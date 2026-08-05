@@ -362,7 +362,15 @@ Bounding what the proof covers: the frontend suite runs in a node environment an
 
 **Phase 3b is complete.** The app can now gate a tool call end to end, so Phase 3c may register MCP tools.
 
-### Phase 3c — Desktop app MCP registration and settings API
+### Phase 3c — Desktop app MCP registration — **DONE 2026-08-06** (`7b6bfc76`)
+
+`app/tools/mcp.go` adapts `mcp.Tool` to the app's `Tool` interface with `ApprovalRequired` and `ScopedTool`; the manager is built once where the server is constructed in `app/cmd/app/app.go` and closed on shutdown; `Server.registerMCPTools` adds its tools to each request's registry. `OLLAMA_DISABLE_MCP` switches it off.
+
+**A defect in the app's own tool plumbing had to be fixed first.** `convertToOllamaTool` rebuilt every tool definition from a map carrying only each property's type and description, discarding enums, array item types, nested objects and alternatives — and emitting properties in Go map order, so the schema sent to the model differed between requests. Tools holding a faithful `api.ToolFunction` now supply it through a new `OllamaTool` interface; the rest derive theirs through a sorted, deterministic replacement. The dead helper was removed.
+
+Proof in `docs/_design/proof/phase3c-falsification.txt`: tests run against the real `rawserver` subprocess, with activation evidence that the registry the chat handler builds contains the server's tools and excludes the refused ones, and that an MCP tool in the app goes through the approval gate. Four protections falsified; a fifth initially passed and the test was repaired — it had asserted only what the lossy path also preserves.
+
+### Phase 3c (original) — settings API
 
 `app/tools/mcp.go` adapter; Manager construction in `app/ui/ui.go` (process-lifetime, not per-request — connecting servers per chat request would relaunch subprocesses on every message); routes per §8; `responses/types.go` additions + `tscriptify` regeneration; schema v17 `mcp_server_state` table (UI-local state: trusted flag, last-seen tool hash, last error — the *config* stays in `mcp.json`).
 

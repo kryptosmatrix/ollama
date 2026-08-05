@@ -3,7 +3,7 @@
 From: Grommet (Claude Opus 5)
 Date: 2026-08-05
 Branch: `mcp/server-support`, pushed to `origin` (kryptosmatrix/ollama)
-Head at handoff: `e7a05864`
+Head at handoff: `7b6bfc76`
 
 ## Read this first
 
@@ -21,7 +21,8 @@ Head at handoff: `e7a05864`
 | 2b — OAuth 2.1 | not started |
 | 3a — CLI surface | **DONE** (`12ea7760`, `09a954cb`, `7e533582`, `f12a2d6a`) |
 | 3b — app approval path | **DONE** (`0506f8e7`, `e7a05864`) |
-| 3c/3d — app surfaces | not started |
+| 3c — app MCP registration | **DONE** (`7b6bfc76`) |
+| 3d — OAuth in the surfaces | not started |
 | 4 / 4b — MCP Servers page, registry browse | not started |
 | 5 — docs, cross-substrate review, closeout | not started |
 
@@ -29,7 +30,7 @@ The whole tree builds and vets clean; `mcp`, `agent/...` and `cmd` all pass. MCP
 
 **The feature is now usable end to end from the terminal.** `ollama mcp add|list|remove|enable|disable|approve|revoke` exists and is registered on the root command; `ollama` in agent mode connects approved servers and offers their tools behind per-tool approval.
 
-`/mcp` inside the agent TUI lists servers and toggles them; it deliberately cannot approve one. **Phases 3a and 3b are complete**: the desktop app can now gate a tool call end to end, ask the user, and act on the answer. **Phase 3c may register MCP tools in the app.**
+`/mcp` inside the agent TUI lists servers and toggles them; it deliberately cannot approve one. **Phases 3a, 3b and 3c are complete.** MCP works end to end in both surfaces: the terminal agent and the desktop app both connect approved servers and offer their tools to the model behind per-tool approval. What the desktop app still lacks is the **MCP Servers page** — there is no way to see or manage servers from the app itself; that is Phase 4, and everything it needs already exists behind `ollama mcp`.
 
 ## Operator rulings in force
 
@@ -59,13 +60,11 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 ## What the next session should do
 
-**Phase 3c: register MCP tools in the desktop app.**
+**Phase 4: the MCP Servers page.** The mock-up's corrections are in plan §8.0 — it is a top-level sidebar destination, not a Settings tab, inserted after Launch in `ChatSidebar.tsx` with the storefront icon, on a new `/mcp` route, and the sidebar's active highlight has to become route-derived because it is currently computed from `currentChatId`. §8.1–8.3 carry the entities, the endpoints and the page shape.
 
-1. `app/tools/mcp.go` — adapt `mcp.Tool` to `app/tools.Tool`, implementing `ApprovalRequired` (always true) and `ScopedTool` (`<server>__<tool>`). Mirror `agent/tools/mcp.go`; the interfaces differ (`Schema() map[string]any`, `Execute(ctx, args) (any, string, error)`, plus `Prompt()`), so the schema has to be marshalled from `api.ToolFunction` into a plain map.
-2. **One manager for the process, not per chat request.** `app/ui/ui.go:852` builds a fresh registry for every request; an MCP manager built there would restart every server subprocess on every message. Build it once where the `Server` is constructed in `app/cmd/app/app.go`, close it on shutdown, and register its tools into the per-request registry.
-3. The routes in plan §8.2, the response types in `app/ui/responses/types.go` (then regenerate with `tscriptify` — it is installed now), and schema v17 with `migrateV16ToV17` for `mcp_server_state`. Do not edit `app/store/schema.sql`; it is a frozen migration fixture.
+The backend for it is mostly done already: `mcp.Config`, `mcp.Approvals`, `Manager.States()` with per-server status, skipped tools and the tools digest. What is missing is the app-side routes in §8.2 and their response types in `app/ui/responses/types.go` (regenerate with `tscriptify`, which is installed now), plus schema v17 with `migrateV16ToV17` for `mcp_server_state` — and `app/store/schema.sql` must not be edited, it is a frozen migration fixture.
 
-Then Phase 4 (the MCP Servers page, §8.0–8.3) and 4b (registry browse, §8.4).
+Then Phase 4b (registry browse, §8.4 — the install gate is the part that must not be trimmed) and Phase 3d (OAuth in both surfaces, sequenced last by design).
 
 ## What must not soften
 
@@ -89,4 +88,5 @@ Then Phase 4 (the MCP Servers page, §8.0–8.3) and 4b (registry browse, §8.4)
 - `docs/_design/proof/phase3a-slash-falsification.txt` — `/mcp`, five protections including a disabled server left running.
 - `docs/_design/proof/phase3b-falsification.txt` — the app approval rendezvous, six protections, plus the attribution of a pre-existing flaky test.
 - `docs/_design/proof/phase3b-react-falsification.txt` — the React prompt, four protections, and a statement of what the node-environment suite cannot cover.
+- `docs/_design/proof/phase3c-falsification.txt` — MCP tools in the app, four protections, plus a falsifier that initially passed and the test repair it forced.
 - `docs/_design/proof/phase2-falsification.txt` — the manager, including three attempts that **failed to falsify** and the removal that followed. Read that section before adding any safety mechanism to this package: the protocol library already reaps processes, and code written to do it again cannot be tested.
