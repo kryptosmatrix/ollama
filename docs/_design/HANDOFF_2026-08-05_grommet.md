@@ -3,7 +3,7 @@
 From: Grommet (Claude Opus 5)
 Date: 2026-08-05
 Branch: `mcp/server-support`, pushed to `origin` (kryptosmatrix/ollama)
-Head at handoff: `594f6104`
+Head at handoff: `09a954cb`
 
 ## Read this first
 
@@ -15,15 +15,18 @@ Head at handoff: `594f6104`
 |---|---|
 | 0 — toolchain and baseline | **DONE** (`bc2d60ae`) |
 | 1 — `mcp/config.go` | **DONE** (`f984d4ec`) |
-| 1b — approval ledger | designed, **not built** — plan §Phase 1b |
+| 1b — approval ledger | **DONE** (`b672284c`) |
 | 2a — namespacing + schema conversion | **DONE** (`7dbec4fa`) |
 | 2 — manager and transports | **DONE** (`594f6104`) |
 | 2b — OAuth 2.1 | not started |
-| 3a/3b/3c/3d — surfaces | not started |
+| 3a — CLI surface | **PARTLY DONE** (`12ea7760`, `09a954cb`) — no user-facing approval command yet |
+| 3b/3c/3d — app surfaces | not started |
 | 4 / 4b — MCP Servers page, registry browse | not started |
 | 5 — docs, cross-substrate review, closeout | not started |
 
-The package builds, vets clean, and is 47 tests (104 with subtests), all passing. The whole tree builds. The MCP client now connects to real servers — stdio subprocesses and remote HTTP — lists their tools, converts their schemas and calls them.
+The whole tree builds and vets clean; `mcp`, `agent/...` and `cmd` all pass. MCP is live in `ollama` agent mode: configured, approved servers are connected at start-up and their tools are offered to the model behind per-tool approval.
+
+**The one thing that is not finished and blocks real use:** there is no command to approve a server. The ledger is honoured everywhere, but `ollama mcp ...` and `/mcp` do not exist, so a user would have to hand-write a SHA-256 fingerprint into `mcp-approvals.json`. Every layer beneath is real and proven; a human cannot drive it yet.
 
 ## Operator rulings in force
 
@@ -51,11 +54,11 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 ## What the next session should do
 
-**Phase 1b, the approval ledger** (plan §Phase 1b), before any surface work. It is what makes registering these tools safe: a hash over each spec's executable surface at `~/.ollama/mcp-approvals.json`, and a server whose current hash is absent is listed but never connected.
+**Finish 3a: the commands.** `cmd/mcp.go` with `ollama mcp list|add|remove|enable|disable|approve`, and `/mcp` in `cmd/tui/chat/input.go` beside `/skills` (see `slashCommands` at `input.go:54`). `approve` is the one that unblocks the feature: show the resolved command line verbatim, ask, then `Approvals.Approve(spec, time.Now())` and save. `list` should show each server's status, and for `needs-approval` show `ServerState.Spec.Summary()` — the exact line the user is being asked to agree to.
 
-Then **Phase 3a**, the CLI surface: an `agent.Tool` adapter over `mcp.Tool` implementing `ApprovalRequired` and `ScopedTool` with scope `<server>__<tool>`, registration in `cmd/agent_tui.go`, `ollama mcp add|remove|list|enable|disable`, and `/mcp` in the TUI. The signal-chain test to write is a real `agent.Session` run whose model tool call reaches a real MCP server and whose result comes back in the messages.
+Reuse rather than reinvent: `mcp.Config` (load/save/set/remove), `mcp.Approvals` (approve/revoke/allows), `ServerState.Skipped` for refused tools with reasons, and `ServerState.ToolsDigest` for change detection.
 
-Two things the manager already gives you that the surfaces should use rather than reinvent: `ServerState.Skipped`, which explains every tool that was refused and why, and `ServerState.ToolsDigest`, which is what change detection compares.
+Then Phase 3b, the desktop app's missing approval path, before any MCP registration in the app.
 
 ## What must not soften
 
@@ -71,4 +74,6 @@ Two things the manager already gives you that the surfaces should use rather tha
 - `docs/_design/proof/phase0-gotest.txt` — full Go suite at baseline: 64 packages ok, 34 without tests, 0 failures.
 - `docs/_design/proof/phase1-falsification.txt` — three protections broken and observed failing, then restored.
 - `docs/_design/proof/phase2a-falsification.txt` — four more, same method.
+- `docs/_design/proof/phase1b-falsification.txt` — the approval ledger, four protections.
+- `docs/_design/proof/phase3a-falsification.txt` — the harness adapter and the CLI entry point, including two falsifiers that initially passed and the test repairs they forced.
 - `docs/_design/proof/phase2-falsification.txt` — the manager, including three attempts that **failed to falsify** and the removal that followed. Read that section before adding any safety mechanism to this package: the protocol library already reaps processes, and code written to do it again cannot be tested.

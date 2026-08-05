@@ -280,7 +280,7 @@ Config path resolves `OLLAMA_MCP_CONFIG`, then `XDG_CONFIG_HOME`, then `~/.ollam
 
 Proof in `docs/_design/proof/phase1-falsification.txt`: 15 tests, then file mode weakened to `0644`, the literal-credential check removed, and unknown-field preservation disabled — each observed to fail the test that catches it, then restored byte-identical.
 
-### Phase 1b — the approval ledger *(designed 2026-08-05, not yet built)*
+### Phase 1b — the approval ledger — **DONE 2026-08-05** (`b672284c`)
 
 Writing Phase 1 exposed a flaw in §6.1 as originally drafted. "Servers are disabled on first sight" cannot be expressed through the `disabled` field: every other MCP client treats absent-`disabled` as enabled, so inverting that default would break the paste-a-config-block flow that makes the feature usable, and would surprise anyone hand-editing the file.
 
@@ -291,7 +291,9 @@ The mechanism that achieves the same protection without fighting the convention 
 - Adding a server through Ollama's own UI or CLI records the hash in the same action, so the ordinary path has no extra step.
 - A spec edited underneath Ollama — by hand, by another tool, or by malware — produces a hash mismatch and returns to needing approval. This is the same mechanism as the tool-description change detection in §6.2, applied to the command line instead of the tool list.
 
-This belongs before Phase 3a, since it is what makes registering MCP tools in a surface safe.
+Built as designed, with two refinements. The fingerprint covers the **whole serialised spec except `disabled`** rather than a hand-listed set of fields, so it cannot drift as the type grows, and an unknown future field is hashed on the principle that we cannot know whether it is executable and must not assume it is not. And a **nil policy denies everything**: a caller that has not thought about approval gets a manager that connects to nothing, with the blanket policy used by this package's own tests kept unexported so no production caller can reach it.
+
+Proof in `docs/_design/proof/phase1b-falsification.txt`: a nil policy made permissive, the fingerprint reduced to the server name, the approval gate removed, and the on/off switch folded into the fingerprint — each observed to fail.
 
 ### Phase 2a — namespacing and schema conversion — **DONE 2026-08-05** (`7dbec4fa`)
 
@@ -330,11 +332,13 @@ Proof:
 - A test asserting the loopback listener is **closed** after the flow, and that a second unsolicited request to the callback path after completion is refused.
 - A keystore round-trip test per platform, with the non-Keychain/DPAPI fallback asserting `0600` and emitting its warning.
 
-### Phase 3a — CLI surface *(ruling A2)*
+### Phase 3a — CLI surface *(ruling A2)* — **PARTLY DONE 2026-08-05** (`12ea7760`, `09a954cb`)
 
-`agent/tools/mcp.go` adapter implementing `agent.Tool` + `ApprovalRequired` + `ScopedTool`; `cmd/agent_tui.go` builds the Manager and registers tools; `cmd/mcp.go` gives `ollama mcp add|remove|list|enable|disable`; `/mcp` in `cmd/tui/chat/input.go`.
+Done: `agent/tools/mcp.go`, the adapter implementing `agent.Tool`, `ApprovalRequired` and `ScopedTool`; and `cmd/agent_tui.go`, which builds one manager per session, consults the ledger, connects approved servers, reports every failure and every skipped tool, and registers the rest. `OLLAMA_AGENT_DISABLE_MCP` switches it off.
 
-Proof: a session-level test driving `agent.Session` with a fake MCP server registered, asserting the model's tool call reaches the fake and the result reaches the messages — signal chain from emitter to consumer to observable effect. Plus an approval test asserting an MCP tool call is **refused** when the prompter denies it.
+Proof in `docs/_design/proof/phase3a-falsification.txt`: the full signal chain — scripted model turn → `agent.Session` → `agent.Registry` → adapter → manager → **real `rawserver` subprocess** → reply asserted in the run's messages, with nothing mocked but the model; a second test proving a declined approval stops the call; and activation evidence at the entry point itself, driving `agentToolsRegistry` and asserting the MCP tool is present and the refused ones absent. Six protections falsified, and two falsifiers that initially passed led to test repairs rather than softened claims.
+
+**Not done, and it matters: there is no way for a user to approve a server.** `ollama mcp add|remove|list|enable|disable|approve` and `/mcp` do not exist yet, so approving a server means hand-editing `mcp-approvals.json` with a SHA-256 fingerprint the user cannot compute. Every layer beneath is real and proven; the feature is not usable by a human until this lands. It is the next session's first task.
 
 ### Phase 3b — Desktop app approval path *(prerequisite for 3c)*
 
