@@ -3,7 +3,7 @@
 From: Grommet (Claude Opus 5)
 Date: 2026-08-05
 Branch: `mcp/server-support`, pushed to `origin` (kryptosmatrix/ollama)
-Head at handoff: `09a954cb`
+Head at handoff: `7e533582`
 
 ## Read this first
 
@@ -19,14 +19,16 @@ Head at handoff: `09a954cb`
 | 2a — namespacing + schema conversion | **DONE** (`7dbec4fa`) |
 | 2 — manager and transports | **DONE** (`594f6104`) |
 | 2b — OAuth 2.1 | not started |
-| 3a — CLI surface | **PARTLY DONE** (`12ea7760`, `09a954cb`) — no user-facing approval command yet |
+| 3a — CLI surface | **DONE except `/mcp`** (`12ea7760`, `09a954cb`, `7e533582`) |
 | 3b/3c/3d — app surfaces | not started |
 | 4 / 4b — MCP Servers page, registry browse | not started |
 | 5 — docs, cross-substrate review, closeout | not started |
 
 The whole tree builds and vets clean; `mcp`, `agent/...` and `cmd` all pass. MCP is live in `ollama` agent mode: configured, approved servers are connected at start-up and their tools are offered to the model behind per-tool approval.
 
-**The one thing that is not finished and blocks real use:** there is no command to approve a server. The ledger is honoured everywhere, but `ollama mcp ...` and `/mcp` do not exist, so a user would have to hand-write a SHA-256 fingerprint into `mcp-approvals.json`. Every layer beneath is real and proven; a human cannot drive it yet.
+**The feature is now usable end to end from the terminal.** `ollama mcp add|list|remove|enable|disable|approve|revoke` exists and is registered on the root command; `ollama` in agent mode connects approved servers and offers their tools behind per-tool approval.
+
+**What remains in 3a is `/mcp` inside the agent TUI**, which is convenience rather than a blocker — everything it would do can be done with `ollama mcp` in another terminal.
 
 ## Operator rulings in force
 
@@ -54,11 +56,17 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 ## What the next session should do
 
-**Finish 3a: the commands.** `cmd/mcp.go` with `ollama mcp list|add|remove|enable|disable|approve`, and `/mcp` in `cmd/tui/chat/input.go` beside `/skills` (see `slashCommands` at `input.go:54`). `approve` is the one that unblocks the feature: show the resolved command line verbatim, ask, then `Approvals.Approve(spec, time.Now())` and save. `list` should show each server's status, and for `needs-approval` show `ServerState.Spec.Summary()` — the exact line the user is being asked to agree to.
+**`/mcp` in the agent TUI.** Anchors, so none of this has to be rediscovered:
 
-Reuse rather than reinvent: `mcp.Config` (load/save/set/remove), `mcp.Approvals` (approve/revoke/allows), `ServerState.Skipped` for refused tools with reasons, and `ServerState.ToolsDigest` for change detection.
+- `cmd/tui/chat/input.go:53` — `chatSlashCommands`. Add `{name: "/mcp", usage: "/mcp [enable|disable <name>]", description: "list MCP servers"}` beside `/skills`.
+- `cmd/tui/chat/input.go:150` — the dispatch switch. Add `case command == "/mcp": return m.handleMCPCommand(args)`, modelled on `handleSkillsCommand`.
+- `cmd/tui/chat/input.go:1298` — `matchingSkillsImportCompletions` is the pattern for subcommand completion if `/mcp enable <name>` should complete.
+- `cmd/tui/chat/chat.go:50` — `Options`. The TUI has no MCP state today. Add a narrow accessor rather than the manager itself: something like `MCPStates func() []mcp.ServerState` plus `SetMCPEnabled func(name string, enabled bool) error`, so `cmd/tui/chat` does not import the manager's lifecycle and cannot close it.
+- `cmd/agent_tui.go` — supply those two closures from the session manager already built there, and re-register tools after a toggle via the existing `registryForModel` path rather than mutating the registry directly.
 
-Then Phase 3b, the desktop app's missing approval path, before any MCP registration in the app.
+Do not let `/mcp` approve a server. Approval needs the command line shown verbatim and a deliberate answer; a chat input line is the wrong place for it. `/mcp` should list, enable and disable, and point at `ollama mcp approve` for the rest.
+
+Then Phase 3b, the desktop app's missing approval path, before any MCP registration in the app. That is the largest remaining piece and it is not visible in the mock-up.
 
 ## What must not soften
 
@@ -76,4 +84,5 @@ Then Phase 3b, the desktop app's missing approval path, before any MCP registrat
 - `docs/_design/proof/phase2a-falsification.txt` — four more, same method.
 - `docs/_design/proof/phase1b-falsification.txt` — the approval ledger, four protections.
 - `docs/_design/proof/phase3a-falsification.txt` — the harness adapter and the CLI entry point, including two falsifiers that initially passed and the test repairs they forced.
+- `docs/_design/proof/phase3a-commands-falsification.txt` — the `ollama mcp` commands, five protections including root-command registration.
 - `docs/_design/proof/phase2-falsification.txt` — the manager, including three attempts that **failed to falsify** and the removal that followed. Read that section before adding any safety mechanism to this package: the protocol library already reaps processes, and code written to do it again cannot be tested.
