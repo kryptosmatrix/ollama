@@ -129,6 +129,12 @@ mcp/                                  NEW — shared core, no dependency on agen
   names.go         namespacing + collision resolution ("<server>__<tool>")
   secrets.go       header/token resolution: env indirection, no plaintext secrets in mcp.json
   fake_test.go     in-process fake MCP server used by every layer's tests
+  oauth.go         OAuth 2.1: metadata discovery, DCR, PKCE, loopback callback, refresh, revoke
+  oauth_test.go
+  keystore_darwin.go   Keychain-backed token storage
+  keystore_windows.go  DPAPI-backed token storage
+  keystore_other.go    build-tagged fallback: file-backed 0600, with a stated warning
+  keystore_test.go
 
 agent/tools/mcp.go            NEW — adapter: mcp.Tool -> agent.Tool (+ ApprovalRequired, ScopedTool)
 agent/tools/mcp_test.go
@@ -153,7 +159,22 @@ docs/mcp.mdx                  NEW — user documentation
 
 ---
 
-## 5. Decisions that are Ash's (raised as chips alongside this document)
+## 5. Decisions that are Ash's — **RULED 2026-08-05**
+
+| Decision | Ruling | Effect |
+|---|---|---|
+| A — surfaces | **A2: desktop app + CLI agent TUI** | The shared `mcp/` package of §4 is mandatory, not merely preferable. |
+| B — remote depth | **B3: full OAuth 2.1 with sign-in** | Largest single scope increase. Adds Phases 2b and 3d; see §6.4 and §7. |
+| C — protocol | **C1: official `go-sdk` v1.7.0** | Pinned exactly; contained per §5.1. |
+| D — upstream | **D2: aimed at an upstream PR** | Naming follows `5c0caaff`; commits stay small and separable; dependency surface is minimised. |
+
+### 5.1 The two consequences that need writing down
+
+**The dissent beat on B3.** The strongest case against full OAuth in v1: it is the only decision here that can double the calendar cost of the feature, and it does so in the part of the work with the least visible payoff. It brings a loopback redirect listener, dynamic client registration, token refresh, revocation, and OS-keystore storage on two platforms — and the SDK's client-side OAuth is marked *experimental* at v1.7.0, so we should expect to write and own a meaningful share of it rather than call into it. The cheaper path (B1, static credentials from env vars) reaches most hosted servers today and would let v1 ship, with OAuth added afterwards without redesign. That case is stated and the ruling stands: B3 is what makes "connect and sign in" work for consumer-facing servers, which is the experience a settings page implies. It is sequenced last (Phase 3d) so that a working, useful v1 exists before OAuth lands, and so OAuth slipping cannot hold the rest hostage.
+
+**C1 against D2.** These pull in opposite directions: adding a substantial new dependency is the single most likely reason an upstream PR is refused, and upstream's own attempt at `5c0caaff` added no MCP dependency at all — its `go.mod` diff only promoted `gopkg.in/yaml.v3` from indirect. Rather than re-litigate the ruling, the plan contains the risk mechanically: **no SDK type may appear in any package outside `mcp/`.** `agent/`, `app/`, `cmd/` and `api/` see only our own types (`mcp.ServerSpec`, `mcp.Tool`, `mcp.Manager`) and `api.ToolFunction`. Enforced by a test that fails if any file outside `mcp/` imports `github.com/modelcontextprotocol/go-sdk`. The effect is that swapping to a hand-rolled or vendored implementation later — if upstream insists — is a single-package change with no call-site churn, so C1 stops being irreversible.
+
+### 5.2 The decisions as they were put
 
 ### Decision A — Which surfaces get MCP in v1?
 
@@ -178,7 +199,7 @@ docs/mcp.mdx                  NEW — user documentation
 1. **Ash's fork only.** We optimise for the best design and Ash's needs; rebases on upstream are our problem.
 2. **Aimed at upstream** *(no recommendation — this is a product/relationship call)*. Changes the plan materially: minimise dependencies (pushes Decision C toward 2), match upstream's existing naming from `5c0caaff`, keep commits small and separable, and expect the design to be negotiated by people who already have opinions about it.
 
-**If no ruling arrives, the plan proceeds on the recommended defaults: A2, B1, C1, D1.** Every one of those is reversible before Phase 3 and expensive after it.
+*(Ruled A2, B3, C1, D2 on 2026-08-05 — see §5 header.)*
 
 ---
 
@@ -211,10 +232,20 @@ So Phase 3 in the app is *two* pieces of work: an approval path in Stack B, then
 
 I want to be plain about the trade: this is the single largest piece of work in the plan and it is not visible in a mock-up. It is also the difference between a feature and a vulnerability.
 
-### 6.4 Network exposure
+### 6.4 Network exposure, and the OAuth surface (ruling B3)
 
 - Remote servers: HTTPS only unless the host is loopback. No plaintext credentials in `mcp.json` — a header value of the form `${env:VAR_NAME}` is resolved at connect time and the literal form is rejected with a clear error.
 - Per-server timeouts and a response size cap, because a remote tool result flows straight into the context window.
+
+Full OAuth 2.1 brings its own obligations, and each is a place where a wrong default is a credential leak:
+
+- **PKCE is mandatory** (S256), on every flow, no exceptions. An authorization-code flow without PKCE in a native app is broken by construction.
+- **Redirect URI is loopback only** — `http://127.0.0.1:<ephemeral>/callback`, bound before the browser is opened, torn down immediately after, with a `state` parameter checked on return. Never a custom URL scheme; never a wildcard port.
+- **Tokens never touch `mcp.json`.** Access and refresh tokens go to the OS keystore — Keychain on macOS, DPAPI on Windows — keyed by server name. `mcp.json` holds only the issuer URL, client ID and scopes.
+- **Authorization-server metadata is discovered, not configured** (RFC 8414 / protected-resource metadata), and the resource indicator is sent so a token minted for one server cannot be replayed at another.
+- **Refresh and revocation are first-class**: expiry is handled inside the transport with a single-flight refresh, and "disconnect" in the UI revokes at the server and deletes the keystore entry, not just the local record.
+- **The browser round-trip is an explicit user act.** Ollama never opens a browser because a model asked it to — only because the user pressed connect.
+- **Dynamic client registration (RFC 7591)** is attempted where the server advertises it, with the registered client credentials stored in the keystore alongside the tokens; a server without DCR falls back to a user-supplied client ID.
 
 ---
 
@@ -244,7 +275,19 @@ Proof (this is the phase where a facade is easiest and least visible):
 - A conversion test asserting a schema with `oneOf`, `minimum` and `$ref` produces either a faithful `api.ToolFunction` or a documented, asserted degradation — never a silently wrong one.
 - A process-reaping test: kill the parent context, assert no orphaned child remains.
 
-### Phase 3a — CLI surface *(Decision A2)*
+A containment test also lands here: a test that walks the module and **fails if any file outside `mcp/` imports `github.com/modelcontextprotocol/go-sdk`** (§5.1).
+
+### Phase 2b — OAuth 2.1 for remote servers *(ruling B3)*
+
+`mcp/oauth.go` and the platform keystores. Authorization-server metadata discovery, dynamic client registration where advertised, PKCE S256, loopback redirect with `state` verification and immediate listener teardown, token persistence in Keychain/DPAPI, single-flight refresh inside the transport, and revoke-on-disconnect. The SDK's OAuth package is used where it is sound at the pinned version and replaced with our own where its experimental status shows; whichever way each piece goes is recorded in the commit, not left implicit.
+
+Proof:
+- A **fake authorization server** in-process: issues codes, rejects a mismatched `state`, rejects a missing or wrong PKCE verifier, expires an access token so refresh must fire, and rejects a revoked refresh token. Each is a separate test with an asserted failure, not a happy path with error branches unvisited.
+- A test asserting **no token ever appears in `mcp.json`** — write a config after a full flow, read the file bytes, assert the token substring is absent.
+- A test asserting the loopback listener is **closed** after the flow, and that a second unsolicited request to the callback path after completion is refused.
+- A keystore round-trip test per platform, with the non-Keychain/DPAPI fallback asserting `0600` and emitting its warning.
+
+### Phase 3a — CLI surface *(ruling A2)*
 
 `agent/tools/mcp.go` adapter implementing `agent.Tool` + `ApprovalRequired` + `ScopedTool`; `cmd/agent_tui.go` builds the Manager and registers tools; `cmd/mcp.go` gives `ollama mcp add|remove|list|enable|disable`; `/mcp` in `cmd/tui/chat/input.go`.
 
@@ -261,6 +304,12 @@ Proof: an `app/ui` handler test asserting a tool marked as requiring approval do
 `app/tools/mcp.go` adapter; Manager construction in `app/ui/ui.go` (process-lifetime, not per-request — connecting servers per chat request would relaunch subprocesses on every message); routes per §8; `responses/types.go` additions + `tscriptify` regeneration; schema v17 `mcp_server_state` table (UI-local state: trusted flag, last-seen tool hash, last error — the *config* stays in `mcp.json`).
 
 Proof: handler tests for every new route; a migration test proving v16→v17 preserves existing rows (the store already has `migration_test.go` conventions to follow).
+
+### Phase 3d — OAuth in the surfaces
+
+The desktop app gains a connect/disconnect affordance that opens the system browser and reports back (`POST /api/v1/mcp/{name}/connect`, `POST /api/v1/mcp/{name}/disconnect`); the CLI gains `ollama mcp login <name>` / `logout <name>`. Sequenced last deliberately: everything before this point is a shippable feature, so OAuth slipping delays OAuth and nothing else.
+
+Proof: a handler test driving the full flow against the fake authorization server of Phase 2b, asserting the connected state is reached and that disconnect revokes and clears the keystore entry.
 
 ### Phase 4 — Settings UI *(shape pending mock-up)*
 
@@ -279,7 +328,7 @@ Proof: Vitest coverage of the list/add/edit/remove/enable flows against a mocked
 Entities the UI must be able to express:
 
 - **Server**: name, transport (local command vs remote URL), the command line or URL shown verbatim, enabled toggle, trusted-tools toggle, per-server error text.
-- **Connection state**: `disabled` · `connecting` · `connected` · `failed(reason)` · `needs-approval` (config present but never enabled).
+- **Connection state**: `disabled` · `connecting` · `connected` · `failed(reason)` · `needs-approval` (config present but never enabled) · `needs-sign-in` (remote server requires OAuth and has no valid token) · `signed-in-as(account)` where the server reports an identity.
 - **Tool list per server**: name, description as advertised (marked as coming from the server, not from Ollama), and a warning badge when a description has changed since last session.
 - **Add flows**: local (command + args + env vars) and remote (URL + header credentials by env-var reference). Paste-a-JSON-block should be accepted, because that is how every other client distributes server configs.
 
@@ -290,8 +339,12 @@ GET    /api/v1/mcp                 list servers with state + tools
 POST   /api/v1/mcp                 add a server
 PUT    /api/v1/mcp/{name}          update (including enable/disable, trust)
 DELETE /api/v1/mcp/{name}          remove
-POST   /api/v1/mcp/{name}/test     connect once and report result without persisting enablement
+POST   /api/v1/mcp/{name}/test        connect once and report result without persisting enablement
+POST   /api/v1/mcp/{name}/connect     begin OAuth sign-in (opens the system browser)
+POST   /api/v1/mcp/{name}/disconnect  revoke tokens and clear the keystore entry
 ```
+
+Sign-in is always initiated by a user gesture in this UI. There is no path by which a model, a tool result, or a config file can cause a browser to open.
 
 ---
 
@@ -304,8 +357,9 @@ Named so they are decisions rather than omissions: MCP *resources* and *prompts*
 ## 10. Risks
 
 - **Upstream rebase risk.** `app/ui/ui.go` and `cmd/agent_tui.go` are active files upstream. Keeping edits in new files and touching those two at as few points as possible is deliberate.
-- **SDK churn.** v1.7.0 landed 2026-07-27 and the spec revised 2026-07-28. Pin exactly; treat an SDK bump as its own reviewed change.
-- **Scope creep through OAuth.** Decision B3 is a feature of its own size. If it is wanted, it should be sequenced after v1 ships, not folded in.
+- **SDK churn.** v1.7.0 landed 2026-07-27 and the spec revised 2026-07-28. Pin exactly; treat an SDK bump as its own reviewed change. The §5.1 containment rule limits the blast radius to one package.
+- **OAuth is the schedule risk.** Ruled in (B3) and sequenced last (Phase 3d) precisely so it cannot hold the rest hostage. The signal to watch is the SDK's experimental OAuth surface: if we find ourselves rewriting more than roughly half of it, that is worth reporting rather than absorbing.
+- **Dependency versus upstream (D2).** The §5.1 containment test is the mitigation; if an upstream maintainer refuses the dependency, the swap is one package, not a rewrite.
 - **The invisible half.** Most of the work here — approval, poisoning defences, process lifecycle — is not visible in the mock-up. The completion signal for this feature must not be "the settings page looks like the picture".
 
 ---
