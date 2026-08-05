@@ -30,6 +30,11 @@ const (
 	StatusInvalid Status = "invalid"
 	// StatusDisabled means the user has switched the server off.
 	StatusDisabled Status = "disabled"
+	// StatusNeedsApproval means the server is configured and enabled, but the
+	// exact command it would run has not been approved — either it has never
+	// been approved, or it has changed since it was. Its tools are not offered
+	// and it is never contacted.
+	StatusNeedsApproval Status = "needs-approval"
 	// StatusConnecting means a connection attempt is in flight.
 	StatusConnecting Status = "connecting"
 	// StatusConnected means the session is live and its tools are usable.
@@ -104,6 +109,12 @@ type Options struct {
 	ConnectTimeout time.Duration
 	CallTimeout    time.Duration
 	ResultLimit    int
+
+	// Approvals decides which servers may actually be run. A nil policy denies
+	// everything: a caller that has not thought about approval gets a manager
+	// that connects to nothing, rather than one that quietly runs whatever the
+	// configuration names.
+	Approvals ApprovalPolicy
 
 	// newTransport is a seam for tests, which connect an in-process server over
 	// the SDK's in-memory transport. Production leaves it nil and gets the real
@@ -182,6 +193,13 @@ func (m *Manager) Connect(ctx context.Context, cfg *Config) {
 			m.setState(&ServerState{Name: name, Spec: spec, Status: StatusInvalid, Err: problems[name]})
 		case spec.Disabled:
 			m.setState(&ServerState{Name: name, Spec: spec, Status: StatusDisabled})
+		case !m.approves(spec):
+			m.setState(&ServerState{
+				Name:   name,
+				Spec:   spec,
+				Status: StatusNeedsApproval,
+				Err:    fmt.Errorf("%s has not been approved to run: %s", name, spec.Summary()),
+			})
 		default:
 			m.setState(&ServerState{Name: name, Spec: spec, Status: StatusConnecting})
 			jobs = append(jobs, job{name: name, spec: spec})
@@ -197,6 +215,15 @@ func (m *Manager) Connect(ctx context.Context, cfg *Config) {
 		}()
 	}
 	wg.Wait()
+}
+
+// approves reports whether the configured approval policy permits this exact
+// spec. A manager with no policy approves nothing.
+func (m *Manager) approves(spec *ServerSpec) bool {
+	if m.opts.Approvals == nil {
+		return false
+	}
+	return m.opts.Approvals.Allows(spec)
 }
 
 func (m *Manager) connectOne(ctx context.Context, spec *ServerSpec) {

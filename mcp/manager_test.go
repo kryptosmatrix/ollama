@@ -95,6 +95,10 @@ func (f *fakeServer) connect(t *testing.T, spec *ServerSpec) *Manager {
 	manager := NewManager(Options{
 		ConnectTimeout: 5 * time.Second,
 		CallTimeout:    2 * time.Second,
+		// These tests exercise the manager's mechanics, not the approval
+		// policy; the policy has its own tests, including one proving that a
+		// manager with no policy connects to nothing.
+		Approvals: allowAll{},
 		newTransport: func(context.Context, *ServerSpec) (sdk.Transport, error) {
 			return clientTransport, nil
 		},
@@ -356,6 +360,7 @@ func TestToolsDigestChangesWhenTheServerChangesWhatItOffers(t *testing.T) {
 
 func TestManagerRecordsDisabledAndInvalidWithoutConnecting(t *testing.T) {
 	manager := NewManager(Options{
+		Approvals: allowAll{},
 		newTransport: func(context.Context, *ServerSpec) (sdk.Transport, error) {
 			t.Error("a disabled or invalid server must never reach the transport")
 			return nil, errors.New("must not be called")
@@ -395,6 +400,7 @@ func TestOneFailedServerDoesNotStopTheOthers(t *testing.T) {
 
 	manager := NewManager(Options{
 		ConnectTimeout: 5 * time.Second,
+		Approvals:      allowAll{},
 		newTransport: func(_ context.Context, spec *ServerSpec) (sdk.Transport, error) {
 			if spec.Name == "works" {
 				return clientTransport, nil

@@ -35,7 +35,7 @@ func buildRawServer(t *testing.T) string {
 func TestStdioSubprocessEndToEnd(t *testing.T) {
 	binary := buildRawServer(t)
 
-	manager := NewManager(Options{ConnectTimeout: 30 * time.Second, CallTimeout: 15 * time.Second})
+	manager := NewManager(Options{ConnectTimeout: 30 * time.Second, CallTimeout: 15 * time.Second, Approvals: allowAll{}})
 	t.Cleanup(func() { manager.Close() })
 
 	cfg := &Config{}
@@ -163,7 +163,7 @@ func TestCloseReapsTheChildProcess(t *testing.T) {
 	}
 	binary := buildRawServer(t)
 
-	manager := NewManager(Options{ConnectTimeout: 30 * time.Second})
+	manager := NewManager(Options{ConnectTimeout: 30 * time.Second, Approvals: allowAll{}})
 	cfg := &Config{}
 	cfg.Set("raw", &ServerSpec{Command: binary})
 	manager.Connect(t.Context(), cfg)
@@ -205,7 +205,7 @@ func TestFailedHandshakeLeavesNoOrphanProcess(t *testing.T) {
 	}
 	binary := buildRawServer(t)
 
-	manager := NewManager(Options{ConnectTimeout: 2 * time.Second})
+	manager := NewManager(Options{ConnectTimeout: 2 * time.Second, Approvals: allowAll{}})
 	t.Cleanup(func() { manager.Close() })
 
 	cfg := &Config{}
@@ -234,7 +234,7 @@ func TestFailedHandshakeLeavesNoOrphanProcess(t *testing.T) {
 func TestConnectTimeoutDoesNotKillTheServer(t *testing.T) {
 	binary := buildRawServer(t)
 
-	manager := NewManager(Options{ConnectTimeout: 2 * time.Second, CallTimeout: 10 * time.Second})
+	manager := NewManager(Options{ConnectTimeout: 2 * time.Second, CallTimeout: 10 * time.Second, Approvals: allowAll{}})
 	t.Cleanup(func() { manager.Close() })
 
 	cfg := &Config{}
@@ -271,7 +271,7 @@ func processRunning(t *testing.T, binary string) bool {
 // command does not exist fails once, with a message naming the command, rather
 // than being retried into repeated process spawns.
 func TestMissingCommandFailsClearlyAndIsNotRetried(t *testing.T) {
-	manager := NewManager(Options{ConnectTimeout: 5 * time.Second})
+	manager := NewManager(Options{ConnectTimeout: 5 * time.Second, Approvals: allowAll{}})
 	t.Cleanup(func() { manager.Close() })
 
 	cfg := &Config{}

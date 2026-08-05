@@ -1,0 +1,210 @@
+package mcp
+
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"maps"
+	"os"
+	"path/filepath"
+	"slices"
+	"strings"
+	"time"
+)
+
+// ApprovalsPathEnv overrides the location of the approval ledger.
+const ApprovalsPathEnv = "OLLAMA_MCP_APPROVALS"
+
+const approvalsFilename = "mcp-approvals.json"
+
+// ApprovalPolicy decides whether a configured server may be connected.
+//
+// It exists because "the user switched this server on" and "the user agreed to
+// run this particular command" are different questions. The configuration file
+// answers the first; only the ledger answers the second.
+type ApprovalPolicy interface {
+	// Allows reports whether this exact spec has been approved. An
+	// implementation must key on what the spec would execute, not on its name:
+	// a name that has been approved once must not launder a command that has
+	// been changed since.
+	Allows(spec *ServerSpec) bool
+}
+
+// allowAll approves everything. It is unexported so it cannot be reached from
+// outside this package: a production caller must supply a real ledger, and the
+// only legitimate users of a blanket policy are this package's own tests, which
+// exercise the manager's mechanics rather than the policy.
+type allowAll struct{}
+
+func (allowAll) Allows(*ServerSpec) bool { return true }
+
+// Approval is one recorded agreement to run a particular server.
+type Approval struct {
+	// Fingerprint is the hash of the spec the user approved.
+	Fingerprint string `json:"fingerprint"`
+	// ApprovedAt is when it was approved, for display and audit.
+	ApprovedAt time.Time `json:"approvedAt"`
+	// Summary is the command line or URL as it stood at approval time. It is
+	// recorded for the user's benefit — when a fingerprint stops matching, this
+	// is what they are being asked to compare against.
+	Summary string `json:"summary,omitempty"`
+}
+
+// Approvals is the ledger of servers the user has agreed to run.
+//
+// It is deliberately separate from mcp.json. Every other MCP client treats a
+// server without "disabled" as enabled, so a configuration block pasted from
+// elsewhere is expected to work; inverting that default would break the paste
+// and surprise anyone editing the file by hand. The ledger achieves the same
+// protection without fighting the convention: configuration says what exists,
+// the ledger says what may run.
+type Approvals struct {
+	Entries map[string]Approval `json:"approvals"`
+}
+
+// ApprovalsPath returns the ledger's location, resolved like ConfigPath.
+func ApprovalsPath() (string, error) {
+	if path := strings.TrimSpace(os.Getenv(ApprovalsPathEnv)); path != "" {
+		return filepath.Abs(path)
+	}
+	if xdg := strings.TrimSpace(os.Getenv("XDG_CONFIG_HOME")); xdg != "" {
+		return filepath.Join(xdg, "ollama", approvalsFilename), nil
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(home, ".ollama", approvalsFilename), nil
+}
+
+// LoadApprovals reads the ledger. A missing file yields an empty ledger, which
+// means nothing is approved yet — the safe direction.
+//
+// A ledger that cannot be parsed is an error rather than an empty ledger.
+// Treating a corrupt file as "nothing approved" would be safe; treating it as
+// an error is safe *and* visible, and a silently emptied ledger would ask the
+// user to re-approve everything with no explanation.
+func LoadApprovals(path string) (*Approvals, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return &Approvals{Entries: map[string]Approval{}}, nil
+		}
+		return nil, fmt.Errorf("read mcp approvals %s: %w", path, err)
+	}
+	if len(strings.TrimSpace(string(data))) == 0 {
+		return &Approvals{Entries: map[string]Approval{}}, nil
+	}
+
+	var ledger Approvals
+	if err := json.Unmarshal(data, &ledger); err != nil {
+		return nil, fmt.Errorf("parse mcp approvals %s: %w", path, err)
+	}
+	if ledger.Entries == nil {
+		ledger.Entries = map[string]Approval{}
+	}
+	return &ledger, nil
+}
+
+// Save writes the ledger with the same private permissions as the config: it
+// records which commands are allowed to run, so write access to it is write
+// access to the approval decision.
+func (a *Approvals) Save(path string) error {
+	if a.Entries == nil {
+		a.Entries = map[string]Approval{}
+	}
+	data, err := json.MarshalIndent(a, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal mcp approvals: %w", err)
+	}
+	return writeFilePrivate(path, append(data, '\n'))
+}
+
+// Approve records agreement to run the spec exactly as it currently stands.
+func (a *Approvals) Approve(spec *ServerSpec, at time.Time) {
+	if a.Entries == nil {
+		a.Entries = map[string]Approval{}
+	}
+	a.Entries[spec.Name] = Approval{
+		Fingerprint: spec.Fingerprint(),
+		ApprovedAt:  at.UTC(),
+		Summary:     spec.Summary(),
+	}
+}
+
+// Revoke removes a server's approval. It reports whether one was present.
+func (a *Approvals) Revoke(name string) bool {
+	if _, ok := a.Entries[name]; !ok {
+		return false
+	}
+	delete(a.Entries, name)
+	return true
+}
+
+// Allows reports whether this exact spec has been approved.
+func (a *Approvals) Allows(spec *ServerSpec) bool {
+	if a == nil || spec == nil {
+		return false
+	}
+	entry, ok := a.Entries[spec.Name]
+	if !ok {
+		return false
+	}
+	return entry.Fingerprint == spec.Fingerprint()
+}
+
+// Names returns the approved server names in a stable order.
+func (a *Approvals) Names() []string {
+	if a == nil {
+		return nil
+	}
+	return slices.Sorted(maps.Keys(a.Entries))
+}
+
+// Fingerprint hashes everything about a spec that determines what Ollama would
+// run and where it would send data: the transport, the command and its
+// arguments, the environment handed to it, the URL, the headers, and any field
+// this version of Ollama does not understand.
+//
+// Only "disabled" is excluded, because it is the user's own switch rather than
+// a description of the server. Everything else is included deliberately, and
+// the direction of the trade is chosen on purpose: including a field means a
+// benign edit asks for re-approval, while excluding one means an edit to it
+// runs unreviewed. An unknown future field is hashed for the same reason — we
+// cannot know whether it is executable, so we must not assume it is not.
+func (s *ServerSpec) Fingerprint() string {
+	if s == nil {
+		return ""
+	}
+	// Hash the canonical serialised form with the user's own switch cleared,
+	// so the fingerprint follows the spec rather than a hand-maintained list of
+	// fields that would drift as the type grows.
+	clone := *s
+	clone.Disabled = false
+	clone.Name = ""
+
+	data, err := json.Marshal(clone)
+	if err != nil {
+		// A spec that cannot be marshalled cannot be approved. Returning a
+		// value that matches nothing is the safe failure.
+		return "unmarshalable"
+	}
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:])
+}
+
+// Summary is the one-line description of what a server would do, for the user
+// to read when approving it or when its fingerprint stops matching.
+func (s *ServerSpec) Summary() string {
+	switch s.transport() {
+	case TransportStdio:
+		parts := append([]string{s.Command}, s.Args...)
+		return strings.Join(parts, " ")
+	case TransportHTTP:
+		return s.URL
+	default:
+		return ""
+	}
+}
