@@ -301,9 +301,16 @@ Two additions to what the plan specified. Local `$ref` resolution against `$defs
 
 Proof in `docs/_design/proof/phase2a-falsification.txt`: package now 29 tests (74 with subtests); control-character stripping, the lost-constraint note, sorted iteration and the reserved-name check each broken and observed to fail, then restored byte-identical.
 
-### Phase 2 — `mcp/` core: manager and transports *(next)*
+### Phase 2 — `mcp/` core: manager and transports — **DONE 2026-08-05** (`594f6104`)
 
-`Manager` connects N servers concurrently with per-server timeout, records capabilities, caches `tools/list`, exposes `Tools()` and `Call(ctx, server, tool, args)`, retries with backoff, and `Close()` reaps every child process. This is the first phase that adds the SDK dependency (`go get github.com/modelcontextprotocol/go-sdk@v1.7.0`), and it must land the §5.1 containment test in the same commit. Schema conversion and namespacing are already done (Phase 2a).
+`mcp/server.go` and `mcp/manager.go`. Delivered as specified, with four things worth recording.
+
+- **The dependency's real weight.** `go-sdk` v1.7.0 brings six indirect dependencies (`google/jsonschema-go`, `segmentio/asm`, `segmentio/encoding`, `yosida95/uritemplate/v3`, `golang.org/x/oauth2`, `golang.org/x/time`) and lifts `golang.org/x/sync` to v0.20.0 and `golang.org/x/sys` to v0.41.0. That is the predicted cost of ruling C1 against ruling D2, and the §5.1 containment test is what keeps it reversible.
+- **Retry diverges from the plan, deliberately.** HTTP connections retry three times with doubling backoff; stdio does not retry at all. A failed `exec` is deterministic — the command is missing, or it is not executable — and retrying it only spawns processes. Proven by a test asserting a missing command fails in under two seconds.
+- **A real defect, found and fixed.** The server process was tied to the connect-timeout context, which is cancelled on the way out of the dial. Every server therefore died the instant its handshake completed — indistinguishable from a server that connected. It is now tied to the manager's lifetime, and the defect is reintroduced as F8 in the proof file and observed to fail.
+- **Three protections could not be falsified, so they were removed.** Attempts to prove Ollama-side process reaping all passed with the mechanism deleted: the library's `CommandTransport` closes stdin, sends `SIGTERM`, then kills, and tears the transport down when a handshake fails. The per-server cancellation was removed rather than kept. Unfalsifiable code that reads as a safety measure is worse than none, because the next reader believes the safety is ours. The two behavioural no-orphan tests remain, since the promise must keep holding if a transport is ever swapped.
+
+Proof in `docs/_design/proof/phase2-falsification.txt`: 47 tests, 104 with subtests, against **two** peers — an in-process server built on the library over its in-memory transport, and a hand-written server in `mcp/testdata/rawserver` with no protocol library at all, compiled and launched as a real subprocess. The second is what proves the client works against an implementation that is not itself, and it is the only way to exercise what a well-behaved SDK server refuses to emit: a non-object input schema, a tool named `bash`, and a description carrying escape and NUL bytes.
 
 Proof (this is the phase where a facade is easiest and least visible):
 - An **in-process fake MCP server** (`fake_test.go`) that speaks real JSON-RPC over an in-memory pipe: initialise, list tools, call a tool, return an error, hang past timeout, close its pipe mid-call, and advertise a changed tool list on reconnect. Every manager behaviour is proven against it.

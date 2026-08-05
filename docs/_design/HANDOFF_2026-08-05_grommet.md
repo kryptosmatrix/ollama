@@ -3,7 +3,7 @@
 From: Grommet (Claude Opus 5)
 Date: 2026-08-05
 Branch: `mcp/server-support`, pushed to `origin` (kryptosmatrix/ollama)
-Head at handoff: `7dbec4fa`
+Head at handoff: `594f6104`
 
 ## Read this first
 
@@ -17,13 +17,13 @@ Head at handoff: `7dbec4fa`
 | 1 — `mcp/config.go` | **DONE** (`f984d4ec`) |
 | 1b — approval ledger | designed, **not built** — plan §Phase 1b |
 | 2a — namespacing + schema conversion | **DONE** (`7dbec4fa`) |
-| 2 — manager and transports | **next** |
+| 2 — manager and transports | **DONE** (`594f6104`) |
 | 2b — OAuth 2.1 | not started |
 | 3a/3b/3c/3d — surfaces | not started |
 | 4 / 4b — MCP Servers page, registry browse | not started |
 | 5 — docs, cross-substrate review, closeout | not started |
 
-The package builds, vets clean, and is 29 tests (74 with subtests), all passing. The whole tree builds.
+The package builds, vets clean, and is 47 tests (104 with subtests), all passing. The whole tree builds. The MCP client now connects to real servers — stdio subprocesses and remote HTTP — lists their tools, converts their schemas and calls them.
 
 ## Operator rulings in force
 
@@ -51,17 +51,11 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 ## What the next session should do
 
-Phase 2, the manager. In one commit with the dependency:
+**Phase 1b, the approval ledger** (plan §Phase 1b), before any surface work. It is what makes registering these tools safe: a hash over each spec's executable surface at `~/.ollama/mcp-approvals.json`, and a server whose current hash is absent is listed but never connected.
 
-1. `go get github.com/modelcontextprotocol/go-sdk@v1.7.0`, pinned exactly.
-2. `mcp/server.go` — transport construction from a `ServerSpec`. Stdio uses `exec.Command(spec.Command, spec.Args...)` and **never a shell**; the child gets `ResolveEnv()` plus a minimal base environment, not the parent's whole environment. HTTP uses the resolved headers from `ResolveHeaders()`.
-3. `mcp/manager.go` — connect N servers concurrently with a per-server timeout, cache `tools/list`, expose `Tools()` and `Call(ctx, server, tool, args)`, and a `Close()` that reaps every child.
-4. `mcp/fake_test.go` — an in-process fake server speaking real JSON-RPC over a pipe: initialise, list, call, error, hang past timeout, close mid-call, and advertise a changed tool list on reconnect.
-5. A real-subprocess test that launches an actual stdio MCP server and calls a tool. This is the test a mock cannot pass, and the plan commits to it existing.
-6. The **containment test**: walk the module and fail if any file outside `mcp/` imports the SDK. This is what keeps ruling 3 from becoming irreversible.
-7. Falsification evidence in the same shape as `phase1-` and `phase2a-falsification.txt`: break each protection, watch the test fail, restore, watch it pass. A falsifier never observed to fail is a claim, not a proof.
+Then **Phase 3a**, the CLI surface: an `agent.Tool` adapter over `mcp.Tool` implementing `ApprovalRequired` and `ScopedTool` with scope `<server>__<tool>`, registration in `cmd/agent_tui.go`, `ollama mcp add|remove|list|enable|disable`, and `/mcp` in the TUI. The signal-chain test to write is a real `agent.Session` run whose model tool call reaches a real MCP server and whose result comes back in the messages.
 
-Then Phase 1b (the approval ledger) before any surface work, because it is what makes registering these tools safe.
+Two things the manager already gives you that the surfaces should use rather than reinvent: `ServerState.Skipped`, which explains every tool that was refused and why, and `ServerState.ToolsDigest`, which is what change detection compares.
 
 ## What must not soften
 
@@ -77,3 +71,4 @@ Then Phase 1b (the approval ledger) before any surface work, because it is what 
 - `docs/_design/proof/phase0-gotest.txt` — full Go suite at baseline: 64 packages ok, 34 without tests, 0 failures.
 - `docs/_design/proof/phase1-falsification.txt` — three protections broken and observed failing, then restored.
 - `docs/_design/proof/phase2a-falsification.txt` — four more, same method.
+- `docs/_design/proof/phase2-falsification.txt` — the manager, including three attempts that **failed to falsify** and the removal that followed. Read that section before adding any safety mechanism to this package: the protocol library already reaps processes, and code written to do it again cannot be tested.
