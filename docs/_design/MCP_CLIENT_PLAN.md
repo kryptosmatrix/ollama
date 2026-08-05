@@ -340,7 +340,11 @@ Proof in `docs/_design/proof/phase3a-falsification.txt`: the full signal chain �
 
 Also done (`7e533582`): `ollama mcp list|add|remove|enable|disable|approve|revoke`, registered on the root command and proven by tests that drive the real cobra tree against isolated config and approval files. `add` approves what the user typed, since the command line came from their own keyboard and requiring a second command there is friction without security gain; `--no-approve` opts out. `approve` is what the ledger actually defends: it prints the resolved command line, environment and headers verbatim, shows the previously-approved command line when one has changed, and refuses to assume yes when there is no terminal to ask on. `remove` drops the approval with the server, so a future server reusing the name and command cannot inherit it. Five protections falsified, including the group being unregistered from the root command — a command tree that exists and is not hung off `ollama` is unreachable.
 
-**Remaining in 3a: `/mcp` inside the agent TUI.** Convenience rather than a blocker — everything it would do is available through `ollama mcp` in another terminal. Anchors are recorded in the handoff. It should list, enable and disable only: approval needs a command line shown verbatim and a deliberate answer, and a chat input line is the wrong place for that.
+Also done (`f12a2d6a`): `/mcp` in the agent TUI, listing every server with its status, command line, tool count and skipped tools, and `/mcp enable|disable` to toggle one. It cannot approve, and a test guards that decision rather than the implementation. The TUI receives two narrow closures rather than the manager, so it cannot close a manager it does not own; after a successful toggle the registry and system prompt are rebuilt through the model-switch path, and after a failed one nothing is rebuilt and the reason reaches the user.
+
+Wiring it exposed a defect in the manager, now fixed: `Connect` marked a newly-disabled server as disabled and dropped its tools but left its session open, so its process ran on for the rest of the session — a switch that switched nothing off, and nothing else would have noticed. `Connect` now closes the session of any server it is not connecting.
+
+**Phase 3a is complete.**
 
 ### Phase 3b — Desktop app approval path *(prerequisite for 3c)*
 

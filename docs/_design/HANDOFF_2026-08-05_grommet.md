@@ -3,7 +3,7 @@
 From: Grommet (Claude Opus 5)
 Date: 2026-08-05
 Branch: `mcp/server-support`, pushed to `origin` (kryptosmatrix/ollama)
-Head at handoff: `7e533582`
+Head at handoff: `f12a2d6a`
 
 ## Read this first
 
@@ -19,7 +19,7 @@ Head at handoff: `7e533582`
 | 2a — namespacing + schema conversion | **DONE** (`7dbec4fa`) |
 | 2 — manager and transports | **DONE** (`594f6104`) |
 | 2b — OAuth 2.1 | not started |
-| 3a — CLI surface | **DONE except `/mcp`** (`12ea7760`, `09a954cb`, `7e533582`) |
+| 3a — CLI surface | **DONE** (`12ea7760`, `09a954cb`, `7e533582`, `f12a2d6a`) |
 | 3b/3c/3d — app surfaces | not started |
 | 4 / 4b — MCP Servers page, registry browse | not started |
 | 5 — docs, cross-substrate review, closeout | not started |
@@ -28,7 +28,7 @@ The whole tree builds and vets clean; `mcp`, `agent/...` and `cmd` all pass. MCP
 
 **The feature is now usable end to end from the terminal.** `ollama mcp add|list|remove|enable|disable|approve|revoke` exists and is registered on the root command; `ollama` in agent mode connects approved servers and offers their tools behind per-tool approval.
 
-**What remains in 3a is `/mcp` inside the agent TUI**, which is convenience rather than a blocker — everything it would do can be done with `ollama mcp` in another terminal.
+`/mcp` inside the agent TUI lists servers and toggles them; it deliberately cannot approve one. **Phase 3a is complete.** The next surface is the desktop app.
 
 ## Operator rulings in force
 
@@ -56,17 +56,11 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 ## What the next session should do
 
-**`/mcp` in the agent TUI.** Anchors, so none of this has to be rediscovered:
+**Phase 3b: the desktop app's missing approval path.** This is the largest remaining piece and none of it is visible in the mock-up. `app/tools.Tool` has no approval hook at all and `app/ui/ui.go:1030` executes whatever the model names, so MCP tools must not be registered there until it exists. Build `app/tools/approval.go` mirroring `agent/approval.go`'s model — per-scope grants, an "always allow this tool from this server" state, blanket allow only as an explicit act — surfaced over the existing SSE channel as a new `tool_approval` event with `POST /api/v1/chat/{id}/approval` carrying the answer. Existing first-party tools keep their current behaviour so nothing regresses.
 
-- `cmd/tui/chat/input.go:53` — `chatSlashCommands`. Add `{name: "/mcp", usage: "/mcp [enable|disable <name>]", description: "list MCP servers"}` beside `/skills`.
-- `cmd/tui/chat/input.go:150` — the dispatch switch. Add `case command == "/mcp": return m.handleMCPCommand(args)`, modelled on `handleSkillsCommand`.
-- `cmd/tui/chat/input.go:1298` — `matchingSkillsImportCompletions` is the pattern for subcommand completion if `/mcp enable <name>` should complete.
-- `cmd/tui/chat/chat.go:50` — `Options`. The TUI has no MCP state today. Add a narrow accessor rather than the manager itself: something like `MCPStates func() []mcp.ServerState` plus `SetMCPEnabled func(name string, enabled bool) error`, so `cmd/tui/chat` does not import the manager's lifecycle and cannot close it.
-- `cmd/agent_tui.go` — supply those two closures from the session manager already built there, and re-register tools after a toggle via the existing `registryForModel` path rather than mutating the registry directly.
+Then 3c (app registration, settings API, schema v17) and 4/4b (the MCP Servers page and registry browse). Plan §7 has the proof obligations for each; §8 has the UI contract and the mock-up's corrections.
 
-Do not let `/mcp` approve a server. Approval needs the command line shown verbatim and a deliberate answer; a chat input line is the wrong place for it. `/mcp` should list, enable and disable, and point at `ollama mcp approve` for the rest.
-
-Then Phase 3b, the desktop app's missing approval path, before any MCP registration in the app. That is the largest remaining piece and it is not visible in the mock-up.
+Reuse rather than reinvent: `mcp.Config`, `mcp.Approvals`, `ServerState.Skipped`, `ServerState.ToolsDigest`, and the two-closure pattern used for the TUI (`MCPServers` / `SetMCPEnabled` in `cmd/tui/chat/chat.go:60`) — hand the surface narrow accessors, never the manager, so it cannot close a manager it does not own.
 
 ## What must not soften
 
@@ -74,6 +68,7 @@ Then Phase 3b, the desktop app's missing approval path, before any MCP registrat
 - Schema conversion is lossy and says so in the description. Do not "simplify" that into dropping constraints.
 - `mcp.json` is a code-execution config: `0600` in a `0700` directory, no shell, credentials only as `${env:NAME}`.
 - The desktop app has **no approval system at all** (`app/ui/ui.go:1030` executes whatever the model names). Phase 3b builds one. Registering MCP tools in the app before it exists would be shipping unreviewed remote code execution.
+- `/mcp` must never grow an approve verb. Approval needs the command line shown verbatim and a deliberate answer; a chat input line cannot give either. There is a test guarding the decision, not the implementation.
 - If Phase 4b runs long, the browse polish gives way; the install gate — resolved command line shown verbatim, landed disabled, hash verified — never does.
 
 ## Proof artefacts
@@ -85,4 +80,5 @@ Then Phase 3b, the desktop app's missing approval path, before any MCP registrat
 - `docs/_design/proof/phase1b-falsification.txt` — the approval ledger, four protections.
 - `docs/_design/proof/phase3a-falsification.txt` — the harness adapter and the CLI entry point, including two falsifiers that initially passed and the test repairs they forced.
 - `docs/_design/proof/phase3a-commands-falsification.txt` — the `ollama mcp` commands, five protections including root-command registration.
+- `docs/_design/proof/phase3a-slash-falsification.txt` — `/mcp`, five protections including a disabled server left running.
 - `docs/_design/proof/phase2-falsification.txt` — the manager, including three attempts that **failed to falsify** and the removal that followed. Read that section before adding any safety mechanism to this package: the protocol library already reaps processes, and code written to do it again cannot be tested.
