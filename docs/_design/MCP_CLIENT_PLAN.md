@@ -356,7 +356,11 @@ Approvals are per chat and in memory. "Remember" grants one scope, "remember all
 
 Proof in `docs/_design/proof/phase3b-falsification.txt`: 29 tests including a full round trip, plus refusal, cross-chat refusal, timeout, cancellation, out-of-order concurrent answers and no-leak assertions. Six protections falsified.
 
-**Not done: the React side** that renders the prompt and posts the answer. Until it lands a user cannot answer, so **no MCP tool may be registered in the app yet** — the gate would refuse every call at the ten-minute timeout. That, plus regenerating `gotypes.gen.ts` for the new event fields, is the first task of Phase 3c.
+Also done (`e7a05864`): the React prompt. A gated call raises a panel above the composer naming the tool, listing its arguments, and offering allow once, always allow this tool, or decline. Arguments are shown because the user is agreeing to *this call*; they are stripped of control characters and capped with a visible marker, and a test asserts that markup in a tool name or argument renders as text. A refusal never carries a remember flag on the wire. An event with no identifier is ignored rather than shown, since an unanswerable prompt would strand the chat until the server's timeout, and a 409 is surfaced rather than swallowed. `gotypes.gen.ts` was regenerated with `tscriptify`, a seven-line diff.
+
+Bounding what the proof covers: the frontend suite runs in a node environment and renders with `renderToStaticMarkup` — the pattern already used here — so there is **no DOM event simulation and a button click is not exercised**. The handlers are one call each and everything they call is tested directly.
+
+**Phase 3b is complete.** The app can now gate a tool call end to end, so Phase 3c may register MCP tools.
 
 ### Phase 3c — Desktop app MCP registration and settings API
 

@@ -3,7 +3,7 @@
 From: Grommet (Claude Opus 5)
 Date: 2026-08-05
 Branch: `mcp/server-support`, pushed to `origin` (kryptosmatrix/ollama)
-Head at handoff: `0506f8e7`
+Head at handoff: `e7a05864`
 
 ## Read this first
 
@@ -20,7 +20,7 @@ Head at handoff: `0506f8e7`
 | 2 — manager and transports | **DONE** (`594f6104`) |
 | 2b — OAuth 2.1 | not started |
 | 3a — CLI surface | **DONE** (`12ea7760`, `09a954cb`, `7e533582`, `f12a2d6a`) |
-| 3b — app approval path | **BACKEND DONE** (`0506f8e7`) — React side outstanding |
+| 3b — app approval path | **DONE** (`0506f8e7`, `e7a05864`) |
 | 3c/3d — app surfaces | not started |
 | 4 / 4b — MCP Servers page, registry browse | not started |
 | 5 — docs, cross-substrate review, closeout | not started |
@@ -29,7 +29,7 @@ The whole tree builds and vets clean; `mcp`, `agent/...` and `cmd` all pass. MCP
 
 **The feature is now usable end to end from the terminal.** `ollama mcp add|list|remove|enable|disable|approve|revoke` exists and is registered on the root command; `ollama` in agent mode connects approved servers and offers their tools behind per-tool approval.
 
-`/mcp` inside the agent TUI lists servers and toggles them; it deliberately cannot approve one. **Phase 3a is complete.** The next surface is the desktop app.
+`/mcp` inside the agent TUI lists servers and toggles them; it deliberately cannot approve one. **Phases 3a and 3b are complete**: the desktop app can now gate a tool call end to end, ask the user, and act on the answer. **Phase 3c may register MCP tools in the app.**
 
 ## Operator rulings in force
 
@@ -59,21 +59,20 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 ## What the next session should do
 
-**Finish 3b, then 3c.** Two pieces, in this order:
+**Phase 3c: register MCP tools in the desktop app.**
 
-1. **The React approval prompt.** The backend is complete and proven; a user still cannot answer. Regenerate `app/ui/app/codegen/gotypes.gen.ts` (the `tscriptify` generate directive at `app/ui/ui.go:39`) so the new `tool_approval` event and its `approvalId` / `approvalScope` / `approvalArgs` fields reach TypeScript, then render the prompt in the message stream and POST the answer to `/api/v1/chat/{id}/approval` with `{approvalId, allow, remember, rememberAll}`. Do **not** hand-edit the generated file.
-2. **3c: register MCP tools in the app.** `app/tools/mcp.go` adapting `mcp.Tool` to `app/tools.Tool` plus `ApprovalRequired` and `ScopedTool` (mirror `agent/tools/mcp.go`), a process-lifetime manager in `app/ui/ui.go` — **not** per chat request, or every message restarts the subprocesses — the routes in plan §8.2, `responses/types.go` additions, and schema v17 for `mcp_server_state`.
+1. `app/tools/mcp.go` — adapt `mcp.Tool` to `app/tools.Tool`, implementing `ApprovalRequired` (always true) and `ScopedTool` (`<server>__<tool>`). Mirror `agent/tools/mcp.go`; the interfaces differ (`Schema() map[string]any`, `Execute(ctx, args) (any, string, error)`, plus `Prompt()`), so the schema has to be marshalled from `api.ToolFunction` into a plain map.
+2. **One manager for the process, not per chat request.** `app/ui/ui.go:852` builds a fresh registry for every request; an MCP manager built there would restart every server subprocess on every message. Build it once where the `Server` is constructed in `app/cmd/app/app.go`, close it on shutdown, and register its tools into the per-request registry.
+3. The routes in plan §8.2, the response types in `app/ui/responses/types.go` (then regenerate with `tscriptify` — it is installed now), and schema v17 with `migrateV16ToV17` for `mcp_server_state`. Do not edit `app/store/schema.sql`; it is a frozen migration fixture.
 
-**Until the React prompt exists, do not register MCP tools in the app.** The gate would block every call for ten minutes and then refuse it, which is safe but looks exactly like a hang.
-
-Then Phase 4 (the MCP Servers page) and 4b (registry browse).
+Then Phase 4 (the MCP Servers page, §8.0–8.3) and 4b (registry browse, §8.4).
 
 ## What must not soften
 
 - Tool descriptions from a server are untrusted input that lands in the model's prompt. Sanitised and capped in `mcp/tools.go`; keep it that way when the manager starts feeding real ones through.
 - Schema conversion is lossy and says so in the description. Do not "simplify" that into dropping constraints.
 - `mcp.json` is a code-execution config: `0600` in a `0700` directory, no shell, credentials only as `${env:NAME}`.
-- The desktop app's approval path now exists but **has no user interface**. Registering MCP tools in the app before the React prompt lands would gate every call on a question nobody can answer.
+- The desktop app's approval path is complete, backend and interface. Any tool registered there that implements `ApprovalRequired` will be gated; anything that does not will run the moment the model names it, so an MCP adapter must implement it.
 - Everything about the approval wait fails safe: a timeout, a cancelled context and a failed notify all refuse the call. Do not "simplify" any of those into allowing it.
 - `/mcp` must never grow an approve verb. Approval needs the command line shown verbatim and a deliberate answer; a chat input line cannot give either. There is a test guarding the decision, not the implementation.
 - If Phase 4b runs long, the browse polish gives way; the install gate — resolved command line shown verbatim, landed disabled, hash verified — never does.
@@ -89,4 +88,5 @@ Then Phase 4 (the MCP Servers page) and 4b (registry browse).
 - `docs/_design/proof/phase3a-commands-falsification.txt` — the `ollama mcp` commands, five protections including root-command registration.
 - `docs/_design/proof/phase3a-slash-falsification.txt` — `/mcp`, five protections including a disabled server left running.
 - `docs/_design/proof/phase3b-falsification.txt` — the app approval rendezvous, six protections, plus the attribution of a pre-existing flaky test.
+- `docs/_design/proof/phase3b-react-falsification.txt` — the React prompt, four protections, and a statement of what the node-environment suite cannot cover.
 - `docs/_design/proof/phase2-falsification.txt` — the manager, including three attempts that **failed to falsify** and the removal that followed. Read that section before adding any safety mechanism to this package: the protocol library already reaps processes, and code written to do it again cannot be tested.
