@@ -255,11 +255,18 @@ Full OAuth 2.1 brings its own obligations, and each is a place where a wrong def
 
 Each phase states its files, its obligations, and the falsifiable proof that closes it. No phase is "done" on compilation. Every phase ends in a commit signed `Co-Authored-By: Grommet (Claude Opus 5)`; the branch is pushed at every phase boundary.
 
-### Phase 0 — Toolchain and baseline *(blocking prerequisite)*
+### Phase 0 — Toolchain and baseline — **DONE 2026-08-05**
 
-Install Go 1.26+ (`brew install go`). Capture a clean baseline **before** any change: `go build ./...`, `go vet ./...`, `go test ./...` with the full output saved to `docs/_design/proof/phase0-baseline.txt`, plus `npm ci && npm run build && npm run test` in `app/ui/app`. Record which tests are already failing on this machine — without that baseline, no later "the suite is green" claim is attributable.
+Go 1.26.5 and CMake 4.4.2 installed via Homebrew. Baseline captured at commit `a734e3b1` into `docs/_design/proof/phase0-baseline.txt` (build, vet, frontend install/build/test/lint/format) and `phase0-gotest.txt` (full Go suite), with an explicit exit code echoed after every command.
 
-Proof: baseline file exists, committed, with exit codes echoed explicitly per command (a wrapper's exit code is not the build's).
+**What the baseline established, and why each item matters later:**
+
+- `go build ./...` fails on a clean checkout with `app/ui/app.go:15:12: pattern app/dist: no matching files found`. The desktop app embeds the built frontend, so **the frontend must be built before the Go tree will compile**. `npm ci && npm run build` in `app/ui/app` fixes it; after that the build is clean (cgo warnings from `app/webview` only). Any future "the build is broken" report has to check this first.
+- `go vet ./...` **already fails**: `tokenizer/bytepairencoding_test.go:542:5: result of slices.Collect call not used`. Pre-existing, not ours, not to be fixed here — fixing unrelated files works against the upstream-PR ruling (D2).
+- Frontend tests pass: 4 files, 27 tests.
+- `npm run lint` **already fails**: 122 problems (112 errors, 10 warnings) across 14 files including the generated `codegen/gotypes.gen.ts` and `src/components/ChatSidebar.tsx`. `npm run prettier:check` **already fails** on 9 files, also including `ChatSidebar.tsx`, `Settings.tsx` and `api.ts`.
+
+**The constraint that follows, and it is load-bearing.** `ChatSidebar.tsx` is a file this feature must edit (§8.0) and it is both lint-dirty and format-dirty today. Running `prettier --write` on it would reformat the entire file and bury a three-line change in a hundred-line diff. So: **new files must be lint-clean and prettier-clean; existing files are edited by hand in their surrounding style and never reformatted wholesale.** The completion test for lint is "no new problems against the recorded baseline count", not "zero problems".
 
 ### Phase 1 — `mcp/config.go`: the config file
 
