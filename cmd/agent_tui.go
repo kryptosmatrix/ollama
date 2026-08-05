@@ -23,6 +23,7 @@ import (
 	"github.com/ollama/ollama/format"
 	internalcloud "github.com/ollama/ollama/internal/cloud"
 	"github.com/ollama/ollama/internal/modelref"
+	"github.com/ollama/ollama/mcp"
 	"github.com/ollama/ollama/types/model"
 )
 
@@ -93,12 +94,20 @@ func GenerateAgentTUI(cmd *cobra.Command, client *api.Client, opts agentTUIOptio
 	if _, err := reloadSkills(); err != nil {
 		return fmt.Errorf("load agent skills: %w", err)
 	}
+	// One manager for the session, not one per registry: the registry is
+	// rebuilt whenever the model changes, and reconnecting every MCP server on
+	// a model switch would restart their processes for no reason.
+	mcpManager := agentMCPManager(cmd.Context())
+	if mcpManager != nil {
+		defer mcpManager.Close()
+	}
+
 	var registry *coreagent.Registry
 	registryForModel := func(ctx context.Context, model string) *coreagent.Registry {
-		return agentToolsRegistry(ctx, client, model, skillCatalog)
+		return agentToolsRegistry(ctx, client, model, skillCatalog, mcpManager)
 	}
 	if opts.Model != "" {
-		registry = agentToolsRegistry(cmd.Context(), client, opts.Model, skillCatalog)
+		registry = agentToolsRegistry(cmd.Context(), client, opts.Model, skillCatalog, mcpManager)
 	}
 	systemPrompt := agentSystemPromptWithWorkingDir(opts.Model, opts.System, agentSkillSystemContext(skillCatalog, registry, opts.ToolsDisabled), cwd)
 
@@ -246,7 +255,74 @@ func agentSystemFromShow(ctx context.Context, client *api.Client, modelName stri
 	return resp.System
 }
 
-func agentToolsRegistry(ctx context.Context, client *api.Client, modelName string, skillCatalog *coreagent.SkillCatalog) *coreagent.Registry {
+// agentMCPManager loads the MCP configuration and the approval ledger and
+// connects every approved, enabled server. It returns nil when MCP is switched
+// off or nothing is configured.
+//
+// Failures are reported and then tolerated: an unreachable or unapproved server
+// is a reason to tell the user, not a reason to refuse to start the agent.
+func agentMCPManager(ctx context.Context) *mcp.Manager {
+	if os.Getenv("OLLAMA_AGENT_DISABLE_MCP") != "" {
+		return nil
+	}
+
+	configPath, err := mcp.ConfigPath()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m could not locate mcp config: %v\n", err)
+		return nil
+	}
+	cfg, err := mcp.Load(configPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m %v\n", err)
+		return nil
+	}
+	if len(cfg.Names()) == 0 {
+		return nil
+	}
+
+	approvalsPath, err := mcp.ApprovalsPath()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m could not locate mcp approvals: %v\n", err)
+		return nil
+	}
+	approvals, err := mcp.LoadApprovals(approvalsPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m %v\n", err)
+		return nil
+	}
+
+	manager := mcp.NewManager(mcp.Options{Approvals: approvals})
+	manager.Connect(ctx, cfg)
+	reportMCPStates(manager.States())
+	return manager
+}
+
+// reportMCPStates tells the user what happened to each configured server, in
+// the same voice as the skill diagnostics above. A server that is silently
+// missing its tools is worse than one that explains itself.
+func reportMCPStates(states []mcp.ServerState) {
+	var connected []string
+	for _, state := range states {
+		switch state.Status {
+		case mcp.StatusConnected:
+			connected = append(connected, fmt.Sprintf("%s (%d tools)", state.Name, len(state.Tools)))
+			for _, skipped := range state.Skipped {
+				fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m mcp %s: skipped tool %q: %s\n", state.Name, skipped.Name, skipped.Reason)
+			}
+		case mcp.StatusNeedsApproval:
+			fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m mcp %s is not approved to run: %s\n", state.Name, state.Spec.Summary())
+		case mcp.StatusInvalid:
+			fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m mcp %s is misconfigured: %v\n", state.Name, state.Err)
+		case mcp.StatusFailed:
+			fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m mcp %s unavailable: %v\n", state.Name, state.Err)
+		}
+	}
+	if len(connected) > 0 {
+		fmt.Fprintf(os.Stderr, "Loaded MCP servers: %s\n", strings.Join(connected, ", "))
+	}
+}
+
+func agentToolsRegistry(ctx context.Context, client *api.Client, modelName string, skillCatalog *coreagent.SkillCatalog, mcpManager *mcp.Manager) *coreagent.Registry {
 	supportsTools, err := agentModelSupportsTools(ctx, client, modelName)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m could not check model capabilities: %v\n", err)
@@ -272,6 +348,10 @@ func agentToolsRegistry(ctx context.Context, client *api.Client, modelName strin
 		} else {
 			fmt.Fprintf(os.Stderr, "%s\n", internalcloud.DisabledError("web search is unavailable"))
 		}
+	}
+
+	if _, err := agenttools.RegisterMCP(registry, mcpManager); err != nil {
+		fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m could not offer some MCP tools: %v\n", err)
 	}
 	return registry
 }

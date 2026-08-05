@@ -55,3 +55,74 @@ F20_TEST_EXIT=1 (expect non-zero)
 RESTORE_IDENTICAL=yes
 ok  	github.com/ollama/ollama/agent/tools	5.259s
 RESTORED_TEST_EXIT=0
+
+=== PHASE 3a, SECOND HALF: activation evidence at the CLI entry point ===
+captured: 2026-08-05T12:59:55Z
+agentToolsRegistry is the function the agent TUI actually calls to build its tool registry.
+Without MCP tools in it, every layer beneath could be perfect and the user would see nothing.
+
+--- baseline ---
+ok  	github.com/ollama/ollama/cmd	1.089s
+BASELINE_CMD_TEST_EXIT=0
+
+--- F21: registry built without registering MCP tools ---
+353:	if _, err := agenttools.RegisterMCP(registry, nil); err != nil { // FALSIFICATION: manager not passed through
+--- FAIL: TestAgentToolsRegistryOffersMCPTools (0.71s)
+    agent_tui_mcp_test.go:90: the MCP tool is missing from the agent's registry; it has [edit read]
+FAIL
+FAIL	github.com/ollama/ollama/cmd	1.396s
+FAIL
+F21_TEST_EXIT=1 (expect non-zero)
+
+--- F22: the CLI loader ignores the approval ledger ---
+294:	manager := mcp.NewManager(mcp.Options{}) // FALSIFICATION: ledger discarded
+ok  	github.com/ollama/ollama/cmd	0.589s
+F22_TEST_EXIT=0 (expect non-zero — a discarded ledger denies everything, so needs-approval still holds; see note)
+
+--- F23: the disable switch is ignored ---
+265:	// FALSIFICATION: disable switch ignored
+ok  	github.com/ollama/ollama/cmd	0.557s
+F23_TEST_EXIT=0 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/cmd	1.258s
+RESTORED_CMD_TEST_EXIT=0
+
+=== F22 AND F23 RE-RUN after both tests were made to discriminate ===
+F22 passed because a discarded ledger yields a nil policy, which denies everything, so the
+needs-approval assertion held either way. The gap was real but the other way round: there was
+no test proving the loader READS the ledger. TestAgentMCPManagerConnectsAnApprovedServer adds it.
+F23 passed because the disable-switch test did not isolate OLLAMA_MCP_CONFIG, so with the switch
+removed the loader read a nonexistent ~/.ollama/mcp.json and returned nil anyway — the test was
+passing for a reason unrelated to the switch. It now writes a real config and asserts a control
+case first.
+
+--- F22b: the CLI loader discards the approval ledger ---
+294:	manager := mcp.NewManager(mcp.Options{}) // FALSIFICATION: ledger discarded
+[1mwarning:[0m mcp raw is not approved to run: /var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/TestAgentMCPManagerConnectsAnApprovedServer1285531446/001/rawserver
+--- FAIL: TestAgentMCPManagerConnectsAnApprovedServer (0.53s)
+    agent_tui_mcp_test.go:199: status = "needs-approval", err = raw has not been approved to run: /var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/TestAgentMCPManagerConnectsAnApprovedServer1285531446/001/rawserver — an approved server must actually connect
+FAIL
+FAIL	github.com/ollama/ollama/cmd	1.100s
+FAIL
+F22b_TEST_EXIT=1 (expect non-zero)
+
+--- F23b: the disable switch is ignored ---
+265:	// FALSIFICATION: disable switch ignored
+[1mwarning:[0m mcp present is not approved to run: echo hello
+[1mwarning:[0m mcp present is not approved to run: echo hello
+--- FAIL: TestAgentMCPManagerRespectsTheDisableSwitch (0.02s)
+    agent_tui_mcp_test.go:151: OLLAMA_AGENT_DISABLE_MCP must switch MCP off entirely
+FAIL
+FAIL	github.com/ollama/ollama/cmd	0.587s
+FAIL
+F23b_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/cmd	2.375s
+ok  	github.com/ollama/ollama/agent	1.196s
+ok  	github.com/ollama/ollama/agent/tools	7.010s
+ok  	github.com/ollama/ollama/mcp	9.618s
+RESTORED_TEST_EXIT=0
