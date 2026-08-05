@@ -292,3 +292,50 @@ func TestMissingCommandFailsClearlyAndIsNotRetried(t *testing.T) {
 		t.Errorf("failing took %s; a missing command must not be retried with backoff", elapsed)
 	}
 }
+
+// TestDisablingAServerStopsItsProcess proves that switching a server off
+// actually switches it off. Dropping it from the tool list while leaving the
+// process running would be a switch that does not switch anything off, and
+// nothing else in the system would ever notice.
+func TestDisablingAServerStopsItsProcess(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("process listing differs on windows; covered on unix")
+	}
+	binary := buildRawServer(t)
+
+	manager := NewManager(Options{ConnectTimeout: 30 * time.Second, Approvals: allowAll{}})
+	t.Cleanup(func() { manager.Close() })
+
+	cfg := &Config{}
+	cfg.Set("raw", &ServerSpec{Command: binary})
+	manager.Connect(t.Context(), cfg)
+
+	if state, _ := manager.State("raw"); state.Status != StatusConnected {
+		t.Fatalf("status = %q, err = %v", state.Status, state.Err)
+	}
+	if !processRunning(t, binary) {
+		t.Fatal("the server should be running while connected")
+	}
+
+	// The user switches it off and the configuration is applied again, which is
+	// exactly what /mcp disable and ollama mcp disable do.
+	spec, _ := cfg.Get("raw")
+	spec.Disabled = true
+	manager.Connect(t.Context(), cfg)
+
+	if state, _ := manager.State("raw"); state.Status != StatusDisabled {
+		t.Fatalf("status = %q, want disabled", state.Status)
+	}
+	if len(manager.Tools()) != 0 {
+		t.Error("a disabled server must offer no tools")
+	}
+
+	deadline := time.Now().Add(15 * time.Second)
+	for time.Now().Before(deadline) {
+		if !processRunning(t, binary) {
+			return
+		}
+		time.Sleep(200 * time.Millisecond)
+	}
+	t.Error("the server process survived being switched off")
+}

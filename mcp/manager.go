@@ -190,10 +190,13 @@ func (m *Manager) Connect(ctx context.Context, cfg *Config) {
 		spec, _ := cfg.Get(name)
 		switch {
 		case problems[name] != nil:
+			m.closeSession(name)
 			m.setState(&ServerState{Name: name, Spec: spec, Status: StatusInvalid, Err: problems[name]})
 		case spec.Disabled:
+			m.closeSession(name)
 			m.setState(&ServerState{Name: name, Spec: spec, Status: StatusDisabled})
 		case !m.approves(spec):
+			m.closeSession(name)
 			m.setState(&ServerState{
 				Name:   name,
 				Spec:   spec,
@@ -215,6 +218,24 @@ func (m *Manager) Connect(ctx context.Context, cfg *Config) {
 		}()
 	}
 	wg.Wait()
+}
+
+// closeSession ends any live session for a server that should no longer be
+// running. Connect is called again whenever the configuration changes, so a
+// server the user has just switched off, invalidated or un-approved must lose
+// its process here — dropping it from the tool list while leaving it running
+// would be a switch that does not switch anything off.
+func (m *Manager) closeSession(name string) {
+	m.mu.Lock()
+	session := m.clients[name]
+	delete(m.clients, name)
+	m.mu.Unlock()
+
+	if session != nil {
+		if err := session.Close(); err != nil {
+			m.opts.Logger.Debug("mcp server closed on reconfigure", "server", name, "reason", err)
+		}
+	}
 }
 
 // approves reports whether the configured approval policy permits this exact

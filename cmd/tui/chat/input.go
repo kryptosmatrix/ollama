@@ -20,6 +20,7 @@ import (
 	coreagent "github.com/ollama/ollama/agent"
 	"github.com/ollama/ollama/api"
 	"github.com/ollama/ollama/cmd/internal/filedata"
+	"github.com/ollama/ollama/mcp"
 )
 
 type chatSlashCommand struct {
@@ -57,6 +58,7 @@ var chatSlashCommands = []chatSlashCommand{
 	{name: "/tools", description: "toggle tools on or off"},
 	{name: "/system", usage: "/system [on|off]", description: "show or set the built-in system prompt"},
 	{name: "/skills", usage: "/skills [import codex|claude|pi]", description: "list or import skills"},
+	{name: "/mcp", usage: "/mcp [enable|disable <name>]", description: "list MCP servers"},
 	{name: "/compact", description: "summarize older context"},
 	{name: "/help", description: "show commands", aliases: []string{"/?"}},
 	{name: "/bye", description: "exit", aliases: []string{"/exit"}},
@@ -166,6 +168,8 @@ func (m *chatModel) submitInput(input string) (tea.Model, tea.Cmd) {
 		return m.handleSystemCommand(args)
 	case command == "/skills":
 		return m.handleSkillsCommand(args)
+	case command == "/mcp":
+		return m.handleMCPCommand(args)
 	case command == "/prompt":
 		return m.handlePromptCommand(args)
 	case command == "/save":
@@ -208,6 +212,101 @@ func (m *chatModel) handleSkillsCommand(args string) (tea.Model, tea.Cmd) {
 	}
 	lines = append(lines, "\nType `/<name>` to load a skill into the conversation.")
 	m.entries = append(m.entries, newSlashEntry(strings.Join(lines, "\n")))
+	return *m, nil
+}
+
+// handleMCPCommand lists MCP servers and switches them on or off.
+//
+// It deliberately cannot approve one. Approving a server means agreeing to run
+// a particular command line, which has to be shown verbatim and answered
+// deliberately; a chat input line is the wrong place for that, so approval
+// stays with `ollama mcp approve`.
+func (m *chatModel) handleMCPCommand(args string) (tea.Model, tea.Cmd) {
+	fields := strings.Fields(args)
+	switch {
+	case len(fields) == 0:
+		return m.showMCPServers()
+	case len(fields) == 2 && (fields[0] == "enable" || fields[0] == "disable"):
+		return m.setMCPEnabled(fields[1], fields[0] == "enable")
+	default:
+		m.status = "error"
+		m.entries = append(m.entries, newChatEntry(chatEntry{role: "error", content: "usage: /mcp [enable|disable <name>]"}))
+		return *m, nil
+	}
+}
+
+func (m *chatModel) showMCPServers() (tea.Model, tea.Cmd) {
+	if m.opts.MCPServers == nil {
+		m.entries = append(m.entries, newSlashEntry("MCP is not available in this session."))
+		return *m, nil
+	}
+
+	states := m.opts.MCPServers()
+	if len(states) == 0 {
+		m.entries = append(m.entries, newSlashEntry("No MCP servers configured.\n\nAdd one with `ollama mcp add <name> <command>`."))
+		return *m, nil
+	}
+
+	lines := []string{"MCP servers:"}
+	var needApproval []string
+	for _, state := range states {
+		detail := string(state.Status)
+		switch state.Status {
+		case mcp.StatusConnected:
+			detail = fmt.Sprintf("connected, %d tools", len(state.Tools))
+		case mcp.StatusNeedsApproval:
+			needApproval = append(needApproval, state.Name)
+		case mcp.StatusFailed, mcp.StatusInvalid:
+			if state.Err != nil {
+				detail = fmt.Sprintf("%s: %v", state.Status, state.Err)
+			}
+		}
+		summary := ""
+		if state.Spec != nil {
+			summary = state.Spec.Summary()
+		}
+		lines = append(lines, fmt.Sprintf("- `%s`: %s — %s", state.Name, detail, summary))
+		for _, skipped := range state.Skipped {
+			lines = append(lines, fmt.Sprintf("    skipped tool `%s`: %s", skipped.Name, skipped.Reason))
+		}
+	}
+
+	if len(needApproval) > 0 {
+		lines = append(lines, "", "Approve with `ollama mcp approve <name>`: "+strings.Join(needApproval, ", "))
+	}
+	lines = append(lines, "", "Switch one on or off with `/mcp enable <name>` or `/mcp disable <name>`.")
+	m.entries = append(m.entries, newSlashEntry(strings.Join(lines, "\n")))
+	return *m, nil
+}
+
+func (m *chatModel) setMCPEnabled(name string, enabled bool) (tea.Model, tea.Cmd) {
+	if m.opts.SetMCPEnabled == nil {
+		m.status = "error"
+		m.entries = append(m.entries, newChatEntry(chatEntry{role: "error", content: "MCP is not available in this session."}))
+		return *m, nil
+	}
+
+	if err := m.opts.SetMCPEnabled(m.ctx, name, enabled); err != nil {
+		m.status = "error"
+		m.entries = append(m.entries, newChatEntry(chatEntry{role: "error", content: fmt.Sprintf("Could not change %s: %v", name, err)}))
+		return *m, nil
+	}
+
+	// Rebuild the tool registry through the same path a model switch uses, so
+	// the model's tool list matches what is actually connected.
+	if m.opts.ToolRegistryForModel != nil && m.opts.Model != "" {
+		m.opts.Tools = m.opts.ToolRegistryForModel(m.ctx, m.opts.Model)
+	}
+	if m.opts.SystemPromptForModel != nil {
+		m.opts.SystemPrompt = m.opts.SystemPromptForModel(m.ctx, m.opts.Model, m.opts.Tools, m.opts.ToolsDisabled)
+	}
+
+	verb := "enabled"
+	if !enabled {
+		verb = "disabled"
+	}
+	m.status = "mcp " + verb
+	m.entries = append(m.entries, newSlashEntry(fmt.Sprintf("%s %s.", strings.ToUpper(verb[:1])+verb[1:], name)))
 	return *m, nil
 }
 

@@ -116,7 +116,16 @@ func GenerateAgentTUI(cmd *cobra.Command, client *api.Client, opts agentTUIOptio
 		Client:               client,
 		Tools:                registry,
 		ToolRegistryForModel: registryForModel,
-		ToolsDisabled:        opts.ToolsDisabled,
+		MCPServers: func() []mcp.ServerState {
+			if mcpManager == nil {
+				return nil
+			}
+			return mcpManager.States()
+		},
+		SetMCPEnabled: func(ctx context.Context, name string, enabled bool) error {
+			return setAgentMCPEnabled(ctx, mcpManager, name, enabled)
+		},
+		ToolsDisabled: opts.ToolsDisabled,
 		MultiModalForModel: func(ctx context.Context, model string) bool {
 			return agentModelSupportsMultimodal(ctx, client, model)
 		},
@@ -295,6 +304,52 @@ func agentMCPManager(ctx context.Context) *mcp.Manager {
 	manager.Connect(ctx, cfg)
 	reportMCPStates(manager.States())
 	return manager
+}
+
+// setAgentMCPEnabled switches a configured server on or off and applies the
+// change immediately, which includes stopping a server that was switched off.
+//
+// The configuration file is the source of truth, so the change is written there
+// first and the manager is then brought into line with it, rather than the two
+// being updated independently and left to drift.
+func setAgentMCPEnabled(ctx context.Context, manager *mcp.Manager, name string, enabled bool) error {
+	if manager == nil {
+		return errors.New("MCP is not available in this session")
+	}
+
+	configPath, err := mcp.ConfigPath()
+	if err != nil {
+		return err
+	}
+	cfg, err := mcp.Load(configPath)
+	if err != nil {
+		return err
+	}
+	spec, ok := cfg.Get(name)
+	if !ok {
+		return fmt.Errorf("no MCP server named %q", name)
+	}
+	spec.Disabled = !enabled
+	if err := cfg.Save(configPath); err != nil {
+		return err
+	}
+
+	manager.Connect(ctx, cfg)
+
+	if enabled {
+		state, _ := manager.State(name)
+		switch state.Status {
+		case mcp.StatusConnected:
+		case mcp.StatusNeedsApproval:
+			return fmt.Errorf("%s is not approved to run; approve it with: ollama mcp approve %s", name, name)
+		default:
+			if state.Err != nil {
+				return state.Err
+			}
+			return fmt.Errorf("%s is %s", name, state.Status)
+		}
+	}
+	return nil
 }
 
 // reportMCPStates tells the user what happened to each configured server, in

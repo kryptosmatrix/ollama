@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -234,4 +235,92 @@ func TestAgentMCPManagerRefusesUnapprovedServers(t *testing.T) {
 	if len(manager.Tools()) != 0 {
 		t.Error("an unapproved server must contribute no tools to the agent")
 	}
+}
+
+// TestSetAgentMCPEnabledWritesTheConfigAndAppliesIt covers what /mcp enable and
+// /mcp disable actually do. The configuration file is the source of truth, so a
+// toggle that updated only the running manager would be forgotten at the next
+// launch, and one that updated only the file would leave a switched-off server
+// still running for the rest of the session.
+func TestSetAgentMCPEnabledWritesTheConfigAndAppliesIt(t *testing.T) {
+	name := "rawserver"
+	if runtime.GOOS == "windows" {
+		name += ".exe"
+	}
+	binary := filepath.Join(t.TempDir(), name)
+	build := exec.Command("go", "build", "-o", binary, "github.com/ollama/ollama/mcp/testdata/rawserver")
+	if output, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("build rawserver: %v\n%s", err, output)
+	}
+
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, "mcp.json")
+	approvalsPath := filepath.Join(dir, "mcp-approvals.json")
+	t.Setenv("OLLAMA_MCP_CONFIG", configPath)
+	t.Setenv("OLLAMA_MCP_APPROVALS", approvalsPath)
+	t.Setenv("OLLAMA_AGENT_DISABLE_MCP", "")
+
+	cfg := &mcp.Config{}
+	cfg.Set("raw", &mcp.ServerSpec{Command: binary})
+	cfg.Set("unapproved", &mcp.ServerSpec{Command: binary, Args: []string{"-silent"}})
+	if err := cfg.Save(configPath); err != nil {
+		t.Fatalf("save config: %v", err)
+	}
+	approved, _ := cfg.Get("raw")
+	approvals := &mcp.Approvals{}
+	approvals.Approve(approved, time.Now())
+	if err := approvals.Save(approvalsPath); err != nil {
+		t.Fatalf("save approvals: %v", err)
+	}
+
+	manager := agentMCPManager(t.Context())
+	if manager == nil {
+		t.Fatal("no manager")
+	}
+	t.Cleanup(func() { manager.Close() })
+	if len(manager.Tools()) == 0 {
+		t.Fatal("the approved server should be offering tools before the toggle")
+	}
+
+	t.Run("disable stops offering the tools and is written to the config", func(t *testing.T) {
+		if err := setAgentMCPEnabled(t.Context(), manager, "raw", false); err != nil {
+			t.Fatalf("disable: %v", err)
+		}
+		if len(manager.Tools()) != 0 {
+			t.Error("a disabled server must stop offering tools immediately")
+		}
+		reloaded, err := mcp.Load(configPath)
+		if err != nil {
+			t.Fatalf("reload config: %v", err)
+		}
+		spec, _ := reloaded.Get("raw")
+		if !spec.Disabled {
+			t.Error("the change was not written to the config, so it would be forgotten at the next launch")
+		}
+	})
+
+	t.Run("enable brings it back", func(t *testing.T) {
+		if err := setAgentMCPEnabled(t.Context(), manager, "raw", true); err != nil {
+			t.Fatalf("enable: %v", err)
+		}
+		if len(manager.Tools()) == 0 {
+			t.Error("re-enabling should reconnect and offer the tools again")
+		}
+	})
+
+	t.Run("enabling an unapproved server fails and says how to approve it", func(t *testing.T) {
+		err := setAgentMCPEnabled(t.Context(), manager, "unapproved", true)
+		if err == nil {
+			t.Fatal("an unapproved server must not be enabled into use silently")
+		}
+		if !strings.Contains(err.Error(), "ollama mcp approve unapproved") {
+			t.Errorf("error = %v, want it to name the command that would fix it", err)
+		}
+	})
+
+	t.Run("an unknown server is refused", func(t *testing.T) {
+		if err := setAgentMCPEnabled(t.Context(), manager, "absent", true); err == nil {
+			t.Fatal("expected an error for an unknown server")
+		}
+	})
 }
