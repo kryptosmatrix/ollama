@@ -1,0 +1,54 @@
+=== PHASE 1 FALSIFICATION EVIDENCE ===
+captured: 2026-08-05T11:49:45Z
+Method: break the production code, observe the test fail, restore, observe it pass.
+A falsifier that has never been seen to fail is a claim, not a proof.
+
+--- baseline: package green before any tampering ---
+ok  	github.com/ollama/ollama/mcp	(cached)
+BASELINE_TEST_EXIT=0
+
+--- F1: weaken config file mode from 0600 to 0644 ---
+313:	if err := tmp.Chmod(0o644); err != nil {
+--- FAIL: TestSaveWritesPrivatePermissions (0.01s)
+    config_test.go:350: config mode = 644, want 600 — this file names executables Ollama will run
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.540s
+FAIL
+F1_TEST_EXIT=1 (expect non-zero)
+
+--- F2: remove the literal-credential header check ---
+415:	_ = validateHeaders // FALSIFICATION: check removed
+--- FAIL: TestProblems (0.02s)
+    --- FAIL: TestProblems/literal_authorization_header (0.00s)
+        config_test.go:218: expected a problem for "leaky", got none
+    --- FAIL: TestProblems/literal_api_key_header,_lower_case (0.00s)
+        config_test.go:218: expected a problem for "leaky2", got none
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.523s
+FAIL
+F2_TEST_EXIT=1 (expect non-zero)
+
+--- F3: stop preserving unknown server fields on save ---
+141:	if true { // FALSIFICATION: drop unknown fields
+--- FAIL: TestSaveRoundTripPreservesUnknownFields (0.01s)
+    config_test.go:321: unknown server field futureField was dropped by save
+    config_test.go:324: unknown server field timeoutSeconds was dropped by save
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.530s
+FAIL
+F3_TEST_EXIT=1 (expect non-zero)
+
+--- restored: byte-for-byte identical to pre-tamper, package green again ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/mcp	0.331s
+RESTORED_TEST_EXIT=0
+
+=== scale ===
+top-level tests: 15
+including subtests: 32
+
+=== whole-tree build unaffected ===
+# github.com/ollama/ollama/app/cmd/app
+ld: warning: ignoring duplicate libraries: '-lobjc'
+TREE_BUILD_EXIT=0
+MCP_VET_EXIT=0
