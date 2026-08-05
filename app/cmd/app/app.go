@@ -30,6 +30,7 @@ import (
 	"github.com/ollama/ollama/app/ui"
 	"github.com/ollama/ollama/app/updater"
 	"github.com/ollama/ollama/app/version"
+	"github.com/ollama/ollama/mcp"
 )
 
 var (
@@ -253,6 +254,13 @@ func main() {
 
 	upd := &updater.Updater{Store: st}
 
+	// One MCP manager for the life of the process. Building it per chat request
+	// would restart every server's subprocess on every message.
+	mcpManager := startMCPManager(ctx)
+	if mcpManager != nil {
+		defer mcpManager.Close()
+	}
+
 	uiServer := ui.Server{
 		Token: token,
 		Restart: func() {
@@ -266,6 +274,7 @@ func main() {
 		Store:        st,
 		ToolRegistry: toolRegistry,
 		Approvals:    tools.NewApprovals(),
+		MCP:          mcpManager,
 		Dev:          devMode,
 		Logger:       slog.Default(),
 		Updater:      upd,
@@ -505,4 +514,58 @@ func handleURLSchemeInCurrentInstance(urlSchemeRequest string) {
 			showWindow(wv.webview.Window())
 		}
 	}
+}
+
+// startMCPManager loads the MCP configuration and the approval ledger and
+// connects every approved, enabled server. It returns nil when nothing is
+// configured or MCP is switched off.
+//
+// Failures are logged and then tolerated: an unreachable or unapproved server
+// is a reason to tell the user, not a reason to refuse to start the app.
+func startMCPManager(ctx context.Context) *mcp.Manager {
+	if os.Getenv("OLLAMA_DISABLE_MCP") != "" {
+		return nil
+	}
+
+	configPath, err := mcp.ConfigPath()
+	if err != nil {
+		slog.Warn("could not locate mcp config", "error", err)
+		return nil
+	}
+	cfg, err := mcp.Load(configPath)
+	if err != nil {
+		slog.Warn("could not read mcp config", "error", err)
+		return nil
+	}
+	if len(cfg.Names()) == 0 {
+		return nil
+	}
+
+	approvalsPath, err := mcp.ApprovalsPath()
+	if err != nil {
+		slog.Warn("could not locate mcp approvals", "error", err)
+		return nil
+	}
+	approvals, err := mcp.LoadApprovals(approvalsPath)
+	if err != nil {
+		slog.Warn("could not read mcp approvals", "error", err)
+		return nil
+	}
+
+	manager := mcp.NewManager(mcp.Options{Approvals: approvals})
+	manager.Connect(ctx, cfg)
+	for _, state := range manager.States() {
+		switch state.Status {
+		case mcp.StatusConnected:
+			slog.Info("mcp server connected", "server", state.Name, "tools", len(state.Tools))
+			for _, skipped := range state.Skipped {
+				slog.Warn("mcp tool skipped", "server", state.Name, "tool", skipped.Name, "reason", skipped.Reason)
+			}
+		case mcp.StatusNeedsApproval:
+			slog.Warn("mcp server is not approved to run", "server", state.Name, "runs", state.Spec.Summary())
+		default:
+			slog.Warn("mcp server unavailable", "server", state.Name, "status", state.Status, "error", state.Err)
+		}
+	}
+	return manager
 }

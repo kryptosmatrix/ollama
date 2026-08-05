@@ -33,6 +33,7 @@ import (
 	ollamaAuth "github.com/ollama/ollama/auth"
 	"github.com/ollama/ollama/envconfig"
 	"github.com/ollama/ollama/manifest"
+	"github.com/ollama/ollama/mcp"
 	"github.com/ollama/ollama/types/model"
 	_ "github.com/tkrajina/typescriptify-golang-structs/typescriptify"
 )
@@ -101,6 +102,11 @@ type Server struct {
 	Token        string
 	Store        *store.Store
 	ToolRegistry *tools.Registry
+	// MCP holds the connections to configured MCP servers. It is built once for
+	// the life of the process, not per chat request: the tool registry is
+	// rebuilt for every message, and connecting there would restart every
+	// server's subprocess on each one.
+	MCP *mcp.Manager
 	// Approvals is the rendezvous between a chat waiting on a tool call and the
 	// separate request that carries the user's answer.
 	Approvals     *tools.Approvals
@@ -877,6 +883,10 @@ func (s *Server) chat(w http.ResponseWriter, r *http.Request) error {
 				registry.Register(&tools.WebFetch{})
 			}
 		}
+
+		if hasToolsCapability {
+			s.registerMCPTools(registry)
+		}
 	}
 
 	var thinkingTimeStart *time.Time = nil
@@ -891,7 +901,7 @@ func (s *Server) chat(w http.ResponseWriter, r *http.Request) error {
 	for {
 		var toolsExecuted bool
 
-		availableTools := registry.AvailableTools()
+		availableTools := registry.OllamaTools()
 
 		// If we have pending assistant tool_calls and no assistant yet,
 		// build the request against a temporary chat that includes a
@@ -1368,6 +1378,21 @@ func (s *Server) renameChat(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// registerMCPTools adds the tools of every connected MCP server to this
+// request's registry. It is a no-op when no manager was built, which is the
+// ordinary case for a user who has configured no servers.
+//
+// A tool that cannot be adapted is reported and skipped rather than costing the
+// user every other tool from that server.
+func (s *Server) registerMCPTools(registry *tools.Registry) {
+	if s.MCP == nil {
+		return
+	}
+	if _, err := tools.RegisterMCP(registry, s.MCP); err != nil {
+		s.log().Warn("could not offer some MCP tools", "error", err)
+	}
+}
+
 // awaitToolApproval returns nil when the call may proceed. It returns an error
 // when the user declined, when nobody answered, or when the chat ended — and in
 // every one of those cases the tool must not run.
@@ -1784,53 +1809,6 @@ func userAgent() string {
 	)
 }
 
-// convertToOllamaTool converts a tool schema from our tools package format to Ollama API format
-func convertToOllamaTool(toolSchema map[string]any) api.Tool {
-	tool := api.Tool{
-		Type: "function",
-		Function: api.ToolFunction{
-			Name:        getStringFromMap(toolSchema, "name", ""),
-			Description: getStringFromMap(toolSchema, "description", ""),
-		},
-	}
-
-	tool.Function.Parameters.Type = "object"
-	tool.Function.Parameters.Required = []string{}
-	tool.Function.Parameters.Properties = api.NewToolPropertiesMap()
-
-	if schemaProps, ok := toolSchema["schema"].(map[string]any); ok {
-		tool.Function.Parameters.Type = getStringFromMap(schemaProps, "type", "object")
-
-		if props, ok := schemaProps["properties"].(map[string]any); ok {
-			tool.Function.Parameters.Properties = api.NewToolPropertiesMap()
-
-			for propName, propDef := range props {
-				if propMap, ok := propDef.(map[string]any); ok {
-					prop := api.ToolProperty{
-						Type:        api.PropertyType{getStringFromMap(propMap, "type", "string")},
-						Description: getStringFromMap(propMap, "description", ""),
-					}
-					tool.Function.Parameters.Properties.Set(propName, prop)
-				}
-			}
-		}
-
-		if required, ok := schemaProps["required"].([]string); ok {
-			tool.Function.Parameters.Required = required
-		} else if requiredAny, ok := schemaProps["required"].([]any); ok {
-			required := make([]string, len(requiredAny))
-			for i, r := range requiredAny {
-				if s, ok := r.(string); ok {
-					required[i] = s
-				}
-			}
-			tool.Function.Parameters.Required = required
-		}
-	}
-
-	return tool
-}
-
 // getStringFromMap safely gets a string from a map
 func getStringFromMap(m map[string]any, key, defaultValue string) string {
 	if val, ok := m[key].(string); ok {
@@ -1854,7 +1832,7 @@ func supportsBrowserTools(model string) bool {
 }
 
 // buildChatRequest converts store.Chat to api.ChatRequest
-func (s *Server) buildChatRequest(chat *store.Chat, model string, think any, availableTools []map[string]any) (*api.ChatRequest, error) {
+func (s *Server) buildChatRequest(chat *store.Chat, model string, think any, availableTools api.Tools) (*api.ChatRequest, error) {
 	var msgs []api.Message
 	for _, m := range chat.Messages {
 		// Skip empty messages if present
@@ -1939,11 +1917,7 @@ func (s *Server) buildChatRequest(chat *store.Chat, model string, think any, ava
 	}
 
 	if len(availableTools) > 0 {
-		tools := make(api.Tools, len(availableTools))
-		for i, toolSchema := range availableTools {
-			tools[i] = convertToOllamaTool(toolSchema)
-		}
-		req.Tools = tools
+		req.Tools = availableTools
 	}
 
 	return req, nil

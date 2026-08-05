@@ -6,6 +6,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
+
+	"github.com/ollama/ollama/api"
 )
 
 // Tool defines the interface that all tools must implement
@@ -110,6 +113,85 @@ func (r *Registry) AvailableTools() []map[string]any {
 		schemas = append(schemas, schema)
 	}
 	return schemas
+}
+
+// OllamaTools returns every registered tool as an Ollama tool definition, in a
+// stable order.
+//
+// A tool that already holds a faithful definition supplies it directly; the
+// rest are derived from their schema map. Deriving is lossy — it keeps only a
+// property's type and description — so anything that has the real thing must
+// not be round-tripped through it.
+func (r *Registry) OllamaTools() api.Tools {
+	names := r.ToolNames()
+	sort.Strings(names)
+
+	definitions := make(api.Tools, 0, len(names))
+	for _, name := range names {
+		tool := r.tools[name]
+		if faithful, ok := tool.(OllamaTool); ok {
+			definitions = append(definitions, api.Tool{Type: "function", Function: faithful.ToolFunction()})
+			continue
+		}
+		definitions = append(definitions, api.Tool{Type: "function", Function: toolFunctionFromSchema(tool)})
+	}
+	return definitions
+}
+
+// toolFunctionFromSchema derives a definition from a tool's schema map. It
+// carries each property's type and description and the required list, which is
+// all the map form has ever expressed.
+func toolFunctionFromSchema(tool Tool) api.ToolFunction {
+	fn := api.ToolFunction{Name: tool.Name(), Description: tool.Description()}
+	fn.Parameters.Type = "object"
+	fn.Parameters.Required = []string{}
+	fn.Parameters.Properties = api.NewToolPropertiesMap()
+
+	schema := tool.Schema()
+	if schema == nil {
+		return fn
+	}
+	if declared, ok := schema["type"].(string); ok && declared != "" {
+		fn.Parameters.Type = declared
+	}
+	if properties, ok := schema["properties"].(map[string]any); ok {
+		for _, name := range sortedKeys(properties) {
+			definition, ok := properties[name].(map[string]any)
+			if !ok {
+				continue
+			}
+			property := api.ToolProperty{}
+			if declared, ok := definition["type"].(string); ok && declared != "" {
+				property.Type = api.PropertyType{declared}
+			}
+			if description, ok := definition["description"].(string); ok {
+				property.Description = description
+			}
+			fn.Parameters.Properties.Set(name, property)
+		}
+	}
+	switch required := schema["required"].(type) {
+	case []string:
+		fn.Parameters.Required = required
+	case []any:
+		list := make([]string, 0, len(required))
+		for _, entry := range required {
+			if name, ok := entry.(string); ok {
+				list = append(list, name)
+			}
+		}
+		fn.Parameters.Required = list
+	}
+	return fn
+}
+
+func sortedKeys(m map[string]any) []string {
+	keys := make([]string, 0, len(m))
+	for key := range m {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 // ToolNames returns a list of all tool names

@@ -1,0 +1,79 @@
+=== PHASE 3c FALSIFICATION EVIDENCE (MCP tools in the desktop app) ===
+captured: 2026-08-05T22:01:51Z
+
+--- baseline ---
+ok  	github.com/ollama/ollama/app/tools	3.681s
+ok  	github.com/ollama/ollama/app/ui	2.256s
+BASELINE_TEST_EXIT=0
+
+--- F44: the chat handler never registers MCP tools ---
+1388:	if true { // FALSIFICATION: registration skipped
+--- FAIL: TestChatRegistryOffersMCPTools (0.64s)
+    approval_test.go:315: the MCP tool is missing from the request's registry; it has []
+--- FAIL: TestMCPToolsAreGatedInTheApp (0.75s)
+    approval_test.go:345: an MCP tool ran in the app without being approved
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	1.932s
+FAIL
+F44_TEST_EXIT=1 (expect non-zero)
+
+--- F45: MCP tools do not require approval in the app ---
+114:func (m *MCP) RequiresApproval(map[string]any) bool { return false } // FALSIFICATION
+--- FAIL: TestMCPToolRequiresApprovalAndIsScoped (0.65s)
+    mcp_test.go:98: an MCP tool must be gated: approving a server is agreement to run it, not to let the model drive it
+FAIL
+FAIL	github.com/ollama/ollama/app/tools	1.088s
+FAIL
+F45a_TEST_EXIT=1 (expect non-zero)
+--- FAIL: TestMCPToolsAreGatedInTheApp (0.64s)
+    approval_test.go:345: an MCP tool ran in the app without being approved
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	1.193s
+FAIL
+F45b_TEST_EXIT=1 (expect non-zero)
+
+--- F46: faithful schemas are flattened through the map form ---
+132:		if faithful, ok := tool.(OllamaTool); ok && false { // FALSIFICATION: always derive
+ok  	github.com/ollama/ollama/app/tools	1.158s
+F46_TEST_EXIT=0 (expect non-zero)
+
+--- F47: the tool call never reaches the server ---
+127:	return nil, "ok", nil // FALSIFICATION: server never contacted
+--- FAIL: TestMCPToolCallsTheServer (0.65s)
+    mcp_test.go:191: content = "ok", want the subprocess's own reply
+--- FAIL: TestMCPToolSurfacesAServerReportedFailure (0.63s)
+    mcp_test.go:204: a server-reported failure must reach the app as an error
+FAIL
+FAIL	github.com/ollama/ollama/app/tools	1.706s
+FAIL
+F47_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/app/tools	3.716s
+ok  	github.com/ollama/ollama/app/ui	2.305s
+RESTORED_TEST_EXIT=0
+
+=== F46 RE-RUN after the test was made to discriminate ===
+The first F46 attempt FAILED TO FALSIFY. Forcing every tool through the derived path left the
+test green, because it asserted the required list and a description — both of which the derived
+path also preserves. It proved nothing about which path had been taken. The test now asserts an
+enum, an array item type and a nested object's properties, which are exactly what deriving loses.
+
+--- F46b: faithful schemas flattened through the map form ---
+132:		if faithful, ok := tool.(OllamaTool); ok && false { // FALSIFICATION: always derive
+--- FAIL: TestMCPToolKeepsItsFaithfulSchema (0.65s)
+    mcp_test.go:150: the enum was lost, so the model cannot see the allowed values:
+        {"name":"raw__create_issue","description":"opens an issue","parameters":{"type":"object","required":["priority"],"properties":{"author":{"type":"object"},"labels":{"type":"array"},"priority":{"type":"string"}}}}
+    mcp_test.go:153: the array item type was lost:
+        {"name":"raw__create_issue","description":"opens an issue","parameters":{"type":"object","required":["priority"],"properties":{"author":{"type":"object"},"labels":{"type":"array"},"priority":{"type":"string"}}}}
+FAIL
+FAIL	github.com/ollama/ollama/app/tools	1.081s
+FAIL
+F46b_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/app/tools	3.636s
+ok  	github.com/ollama/ollama/app/ui	2.285s
+RESTORED_TEST_EXIT=0

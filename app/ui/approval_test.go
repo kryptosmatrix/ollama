@@ -7,11 +7,15 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os/exec"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/ollama/ollama/app/tools"
+	"github.com/ollama/ollama/mcp"
 )
 
 // approvalTool requires approval and records whether it ever ran. Whether it
@@ -263,5 +267,87 @@ func TestApprovalTimeoutRefusesRatherThanHanging(t *testing.T) {
 	}
 	if gated.executed != 0 {
 		t.Error("the tool ran after a timeout")
+	}
+}
+
+// mcpServer builds a Server with a live MCP manager attached, exactly as
+// app/cmd/app does, so the registration and gating paths can be exercised
+// against a real server subprocess.
+func mcpServer(t *testing.T) *Server {
+	t.Helper()
+
+	name := "rawserver"
+	if runtime.GOOS == "windows" {
+		name += ".exe"
+	}
+	binary := filepath.Join(t.TempDir(), name)
+	build := exec.Command("go", "build", "-o", binary, "github.com/ollama/ollama/mcp/testdata/rawserver")
+	if output, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("build rawserver: %v\n%s", err, output)
+	}
+
+	cfg := &mcp.Config{}
+	cfg.Set("raw", &mcp.ServerSpec{Command: binary})
+	stored, _ := cfg.Get("raw")
+	approvals := &mcp.Approvals{}
+	approvals.Approve(stored, time.Now())
+
+	manager := mcp.NewManager(mcp.Options{ConnectTimeout: 30 * time.Second, Approvals: approvals})
+	t.Cleanup(func() { manager.Close() })
+	manager.Connect(t.Context(), cfg)
+	if state, _ := manager.State("raw"); state.Status != mcp.StatusConnected {
+		t.Fatalf("mcp server status = %q, err = %v", state.Status, state.Err)
+	}
+
+	return &Server{MCP: manager, Approvals: tools.NewApprovals()}
+}
+
+// TestChatRegistryOffersMCPTools is the activation evidence for the desktop
+// app: the registry the chat handler builds for a request must contain the
+// tools of connected MCP servers. Without it every layer beneath could be
+// perfect and the app would show nothing.
+func TestChatRegistryOffersMCPTools(t *testing.T) {
+	server := mcpServer(t)
+	registry := tools.NewRegistry()
+	server.registerMCPTools(registry)
+
+	if _, ok := registry.Get("raw__echo"); !ok {
+		t.Fatalf("the MCP tool is missing from the request's registry; it has %v", registry.ToolNames())
+	}
+	for _, refused := range []string{"raw__bash", "raw__scalar_input"} {
+		if _, present := registry.Get(refused); present {
+			t.Errorf("%q must not be offered", refused)
+		}
+	}
+}
+
+func TestChatRegistryWithoutAnMCPManager(t *testing.T) {
+	server := &Server{Approvals: tools.NewApprovals()}
+	registry := tools.NewRegistry()
+	server.registerMCPTools(registry)
+	if len(registry.ToolNames()) != 0 {
+		t.Errorf("a server with no manager must register nothing, got %v", registry.ToolNames())
+	}
+}
+
+// TestMCPToolsAreGatedInTheApp is the security-critical composition: an MCP
+// tool registered in the app must go through the approval path, not run the
+// moment the model names it.
+func TestMCPToolsAreGatedInTheApp(t *testing.T) {
+	server := mcpServer(t)
+	server.Approvals.Timeout = 300 * time.Millisecond
+	registry := tools.NewRegistry()
+	server.registerMCPTools(registry)
+
+	recorder := httptest.NewRecorder()
+	err := server.awaitToolApproval(t.Context(), recorder, recorder, "chat-1", registry, "raw__echo", map[string]any{"text": "hi"})
+	if err == nil {
+		t.Fatal("an MCP tool ran in the app without being approved")
+	}
+	if !strings.Contains(recorder.Body.String(), "tool_approval") {
+		t.Errorf("the user was never asked: %q", recorder.Body.String())
+	}
+	if !strings.Contains(recorder.Body.String(), "raw__echo") {
+		t.Errorf("the prompt did not name the tool: %q", recorder.Body.String())
 	}
 }
