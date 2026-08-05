@@ -294,6 +294,12 @@ func (s *Server) Handler() http.Handler {
 	mux.Handle("POST /api/v1/chat/{id}", handle(s.chat))
 	mux.Handle("DELETE /api/v1/chat/{id}", handle(s.deleteChat))
 	mux.Handle("POST /api/v1/chat/{id}/approval", handle(s.chatApproval))
+
+	mux.Handle("GET /api/v1/mcp", handle(s.listMCPServers))
+	mux.Handle("POST /api/v1/mcp", handle(s.addMCPServer))
+	mux.Handle("PUT /api/v1/mcp/{name}", handle(s.updateMCPServer))
+	mux.Handle("DELETE /api/v1/mcp/{name}", handle(s.deleteMCPServer))
+	mux.Handle("POST /api/v1/mcp/{name}/approve", handle(s.approveMCPServer))
 	mux.Handle("POST /api/v1/create-chat", handle(s.createChat))
 	mux.Handle("PUT /api/v1/chat/{id}/rename", handle(s.renameChat))
 

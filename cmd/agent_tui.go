@@ -294,13 +294,15 @@ func agentMCPManager(ctx context.Context) *mcp.Manager {
 		fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m could not locate mcp approvals: %v\n", err)
 		return nil
 	}
-	approvals, err := mcp.LoadApprovals(approvalsPath)
-	if err != nil {
+	if _, err := mcp.LoadApprovals(approvalsPath); err != nil {
 		fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m %v\n", err)
 		return nil
 	}
 
-	manager := mcp.NewManager(mcp.Options{Approvals: approvals})
+	// Re-read on every question rather than snapshotted, so approving a server
+	// in another terminal takes effect on the next /mcp enable rather than
+	// requiring a restart.
+	manager := mcp.NewManager(mcp.Options{Approvals: mcp.ApprovalsFile(approvalsPath, nil)})
 	manager.Connect(ctx, cfg)
 	reportMCPStates(manager.States())
 	return manager

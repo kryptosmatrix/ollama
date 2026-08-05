@@ -615,3 +615,96 @@ export class BrowserStateData {
         this.url_to_page = source["url_to_page"];
     }
 }
+
+export class MCPTool {
+    name: string;
+    description: string;
+
+    constructor(source: any = {}) {
+        if ('string' === typeof source) source = JSON.parse(source);
+        this.name = source["name"];
+        this.description = source["description"];
+    }
+}
+export class MCPSkippedTool {
+    name: string;
+    reason: string;
+
+    constructor(source: any = {}) {
+        if ('string' === typeof source) source = JSON.parse(source);
+        this.name = source["name"];
+        this.reason = source["reason"];
+    }
+}
+export class MCPServer {
+    name: string;
+    status: string;
+    transport: string;
+    runs: string;
+    enabled: boolean;
+    approved: boolean;
+    changed?: boolean;
+    previouslyRan?: string;
+    error?: string;
+    tools?: MCPTool[];
+    skipped?: MCPSkippedTool[];
+
+    constructor(source: any = {}) {
+        if ('string' === typeof source) source = JSON.parse(source);
+        this.name = source["name"];
+        this.status = source["status"];
+        this.transport = source["transport"];
+        this.runs = source["runs"];
+        this.enabled = source["enabled"];
+        this.approved = source["approved"];
+        this.changed = source["changed"];
+        this.previouslyRan = source["previouslyRan"];
+        this.error = source["error"];
+        this.tools = this.convertValues(source["tools"], MCPTool);
+        this.skipped = this.convertValues(source["skipped"], MCPSkippedTool);
+    }
+
+	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	    if (!a) {
+	        return a;
+	    }
+	    if (Array.isArray(a)) {
+	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	    } else if ("object" === typeof a) {
+	        if (asMap) {
+	            for (const key of Object.keys(a)) {
+	                a[key] = new classs(a[key]);
+	            }
+	            return a;
+	        }
+	        return new classs(a);
+	    }
+	    return a;
+	}
+}
+export class MCPServersResponse {
+    servers: MCPServer[];
+
+    constructor(source: any = {}) {
+        if ('string' === typeof source) source = JSON.parse(source);
+        this.servers = this.convertValues(source["servers"], MCPServer);
+    }
+
+	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	    if (!a) {
+	        return a;
+	    }
+	    if (Array.isArray(a)) {
+	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	    } else if ("object" === typeof a) {
+	        if (asMap) {
+	            for (const key of Object.keys(a)) {
+	                a[key] = new classs(a[key]);
+	            }
+	            return a;
+	        }
+	        return new classs(a);
+	    }
+	    return a;
+	}
+}

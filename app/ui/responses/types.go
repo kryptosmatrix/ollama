@@ -160,3 +160,44 @@ type Page struct {
 	Links     map[int]string `json:"links,omitempty" ts_type:"Record<number, string>"`
 	FetchedAt time.Time      `json:"fetched_at"`
 }
+
+// MCPTool is one tool a connected MCP server is offering the model.
+type MCPTool struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+// MCPSkippedTool is a tool Ollama refused to offer, and why. These are shown
+// rather than swallowed: a user whose tool is missing needs to know it was
+// rejected rather than absent.
+type MCPSkippedTool struct {
+	Name   string `json:"name"`
+	Reason string `json:"reason"`
+}
+
+// MCPServer is one configured MCP server as the app presents it: what it would
+// run, whether Ollama may run it, and what it is currently offering.
+type MCPServer struct {
+	Name      string `json:"name"`
+	Status    string `json:"status"`
+	Transport string `json:"transport"`
+	// Runs is the command line or URL, shown verbatim. It is what the user
+	// reads before approving.
+	Runs    string `json:"runs"`
+	Enabled bool   `json:"enabled"`
+	// Approved reports whether this exact spec has been agreed to.
+	Approved bool `json:"approved"`
+	// Changed reports that the server was approved once but has been edited
+	// since, so what it would now run has never been agreed to.
+	Changed bool `json:"changed,omitempty"`
+	// PreviouslyRan is the command line that was approved, shown beside the
+	// current one so the change is visible rather than merely detected.
+	PreviouslyRan string           `json:"previouslyRan,omitempty"`
+	Error         string           `json:"error,omitempty"`
+	Tools         []MCPTool        `json:"tools,omitempty"`
+	Skipped       []MCPSkippedTool `json:"skipped,omitempty"`
+}
+
+type MCPServersResponse struct {
+	Servers []MCPServer `json:"servers"`
+}

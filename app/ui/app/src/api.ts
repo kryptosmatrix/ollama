@@ -9,6 +9,7 @@ import {
   DownloadEvent,
   ErrorEvent,
   InferenceComputeResponse,
+  MCPServer,
   ModelCapabilitiesResponse,
   Model,
   ChatRequest,
@@ -288,6 +289,82 @@ export async function respondToToolApproval(
   }
 }
 
+export interface AddMCPServerRequest {
+  name: string;
+  command?: string;
+  args?: string[];
+  env?: Record<string, string>;
+  url?: string;
+  headers?: Record<string, string>;
+}
+
+async function mcpRequest(
+  path: string,
+  init: RequestInit = {},
+): Promise<Response> {
+  const response = await fetch(`${API_BASE}/api/v1/mcp${path}`, init);
+  if (!response.ok) {
+    let detail = "";
+    try {
+      detail = (await response.text()).trim();
+    } catch {
+      detail = "";
+    }
+    throw new Error(detail || `Request failed: ${response.status}`);
+  }
+  return response;
+}
+
+export async function listMCPServers(): Promise<MCPServer[]> {
+  const response = await mcpRequest("");
+  const data = await response.json();
+  return (data.servers ?? []).map((server: unknown) => new MCPServer(server));
+}
+
+export async function addMCPServer(
+  request: AddMCPServerRequest,
+): Promise<void> {
+  await mcpRequest("", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+  });
+}
+
+export async function setMCPServerEnabled(
+  name: string,
+  enabled: boolean,
+): Promise<void> {
+  await mcpRequest(`/${encodeURIComponent(name)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ enabled }),
+  });
+}
+
+/**
+ * Approves a server to run.
+ *
+ * `runs` is the command line the page displayed. The server checks it against
+ * what is on disk and refuses if they differ, so a stale page or a
+ * configuration edited underneath cannot approve something the user never
+ * read.
+ */
+export async function approveMCPServer(
+  name: string,
+  runs: string,
+): Promise<void> {
+  await mcpRequest(`/${encodeURIComponent(name)}/approve`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ runs }),
+  });
+}
+
+export async function removeMCPServer(name: string): Promise<void> {
+  await mcpRequest(`/${encodeURIComponent(name)}`, { method: "DELETE" });
+}
+
 export async function getSettings(): Promise<{
   settings: Settings;
 }> {
@@ -449,7 +526,9 @@ export interface ModelRecommendationsResponse {
   recommendations: ModelRecommendation[];
 }
 
-export async function getModelRecommendations(): Promise<ModelRecommendation[]> {
+export async function getModelRecommendations(): Promise<
+  ModelRecommendation[]
+> {
   const response = await fetch(
     `${API_BASE}/api/experimental/model-recommendations`,
   );

@@ -546,13 +546,15 @@ func startMCPManager(ctx context.Context) *mcp.Manager {
 		slog.Warn("could not locate mcp approvals", "error", err)
 		return nil
 	}
-	approvals, err := mcp.LoadApprovals(approvalsPath)
-	if err != nil {
+	if _, err := mcp.LoadApprovals(approvalsPath); err != nil {
 		slog.Warn("could not read mcp approvals", "error", err)
 		return nil
 	}
 
-	manager := mcp.NewManager(mcp.Options{Approvals: approvals})
+	// The ledger is read on every question rather than snapshotted here,
+	// because a user can approve a server from the app while it is running and
+	// expects it to start.
+	manager := mcp.NewManager(mcp.Options{Approvals: mcp.ApprovalsFile(approvalsPath, slog.Default())})
 	manager.Connect(ctx, cfg)
 	for _, state := range manager.States() {
 		switch state.Status {

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"maps"
 	"os"
 	"path/filepath"
@@ -39,6 +40,40 @@ type ApprovalPolicy interface {
 type allowAll struct{}
 
 func (allowAll) Allows(*ServerSpec) bool { return true }
+
+// approvalsFile is an ApprovalPolicy that reads the ledger from disk on every
+// question rather than holding a snapshot.
+//
+// This matters because approvals change while Ollama is running: a user
+// approves a server from the app or from another terminal and expects it to
+// start. A manager built with a snapshot would answer from the ledger as it
+// stood at launch and refuse for ever, which looks exactly like the approval
+// not having been recorded.
+//
+// A ledger that cannot be read denies, which is the safe direction.
+type approvalsFile struct {
+	path   string
+	logger *slog.Logger
+}
+
+// ApprovalsFile returns a policy backed by the ledger at path, re-read on each
+// question. Pass it to Options.Approvals when approvals may change while the
+// process is running, which is every production caller.
+func ApprovalsFile(path string, logger *slog.Logger) ApprovalPolicy {
+	if logger == nil {
+		logger = slog.Default()
+	}
+	return &approvalsFile{path: path, logger: logger}
+}
+
+func (a *approvalsFile) Allows(spec *ServerSpec) bool {
+	ledger, err := LoadApprovals(a.path)
+	if err != nil {
+		a.logger.Warn("could not read mcp approvals; refusing to run any server", "path", a.path, "error", err)
+		return false
+	}
+	return ledger.Allows(spec)
+}
 
 // Approval is one recorded agreement to run a particular server.
 type Approval struct {
