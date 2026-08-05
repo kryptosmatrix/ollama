@@ -28,7 +28,14 @@ import { useNavigate } from "@tanstack/react-router";
 import { useSelectedModel } from "@/hooks/useSelectedModel";
 import { useUser } from "@/hooks/useUser";
 import { useHasVisionCapability } from "@/hooks/useModelCapabilities";
-import { Message } from "@/gotypes";
+import { Message, ChatEvent } from "@/gotypes";
+import { ToolApproval } from "./ToolApproval";
+import { respondToToolApproval } from "@/api";
+import {
+  pendingApprovalFromEvent,
+  type ApprovalDecision,
+  type PendingApproval,
+} from "@/utils/toolApproval";
 
 export default function Chat({ chatId }: { chatId: string }) {
   const queryClient = useQueryClient();
@@ -124,6 +131,33 @@ export default function Chat({ chatId }: { chatId: string }) {
     prevChatIdRef.current = chatId;
   }, [chatId, messages.length]);
 
+  // A tool call waiting on the user. The chat's streaming response is blocked
+  // while this is set, so it is cleared on an answer and whenever a run ends.
+  const [pendingApproval, setPendingApproval] =
+    useState<PendingApproval | null>(null);
+  const [approvalError, setApprovalError] = useState<string | null>(null);
+  const [isAnsweringApproval, setIsAnsweringApproval] = useState(false);
+
+  const answerApproval = async (decision: ApprovalDecision) => {
+    if (!pendingApproval) return;
+    setIsAnsweringApproval(true);
+    setApprovalError(null);
+    try {
+      await respondToToolApproval(
+        chatId,
+        pendingApproval.approvalId,
+        decision,
+      );
+      setPendingApproval(null);
+    } catch (err) {
+      setApprovalError(
+        err instanceof Error ? err.message : "Could not send the answer.",
+      );
+    } finally {
+      setIsAnsweringApproval(false);
+    }
+  };
+
   // Simplified submit handler - ChatForm handles all the attachment logic
   const handleChatFormSubmit = (
     message: string,
@@ -155,6 +189,11 @@ export default function Chat({ chatId }: { chatId: string }) {
       fileTools: options.fileTools,
       think: options.think,
       onChatEvent: (event) => {
+        const approval = pendingApprovalFromEvent(event as ChatEvent);
+        if (approval) {
+          setApprovalError(null);
+          setPendingApproval(approval);
+        }
         if (event.eventName === "chat_created" && event.chatId) {
           navigate({
             to: "/c/$chatId",
@@ -276,6 +315,14 @@ export default function Chat({ chatId }: { chatId: string }) {
               <div className="pb-2">
                 <DisplayLogin error={chatError} />
               </div>
+            )}
+            {pendingApproval && (
+              <ToolApproval
+                approval={pendingApproval}
+                onAnswer={answerApproval}
+                error={approvalError}
+                isAnswering={isAnsweringApproval}
+              />
             )}
             <ChatForm
               hasMessages={messages.length > 0}

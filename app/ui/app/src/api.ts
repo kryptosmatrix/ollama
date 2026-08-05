@@ -1,4 +1,8 @@
 import {
+  approvalRequestBody,
+  type ApprovalDecision,
+} from "@/utils/toolApproval";
+import {
   ChatResponse,
   ChatsResponse,
   ChatEvent,
@@ -254,6 +258,33 @@ export async function* sendMessage(
         yield new ChatEvent(event);
         break;
     }
+  }
+}
+
+/**
+ * Answers a tool call that is waiting for approval.
+ *
+ * The waiting call is inside a different, still-open response, so this request
+ * is the only way it ever resumes. A 409 means it is no longer waiting — it was
+ * already answered, it timed out, or the chat ended — which is reported rather
+ * than swallowed, because a button that silently did nothing would leave the
+ * user believing they had answered.
+ */
+export async function respondToToolApproval(
+  chatId: string,
+  approvalId: string,
+  decision: ApprovalDecision,
+): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/v1/chat/${chatId}/approval`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(approvalRequestBody(approvalId, decision)),
+  });
+  if (response.status === 409) {
+    throw new Error("That tool call is no longer waiting for an answer.");
+  }
+  if (!response.ok) {
+    throw new Error(`Failed to answer the approval: ${response.status}`);
   }
 }
 

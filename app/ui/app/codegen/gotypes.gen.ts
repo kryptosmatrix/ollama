@@ -324,7 +324,7 @@ export class ModelCapabilitiesResponse {
     }
 }
 export class ChatEvent {
-    eventName: "chat" | "thinking" | "assistant_with_tools" | "tool_call" | "tool" | "tool_result" | "done" | "chat_created";
+    eventName: "chat" | "thinking" | "assistant_with_tools" | "tool_call" | "tool" | "tool_result" | "tool_approval" | "done" | "chat_created";
     content?: string;
     thinking?: string;
     thinkingTimeStart?: Date | undefined;
@@ -335,6 +335,9 @@ export class ChatEvent {
     toolResult?: boolean;
     toolResultData?: any;
     chatId?: string;
+    approvalId?: string;
+    approvalScope?: string;
+    approvalArgs?: {[key: string]: any};
     toolState?: any;
 
     constructor(source: any = {}) {
@@ -350,6 +353,9 @@ export class ChatEvent {
         this.toolResult = source["toolResult"];
         this.toolResultData = source["toolResultData"];
         this.chatId = source["chatId"];
+        this.approvalId = source["approvalId"];
+        this.approvalScope = source["approvalScope"];
+        this.approvalArgs = source["approvalArgs"];
         this.toolState = source["toolState"];
     }
 
