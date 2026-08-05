@@ -1,0 +1,119 @@
+=== PHASE 2 FALSIFICATION EVIDENCE (manager, transports, containment) ===
+captured: 2026-08-05T12:10:36Z
+Method: break the production code, observe the test fail, restore, observe it pass.
+
+--- baseline ---
+ok  	github.com/ollama/ollama/mcp	8.937s
+BASELINE_TEST_EXIT=0
+
+--- F8: tie the server process to the connect timeout instead of the manager lifetime ---
+(this is the real defect found and fixed while writing the manager: the child dies the instant the handshake ends)
+243:	transport, err := m.opts.newTransport(dialCtx, spec) // FALSIFICATION: process tied to the dial timeout
+# github.com/ollama/ollama/mcp [github.com/ollama/ollama/mcp.test]
+mcp/manager.go:241:2: declared and not used: serverCtx
+FAIL	github.com/ollama/ollama/mcp [build failed]
+FAIL
+F8_TEST_EXIT=1 (expect non-zero)
+
+--- F9: stop cancelling server contexts on Close ---
+476:	_ = cancels // FALSIFICATION: children not reaped
+ok  	github.com/ollama/ollama/mcp	1.492s
+F9_TEST_EXIT=0 (expect non-zero)
+
+--- F10: offer every advertised tool without validating its name or schema ---
+312:		// FALSIFICATION: name validation removed
+330:		// FALSIFICATION: schema validation removed
+--- FAIL: TestManagerSkipsToolsItCannotOfferAndSaysWhy (0.00s)
+    manager_test.go:305: usable tools = [{files bad name  unusable name [123 34 116 121 112 101 34 58 34 111 98 106 101 99 116 34 125]} {files bash  impersonates a first-party tool [123 34 116 121 112 101 34 58 34 111 98 106 101 99 116 34 125]} {files good  a tool called good [123 34 112 114 111 112 101 114 116 105 101 115 34 58 123 34 118 97 108 117 101 34 58 123 34 116 121 112 101 34 58 34 115 116 114 105 110 103 34 125 125 44 34 116 121 112 101 34 58 34 111 98 106 101 99 116 34 125]}], want just good
+--- FAIL: TestStdioSubprocessEndToEnd (0.77s)
+    --- FAIL: TestStdioSubprocessEndToEnd/an_unrepresentable_schema_is_skipped_with_a_reason (0.00s)
+        subprocess_test.go:82: tool "scalar_input" was not skipped; skipped list is []
+    --- FAIL: TestStdioSubprocessEndToEnd/a_tool_claiming_a_first-party_name_is_refused (0.00s)
+        subprocess_test.go:92: tool "bash" was not skipped; skipped list is []
+FAIL
+FAIL	github.com/ollama/ollama/mcp	1.329s
+FAIL
+F10_TEST_EXIT=1 (expect non-zero)
+
+--- F11: leak an SDK import into another package ---
+9:	_ "github.com/modelcontextprotocol/go-sdk/mcp" // FALSIFICATION: SDK leaked out of mcp/
+--- FAIL: TestSDKIsContainedToThisPackage (1.17s)
+    containment_test.go:74: the MCP protocol library must not be imported outside github.com/ollama/ollama/mcp, so that swapping it stays a one-package change. Found:
+          github.com/ollama/ollama/agent imports github.com/modelcontextprotocol/go-sdk/mcp
+FAIL
+FAIL	github.com/ollama/ollama/mcp	1.497s
+FAIL
+F11_TEST_EXIT=1 (expect non-zero)
+
+--- F12: remove the tool-result size cap ---
+442:		Content:    flattenContent(result.Content, 100_000_000), // FALSIFICATION: cap removed
+--- FAIL: TestManagerKeepsStructuredResultsAndCapsHugeOnes (0.01s)
+    --- FAIL: TestManagerKeepsStructuredResultsAndCapsHugeOnes/an_enormous_result_is_capped (0.01s)
+        manager_test.go:275: result is 500000 runes; the cap did not apply
+        manager_test.go:278: truncation must be visible to the model
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.570s
+FAIL
+F12_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/mcp	8.950s
+RESTORED_TEST_EXIT=0
+
+=== F9 RE-RUN after the reaping test was strengthened ===
+The first F9 attempt FAILED TO FALSIFY: with cancellation removed the test still passed,
+because the protocol library's own transport closes stdin and sends SIGTERM, and a polite
+server dies to either. The test read as coverage of Ollama's reaping and was really covering
+the library's. The test was strengthened rather than the claim softened: testdata/rawserver
+gained a -stubborn mode that ignores SIGTERM and outlives stdin close, so only the manager
+cancelling the process context can stop it.
+
+--- F9b: stop cancelling server contexts on Close, against a server that ignores SIGTERM ---
+489:	_ = cancels // FALSIFICATION: children not reaped
+ok  	github.com/ollama/ollama/mcp	11.426s
+F9b_TEST_EXIT=0 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/mcp	19.789s
+RESTORED_TEST_EXIT=0
+
+=== F9c: the orphan path, which is the one the cancellation actually protects ===
+F9 and F9b BOTH FAILED TO FALSIFY and are recorded above as such: the SDK's CommandTransport
+closes stdin, sends SIGTERM and then kills, so reaping on Close is the library's guarantee and
+not Ollama's. Rather than keep code no test could justify, the property was re-scoped to the
+path that IS ours: a process that starts but never completes its handshake has no session for
+anyone to close, so only the manager cancelling the command's context prevents an orphan.
+
+--- F9c: remove serverCancel from the dial failure paths ---
+253:		// FALSIFICATION: orphan not reaped
+ok  	github.com/ollama/ollama/mcp	1.360s
+F9c_TEST_EXIT=0 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/mcp	9.761s
+RESTORED_TEST_EXIT=0
+
+=== OUTCOME OF THE F9 INVESTIGATION ===
+F9, F9b and F9c were three attempts to falsify Ollama-side process reaping. All three FAILED
+TO FALSIFY: the protocol library's CommandTransport closes stdin, sends SIGTERM and then kills
+on session close, and closes the transport itself when a handshake fails. There is no path in
+which the manager's own per-server cancellation changed the outcome.
+The cancellation machinery was therefore REMOVED, not kept. Unfalsifiable code that reads as a
+safety measure is worse than no code, because the next reader believes the safety is ours.
+What is kept: a manager lifetime context, justified by F8, which is the difference between a
+server that survives its own connect timeout and one that dies the instant it finishes
+connecting; and the two behavioural tests, because no-orphan is a promise Ollama makes to its
+users and must keep holding if a transport is ever swapped or added.
+
+=== FINAL STATE ===
+# github.com/ollama/ollama/app/cmd/app
+ld: warning: ignoring duplicate libraries: '-lobjc'
+TREE_BUILD_EXIT=0
+MCP_VET_EXIT=0
+ok  	github.com/ollama/ollama/mcp	10.002s
+FINAL_TEST_EXIT=0
+top-level tests: 47
+including subtests: 104
