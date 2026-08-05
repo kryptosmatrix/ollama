@@ -135,6 +135,8 @@ mcp/                                  NEW — shared core, no dependency on agen
   keystore_windows.go  DPAPI-backed token storage
   keystore_other.go    build-tagged fallback: file-backed 0600, with a stated warning
   keystore_test.go
+  registry.go      official MCP Registry client: search, versions, detail, package->command resolution
+  registry_test.go
 
 agent/tools/mcp.go            NEW — adapter: mcp.Tool -> agent.Tool (+ ApprovalRequired, ScopedTool)
 agent/tools/mcp_test.go
@@ -317,6 +319,17 @@ A new `/mcp` route and page component, plus the sidebar entry after Launch with 
 
 Proof: Vitest coverage of the list / add / edit / remove / enable flows against a mocked API; a test asserting the sidebar's active row follows the route rather than `currentChatId`; Storybook entries for connected, connecting, failed, needs-approval, needs-sign-in and empty states; and a manual run of the packaged app with a real local MCP server, screenshotted.
 
+### Phase 4b — Registry browse and install *(ruling §8.4)*
+
+`mcp/registry.go` — a typed client for `/v0/servers` with search, cursor pagination, version listing and detail; package-to-command resolution per `registryType`; the three routes of §8.2; and the browse surface in the page with its search field, entry cards showing publisher namespace and repository, the not-vetted notice, and the install confirmation that shows the resolved command line verbatim.
+
+Proof:
+- Client tests against **recorded registry fixtures** (committed JSON, not live network) covering pagination via `nextCursor`, empty results, a malformed entry, and an entry with both `packages` and `remotes`.
+- A resolution test per `registryType` asserting the exact argv produced, including a case where resolution is impossible and the entry must be shown as un-installable rather than guessed at.
+- A test asserting an installed entry lands in `mcp.json` **disabled**, and a test asserting no code path enables a server as part of install.
+- A `fileSha256` mismatch test asserting a hard failure.
+- An offline test asserting the manager half of the page still lists and connects configured servers when the registry is unreachable.
+
 ### Phase 5 — Documentation, cross-substrate review, closeout
 
 `docs/mcp.mdx`; a Codex review of the whole diff (different substrate, per KANON 19 and the union-not-count lesson — a second Claude is not a second instrument); series closeout reconciling every claim in this document against the live tree; retro entries.
@@ -357,7 +370,13 @@ DELETE /api/v1/mcp/{name}          remove
 POST   /api/v1/mcp/{name}/test        connect once and report result without persisting enablement
 POST   /api/v1/mcp/{name}/connect     begin OAuth sign-in (opens the system browser)
 POST   /api/v1/mcp/{name}/disconnect  revoke tokens and clear the keystore entry
+
+GET    /api/v1/mcp/registry           browse/search the official registry (search, cursor, limit)
+GET    /api/v1/mcp/registry/{name}    entry detail incl. versions, packages, remotes
+POST   /api/v1/mcp/registry/{name}/resolve  return the exact command line an install would write
 ```
+
+The registry is reached through the Go side rather than from the WebView directly, so timeouts, caching, offline behaviour and the user-agent stay under our control and the page keeps working with no network. `resolve` exists so the UI can show the verbatim command line before the user commits (§8.4) without duplicating resolution logic in TypeScript.
 
 Sign-in is always initiated by a user gesture in this UI. There is no path by which a model, a tool result, or a config file can cause a browser to open.
 
@@ -365,21 +384,33 @@ Sign-in is always initiated by a user gesture in this UI. There is no path by wh
 
 The page is a list of configured servers, each row carrying name, transport summary (the command line or the host), connection state, tool count, and a disclosure that reveals the server's advertised tools with their descriptions. Primary action is *Add server*; per-row actions are enable/disable, sign in/out for OAuth servers, edit, and remove. Empty state explains what an MCP server is and offers both add paths (local command, remote URL) plus paste-a-JSON-block.
 
-### 8.4 Open: manager, or storefront? *(chip raised 2026-08-05)*
+### 8.4 Storefront — **RULED 2026-08-05: manager + the official MCP Registry**
 
-The chosen icon is a shopfront, which reads as *browse and get* rather than *configure what you already have*. Three readings, and they are different features:
+The page is both a manager (§8.3) and a browse-and-install surface over `registry.modelcontextprotocol.io`. The icon is honest.
 
-1. **Manager only** — the page lists and configures the servers the user has added. The icon is decoration. Smallest, and it is what §8.3 describes.
-2. **Manager + curated catalogue** — Ollama ships a small hand-picked list of known-good servers with one-click add. Requires a catalogue source we own and maintain, and it makes Ollama an implicit endorser of third-party code.
-3. **Manager + the official MCP Registry** — browse and install from `registry.modelcontextprotocol.io`, whose `/v0/servers` API is live and returns name, title, description, version and remotes per entry. Hardest and most thorough: adds a network-dependent browse surface, search, version pinning, and a provenance story for entries Ollama did not vet. It is also the option that makes the storefront icon honest.
+Registry API as read from its OpenAPI document on 2026-08-05 (`/v0` and `/v0.1` are both served):
 
-Whichever is ruled, the install path must land in the same place: a registry entry becomes an ordinary `ServerSpec` in `~/.ollama/mcp.json`, disabled until the user enables it (§6.1). A catalogue must never be able to enable a server by itself.
+- `GET /v0/servers` — query params `search` (substring on name), `cursor`, `limit` (default 30, max 100), `version` (`latest` or exact), `updated_since` (RFC3339), `include_deleted`. Envelope: `{ servers: [...], metadata: { count, nextCursor? } }`.
+- `GET /v0/servers/{serverName}/versions` and `.../versions/{version}` — version list and pinned detail.
+- Entry shape: reverse-DNS `name` (e.g. `io.github.user/weather`), `description`, `title`, semver `version`, `repository`, `websiteUrl`, `icons`, and two mutually-informative arrays — `packages` (each with `registryType` of npm/pypi/cargo/oci/nuget/mcpb, `identifier`, `runtimeArguments`, `packageArguments`, optional `fileSha256`) and `remotes` (each with `type` of stdio/streamable-http/sse, URL, headers, variables).
+
+Install semantics, which is where the security lives:
+
+- A registry entry becomes an ordinary `ServerSpec` in `~/.ollama/mcp.json`, **disabled**, exactly as if the user had typed it (§6.1). The registry never enables anything.
+- A `packages` entry is resolved into a concrete command line — `npx -y <identifier>`, `uvx <identifier>`, `docker run ...` — and that **fully resolved command line is shown verbatim for the user to read before the add is committed**. Installing from a directory must never be the first time a user sees what will run on their machine.
+- Ollama runs the command; it does not separately download, unpack or execute anything on the registry's say-so. Where `fileSha256` is present it is verified and a mismatch is a hard failure.
+- `variables` declared by an entry (API keys, account ids) are collected in the add form and stored as `${env:VAR}` indirection, never as literals (§6.4).
+- Version is pinned at install time, recorded in the spec, and an available upgrade is surfaced rather than applied.
+
+### 8.5 What the registry is not
+
+It is an open-publish metadata registry, not a vetting service. A listing is a claim by its publisher, and Ollama presenting it is not endorsement. The UI says so in the browse surface, shows the publisher namespace and repository URL on every entry, and does not rank by anything that could be read as a recommendation. This is not decoration: an install flow that reads as curation while surfacing arbitrary published code is the failure mode worth designing against.
 
 ---
 
 ## 9. Non-goals for v1
 
-Named so they are decisions rather than omissions: MCP *resources* and *prompts* (only `tools` in v1); MCP servers packaged and distributed through the Ollama registry (upstream's `server/mcp.go` direction — deferred, not rejected); sampling / elicitation callbacks (server-initiated model calls); Ollama acting as an MCP *server*; and per-chat server selection (v1 scope is global enable/disable).
+Named so they are decisions rather than omissions: MCP *resources* and *prompts* (only `tools` in v1); MCP servers packaged and distributed through the *Ollama* registry (upstream's `server/mcp.go` direction — deferred, not rejected, and now partly displaced by the official registry ruling in §8.4); publishing *to* the official MCP Registry from Ollama; sampling / elicitation callbacks (server-initiated model calls); Ollama acting as an MCP *server*; and per-chat server selection (v1 scope is global enable/disable).
 
 ---
 
@@ -389,7 +420,9 @@ Named so they are decisions rather than omissions: MCP *resources* and *prompts*
 - **SDK churn.** v1.7.0 landed 2026-07-27 and the spec revised 2026-07-28. Pin exactly; treat an SDK bump as its own reviewed change. The §5.1 containment rule limits the blast radius to one package.
 - **OAuth is the schedule risk.** Ruled in (B3) and sequenced last (Phase 3d) precisely so it cannot hold the rest hostage. The signal to watch is the SDK's experimental OAuth surface: if we find ourselves rewriting more than roughly half of it, that is worth reporting rather than absorbing.
 - **Dependency versus upstream (D2).** The §5.1 containment test is the mitigation; if an upstream maintainer refuses the dependency, the swap is one package, not a rewrite.
-- **The invisible half.** Most of the work here — approval, poisoning defences, process lifecycle — is not visible in the mock-up. The completion signal for this feature must not be "the settings page looks like the picture".
+- **The invisible half.** Most of the work here — approval, poisoning defences, process lifecycle — is not visible in the mock-up. The completion signal for this feature must not be "the page looks like the picture".
+- **The registry turns a config page into a distribution channel.** Browse-and-install (§8.4) means a network response can produce a command line that runs on the user's machine. The mitigations are stated — disabled on install, verbatim command shown before commit, hash verified where offered, no ranking that reads as endorsement — and they are the part of Phase 4b that must not be trimmed if the phase runs long. If something has to give there, it is the browse polish, never the install gate.
+- **Registry API churn.** It is a `/v0` API with a `/v0.1` alongside it. Fixtures are committed so our tests do not depend on the live service, and the client tolerates unknown fields rather than failing closed on them.
 
 ---
 
