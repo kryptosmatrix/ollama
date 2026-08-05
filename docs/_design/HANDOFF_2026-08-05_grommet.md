@@ -3,7 +3,7 @@
 From: Grommet (Claude Opus 5)
 Date: 2026-08-05
 Branch: `mcp/server-support`, pushed to `origin` (kryptosmatrix/ollama)
-Head at handoff: `f12a2d6a`
+Head at handoff: `0506f8e7`
 
 ## Read this first
 
@@ -20,7 +20,8 @@ Head at handoff: `f12a2d6a`
 | 2 — manager and transports | **DONE** (`594f6104`) |
 | 2b — OAuth 2.1 | not started |
 | 3a — CLI surface | **DONE** (`12ea7760`, `09a954cb`, `7e533582`, `f12a2d6a`) |
-| 3b/3c/3d — app surfaces | not started |
+| 3b — app approval path | **BACKEND DONE** (`0506f8e7`) — React side outstanding |
+| 3c/3d — app surfaces | not started |
 | 4 / 4b — MCP Servers page, registry browse | not started |
 | 5 — docs, cross-substrate review, closeout | not started |
 
@@ -54,20 +55,26 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 **`go test ./... | tail` reports the exit code of `tail`.** Redirect to a file and echo `$?` on its own.
 
+**`app/updater`'s `TestAutoUpdateDisabledSkipsDownload` is flaky.** It fails roughly one full app-tree run in three and always passes when that package is run alone — proven against a clean tree with this work stashed. It is not MCP's. Do not chase it, and do not read a single green app-tree run as proof of anything.
+
 ## What the next session should do
 
-**Phase 3b: the desktop app's missing approval path.** This is the largest remaining piece and none of it is visible in the mock-up. `app/tools.Tool` has no approval hook at all and `app/ui/ui.go:1030` executes whatever the model names, so MCP tools must not be registered there until it exists. Build `app/tools/approval.go` mirroring `agent/approval.go`'s model — per-scope grants, an "always allow this tool from this server" state, blanket allow only as an explicit act — surfaced over the existing SSE channel as a new `tool_approval` event with `POST /api/v1/chat/{id}/approval` carrying the answer. Existing first-party tools keep their current behaviour so nothing regresses.
+**Finish 3b, then 3c.** Two pieces, in this order:
 
-Then 3c (app registration, settings API, schema v17) and 4/4b (the MCP Servers page and registry browse). Plan §7 has the proof obligations for each; §8 has the UI contract and the mock-up's corrections.
+1. **The React approval prompt.** The backend is complete and proven; a user still cannot answer. Regenerate `app/ui/app/codegen/gotypes.gen.ts` (the `tscriptify` generate directive at `app/ui/ui.go:39`) so the new `tool_approval` event and its `approvalId` / `approvalScope` / `approvalArgs` fields reach TypeScript, then render the prompt in the message stream and POST the answer to `/api/v1/chat/{id}/approval` with `{approvalId, allow, remember, rememberAll}`. Do **not** hand-edit the generated file.
+2. **3c: register MCP tools in the app.** `app/tools/mcp.go` adapting `mcp.Tool` to `app/tools.Tool` plus `ApprovalRequired` and `ScopedTool` (mirror `agent/tools/mcp.go`), a process-lifetime manager in `app/ui/ui.go` — **not** per chat request, or every message restarts the subprocesses — the routes in plan §8.2, `responses/types.go` additions, and schema v17 for `mcp_server_state`.
 
-Reuse rather than reinvent: `mcp.Config`, `mcp.Approvals`, `ServerState.Skipped`, `ServerState.ToolsDigest`, and the two-closure pattern used for the TUI (`MCPServers` / `SetMCPEnabled` in `cmd/tui/chat/chat.go:60`) — hand the surface narrow accessors, never the manager, so it cannot close a manager it does not own.
+**Until the React prompt exists, do not register MCP tools in the app.** The gate would block every call for ten minutes and then refuse it, which is safe but looks exactly like a hang.
+
+Then Phase 4 (the MCP Servers page) and 4b (registry browse).
 
 ## What must not soften
 
 - Tool descriptions from a server are untrusted input that lands in the model's prompt. Sanitised and capped in `mcp/tools.go`; keep it that way when the manager starts feeding real ones through.
 - Schema conversion is lossy and says so in the description. Do not "simplify" that into dropping constraints.
 - `mcp.json` is a code-execution config: `0600` in a `0700` directory, no shell, credentials only as `${env:NAME}`.
-- The desktop app has **no approval system at all** (`app/ui/ui.go:1030` executes whatever the model names). Phase 3b builds one. Registering MCP tools in the app before it exists would be shipping unreviewed remote code execution.
+- The desktop app's approval path now exists but **has no user interface**. Registering MCP tools in the app before the React prompt lands would gate every call on a question nobody can answer.
+- Everything about the approval wait fails safe: a timeout, a cancelled context and a failed notify all refuse the call. Do not "simplify" any of those into allowing it.
 - `/mcp` must never grow an approve verb. Approval needs the command line shown verbatim and a deliberate answer; a chat input line cannot give either. There is a test guarding the decision, not the implementation.
 - If Phase 4b runs long, the browse polish gives way; the install gate — resolved command line shown verbatim, landed disabled, hash verified — never does.
 
@@ -81,4 +88,5 @@ Reuse rather than reinvent: `mcp.Config`, `mcp.Approvals`, `ServerState.Skipped`
 - `docs/_design/proof/phase3a-falsification.txt` — the harness adapter and the CLI entry point, including two falsifiers that initially passed and the test repairs they forced.
 - `docs/_design/proof/phase3a-commands-falsification.txt` — the `ollama mcp` commands, five protections including root-command registration.
 - `docs/_design/proof/phase3a-slash-falsification.txt` — `/mcp`, five protections including a disabled server left running.
+- `docs/_design/proof/phase3b-falsification.txt` — the app approval rendezvous, six protections, plus the attribution of a pre-existing flaky test.
 - `docs/_design/proof/phase2-falsification.txt` — the manager, including three attempts that **failed to falsify** and the removal that followed. Read that section before adding any safety mechanism to this package: the protocol library already reaps processes, and code written to do it again cannot be tested.

@@ -346,11 +346,17 @@ Wiring it exposed a defect in the manager, now fixed: `Connect` marked a newly-d
 
 **Phase 3a is complete.**
 
-### Phase 3b — Desktop app approval path *(prerequisite for 3c)*
+### Phase 3b — Desktop app approval path — **BACKEND DONE 2026-08-06** (`0506f8e7`)
 
-`app/tools/approval.go`, the `tool_approval` SSE event, `POST /api/v1/chat/{id}/approval`, persistence of per-scope grants, and the frontend approval affordance. Existing first-party tools keep their current behaviour (no approval required) so nothing regresses.
+Delivered: `app/tools/approval.go` (the rendezvous registry, per-chat state, the two capability interfaces), the `tool_approval` SSE event in `responses.ChatEvent`, `POST /api/v1/chat/{id}/approval`, the gate in the streaming tool loop, cancellation on chat delete, and construction in `app/cmd/app/app.go`.
 
-Proof: an `app/ui` handler test asserting a tool marked as requiring approval does not execute until an approval arrives, and does execute after; and that a denial produces a tool-error message rather than a hang.
+The design point worth keeping: the two halves live in **different HTTP requests** — the call blocks inside an open streaming response, the answer arrives on a separate POST — so everything about the wait is written to fail safe. It ends on an answer, the caller's context, or a ten-minute timeout, and the last two refuse. Every exit removes the pending entry so a stale answer cannot resolve a request nobody is waiting on; the answer channel is buffered so resolving never blocks; `Resolve` removes the entry itself so a second answer is refused rather than racing the first; and an approval identifier carries its chat, so one conversation cannot answer another's question.
+
+Approvals are per chat and in memory. "Remember" grants one scope, "remember all" grants everything and is set by nothing but an explicit user act, and a refusal grants neither even when the flags are present. Tools that do not implement `ApprovalRequired` are never gated, so the first-party tools are untouched.
+
+Proof in `docs/_design/proof/phase3b-falsification.txt`: 29 tests including a full round trip, plus refusal, cross-chat refusal, timeout, cancellation, out-of-order concurrent answers and no-leak assertions. Six protections falsified.
+
+**Not done: the React side** that renders the prompt and posts the answer. Until it lands a user cannot answer, so **no MCP tool may be registered in the app yet** — the gate would refuse every call at the ten-minute timeout. That, plus regenerating `gotypes.gen.ts` for the new event fields, is the first task of Phase 3c.
 
 ### Phase 3c — Desktop app MCP registration and settings API
 
