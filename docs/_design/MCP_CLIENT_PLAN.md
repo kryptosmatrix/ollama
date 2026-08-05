@@ -268,15 +268,42 @@ Go 1.26.5 and CMake 4.4.2 installed via Homebrew. Baseline captured at commit `a
 
 **The constraint that follows, and it is load-bearing.** `ChatSidebar.tsx` is a file this feature must edit (§8.0) and it is both lint-dirty and format-dirty today. Running `prettier --write` on it would reformat the entire file and bury a three-line change in a hundred-line diff. So: **new files must be lint-clean and prettier-clean; existing files are edited by hand in their surrounding style and never reformatted wholesale.** The completion test for lint is "no new problems against the recorded baseline count", not "zero problems".
 
-### Phase 1 — `mcp/config.go`: the config file
+### Phase 1 — `mcp/config.go`: the config file — **DONE 2026-08-05** (`f984d4ec`)
 
-`ServerSpec` (name, transport `stdio|http`, command, args, env, url, headers, enabled, trusted), `Config{MCPServers map[string]ServerSpec}`, load/save with atomic write via `cmd/internal/fileutil`, `0600` perms, validation (name charset, mutually exclusive transport fields, `${env:VAR}` credential indirection, rejection of literal secrets), and merge semantics with `$OLLAMA_MCP_CONFIG` override.
+Delivered as specified, with three corrections to the plan discovered in the writing:
 
-Proof: table tests over malformed configs; a test asserting a literal `Authorization: Bearer sk-...` value is **rejected**; a test asserting file mode is `0600` after save; a round-trip test proving an unknown future field survives save (forward-compat).
+- **It cannot use `cmd/internal/fileutil`.** Go's `internal` rule puts that package out of reach of a top-level `mcp/`. Moving it to `internal/fileutil` would touch ten files across `cmd/` and enlarge an upstream-aimed diff, so `mcp/` writes atomically itself (temp file, `Chmod(0600)`, sync, rename) into a `0700` directory.
+- **`Load` does not fail on a bad server.** It fails only when the file cannot be read or parsed; per-server faults come back from `Problems()` keyed by name, so one malformed paste cannot make every other server unreachable. Callers must not connect a server that appears in `Problems()`.
+- **Unknown fields are preserved** at both the top level and inside a server object, so a config written by a newer Ollama or another client is not stripped on save.
 
-### Phase 2 — `mcp/` core: manager, transports, schema conversion
+Config path resolves `OLLAMA_MCP_CONFIG`, then `XDG_CONFIG_HOME`, then `~/.ollama/mcp.json`, mirroring `agent.SkillsDir()`.
 
-`Manager` connects N servers concurrently with per-server timeout, records capabilities, caches `tools/list`, exposes `Tools()` and `Call(ctx, server, tool, args)`, retries with backoff, and `Close()` reaps every child process. Schema conversion (`tools.go`) implements the §2.4 policy: representable keywords map through; unrepresentable constraints are **appended to the tool description in a machine-parseable constraints block** rather than dropped silently, so the model still sees them; a tool whose schema cannot be represented at all is skipped with a visible warning rather than offered broken. Namespacing and collision rules in `names.go`.
+Proof in `docs/_design/proof/phase1-falsification.txt`: 15 tests, then file mode weakened to `0644`, the literal-credential check removed, and unknown-field preservation disabled — each observed to fail the test that catches it, then restored byte-identical.
+
+### Phase 1b — the approval ledger *(designed 2026-08-05, not yet built)*
+
+Writing Phase 1 exposed a flaw in §6.1 as originally drafted. "Servers are disabled on first sight" cannot be expressed through the `disabled` field: every other MCP client treats absent-`disabled` as enabled, so inverting that default would break the paste-a-config-block flow that makes the feature usable, and would surprise anyone hand-editing the file.
+
+The mechanism that achieves the same protection without fighting the convention is a **separate approval ledger** at `~/.ollama/mcp-approvals.json`, mode `0600`:
+
+- Keyed by server name, storing a SHA-256 over the spec's executable surface — command, args, resolved transport, and URL. Not over the whole spec: changing a description or a non-executable field should not demand re-approval.
+- A server whose current spec hash is absent from the ledger is **listed but never connected**, whatever `disabled` says.
+- Adding a server through Ollama's own UI or CLI records the hash in the same action, so the ordinary path has no extra step.
+- A spec edited underneath Ollama — by hand, by another tool, or by malware — produces a hash mismatch and returns to needing approval. This is the same mechanism as the tool-description change detection in §6.2, applied to the command line instead of the tool list.
+
+This belongs before Phase 3a, since it is what makes registering MCP tools in a surface safe.
+
+### Phase 2a — namespacing and schema conversion — **DONE 2026-08-05** (`7dbec4fa`)
+
+`mcp/names.go` and `mcp/tools.go`, both written without the SDK: `mcp.Tool` is our own type, so the conversion layer is testable before any protocol code exists and the §5.1 containment rule is satisfied by construction rather than by discipline.
+
+Two additions to what the plan specified. Local `$ref` resolution against `$defs` and `definitions` is implemented, because pydantic and zod emit that shape and most real MCP servers are built on one of them — without it their tools arrive untyped and unusable. Remote `$ref`s are refused and reported, since a tool definition must never cause a network fetch, and cyclic references degrade one property rather than hanging or losing the tool.
+
+Proof in `docs/_design/proof/phase2a-falsification.txt`: package now 29 tests (74 with subtests); control-character stripping, the lost-constraint note, sorted iteration and the reserved-name check each broken and observed to fail, then restored byte-identical.
+
+### Phase 2 — `mcp/` core: manager and transports *(next)*
+
+`Manager` connects N servers concurrently with per-server timeout, records capabilities, caches `tools/list`, exposes `Tools()` and `Call(ctx, server, tool, args)`, retries with backoff, and `Close()` reaps every child process. This is the first phase that adds the SDK dependency (`go get github.com/modelcontextprotocol/go-sdk@v1.7.0`), and it must land the §5.1 containment test in the same commit. Schema conversion and namespacing are already done (Phase 2a).
 
 Proof (this is the phase where a facade is easiest and least visible):
 - An **in-process fake MCP server** (`fake_test.go`) that speaks real JSON-RPC over an in-memory pipe: initialise, list tools, call a tool, return an error, hang past timeout, close its pipe mid-call, and advertise a changed tool list on reconnect. Every manager behaviour is proven against it.
