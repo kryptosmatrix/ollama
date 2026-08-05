@@ -3,7 +3,7 @@
 From: Grommet (Claude Opus 5)
 Date: 2026-08-05
 Branch: `mcp/server-support`, pushed to `origin` (kryptosmatrix/ollama)
-Head at handoff: `7b6bfc76`
+Head at handoff: `273c19bd`
 
 ## Read this first
 
@@ -23,14 +23,15 @@ Head at handoff: `7b6bfc76`
 | 3b — app approval path | **DONE** (`0506f8e7`, `e7a05864`) |
 | 3c — app MCP registration | **DONE** (`7b6bfc76`) |
 | 3d — OAuth in the surfaces | not started |
-| 4 / 4b — MCP Servers page, registry browse | not started |
+| 4 — MCP Servers page | **DONE** (`273c19bd`) |
+| 4b — registry browse | not started |
 | 5 — docs, cross-substrate review, closeout | not started |
 
 The whole tree builds and vets clean; `mcp`, `agent/...` and `cmd` all pass. MCP is live in `ollama` agent mode: configured, approved servers are connected at start-up and their tools are offered to the model behind per-tool approval.
 
 **The feature is now usable end to end from the terminal.** `ollama mcp add|list|remove|enable|disable|approve|revoke` exists and is registered on the root command; `ollama` in agent mode connects approved servers and offers their tools behind per-tool approval.
 
-`/mcp` inside the agent TUI lists servers and toggles them; it deliberately cannot approve one. **Phases 3a, 3b and 3c are complete.** MCP works end to end in both surfaces: the terminal agent and the desktop app both connect approved servers and offer their tools to the model behind per-tool approval. What the desktop app still lacks is the **MCP Servers page** — there is no way to see or manage servers from the app itself; that is Phase 4, and everything it needs already exists behind `ollama mcp`.
+`/mcp` inside the agent TUI lists servers and toggles them; it deliberately cannot approve one. **Phases 3a, 3b, 3c and 4 are complete.** MCP works end to end in both surfaces, and the desktop app now has its MCP Servers page: a top-level sidebar destination that lists, approves, switches, removes and adds servers. What remains is **4b, browse-and-install from the official MCP Registry**, and **3d, OAuth**.
 
 ## Operator rulings in force
 
@@ -60,11 +61,11 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 ## What the next session should do
 
-**Phase 4: the MCP Servers page.** The mock-up's corrections are in plan §8.0 — it is a top-level sidebar destination, not a Settings tab, inserted after Launch in `ChatSidebar.tsx` with the storefront icon, on a new `/mcp` route, and the sidebar's active highlight has to become route-derived because it is currently computed from `currentChatId`. §8.1–8.3 carry the entities, the endpoints and the page shape.
+**Phase 4b: browse and install from the official MCP Registry** (plan §8.4). The registry API is recorded there as read from its OpenAPI document; `mcp/registry.go` does not exist yet. The install gate is the part that must not be trimmed if the phase runs long: the resolved command line shown verbatim before the add is committed, the entry landing disabled and unapproved, `fileSha256` verified where offered, declared variables stored as `${env:VAR}` references, and no ranking that reads as endorsement. The page already has the approval flow to hang it on — an installed entry becomes an ordinary server that must then be read and approved.
 
-The backend for it is mostly done already: `mcp.Config`, `mcp.Approvals`, `Manager.States()` with per-server status, skipped tools and the tools digest. What is missing is the app-side routes in §8.2 and their response types in `app/ui/responses/types.go` (regenerate with `tscriptify`, which is installed now), plus schema v17 with `migrateV16ToV17` for `mcp_server_state` — and `app/store/schema.sql` must not be edited, it is a frozen migration fixture.
+**Then Phase 3d: OAuth in the surfaces** (plan §6.4 and Phase 2b). This is the largest remaining piece and was deliberately sequenced last.
 
-Then Phase 4b (registry browse, §8.4 — the install gate is the part that must not be trimmed) and Phase 3d (OAuth in both surfaces, sequenced last by design).
+Not built, and deliberately: schema v17 / `mcp_server_state`. The plan proposed it for the trusted flag and the last-seen tools digest, but neither has a consumer yet — approvals live in the ledger and the digest is computed live. Adding an unused table would be a facade. Build it when something reads it.
 
 ## What must not soften
 
@@ -75,6 +76,8 @@ Then Phase 4b (registry browse, §8.4 — the install gate is the part that must
 - Everything about the approval wait fails safe: a timeout, a cancelled context and a failed notify all refuse the call. Do not "simplify" any of those into allowing it.
 - `/mcp` must never grow an approve verb. Approval needs the command line shown verbatim and a deliberate answer; a chat input line cannot give either. There is a test guarding the decision, not the implementation.
 - If Phase 4b runs long, the browse polish gives way; the install gate — resolved command line shown verbatim, landed disabled, hash verified — never does.
+- The approval policy must keep reading the ledger from disk on every question (`mcp.ApprovalsFile`). A snapshot means approving a server can never start it, and the symptom is indistinguishable from the approval not having been recorded.
+- Approving from the page must keep sending back the command line it displayed. Without that check, a stale page or a configuration edited underneath approves something the user never read.
 
 ## Proof artefacts
 
@@ -89,4 +92,5 @@ Then Phase 4b (registry browse, §8.4 — the install gate is the part that must
 - `docs/_design/proof/phase3b-falsification.txt` — the app approval rendezvous, six protections, plus the attribution of a pre-existing flaky test.
 - `docs/_design/proof/phase3b-react-falsification.txt` — the React prompt, four protections, and a statement of what the node-environment suite cannot cover.
 - `docs/_design/proof/phase3c-falsification.txt` — MCP tools in the app, four protections, plus a falsifier that initially passed and the test repair it forced.
+- `docs/_design/proof/phase4-falsification.txt` — the MCP Servers page, five protections, plus two falsifiers that initially passed: one a wrong sabotage, one a test that did not discriminate.
 - `docs/_design/proof/phase2-falsification.txt` — the manager, including three attempts that **failed to falsify** and the removal that followed. Read that section before adding any safety mechanism to this package: the protocol library already reaps processes, and code written to do it again cannot be tested.

@@ -382,7 +382,17 @@ The desktop app gains a connect/disconnect affordance that opens the system brow
 
 Proof: a handler test driving the full flow against the fake authorization server of Phase 2b, asserting the connected state is reached and that disconnect revokes and clears the keystore entry.
 
-### Phase 4 — The MCP Servers page *(mock-up received; §8)*
+### Phase 4 — The MCP Servers page — **DONE 2026-08-06** (`273c19bd`)
+
+Delivered as §8.0–8.3 specify: a top-level sidebar destination after Launch with the storefront icon, a `/mcp` route, and a page that lists every server with what it runs, its state, its tools and its refused tools, and can approve, switch, remove and add from a pasted configuration block. The sidebar's active highlight is now route-derived.
+
+**The page may approve where `/mcp` in the chat may not**, and the difference is made real rather than nominal: approving sends back the command line the page displayed, and the server refuses with a conflict when it no longer matches disk. A stale page cannot approve something the user never read. Adding from the app does not approve, because the command line arrived over HTTP rather than from the keyboard.
+
+**A real defect was found and fixed here.** The manager snapshotted the approval ledger when built, so approving from the app could never connect anything — the policy answered from the ledger as it stood at launch. `mcp.ApprovalsFile` now re-reads on every question and both surfaces use it.
+
+**Not built, deliberately:** schema v17 and `mcp_server_state`. Neither the trusted flag nor the last-seen digest has a consumer — approvals live in the ledger, the digest is computed live — and an unused table is a facade. Build it when something reads it.
+
+### Phase 4 (original spec) — *(mock-up received; §8)*
 
 A new `/mcp` route and page component, plus the sidebar entry after Launch with the storefront icon, plus route-derived active state so Chat de-highlights when MCP Servers is open. Not a Settings tab — this was the mock-up's main correction to the plan.
 
