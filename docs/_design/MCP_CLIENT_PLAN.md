@@ -311,11 +311,11 @@ The desktop app gains a connect/disconnect affordance that opens the system brow
 
 Proof: a handler test driving the full flow against the fake authorization server of Phase 2b, asserting the connected state is reached and that disconnect revokes and clears the keystore entry.
 
-### Phase 4 — Settings UI *(shape pending mock-up)*
+### Phase 4 — The MCP Servers page *(mock-up received; §8)*
 
-React components per §8 and the mock-up.
+A new `/mcp` route and page component, plus the sidebar entry after Launch with the storefront icon, plus route-derived active state so Chat de-highlights when MCP Servers is open. Not a Settings tab — this was the mock-up's main correction to the plan.
 
-Proof: Vitest coverage of the list/add/edit/remove/enable flows against a mocked API; Storybook entries for connected / connecting / failed / needs-approval states; and a manual run of the packaged app with a real local MCP server, screenshotted.
+Proof: Vitest coverage of the list / add / edit / remove / enable flows against a mocked API; a test asserting the sidebar's active row follows the route rather than `currentChatId`; Storybook entries for connected, connecting, failed, needs-approval, needs-sign-in and empty states; and a manual run of the packaged app with a real local MCP server, screenshotted.
 
 ### Phase 5 — Documentation, cross-substrate review, closeout
 
@@ -323,16 +323,31 @@ Proof: Vitest coverage of the list/add/edit/remove/enable flows against a mocked
 
 ---
 
-## 8. The UI contract (what the mock-up will dress)
+## 8. The UI contract — **mock-up received 2026-08-05**
 
-Entities the UI must be able to express:
+### 8.0 What the mock-up settles
+
+MCP is a **top-level destination in the sidebar**, not a panel inside Settings. The mock-up shows the sidebar header carrying three entries — `Chat`, `Launch`, and `MCP Servers` — above the `Today` / `This week` / `Older` chat groups, with `MCP Servers` drawn using the Heroicons 24/outline building-storefront glyph.
+
+That is a correction to this document's earlier assumption, and it changes the work:
+
+- **Insertion point**: `app/ui/app/src/components/ChatSidebar.tsx`, in the `<header>` block that today holds the New Chat link (line ~268) and the Launch link (line ~286, `RocketLaunchIcon`), immediately after Launch and before the Windows-only Settings link.
+- **Route**: a new file `app/ui/app/src/routes/mcp.tsx` registering `/mcp`, with the page component in `app/ui/app/src/components/MCPServers.tsx`. TanStack Router generates `routeTree.gen.ts`, so the route file is the whole registration. Note that Launch is *not* a route — it is `/c/launch`, a chat id with special handling — so MCP Servers is the first genuine second destination in this app besides Settings, and its page owns its own scroll and empty states rather than borrowing the chat layout's.
+- **Icon**: `BuildingStorefrontIcon` from `@heroicons/react/24/outline`, `className="h-5 w-5 stroke-current"`, matching Launch exactly.
+- **Active state**: the sidebar's active highlight is currently driven by `currentChatId`, which cannot express a non-chat route. The MCP entry needs route-derived active state (`useMatchRoute` or equivalent), and the Chat entry must *lose* its highlight when `/mcp` is open — the mock-up shows exactly one active row.
+
+**One delegated default.** The mock-up labels the first entry `Chat` with a speech-bubble icon; the live app labels it `New Chat` with a compose glyph. Renaming an existing navigation item is not part of MCP support, so the plan leaves it untouched. Say the word and it becomes a one-line change.
+
+**One question left open** — whether the storefront icon means a *manager* or a *directory*: see §8.4. It is raised as a chip rather than assumed, because it is the difference between a settings page and a distribution feature.
+
+### 8.1 Entities the UI must express
 
 - **Server**: name, transport (local command vs remote URL), the command line or URL shown verbatim, enabled toggle, trusted-tools toggle, per-server error text.
 - **Connection state**: `disabled` · `connecting` · `connected` · `failed(reason)` · `needs-approval` (config present but never enabled) · `needs-sign-in` (remote server requires OAuth and has no valid token) · `signed-in-as(account)` where the server reports an identity.
 - **Tool list per server**: name, description as advertised (marked as coming from the server, not from Ollama), and a warning badge when a description has changed since last session.
 - **Add flows**: local (command + args + env vars) and remote (URL + header credentials by env-var reference). Paste-a-JSON-block should be accepted, because that is how every other client distributes server configs.
 
-Endpoints (all under the app's authenticated `/api/v1` surface):
+### 8.2 Endpoints (all under the app's authenticated `/api/v1` surface)
 
 ```
 GET    /api/v1/mcp                 list servers with state + tools
@@ -345,6 +360,20 @@ POST   /api/v1/mcp/{name}/disconnect  revoke tokens and clear the keystore entry
 ```
 
 Sign-in is always initiated by a user gesture in this UI. There is no path by which a model, a tool result, or a config file can cause a browser to open.
+
+### 8.3 Page shape
+
+The page is a list of configured servers, each row carrying name, transport summary (the command line or the host), connection state, tool count, and a disclosure that reveals the server's advertised tools with their descriptions. Primary action is *Add server*; per-row actions are enable/disable, sign in/out for OAuth servers, edit, and remove. Empty state explains what an MCP server is and offers both add paths (local command, remote URL) plus paste-a-JSON-block.
+
+### 8.4 Open: manager, or storefront? *(chip raised 2026-08-05)*
+
+The chosen icon is a shopfront, which reads as *browse and get* rather than *configure what you already have*. Three readings, and they are different features:
+
+1. **Manager only** — the page lists and configures the servers the user has added. The icon is decoration. Smallest, and it is what §8.3 describes.
+2. **Manager + curated catalogue** — Ollama ships a small hand-picked list of known-good servers with one-click add. Requires a catalogue source we own and maintain, and it makes Ollama an implicit endorser of third-party code.
+3. **Manager + the official MCP Registry** — browse and install from `registry.modelcontextprotocol.io`, whose `/v0/servers` API is live and returns name, title, description, version and remotes per entry. Hardest and most thorough: adds a network-dependent browse surface, search, version pinning, and a provenance story for entries Ollama did not vet. It is also the option that makes the storefront icon honest.
+
+Whichever is ruled, the install path must land in the same place: a registry entry becomes an ordinary `ServerSpec` in `~/.ollama/mcp.json`, disabled until the user enables it (§6.1). A catalogue must never be able to enable a server by itself.
 
 ---
 
