@@ -265,6 +265,7 @@ func main() {
 		},
 		Store:        st,
 		ToolRegistry: toolRegistry,
+		Approvals:    tools.NewApprovals(),
 		Dev:          devMode,
 		Logger:       slog.Default(),
 		Updater:      upd,

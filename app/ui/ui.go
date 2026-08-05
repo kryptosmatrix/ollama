@@ -101,10 +101,14 @@ type Server struct {
 	Token        string
 	Store        *store.Store
 	ToolRegistry *tools.Registry
-	Tools        bool   // if true, the server will use single-turn tools to fulfill the user's request
-	WebSearch    bool   // if true, the server will use single-turn browser tool to fulfill the user's request
-	Agent        bool   // if true, the server will use multi-turn tools to fulfill the user's request
-	WorkingDir   string // Working directory for all agent operations
+	// Approvals is the rendezvous between a chat waiting on a tool call and the
+	// separate request that carries the user's answer.
+	Approvals     *tools.Approvals
+	approvalsOnce sync.Once
+	Tools         bool   // if true, the server will use single-turn tools to fulfill the user's request
+	WebSearch     bool   // if true, the server will use single-turn browser tool to fulfill the user's request
+	Agent         bool   // if true, the server will use multi-turn tools to fulfill the user's request
+	WorkingDir    string // Working directory for all agent operations
 
 	// Dev is true if the server is running in development mode
 	Dev bool
@@ -283,6 +287,7 @@ func (s *Server) Handler() http.Handler {
 	mux.Handle("GET /api/v1/chat/{id}", handle(s.getChat))
 	mux.Handle("POST /api/v1/chat/{id}", handle(s.chat))
 	mux.Handle("DELETE /api/v1/chat/{id}", handle(s.deleteChat))
+	mux.Handle("POST /api/v1/chat/{id}/approval", handle(s.chatApproval))
 	mux.Handle("POST /api/v1/create-chat", handle(s.createChat))
 	mux.Handle("PUT /api/v1/chat/{id}/rename", handle(s.renameChat))
 
@@ -1027,7 +1032,38 @@ func (s *Server) chat(w http.ResponseWriter, r *http.Request) error {
 				for _, toolCall := range res.Message.ToolCalls {
 					// continues loop as tools were executed
 					toolsExecuted = true
-					result, content, err := registry.Execute(ctx, toolCall.Function.Name, toolCall.Function.Arguments.ToMap())
+					args := toolCall.Function.Arguments.ToMap()
+
+					// Ask before running anything that requires it. This blocks
+					// the streaming response until the answer arrives on a
+					// separate request, so a refusal is the only outcome that
+					// costs nothing.
+					if err := s.awaitToolApproval(ctx, w, flusher, chat.ID, registry, toolCall.Function.Name, args); err != nil {
+						errContent := fmt.Sprintf("Error: %v", err)
+						toolErrMsg := store.NewMessage("tool", errContent, nil)
+						toolErrMsg.ToolName = toolCall.Function.Name
+						chat.Messages = append(chat.Messages, toolErrMsg)
+						if appendErr := s.Store.AppendMessage(chat.ID, toolErrMsg); appendErr != nil {
+							return appendErr
+						}
+						toolResult := true
+						json.NewEncoder(w).Encode(responses.ChatEvent{
+							EventName: "tool",
+							Content:   &errContent,
+							ToolName:  &toolCall.Function.Name,
+						})
+						flusher.Flush()
+						json.NewEncoder(w).Encode(responses.ChatEvent{
+							EventName:  "tool_result",
+							Content:    &errContent,
+							ToolName:   &toolCall.Function.Name,
+							ToolResult: &toolResult,
+						})
+						flusher.Flush()
+						continue
+					}
+
+					result, content, err := registry.Execute(ctx, toolCall.Function.Name, args)
 					if err != nil {
 						errContent := fmt.Sprintf("Error: %v", err)
 						toolErrMsg := store.NewMessage("tool", errContent, nil)
@@ -1332,11 +1368,126 @@ func (s *Server) renameChat(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// awaitToolApproval returns nil when the call may proceed. It returns an error
+// when the user declined, when nobody answered, or when the chat ended — and in
+// every one of those cases the tool must not run.
+//
+// A tool that does not require approval, or a scope the chat has already
+// granted, returns immediately without asking.
+func (s *Server) awaitToolApproval(ctx context.Context, w http.ResponseWriter, flusher http.Flusher, chatID string, registry *tools.Registry, toolName string, args map[string]any) error {
+	tool, ok := registry.Get(toolName)
+	if !ok {
+		// An unknown tool is refused by Execute with a clearer message; there
+		// is nothing to approve.
+		return nil
+	}
+	if !tools.ToolRequiresApproval(tool, args) {
+		return nil
+	}
+
+	approvals := s.approvals()
+	scope := tools.ToolApprovalScope(tool, args)
+	if approvals.State(chatID).Allows(scope) {
+		return nil
+	}
+
+	request := tools.ApprovalRequest{
+		ID:       tools.NewRequestID(chatID),
+		ChatID:   chatID,
+		ToolName: toolName,
+		Scope:    scope,
+		Args:     args,
+	}
+
+	decision, err := approvals.Await(ctx, request, func(req tools.ApprovalRequest) error {
+		if encodeErr := json.NewEncoder(w).Encode(responses.ChatEvent{
+			EventName:     "tool_approval",
+			ToolName:      &req.ToolName,
+			ApprovalID:    &req.ID,
+			ApprovalScope: &req.Scope,
+			ApprovalArgs:  req.Args,
+		}); encodeErr != nil {
+			return encodeErr
+		}
+		flusher.Flush()
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("%s was not run: %w", toolName, err)
+	}
+	if !decision.Allow {
+		return fmt.Errorf("%s was not run because you declined it", toolName)
+	}
+	return nil
+}
+
+// approvals returns the approval rendezvous, creating it on first use so a
+// Server built without one still refuses tools that need approval rather than
+// running them.
+func (s *Server) approvals() *tools.Approvals {
+	s.approvalsOnce.Do(func() {
+		if s.Approvals == nil {
+			s.Approvals = tools.NewApprovals()
+		}
+	})
+	return s.Approvals
+}
+
+// chatApproval carries the user's answer back to the tool call that is waiting
+// for it. The waiting call is inside a different, still-open HTTP response, so
+// the two meet through the approvals registry rather than through this request.
+func (s *Server) chatApproval(w http.ResponseWriter, r *http.Request) error {
+	cid := r.PathValue("id")
+	if cid == "" {
+		return fmt.Errorf("chat ID is required")
+	}
+
+	var body struct {
+		ApprovalID  string `json:"approvalId"`
+		Allow       bool   `json:"allow"`
+		Remember    bool   `json:"remember"`
+		RememberAll bool   `json:"rememberAll"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return fmt.Errorf("invalid request body: %w", err)
+	}
+	if body.ApprovalID == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return fmt.Errorf("approvalId is required")
+	}
+	// An approval belongs to the chat it was raised in. Without this check one
+	// chat could answer another chat's question.
+	if !strings.HasPrefix(body.ApprovalID, cid+":") {
+		w.WriteHeader(http.StatusBadRequest)
+		return fmt.Errorf("approval does not belong to this chat")
+	}
+
+	err := s.approvals().Resolve(body.ApprovalID, tools.ApprovalDecision{
+		Allow:       body.Allow,
+		Remember:    body.Remember,
+		RememberAll: body.RememberAll,
+	})
+	if errors.Is(err, tools.ErrNotPending) {
+		w.WriteHeader(http.StatusConflict)
+		return err
+	}
+	if err != nil {
+		return err
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	return json.NewEncoder(w).Encode(map[string]bool{"ok": true})
+}
+
 func (s *Server) deleteChat(w http.ResponseWriter, r *http.Request) error {
 	cid := r.PathValue("id")
 	if cid == "" {
 		return fmt.Errorf("chat ID is required")
 	}
+
+	// Nothing may be left waiting on an answer that can no longer be given.
+	s.approvals().CancelChat(cid)
 
 	// Check if the chat exists (no need to load attachments)
 	_, err := s.Store.ChatWithOptions(cid, false)

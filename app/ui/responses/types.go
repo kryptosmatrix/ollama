@@ -55,7 +55,7 @@ type ModelCapabilitiesResponse struct {
 
 // ChatEvent is for regular chat messages and assistant interactions
 type ChatEvent struct {
-	EventName string `json:"eventName" ts_type:"\"chat\" | \"thinking\" | \"assistant_with_tools\" | \"tool_call\" | \"tool\" | \"tool_result\" | \"done\" | \"chat_created\""`
+	EventName string `json:"eventName" ts_type:"\"chat\" | \"thinking\" | \"assistant_with_tools\" | \"tool_call\" | \"tool\" | \"tool_result\" | \"tool_approval\" | \"done\" | \"chat_created\""`
 
 	// Chat/Assistant message fields
 	Content           *string    `json:"content,omitempty"`
@@ -72,6 +72,13 @@ type ChatEvent struct {
 
 	// Chat creation fields
 	ChatID *string `json:"chatId,omitempty"`
+
+	// Approval fields, sent with a "tool_approval" event when a tool may not
+	// run until the user answers. The answer is posted back to
+	// /api/v1/chat/{id}/approval carrying ApprovalID.
+	ApprovalID    *string        `json:"approvalId,omitempty"`
+	ApprovalScope *string        `json:"approvalScope,omitempty"`
+	ApprovalArgs  map[string]any `json:"approvalArgs,omitempty"`
 
 	// Tool state field from the new code
 	ToolState any `json:"toolState,omitempty"`
