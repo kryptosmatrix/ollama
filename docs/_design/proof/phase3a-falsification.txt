@@ -1,0 +1,57 @@
+=== PHASE 3a FALSIFICATION EVIDENCE (agent harness adapter, signal chain) ===
+captured: 2026-08-05T12:56:55Z
+The signal chain under test: scripted model turn -> agent.Session -> agent.Registry ->
+this adapter -> mcp.Manager -> real rawserver subprocess -> reply back into the run messages.
+
+--- baseline ---
+ok  	github.com/ollama/ollama/agent/tools	4.883s
+BASELINE_TEST_EXIT=0
+
+--- F17: MCP tools no longer require approval ---
+85:func (m *MCP) RequiresApproval(map[string]any) bool { return false } // FALSIFICATION
+--- FAIL: TestMCPToolReachesAServerThroughTheAgentHarness (0.67s)
+    mcp_test.go:159: the user was prompted 0 times, want once
+--- FAIL: TestDeniedApprovalStopsTheCall (0.67s)
+    mcp_test.go:198: the tool ran despite the user declining
+--- FAIL: TestMCPToolShape (0.68s)
+    mcp_test.go:218: an MCP tool must require approval: approving a server is agreement to run it, not to let the model drive it
+FAIL
+FAIL	github.com/ollama/ollama/agent/tools	2.446s
+FAIL
+F17_TEST_EXIT=1 (expect non-zero)
+
+--- F18: approval scope collapses to one bucket for every MCP tool ---
+90:func (m *MCP) ApprovalScope(map[string]any) string { return "mcp" } // FALSIFICATION
+--- FAIL: TestMCPToolReachesAServerThroughTheAgentHarness (0.67s)
+    mcp_test.go:161: approval scope = "mcp", want the tool scoped to its server
+--- FAIL: TestMCPToolShape (0.67s)
+    mcp_test.go:225: ApprovalScope = "mcp", want the tool scoped to its own server
+FAIL
+FAIL	github.com/ollama/ollama/agent/tools	1.761s
+FAIL
+F18_TEST_EXIT=1 (expect non-zero)
+
+--- F19: Execute answers from itself instead of calling the server ---
+99:	return agent.ToolResult{Content: "ok"}, nil // FALSIFICATION: server never contacted
+--- FAIL: TestMCPToolReachesAServerThroughTheAgentHarness (0.66s)
+    mcp_test.go:155: tool message = "ok", want the subprocess's own reply
+--- FAIL: TestMCPToolSurfacesAServerReportedFailure (0.67s)
+    mcp_test.go:242: a server-reported failure must reach the harness as an error so it is rendered as a failed call
+FAIL
+FAIL	github.com/ollama/ollama/agent/tools	1.758s
+FAIL
+F19_TEST_EXIT=1 (expect non-zero)
+
+--- F20: RegisterMCP registers nothing ---
+55:	for _, tool := range []mcp.Tool(nil) { // FALSIFICATION: nothing registered
+--- FAIL: TestMCPToolReachesAServerThroughTheAgentHarness (0.67s)
+    mcp_test.go:119: no tools were registered
+FAIL
+FAIL	github.com/ollama/ollama/agent/tools	1.092s
+FAIL
+F20_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/agent/tools	5.259s
+RESTORED_TEST_EXIT=0
