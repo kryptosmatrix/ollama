@@ -3,7 +3,7 @@
 From: Grommet (Claude Opus 5)
 Date: 2026-08-05
 Branch: `mcp/server-support`, pushed to `origin` (kryptosmatrix/ollama)
-Head at handoff: `0c540dac`
+Head at handoff: `da3b9da1`
 
 ## Read this first
 
@@ -18,7 +18,7 @@ Head at handoff: `0c540dac`
 | 1b — approval ledger | **DONE** (`b672284c`) |
 | 2a — namespacing + schema conversion | **DONE** (`7dbec4fa`) |
 | 2 — manager and transports | **DONE** (`594f6104`) |
-| 2b — OAuth 2.1 | not started |
+| 3d — OAuth 2.1 | **REDIRECT DONE** (`da3b9da1`) — keystore and surfaces outstanding |
 | 3a — CLI surface | **DONE** (`12ea7760`, `09a954cb`, `7e533582`, `f12a2d6a`) |
 | 3b — app approval path | **DONE** (`0506f8e7`, `e7a05864`) |
 | 3c — app MCP registration | **DONE** (`7b6bfc76`) |
@@ -31,7 +31,7 @@ The whole tree builds and vets clean; `mcp`, `agent/...` and `cmd` all pass. MCP
 
 **The feature is now usable end to end from the terminal.** `ollama mcp add|list|remove|enable|disable|approve|revoke` exists and is registered on the root command; `ollama` in agent mode connects approved servers and offers their tools behind per-tool approval.
 
-`/mcp` inside the agent TUI lists servers and toggles them; it deliberately cannot approve one. **Phases 3a, 3b, 3c and 4 are complete.** MCP works end to end in both surfaces, and the desktop app now has its MCP Servers page: a top-level sidebar destination that lists, approves, switches, removes and adds servers. **Every phase is complete except 3d, OAuth.** MCP works end to end in both surfaces, the desktop app manages servers from its own page, and that page can browse and install from the official registry.
+`/mcp` inside the agent TUI lists servers and toggles them; it deliberately cannot approve one. **Phases 3a, 3b, 3c and 4 are complete.** MCP works end to end in both surfaces, and the desktop app now has its MCP Servers page: a top-level sidebar destination that lists, approves, switches, removes and adds servers. **Everything is complete except the rest of OAuth.** MCP works end to end in both surfaces, the desktop app manages servers from its own page, and that page can browse and install from the official registry.
 
 ## Operator rulings in force
 
@@ -61,13 +61,13 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 ## What the next session should do
 
-**Phase 3d: OAuth 2.1 for remote MCP servers.** This is the only phase left and it was sequenced last deliberately. Plan §6.4 lists the obligations in full and Phase 2b lists the proof: PKCE S256 on every flow with no exceptions, a loopback redirect on an ephemeral port with `state` checked and the listener torn down immediately, tokens in Keychain and DPAPI and **never** in `mcp.json`, authorization-server metadata discovered rather than configured, dynamic client registration where advertised, single-flight refresh inside the transport, and revoke-on-disconnect that actually revokes rather than just forgetting.
+**Finish OAuth.** Read the scope correction in plan §Phase 2b/3d first: the protocol library already does metadata discovery, dynamic client registration, PKCE, the token exchange and refresh. Do not reimplement any of it. Three pieces remain.
 
-Surfaces: `POST /api/v1/mcp/{name}/connect` and `/disconnect` for the app, `ollama mcp login` and `logout` for the terminal. The browser is opened only by a user gesture — never because a model, a tool result, or a configuration file asked.
+1. **Token storage.** `AuthorizationCodeHandlerConfig` has `NewTokenSource` and `InitialTokenSource` — those are the hooks. Persist to Keychain on macOS and DPAPI on Windows, keyed by server name, with a build-tagged file fallback at `0600` that says plainly it is weaker. Tokens must never touch `mcp.json`; a test should write a config after a full flow, read the bytes, and assert the token substring is absent.
+2. **Wire the handler into the transport.** `StreamableClientTransport.OAuthHandler` takes it. Build the handler with `RedirectURL` from a `LoopbackRedirect` started first, and `AuthorizationCodeFetcher` set to its `Fetch`. `RequestRefreshToken: true`.
+3. **The surfaces.** `POST /api/v1/mcp/{name}/connect` and `/disconnect` for the app, `ollama mcp login` and `logout` for the terminal. Disconnect must **revoke at the server** and clear the keystore, not merely forget locally.
 
-Expect to write a meaningful share of it: the SDK's client-side OAuth is marked experimental at the pinned v1.7.0. If more than roughly half of it ends up hand-written, that is worth reporting rather than absorbing.
-
-Build the fake authorization server first, before the real flow — rejecting a mismatched `state` and a wrong PKCE verifier are the tests that matter, and writing them after the happy path is how they end up shaped by it.
+Build the fake authorization server before the real flow. The tests that matter reject a mismatched `state` and a wrong PKCE verifier, and writing them after the happy path is how they end up shaped by it.
 
 ## What must not soften
 
@@ -81,6 +81,8 @@ Build the fake authorization server first, before the real flow — rejecting a 
 - The approval policy must keep reading the ledger from disk on every question (`mcp.ApprovalsFile`). A snapshot means approving a server can never start it, and the symptom is indistinguishable from the approval not having been recorded.
 - Approving from the page must keep sending back the command line it displayed. Without that check, a stale page or a configuration edited underneath approves something the user never read.
 - A registry entry Ollama cannot run must never be offered with a command line. Refusing is correct; guessing a runner for an unverified ecosystem is how a user approves something that is not what its name suggests.
+- The OAuth redirect must keep refusing a wrong-state callback *without ending the wait*. Refusing it is not enough on its own: a stray request that aborts a sign-in in progress is a denial of service on the loopback port that anything on the machine can reach.
+- The browser must keep being opened only by `LoopbackRedirect.Fetch`, and only for http and https.
 - Registry tests must keep using the recorded fixtures. Pointing them at the live service makes the suite fail for reasons unrelated to this code.
 
 ## Proof artefacts

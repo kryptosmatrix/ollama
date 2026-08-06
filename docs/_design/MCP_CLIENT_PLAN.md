@@ -322,7 +322,17 @@ Proof (this is the phase where a facade is easiest and least visible):
 
 A containment test also lands here: a test that walks the module and **fails if any file outside `mcp/` imports `github.com/modelcontextprotocol/go-sdk`** (§5.1).
 
-### Phase 2b — OAuth 2.1 for remote servers *(ruling B3)*
+### Phase 2b/3d — OAuth 2.1 — **REDIRECT DONE 2026-08-06** (`da3b9da1`)
+
+**Scope correction, discovered by reading the SDK rather than assuming.** The plan assumed we would write metadata discovery, dynamic client registration, PKCE, the token exchange and refresh. The protocol library's `auth` package already does all of that through `AuthorizationCodeHandler`, which satisfies the `OAuthHandler` the streamable transport accepts. What it explicitly leaves to the caller is the redirect: *"The caller is responsible for handling the redirect out of band."*
+
+So the honest remaining work is three things, not one: the loopback redirect (**done**), token storage in the OS keystore, and the connect/disconnect surfaces.
+
+`mcp/oauth.go` binds 127.0.0.1 on an ephemeral port and satisfies `sdkauth.AuthorizationCodeFetcher`. The state is checked at the listener **as well as** by the library, and the difference is the point: a callback with the wrong state is refused *and does not end the wait*, so a stray or hostile request on the loopback port cannot abort a sign-in in progress. After a flow completes the expected state is cleared, so a replay is refused. The browser is opened only here, only by an explicit sign-in, and only for http and https. The wait ends on a redirect, the context, or five minutes, and the last two refuse. The listener is torn down on Close.
+
+Proof in `docs/_design/proof/phase3d-falsification.txt`: six protections falsified, driven with an HTTP client rather than a browser.
+
+### Phase 2b (original spec) — *(ruling B3)*
 
 `mcp/oauth.go` and the platform keystores. Authorization-server metadata discovery, dynamic client registration where advertised, PKCE S256, loopback redirect with `state` verification and immediate listener teardown, token persistence in Keychain/DPAPI, single-flight refresh inside the transport, and revoke-on-disconnect. The SDK's OAuth package is used where it is sound at the pinned version and replaced with our own where its experimental status shows; whichever way each piece goes is recorded in the commit, not left implicit.
 
