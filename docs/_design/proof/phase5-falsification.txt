@@ -1,0 +1,88 @@
+=== FALSIFICATION EVIDENCE (first-party app tools supply their own definition) ===
+captured: 2026-08-06T04:24:55Z
+tree under test: a8589ea4a1abb46aca5de2b9ac21b65e7f41d8f7
+branched from:   aa7b98db48129c062535e167c62583687b6cdc78 (origin/mcp/server-support)
+
+Environment note: app/ui/app.go has //go:embed app/dist, and a fresh worktree has
+no frontend build, so go list fails to load app/ui — which takes out both
+go test ./app/ui/ and mcp's TestSDKIsContainedToThisPackage, that test being a
+go list sweep of the whole module. A placeholder app/ui/app/dist/index.html
+stands in for the built frontend so the Go suites can run. It is gitignored
+(app/ui/app/.gitignore:11) and none of these tests read the frontend assets.
+
+go build ./... and go vet ./app/tools/ ./app/ui/ ./mcp/ both pass; see the
+session record. The falsification runs below are scoped to app/tools, which is
+where every changed line lives.
+
+--- baseline ---
+ok  	github.com/ollama/ollama/app/tools	(cached)
+ok  	github.com/ollama/ollama/app/ui	(cached)
+ok  	github.com/ollama/ollama/mcp	(cached)
+BASELINE_TEST_EXIT=0
+
+--- F1: faithful definitions are flattened through the map form ---
+132:		if faithful, ok := tool.(OllamaTool); ok && false { // FALSIFICATION: always derive
+--- FAIL: TestBrowserOpenKeepsItsAlternativeIDTypes (0.00s)
+    schema_test.go:76: id offers ""; the model must be told it may send either a URL (string) or a link index (integer):
+        {"type":"object","properties":{"cursor":{"type":"integer","description":"Which page of the browsing history to open from. Defaults to the most recent page."},"id":{"description":"What to open. Omit to redisplay the current page."},"loc":{"type":"integer","description":"The line to start viewing from. Defaults to the top of the page."},"num_lines":{"type":"integer","description":"How many lines to show. Defaults to as many as fit the viewport."}}}
+FAIL
+FAIL	github.com/ollama/ollama/app/tools	0.228s
+FAIL
+F1_TEST_EXIT=1 (expect non-zero)
+
+--- F2: one tool stops supplying its own definition ---
+80:func (w *WebSearch) toolFunctionRemoved() api.ToolFunction { // FALSIFICATION
+--- FAIL: TestFirstPartyToolsSupplyTheirOwnDefinition (0.00s)
+    schema_test.go:86: web_search does not implement OllamaTool, so its definition is rebuilt from the map form and loses whatever the map cannot express
+FAIL
+FAIL	github.com/ollama/ollama/app/tools	0.228s
+FAIL
+F2_TEST_EXIT=1 (expect non-zero)
+
+--- F3: the default stops reaching the model ---
+62:				Description: "Maximum number of search results to return", // FALSIFICATION: default dropped,
+--- FAIL: TestToolsStateTheirDefaultsToTheModel (0.00s)
+    schema_test.go:157: web_search.max_results does not tell the model it gets 5 when the argument is omitted: "Maximum number of search results to return"
+FAIL
+FAIL	github.com/ollama/ollama/app/tools	0.227s
+FAIL
+F3_TEST_EXIT=1 (expect non-zero)
+
+--- F4: a tool goes back to hand-writing its map ---
+62:	return map[string]any{"type": "object"} // FALSIFICATION: hand-written, drifted
+--- FAIL: TestFirstPartyToolDefinitionsAndSchemaMapsAgree (0.00s)
+    schema_test.go:119: web_fetch: Schema map and definition disagree
+         got: map[type:object]
+        want: map[properties:map[url:map[description:URL to crawl and extract content from type:string]] required:[url] type:object]
+FAIL
+FAIL	github.com/ollama/ollama/app/tools	0.230s
+FAIL
+F4_TEST_EXIT=1 (expect non-zero)
+
+--- F5: topn goes back to being read as an int only ---
+187:	case complex128: // FALSIFICATION: json numbers no longer match
+--- FAIL: TestBrowserSearchHonoursTopn (0.00s)
+    --- FAIL: TestBrowserSearchHonoursTopn/decoded_from_json (0.00s)
+        schema_test.go:188: topn = 5, want 2 for 2
+FAIL
+FAIL	github.com/ollama/ollama/app/tools	0.227s
+FAIL
+F5_TEST_EXIT=1 (expect non-zero)
+
+--- F6: honouring topn removes the ceiling on what the model can request ---
+196:	return requested // FALSIFICATION: ceiling removed
+--- FAIL: TestBrowserSearchHonoursTopn (0.00s)
+    --- FAIL: TestBrowserSearchHonoursTopn/above_the_ceiling (0.00s)
+        schema_test.go:188: topn = 100, want 5 for 100
+FAIL
+FAIL	github.com/ollama/ollama/app/tools	0.229s
+FAIL
+F6_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+no falsification markers remain
+ok  	github.com/ollama/ollama/app/tools	4.502s
+ok  	github.com/ollama/ollama/app/ui	4.878s
+ok  	github.com/ollama/ollama/mcp	10.216s
+RESTORED_TEST_EXIT=0
