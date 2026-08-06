@@ -3,7 +3,7 @@
 From: Grommet (Claude Opus 5)
 Date: 2026-08-05
 Branch: `mcp/server-support`, pushed to `origin` (kryptosmatrix/ollama)
-Head at handoff: `07b06d8d`
+Head at handoff: `0c540dac`
 
 ## Read this first
 
@@ -24,14 +24,14 @@ Head at handoff: `07b06d8d`
 | 3c — app MCP registration | **DONE** (`7b6bfc76`) |
 | 3d — OAuth in the surfaces | not started |
 | 4 — MCP Servers page | **DONE** (`273c19bd`) |
-| 4b — registry browse | **BACKEND DONE** (`8317a273`, `07b06d8d`) — browse surface outstanding |
+| 4b — registry browse | **DONE** (`8317a273`, `07b06d8d`, `0c540dac`) |
 | 5 — docs, cross-substrate review, closeout | not started |
 
 The whole tree builds and vets clean; `mcp`, `agent/...` and `cmd` all pass. MCP is live in `ollama` agent mode: configured, approved servers are connected at start-up and their tools are offered to the model behind per-tool approval.
 
 **The feature is now usable end to end from the terminal.** `ollama mcp add|list|remove|enable|disable|approve|revoke` exists and is registered on the root command; `ollama` in agent mode connects approved servers and offers their tools behind per-tool approval.
 
-`/mcp` inside the agent TUI lists servers and toggles them; it deliberately cannot approve one. **Phases 3a, 3b, 3c and 4 are complete.** MCP works end to end in both surfaces, and the desktop app now has its MCP Servers page: a top-level sidebar destination that lists, approves, switches, removes and adds servers. 4b's backend is done: the registry client, the resolution that produces the exact command line, and the browse and resolve routes. What remains is **the browse surface in the page**, and **3d, OAuth**.
+`/mcp` inside the agent TUI lists servers and toggles them; it deliberately cannot approve one. **Phases 3a, 3b, 3c and 4 are complete.** MCP works end to end in both surfaces, and the desktop app now has its MCP Servers page: a top-level sidebar destination that lists, approves, switches, removes and adds servers. **Every phase is complete except 3d, OAuth.** MCP works end to end in both surfaces, the desktop app manages servers from its own page, and that page can browse and install from the official registry.
 
 ## Operator rulings in force
 
@@ -61,13 +61,13 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 ## What the next session should do
 
-**Finish 4b: the browse surface.** The backend is done and proven; there is no way to search the registry from the app yet. Add a search field and results list to `MCPServers.tsx`, calling `GET /api/v1/mcp-registry?search=&cursor=`. Each result already arrives with everything the page needs: publisher, repository, whether it is installable and why not, and `runs` — the exact command line. Render `runs` verbatim and prominently; it is the whole point.
+**Phase 3d: OAuth 2.1 for remote MCP servers.** This is the only phase left and it was sequenced last deliberately. Plan §6.4 lists the obligations in full and Phase 2b lists the proof: PKCE S256 on every flow with no exceptions, a loopback redirect on an ephemeral port with `state` checked and the listener torn down immediately, tokens in Keychain and DPAPI and **never** in `mcp.json`, authorization-server metadata discovered rather than configured, dynamic client registration where advertised, single-flight refresh inside the transport, and revoke-on-disconnect that actually revokes rather than just forgetting.
 
-The install flow is: call `POST /api/v1/mcp-registry/resolve` with the entry name at the moment of the click (not from the list, which may be minutes old), show the returned command line in a confirmation, then `POST /api/v1/mcp` with the resolved fields and the suggested name. It lands unapproved and the user then approves it from the list, where the shown-value check applies. Do not add a route that installs and approves in one step.
+Surfaces: `POST /api/v1/mcp/{name}/connect` and `/disconnect` for the app, `ollama mcp login` and `logout` for the terminal. The browser is opened only by a user gesture — never because a model, a tool result, or a configuration file asked.
 
-The response carries `notVetted: true`. Render it. It is a field precisely so this cannot lapse.
+Expect to write a meaningful share of it: the SDK's client-side OAuth is marked experimental at the pinned v1.7.0. If more than roughly half of it ends up hand-written, that is worth reporting rather than absorbing.
 
-**Then Phase 3d: OAuth** (plan §6.4 and Phase 2b) — the largest remaining piece, sequenced last by design.
+Build the fake authorization server first, before the real flow — rejecting a mismatched `state` and a wrong PKCE verifier are the tests that matter, and writing them after the happy path is how they end up shaped by it.
 
 ## What must not soften
 

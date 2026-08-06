@@ -410,7 +410,11 @@ Installing is deliberately **not** a new route: an entry becomes an ordinary `PO
 
 Proof in `docs/_design/proof/phase4b-falsification.txt`: recorded fixtures in `mcp/testdata/registry`, never the live registry. Nine protections falsified across the client and the routes.
 
-**Not done: the browse surface in the page.** The backend is complete and proven; there is no way to search the registry from the app yet.
+Also done (`0c540dac`): the browse surface. Results carry the publisher namespace, the repository, and the exact command line; clicking add re-resolves on the server rather than trusting a row that may be minutes old, shows that command line in a confirmation with the environment values the user must set, and then installs through the **ordinary add endpoint** so the entry lands unapproved and faces the same agreement as a hand-typed server.
+
+**One correction made in the writing.** The first version sent only the rendered command line to the browser and split it back apart to build the install request — two implementations of one resolution, free to drift, with quoting silently mangling any argument containing a space. The resolved specification is now carried structurally alongside the string: `runs` is what the user reads, the fields are what gets stored, from one resolution.
+
+**Phase 4b is complete.** What remains in the whole plan is Phase 3d, OAuth.
 
 ### Phase 4b (original spec) — *(ruling §8.4)*
 
