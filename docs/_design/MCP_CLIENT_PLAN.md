@@ -398,7 +398,21 @@ A new `/mcp` route and page component, plus the sidebar entry after Launch with 
 
 Proof: Vitest coverage of the list / add / edit / remove / enable flows against a mocked API; a test asserting the sidebar's active row follows the route rather than `currentChatId`; Storybook entries for connected, connecting, failed, needs-approval, needs-sign-in and empty states; and a manual run of the packaged app with a real local MCP server, screenshotted.
 
-### Phase 4b — Registry browse and install *(ruling §8.4)*
+### Phase 4b — Registry browse and install — **BACKEND DONE 2026-08-06** (`8317a273`, `07b06d8d`)
+
+`mcp/registry.go` searches and paginates the official registry and resolves an entry into an ordinary `ServerSpec`; `app/ui/mcp_registry.go` exposes browse and resolve.
+
+The install gate lives in `Resolve`. npm becomes `npx -y` with the pinned version, pypi becomes `uvx` with a version pin, oci becomes `docker run` with the publisher's runtime arguments, and a **hosted endpoint is preferred over any of them** because running nothing on the user's machine is safer than running something. An ecosystem Ollama does not know how to run is **refused rather than guessed at**, and an entry with neither a package nor a remote likewise — inventing a command line for an unverified runner is how a user approves something that does not do what its name suggests. A declared secret is never written down: it becomes an `${env:NAME}` reference, and a test asserts every resolved spec passes exactly the same validation as one a human typed, so a registry entry cannot smuggle in what the configuration layer would refuse.
+
+Every response carries `notVetted: true` as a **field rather than a rendered sentence**, so the honesty of the surface cannot lapse by someone forgetting to display it. Entries that cannot be installed are returned with the reason instead of being hidden, and carry no command line. Suggested names are derived to pass the configuration layer's own rules. An unreachable registry returns a gateway error, because nothing-found and could-not-ask must not look the same.
+
+Installing is deliberately **not** a new route: an entry becomes an ordinary `POST /api/v1/mcp`, so it lands unapproved and goes through the same reading and agreement as a hand-typed server, and the approve endpoint's shown-value check applies unchanged.
+
+Proof in `docs/_design/proof/phase4b-falsification.txt`: recorded fixtures in `mcp/testdata/registry`, never the live registry. Nine protections falsified across the client and the routes.
+
+**Not done: the browse surface in the page.** The backend is complete and proven; there is no way to search the registry from the app yet.
+
+### Phase 4b (original spec) — *(ruling §8.4)*
 
 `mcp/registry.go` — a typed client for `/v0/servers` with search, cursor pagination, version listing and detail; package-to-command resolution per `registryType`; the three routes of §8.2; and the browse surface in the page with its search field, entry cards showing publisher namespace and repository, the not-vetted notice, and the install confirmation that shows the resolved command line verbatim.
 

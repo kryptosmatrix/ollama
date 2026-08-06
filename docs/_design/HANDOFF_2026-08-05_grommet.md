@@ -3,7 +3,7 @@
 From: Grommet (Claude Opus 5)
 Date: 2026-08-05
 Branch: `mcp/server-support`, pushed to `origin` (kryptosmatrix/ollama)
-Head at handoff: `273c19bd`
+Head at handoff: `07b06d8d`
 
 ## Read this first
 
@@ -24,14 +24,14 @@ Head at handoff: `273c19bd`
 | 3c — app MCP registration | **DONE** (`7b6bfc76`) |
 | 3d — OAuth in the surfaces | not started |
 | 4 — MCP Servers page | **DONE** (`273c19bd`) |
-| 4b — registry browse | not started |
+| 4b — registry browse | **BACKEND DONE** (`8317a273`, `07b06d8d`) — browse surface outstanding |
 | 5 — docs, cross-substrate review, closeout | not started |
 
 The whole tree builds and vets clean; `mcp`, `agent/...` and `cmd` all pass. MCP is live in `ollama` agent mode: configured, approved servers are connected at start-up and their tools are offered to the model behind per-tool approval.
 
 **The feature is now usable end to end from the terminal.** `ollama mcp add|list|remove|enable|disable|approve|revoke` exists and is registered on the root command; `ollama` in agent mode connects approved servers and offers their tools behind per-tool approval.
 
-`/mcp` inside the agent TUI lists servers and toggles them; it deliberately cannot approve one. **Phases 3a, 3b, 3c and 4 are complete.** MCP works end to end in both surfaces, and the desktop app now has its MCP Servers page: a top-level sidebar destination that lists, approves, switches, removes and adds servers. What remains is **4b, browse-and-install from the official MCP Registry**, and **3d, OAuth**.
+`/mcp` inside the agent TUI lists servers and toggles them; it deliberately cannot approve one. **Phases 3a, 3b, 3c and 4 are complete.** MCP works end to end in both surfaces, and the desktop app now has its MCP Servers page: a top-level sidebar destination that lists, approves, switches, removes and adds servers. 4b's backend is done: the registry client, the resolution that produces the exact command line, and the browse and resolve routes. What remains is **the browse surface in the page**, and **3d, OAuth**.
 
 ## Operator rulings in force
 
@@ -61,11 +61,13 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 ## What the next session should do
 
-**Phase 4b: browse and install from the official MCP Registry** (plan §8.4). The registry API is recorded there as read from its OpenAPI document; `mcp/registry.go` does not exist yet. The install gate is the part that must not be trimmed if the phase runs long: the resolved command line shown verbatim before the add is committed, the entry landing disabled and unapproved, `fileSha256` verified where offered, declared variables stored as `${env:VAR}` references, and no ranking that reads as endorsement. The page already has the approval flow to hang it on — an installed entry becomes an ordinary server that must then be read and approved.
+**Finish 4b: the browse surface.** The backend is done and proven; there is no way to search the registry from the app yet. Add a search field and results list to `MCPServers.tsx`, calling `GET /api/v1/mcp-registry?search=&cursor=`. Each result already arrives with everything the page needs: publisher, repository, whether it is installable and why not, and `runs` — the exact command line. Render `runs` verbatim and prominently; it is the whole point.
 
-**Then Phase 3d: OAuth in the surfaces** (plan §6.4 and Phase 2b). This is the largest remaining piece and was deliberately sequenced last.
+The install flow is: call `POST /api/v1/mcp-registry/resolve` with the entry name at the moment of the click (not from the list, which may be minutes old), show the returned command line in a confirmation, then `POST /api/v1/mcp` with the resolved fields and the suggested name. It lands unapproved and the user then approves it from the list, where the shown-value check applies. Do not add a route that installs and approves in one step.
 
-Not built, and deliberately: schema v17 / `mcp_server_state`. The plan proposed it for the trusted flag and the last-seen tools digest, but neither has a consumer yet — approvals live in the ledger and the digest is computed live. Adding an unused table would be a facade. Build it when something reads it.
+The response carries `notVetted: true`. Render it. It is a field precisely so this cannot lapse.
+
+**Then Phase 3d: OAuth** (plan §6.4 and Phase 2b) — the largest remaining piece, sequenced last by design.
 
 ## What must not soften
 
@@ -78,6 +80,8 @@ Not built, and deliberately: schema v17 / `mcp_server_state`. The plan proposed 
 - If Phase 4b runs long, the browse polish gives way; the install gate — resolved command line shown verbatim, landed disabled, hash verified — never does.
 - The approval policy must keep reading the ledger from disk on every question (`mcp.ApprovalsFile`). A snapshot means approving a server can never start it, and the symptom is indistinguishable from the approval not having been recorded.
 - Approving from the page must keep sending back the command line it displayed. Without that check, a stale page or a configuration edited underneath approves something the user never read.
+- A registry entry Ollama cannot run must never be offered with a command line. Refusing is correct; guessing a runner for an unverified ecosystem is how a user approves something that is not what its name suggests.
+- Registry tests must keep using the recorded fixtures. Pointing them at the live service makes the suite fail for reasons unrelated to this code.
 
 ## Proof artefacts
 
@@ -93,4 +97,5 @@ Not built, and deliberately: schema v17 / `mcp_server_state`. The plan proposed 
 - `docs/_design/proof/phase3b-react-falsification.txt` — the React prompt, four protections, and a statement of what the node-environment suite cannot cover.
 - `docs/_design/proof/phase3c-falsification.txt` — MCP tools in the app, four protections, plus a falsifier that initially passed and the test repair it forced.
 - `docs/_design/proof/phase4-falsification.txt` — the MCP Servers page, five protections, plus two falsifiers that initially passed: one a wrong sabotage, one a test that did not discriminate.
+- `docs/_design/proof/phase4b-falsification.txt` — the registry client and browse routes, nine protections, all against recorded fixtures.
 - `docs/_design/proof/phase2-falsification.txt` — the manager, including three attempts that **failed to falsify** and the removal that followed. Read that section before adding any safety mechanism to this package: the protocol library already reaps processes, and code written to do it again cannot be tested.
