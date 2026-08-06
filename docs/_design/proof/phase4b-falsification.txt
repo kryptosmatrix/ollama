@@ -110,3 +110,25 @@ RESTORE_IDENTICAL=yes
 ok  	github.com/ollama/ollama/app/ui	4.868s
 ok  	github.com/ollama/ollama/mcp	10.386s
 RESTORED_TEST_EXIT=0
+
+=== BROWSE SURFACE ===
+captured: 2026-08-06T03:33:59Z
+Node-environment suite with static rendering, so no click is exercised; the logic behind each
+handler is tested directly and each handler is a single call.
+
+--- F62: the install request is rebuilt from the displayed string ---
+77:  // FALSIFICATION: re-parse the displayed string instead of the resolved fields
+F62_TEST_EXIT=1 (expect non-zero)
+
+--- F63: an entry Ollama cannot run is installed anyway ---
+54:  if (false) { // FALSIFICATION: unrunnable entry installed
+F63_TEST_EXIT=1 (expect non-zero)
+
+--- F64: the publisher is dropped from the result ---
+33:    publisher: "", // FALSIFICATION: provenance hidden
+F64_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+RESTORED_TEST_EXIT=0
+frontend suite: 11 files, 96 tests

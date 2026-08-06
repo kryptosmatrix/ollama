@@ -708,3 +708,75 @@ export class MCPServersResponse {
 	    return a;
 	}
 }
+export class MCPRegistryEntry {
+    name: string;
+    title?: string;
+    description?: string;
+    version?: string;
+    publisher: string;
+    repository?: string;
+    websiteUrl?: string;
+    installable: boolean;
+    reason?: string;
+    transport?: string;
+    runs?: string;
+    suggestedName?: string;
+    command?: string;
+    args?: string[];
+    env?: {[key: string]: string};
+    url?: string;
+    headers?: {[key: string]: string};
+    variables?: string[];
+
+    constructor(source: any = {}) {
+        if ('string' === typeof source) source = JSON.parse(source);
+        this.name = source["name"];
+        this.title = source["title"];
+        this.description = source["description"];
+        this.version = source["version"];
+        this.publisher = source["publisher"];
+        this.repository = source["repository"];
+        this.websiteUrl = source["websiteUrl"];
+        this.installable = source["installable"];
+        this.reason = source["reason"];
+        this.transport = source["transport"];
+        this.runs = source["runs"];
+        this.suggestedName = source["suggestedName"];
+        this.command = source["command"];
+        this.args = source["args"];
+        this.env = source["env"];
+        this.url = source["url"];
+        this.headers = source["headers"];
+        this.variables = source["variables"];
+    }
+}
+export class MCPRegistryResponse {
+    entries: MCPRegistryEntry[];
+    nextCursor?: string;
+    notVetted: boolean;
+
+    constructor(source: any = {}) {
+        if ('string' === typeof source) source = JSON.parse(source);
+        this.entries = this.convertValues(source["entries"], MCPRegistryEntry);
+        this.nextCursor = source["nextCursor"];
+        this.notVetted = source["notVetted"];
+    }
+
+	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	    if (!a) {
+	        return a;
+	    }
+	    if (Array.isArray(a)) {
+	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	    } else if ("object" === typeof a) {
+	        if (asMap) {
+	            for (const key of Object.keys(a)) {
+	                a[key] = new classs(a[key]);
+	            }
+	            return a;
+	        }
+	        return new classs(a);
+	    }
+	    return a;
+	}
+}

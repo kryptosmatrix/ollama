@@ -228,6 +228,16 @@ type MCPRegistryEntry struct {
 	// SuggestedName is the name the server would be configured under. It is
 	// derived from the entry, and the user may change it.
 	SuggestedName string `json:"suggestedName,omitempty"`
+
+	// The resolved specification, carried structurally so the interface never
+	// has to parse Runs back apart. Runs is for the user to read; these are
+	// what an install writes. Two representations of one thing would drift,
+	// and the one the user agreed to must be the one that is stored.
+	Command string            `json:"command,omitempty"`
+	Args    []string          `json:"args,omitempty"`
+	Env     map[string]string `json:"env,omitempty"`
+	URL     string            `json:"url,omitempty"`
+	Headers map[string]string `json:"headers,omitempty"`
 	// Variables are the environment references the entry declares, so the user
 	// can be told which values they must set before it will work.
 	Variables []string `json:"variables,omitempty"`

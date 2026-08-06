@@ -67,6 +67,11 @@ func describeRegistryEntry(entry mcp.RegistryEntry) responses.MCPRegistryEntry {
 	described.Installable = true
 	described.Runs = spec.Summary()
 	described.Transport = string(spec.Type)
+	described.Command = spec.Command
+	described.Args = spec.Args
+	described.Env = spec.Env
+	described.URL = spec.URL
+	described.Headers = spec.Headers
 
 	names := slices.Sorted(maps.Keys(spec.Env))
 	names = append(names, slices.Sorted(maps.Keys(spec.Headers))...)

@@ -11,13 +11,19 @@ import {
   setMCPServerEnabled,
 } from "@/api";
 import type { MCPServer } from "@/gotypes";
-import { parsePastedServers, presentMCPServer } from "@/utils/mcpServers";
+import {
+  parsePastedServers,
+  presentMCPServer,
+  type AddMCPServerInput,
+} from "@/utils/mcpServers";
+import MCPRegistryBrowse from "./MCPRegistryBrowse";
 
 export default function MCPServers() {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [paste, setPaste] = useState("");
   const [showPaste, setShowPaste] = useState(false);
+  const [showBrowse, setShowBrowse] = useState(false);
 
   const servers = useQuery({
     queryKey: ["mcpServers"],
@@ -73,10 +79,26 @@ export default function MCPServers() {
       )}
 
       <div className="flex gap-2">
+        <Button onClick={() => setShowBrowse((open) => !open)}>
+          Browse the registry
+        </Button>
         <Button onClick={() => setShowPaste((open) => !open)}>
           Add from configuration
         </Button>
       </div>
+
+      {showBrowse && (
+        <MCPRegistryBrowse
+          onInstall={async (request: AddMCPServerInput) => {
+            // The ordinary add path: it lands unapproved and the user then
+            // approves it below, where the command line is checked against
+            // what is on disk.
+            await addMCPServer(request);
+            setShowBrowse(false);
+            await refresh();
+          }}
+        />
+      )}
 
       {showPaste && (
         <div className="flex flex-col gap-2">

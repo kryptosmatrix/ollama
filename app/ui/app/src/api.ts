@@ -10,6 +10,7 @@ import {
   ErrorEvent,
   InferenceComputeResponse,
   MCPServer,
+  MCPRegistryEntry,
   ModelCapabilitiesResponse,
   Model,
   ChatRequest,
@@ -363,6 +364,60 @@ export async function approveMCPServer(
 
 export async function removeMCPServer(name: string): Promise<void> {
   await mcpRequest(`/${encodeURIComponent(name)}`, { method: "DELETE" });
+}
+
+export interface MCPRegistryPage {
+  entries: MCPRegistryEntry[];
+  nextCursor?: string;
+  notVetted: boolean;
+}
+
+/** Searches the official MCP Registry. An empty query lists everything. */
+export async function browseMCPRegistry(
+  search: string,
+  cursor?: string,
+): Promise<MCPRegistryPage> {
+  const params = new URLSearchParams();
+  if (search.trim() !== "") params.set("search", search.trim());
+  if (cursor) params.set("cursor", cursor);
+
+  const response = await fetch(
+    `${API_BASE}/api/v1/mcp-registry?${params.toString()}`,
+  );
+  if (!response.ok) {
+    const detail = (await response.text().catch(() => "")).trim();
+    throw new Error(detail || `Could not reach the registry: ${response.status}`);
+  }
+  const data = await response.json();
+  return {
+    entries: (data.entries ?? []).map(
+      (entry: unknown) => new MCPRegistryEntry(entry),
+    ),
+    nextCursor: data.nextCursor,
+    notVetted: Boolean(data.notVetted),
+  };
+}
+
+/**
+ * Asks what installing one entry would write, at the moment of the decision.
+ *
+ * The browse list may be minutes old by the time the user clicks, and what
+ * they are shown before agreeing must be current — so this asks again rather
+ * than trusting the row.
+ */
+export async function resolveMCPRegistryEntry(
+  name: string,
+): Promise<MCPRegistryEntry> {
+  const response = await fetch(`${API_BASE}/api/v1/mcp-registry/resolve`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+  if (!response.ok) {
+    const detail = (await response.text().catch(() => "")).trim();
+    throw new Error(detail || `Could not resolve the entry: ${response.status}`);
+  }
+  return new MCPRegistryEntry(await response.json());
 }
 
 export async function getSettings(): Promise<{
