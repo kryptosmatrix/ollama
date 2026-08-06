@@ -404,7 +404,13 @@ The routes are `POST /api/v1/mcp/{name}/signin` and `/signout`, not `/connect` a
 
 Proof in `docs/_design/proof/phase3d-oauthhandler-falsification.txt`, `phase3d-signin-falsification.txt` and `phase3d-wiring-falsification.txt`: thirty protections falsified across the handler, sign-in, sign-out and the wiring. Two tests were rewritten before the first pass because they did not discriminate, and the record says which and why.
 
-**Owed, and stated rather than implied: no complete authorization-code flow has ever been run.** Every part has tests, and revocation runs against a fake authorization server serving real metadata documents — but nothing yet drives authorize → callback → exchange → connect end to end, so the tests that reject a mismatched `state` at the exchange and a wrong PKCE verifier do not exist. `RequestRefreshToken` is likewise set and unfalsified. The fake server in `mcp/signin_test.go` is where that work starts. Also owed: the Keychain and DPAPI store, which needs cgo.
+**The whole flow now runs end to end** (`630974c0`), against a fake authorization server in `mcp/oauthflow_test.go` implementing RFC 9728, 8414, 7591, 7636 and 7009: a 401 with a challenge, discovery, dynamic registration, an authorize endpoint that redirects into Ollama's own loopback listener, a token endpoint that verifies the PKCE verifier against the committed challenge, refresh, and revocation. The fake user is already signed in and is redirected straight back, which is the timing that catches a listener bound after the browser was opened.
+
+**Writing it found the defect this phase's whole design rested on.** The protocol library performs discovery and dynamic client registration *before* it asks whether a browser may be opened. Refusing at the fetcher therefore came too late: every launch and every reconnect of a remote server the user had never signed in to announced this installation to the authorization server and left a client registration behind. `signInRequiredTransport` now answers the challenge at the RoundTripper, so the library never reaches its authorization branch, and a handler is attached only when there is a stored token to send. The ordinary path touches the MCP endpoint and nothing else.
+
+It also found a redundant second writer for the stored token, deleted after two attempts to falsify it both passed — the same rule that removed the reaping code in Phase 2.
+
+**Owed: a real service.** A fake authorization server agrees with whatever you built. Nothing has been signed in to for real, and that is where the remaining surprises are. Also owed: the Keychain and DPAPI store, which needs cgo.
 
 ### Phase 4 — The MCP Servers page — **DONE 2026-08-06** (`273c19bd`)
 

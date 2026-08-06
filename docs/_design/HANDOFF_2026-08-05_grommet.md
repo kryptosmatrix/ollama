@@ -3,7 +3,7 @@
 From: Grommet (Claude Opus 5)
 Date: 2026-08-05
 Branch: `mcp/server-support`, pushed to `origin` (kryptosmatrix/ollama)
-Head at handoff: `3104fd4e`
+Head at handoff: `630974c0`
 
 ## Read this first
 
@@ -18,7 +18,7 @@ Head at handoff: `3104fd4e`
 | 1b — approval ledger | **DONE** (`b672284c`) |
 | 2a — namespacing + schema conversion | **DONE** (`7dbec4fa`) |
 | 2 — manager and transports | **DONE** (`594f6104`) |
-| 3d — OAuth 2.1 | **DONE** (`da3b9da1`, `0f82fb9b`, `75dc07cd`, `3104fd4e`) — keychain store still owed |
+| 3d — OAuth 2.1 | **DONE** (`da3b9da1`, `0f82fb9b`, `75dc07cd`, `3104fd4e`, `630974c0`) — keychain store still owed |
 | 3a — CLI surface | **DONE** (`12ea7760`, `09a954cb`, `7e533582`, `f12a2d6a`) |
 | 3b — app approval path | **DONE** (`0506f8e7`, `e7a05864`) |
 | 3c — app MCP registration | **DONE** (`7b6bfc76`) |
@@ -65,7 +65,7 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 **OAuth is wired end to end and both surfaces can start and end a sign-in.** What remains is below, and the first item is the honest gap.
 
-1. **No complete authorization-code flow has ever been run.** The redirect, the handler, the store, the transport wiring, the modes and revocation each have tests, and revocation runs against a fake authorization server in `mcp/signin_test.go` that serves RFC 9728 and RFC 8414 metadata. Nothing yet drives *authorize → callback → token exchange → connect* from end to end, so the tests that reject a mismatched `state` at the exchange and a wrong PKCE verifier do not exist. Extend that fake server into a full one rather than starting again; it already has the two metadata documents and the mux. Do this before claiming OAuth works against a real service — and then try one, because a fake server agrees with whatever you built.
+1. **Try it against a real hosted MCP server.** The whole flow now runs end to end in `mcp/oauthflow_test.go` against a fake authorization server that implements RFC 9728, 8414, 7591, 7636 and 7009 — but a fake server agrees with whatever you built. Nothing has been signed in to for real. Expect the gaps to be in what real services do differently: consent screens that need more than one round trip, `resource` handling, scope names, and authorization servers on a different host from the MCP endpoint (the fake has them on one).
 2. **A Keychain and DPAPI store is owed.** It needs cgo — see the plan for why the `security` CLI is refused. The interface is shaped so adding one changes nothing else. Until it exists, both surfaces must keep showing `TokenStore.Description()` wherever a sign-in is offered, so a user knows their credential is protected by file permissions alone. There are tests on that in `cmd/mcp_signin_test.go` and `app/ui/mcp_signin_test.go`.
 3. **Phase 5**: docs, cross-substrate review, closeout.
 
@@ -97,6 +97,9 @@ What landed, so it is not re-derived: the transport seam is `newTransport(ctx, s
 - `StatusNeedsSignIn` must not collapse back into `StatusFailed`. They ask the user for different things, and a sign-in is never fixed by retrying.
 - A sign-in must stay one-at-a-time per server. Two would open two browser windows and two redirect listeners, and the callback that arrived second would answer a request that no longer exists.
 - Both surfaces must keep naming the token store before a token exists. This is what makes the file store honest rather than merely convenient.
+- `signInRequiredTransport` must stay in front of every connection that is not an explicit sign-in. The protocol library performs discovery and dynamic client registration **before** it asks whether a browser may be opened, so a refusal at the fetcher comes too late: it has already announced this installation to the service and left a client registration behind, on every launch and every reconnect. Attaching an OAuth handler to a server with no stored token brings that back. `TestAServerThatNeedsASignInSaysSoRatherThanFailing` asserts zero registrations and zero authorization requests on the ordinary path.
+- A 401 without a Bearer challenge must keep reading as an ordinary failure. Reporting it as a needed sign-in sends the user to a browser for nothing.
+- There is exactly one place a token is written: `persistingTokenSource`. A second writer was deleted after two attempts to falsify it both passed. Do not add one back beside it.
 - When falsifying, do not back files up by basename. This repository has two `mcp.go`, two `tools.go` and more; a harness that did cost an hour and nearly lost a surface. `docs/_design/proof/phase3d-wiring-falsification.txt` records it.
 
 ## Proof artefacts
