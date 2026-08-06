@@ -1,0 +1,210 @@
+package mcp
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"maps"
+	"os"
+	"path/filepath"
+	"slices"
+	"strings"
+	"time"
+
+	"golang.org/x/oauth2"
+)
+
+// TokensPathEnv overrides the location of the token store.
+const TokensPathEnv = "OLLAMA_MCP_TOKENS"
+
+const tokensFilename = "mcp-tokens.json"
+
+// ErrNoToken reports that a server has no stored token. It is distinct from a
+// failure to read the store, because "you are not signed in" and "your
+// credentials could not be read" call for different responses from the caller.
+var ErrNoToken = errors.New("no stored token for that MCP server")
+
+// TokenStore keeps the OAuth tokens for remote MCP servers.
+//
+// It is an interface because where a token lives is a platform question, and
+// because a caller must be able to say which one it is using — a store that
+// could silently be either the operating system's keychain or a file would
+// leave a user unable to know how their credentials are protected.
+type TokenStore interface {
+	// Load returns the stored token, or ErrNoToken.
+	Load(server string) (*oauth2.Token, error)
+	// Save stores the token, replacing any previous one.
+	Save(server string, token *oauth2.Token) error
+	// Delete removes the token. Deleting an absent token is not an error: the
+	// caller's intent — that no token remain — is satisfied either way.
+	Delete(server string) error
+	// Description says in one line where tokens are kept and how well they are
+	// protected. It is surfaced to the user rather than kept for logs: someone
+	// signing in to a third-party service is entitled to know where the
+	// credential ends up.
+	Description() string
+}
+
+// FileTokenStore keeps tokens in a JSON file in the user's configuration
+// directory, protected by file permissions alone.
+//
+// It is named for what it is. This is **weaker than the operating system's
+// keychain**: any process running as this user can read the file, whereas a
+// keychain item can be scoped to an application and can require the user to
+// unlock it. It exists because the obvious way to reach the macOS keychain
+// without cgo — shelling out to the `security` command — passes the secret as
+// a command-line argument, where any local user can read it out of the process
+// list. That is worse than a 0600 file, not better.
+//
+// A Keychain- and DPAPI-backed store is owed, and needs cgo to be done safely.
+type FileTokenStore struct {
+	// Path is the store's location. Empty means the resolved default.
+	Path string
+}
+
+// TokensPath returns the token store's location, resolved like ConfigPath.
+func TokensPath() (string, error) {
+	if path := strings.TrimSpace(os.Getenv(TokensPathEnv)); path != "" {
+		return filepath.Abs(path)
+	}
+	if xdg := strings.TrimSpace(os.Getenv("XDG_CONFIG_HOME")); xdg != "" {
+		return filepath.Join(xdg, "ollama", tokensFilename), nil
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(home, ".ollama", tokensFilename), nil
+}
+
+func (s *FileTokenStore) path() (string, error) {
+	if strings.TrimSpace(s.Path) != "" {
+		return s.Path, nil
+	}
+	return TokensPath()
+}
+
+// Description tells the user where their tokens are and what protects them.
+func (s *FileTokenStore) Description() string {
+	path, err := s.path()
+	if err != nil {
+		return "a file in your Ollama configuration directory, readable by any program running as you"
+	}
+	return path + ", readable by any program running as you"
+}
+
+// storedToken is the persisted shape. oauth2.Token is serialised field by field
+// rather than embedded, so a change to that type cannot silently alter what is
+// written to disk or what an older Ollama can read back.
+type storedToken struct {
+	AccessToken  string    `json:"accessToken"`
+	TokenType    string    `json:"tokenType,omitempty"`
+	RefreshToken string    `json:"refreshToken,omitempty"`
+	Expiry       time.Time `json:"expiry,omitempty"`
+}
+
+type tokenFile struct {
+	Tokens map[string]storedToken `json:"tokens"`
+}
+
+func (s *FileTokenStore) read() (*tokenFile, string, error) {
+	path, err := s.path()
+	if err != nil {
+		return nil, "", err
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return &tokenFile{Tokens: map[string]storedToken{}}, path, nil
+		}
+		return nil, path, fmt.Errorf("read mcp tokens %s: %w", path, err)
+	}
+	if len(strings.TrimSpace(string(data))) == 0 {
+		return &tokenFile{Tokens: map[string]storedToken{}}, path, nil
+	}
+
+	var file tokenFile
+	// A store that cannot be parsed is an error rather than an empty store.
+	// Treating it as empty would silently sign the user out of everything and
+	// then overwrite whatever was there.
+	if err := json.Unmarshal(data, &file); err != nil {
+		return nil, path, fmt.Errorf("parse mcp tokens %s: %w", path, err)
+	}
+	if file.Tokens == nil {
+		file.Tokens = map[string]storedToken{}
+	}
+	return &file, path, nil
+}
+
+func (s *FileTokenStore) write(file *tokenFile, path string) error {
+	data, err := json.MarshalIndent(file, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal mcp tokens: %w", err)
+	}
+	// Same private write as the configuration: 0600 in a 0700 directory,
+	// temp file and rename, so a crash cannot leave a half-written store.
+	return writeFilePrivate(path, append(data, '\n'))
+}
+
+// Load returns the stored token for a server.
+func (s *FileTokenStore) Load(server string) (*oauth2.Token, error) {
+	file, _, err := s.read()
+	if err != nil {
+		return nil, err
+	}
+	stored, ok := file.Tokens[server]
+	if !ok {
+		return nil, fmt.Errorf("%w: %s", ErrNoToken, server)
+	}
+	return &oauth2.Token{
+		AccessToken:  stored.AccessToken,
+		TokenType:    stored.TokenType,
+		RefreshToken: stored.RefreshToken,
+		Expiry:       stored.Expiry,
+	}, nil
+}
+
+// Save stores a server's token.
+func (s *FileTokenStore) Save(server string, token *oauth2.Token) error {
+	if strings.TrimSpace(server) == "" {
+		return errors.New("a token needs a server name")
+	}
+	if token == nil || token.AccessToken == "" {
+		return errors.New("refusing to store an empty token")
+	}
+
+	file, path, err := s.read()
+	if err != nil {
+		return err
+	}
+	file.Tokens[server] = storedToken{
+		AccessToken:  token.AccessToken,
+		TokenType:    token.TokenType,
+		RefreshToken: token.RefreshToken,
+		Expiry:       token.Expiry,
+	}
+	return s.write(file, path)
+}
+
+// Delete removes a server's token.
+func (s *FileTokenStore) Delete(server string) error {
+	file, path, err := s.read()
+	if err != nil {
+		return err
+	}
+	if _, ok := file.Tokens[server]; !ok {
+		return nil
+	}
+	delete(file.Tokens, server)
+	return s.write(file, path)
+}
+
+// Servers lists the servers with a stored token, in a stable order.
+func (s *FileTokenStore) Servers() ([]string, error) {
+	file, _, err := s.read()
+	if err != nil {
+		return nil, err
+	}
+	return slices.Sorted(maps.Keys(file.Tokens)), nil
+}

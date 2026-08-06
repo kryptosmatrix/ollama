@@ -72,3 +72,83 @@ RESTORED_TEST_EXIT=0
 
 === SCALE ===
 mcp package top-level tests: 80
+
+=== TOKEN STORAGE ===
+captured: 2026-08-06T04:31:50Z
+
+FINDING, PROVEN BY EXPERIMENT — why there is no Keychain-backed store here.
+The obvious way to reach the macOS keychain without cgo is the 'security' command. Its
+add-generic-password takes the secret as a command-line argument (-w), with no stdin form.
+A probe on this machine ran 'security add-generic-password -a probe2 -s ollama-argv-probe2
+-w another-secret-98765' and grepped 'ps -ax -o command' while it ran: the secret was present
+in the process list, readable by any local user. That is WORSE than a 0600 file, so the CLI
+route is refused. A Keychain and DPAPI store needs cgo and is owed.
+
+--- baseline ---
+ok  	github.com/ollama/ollama/mcp	10.918s
+BASELINE_TEST_EXIT=0
+
+--- F71: the store is world-readable instead of 0600 ---
+147:	return os.WriteFile(path, append(data, '\n'), 0o644) // FALSIFICATION: world-readable
+--- FAIL: TestStoreIsPrivate (0.00s)
+    tokenstore_test.go:168: Save: open /var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/TestStoreIsPrivate2167790546/001/nested/mcp-tokens.json: no such file or directory
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.450s
+FAIL
+F71_TEST_EXIT=1 (expect non-zero)
+
+--- F72: a corrupt store reads as 'not signed in' ---
+132:		return &tokenFile{Tokens: map[string]storedToken{}}, path, nil // FALSIFICATION: corrupt reads as empty
+--- FAIL: TestACorruptStoreIsReported (0.00s)
+    tokenstore_test.go:215: err = no stored token for that MCP server: hosted; a store that cannot be read must not read as 'not signed in', which would sign the user out of everything and then overwrite it
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.455s
+FAIL
+F72_TEST_EXIT=1 (expect non-zero)
+
+--- F73: the refresh token and expiry are dropped ---
+181:	file.Tokens[server] = storedToken{ // FALSIFICATION: refresh token and expiry dropped
+--- FAIL: TestTokenRoundTrip (0.01s)
+    tokenstore_test.go:73: the refresh token must survive, or the user is signed out at the first expiry: ""
+    tokenstore_test.go:79: Expiry = 0001-01-01 00:00:00 +0000 UTC, want 2026-08-06 12:00:00 +0000 UTC; a lost expiry means the token is never refreshed
+--- FAIL: TestStoredShapeIsExplicit (0.01s)
+    tokenstore_test.go:334: field "refreshToken" is missing from the stored shape: map[accessToken:access-abc123 expiry:0001-01-01T00:00:00Z tokenType:Bearer]
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.466s
+FAIL
+F73_TEST_EXIT=1 (expect non-zero)
+
+--- F74: deleting only hides the token, leaving it in the file ---
+199:	_ = path // FALSIFICATION: nothing removed
+--- FAIL: TestDelete (0.01s)
+    tokenstore_test.go:144: the token survived deletion: <nil>
+    tokenstore_test.go:158: a deleted token is still in the file
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.454s
+FAIL
+F74_TEST_EXIT=1 (expect non-zero)
+
+--- F75: the store claims to be the operating system's keychain ---
+93:	return "the system keychain" // FALSIFICATION: overclaims protection
+# github.com/ollama/ollama/mcp [github.com/ollama/ollama/mcp.test]
+mcp/tokenstore.go:89:2: declared and not used: path
+FAIL	github.com/ollama/ollama/mcp [build failed]
+FAIL
+F75_TEST_EXIT=1 (expect non-zero)
+
+--- F76: an empty token is stored, so the user appears signed in ---
+175:	} // FALSIFICATION: empty access token accepted
+--- FAIL: TestRefusesToStoreNothing (0.01s)
+    tokenstore_test.go:232: an empty token must be refused; storing it would look like being signed in
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.462s
+FAIL
+F76_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/mcp	10.647s
+RESTORED_TEST_EXIT=0
+
+=== SCALE ===
+mcp package top-level tests: 93
