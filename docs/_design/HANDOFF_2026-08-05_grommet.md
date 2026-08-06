@@ -57,6 +57,8 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 **`go test ./... | tail` reports the exit code of `tail`.** Redirect to a file and echo `$?` on its own.
 
+**The missing `app/dist` also takes out `mcp`'s `TestSDKIsContainedToThisPackage`**, because that test is a `go list` sweep of the whole module and `go list` cannot load `app/ui` without the embed. The failure names the embed, so it reads as nothing to do with SDK containment. `go test ./app/ui/` goes the same way. If you do not need a real frontend, a placeholder `index.html` in `app/ui/app/dist` is enough to unblock both — it is gitignored at `app/ui/app/.gitignore:11`.
+
 **`app/updater`'s `TestAutoUpdateDisabledSkipsDownload` is flaky.** It fails roughly one full app-tree run in three and always passes when that package is run alone — proven against a clean tree with this work stashed. It is not MCP's. Do not chase it, and do not read a single green app-tree run as proof of anything.
 
 ## What the next session should do
@@ -73,6 +75,9 @@ Build the fake authorization server first, before the real flow — rejecting a 
 
 - Tool descriptions from a server are untrusted input that lands in the model's prompt. Sanitised and capped in `mcp/tools.go`; keep it that way when the manager starts feeding real ones through.
 - Schema conversion is lossy and says so in the description. Do not "simplify" that into dropping constraints.
+- The desktop app's own tools declare an `api.ToolFunction` and derive their schema map from it, never the reverse. `browser.open`'s `id` is either a URL or the index of a link on the page, which needs `anyOf` to express; rebuild that tool from a map and the property arrives with no type at all. A new first-party tool that ships only a map is back on the lossy path, and `TestFirstPartyToolsSupplyTheirOwnDefinition` is what catches it.
+- `defaultWebSearchResults` and `defaultBrowserSearchResults` are each read by both `Execute` and the tool definition. Do not inline either back into one of them: the hand-written schema they replaced advertised 3 while `Execute` asked for 5, for as long as both existed.
+- `maxBrowserSearchResults` equals the default on purpose. `browser.search` discarded `topn` for its whole life, so every search it ever ran asked for five; honouring the argument without a ceiling would have widened what the model can request from the search service as a side effect of describing the tool honestly. Raising it is a deliberate decision that needs its own evidence, not a cleanup.
 - `mcp.json` is a code-execution config: `0600` in a `0700` directory, no shell, credentials only as `${env:NAME}`.
 - The desktop app's approval path is complete, backend and interface. Any tool registered there that implements `ApprovalRequired` will be gated; anything that does not will run the moment the model names it, so an MCP adapter must implement it.
 - Everything about the approval wait fails safe: a timeout, a cancelled context and a failed notify all refuse the call. Do not "simplify" any of those into allowing it.
@@ -94,6 +99,7 @@ Build the fake authorization server first, before the real flow — rejecting a 
 - `docs/_design/proof/phase3a-commands-falsification.txt` — the `ollama mcp` commands, five protections including root-command registration.
 - `docs/_design/proof/phase3a-slash-falsification.txt` — `/mcp`, five protections including a disabled server left running.
 - `docs/_design/proof/phase3b-falsification.txt` — the app approval rendezvous, six protections, plus the attribution of a pre-existing flaky test.
+- `docs/_design/proof/phase5-falsification.txt` — the first-party tool definitions, five protections. Only one of them discriminates the faithful path from the derived one — `browser.open`'s `anyOf` — and the file says which, because the rest assert things both paths preserve.
 - `docs/_design/proof/phase3b-react-falsification.txt` — the React prompt, four protections, and a statement of what the node-environment suite cannot cover.
 - `docs/_design/proof/phase3c-falsification.txt` — MCP tools in the app, four protections, plus a falsifier that initially passed and the test repair it forced.
 - `docs/_design/proof/phase4-falsification.txt` — the MCP Servers page, five protections, plus two falsifiers that initially passed: one a wrong sabotage, one a test that did not discriminate.

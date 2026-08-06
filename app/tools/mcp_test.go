@@ -3,6 +3,7 @@
 package tools
 
 import (
+	"context"
 	"encoding/json"
 	"os/exec"
 	"path/filepath"
@@ -157,16 +158,43 @@ func TestMCPToolKeepsItsFaithfulSchema(t *testing.T) {
 	}
 }
 
+// mapOnlyTool has a schema map and no faithful definition, which is all the
+// Tool interface requires.
+//
+// This test used to register &WebSearch{}. Once the first-party tools began
+// supplying their own definitions that stopped exercising the derived path
+// while still passing, so the fallback would have lost its only coverage
+// silently. A tool that genuinely has nothing but a map is used instead.
+type mapOnlyTool struct{}
+
+func (mapOnlyTool) Name() string        { return "map_only" }
+func (mapOnlyTool) Description() string { return "a tool that only describes itself as a map" }
+func (mapOnlyTool) Prompt() string      { return "" }
+
+func (mapOnlyTool) Execute(context.Context, map[string]any) (any, string, error) {
+	return nil, "", nil
+}
+
+func (mapOnlyTool) Schema() map[string]any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"query": map[string]any{"type": "string", "description": "what to look for"},
+		},
+		"required": []any{"query"},
+	}
+}
+
 func TestOllamaToolsFallsBackForOrdinaryTools(t *testing.T) {
 	registry := NewRegistry()
-	registry.Register(&WebSearch{})
+	registry.Register(mapOnlyTool{})
 
 	definitions := registry.OllamaTools()
 	if len(definitions) != 1 {
 		t.Fatalf("got %d definitions", len(definitions))
 	}
 	function := definitions[0].Function
-	if function.Name != "web_search" {
+	if function.Name != "map_only" {
 		t.Errorf("Name = %q", function.Name)
 	}
 	if function.Parameters.Properties.Len() == 0 {

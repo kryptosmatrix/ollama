@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ollama/ollama/api"
 	"github.com/ollama/ollama/app/ui/responses"
 )
 
@@ -111,20 +112,88 @@ func NewBrowserSearch(bb *Browser) *BrowserSearch {
 	}
 }
 
+// defaultBrowserSearchResults is what Execute asks for when topn is omitted,
+// and what the definition tells the model to expect.
+//
+// maxBrowserSearchResults is the ceiling. It is deliberately the same number:
+// topn was silently discarded before it was declared, so every search this tool
+// has ever run asked for five. Honouring the argument without a ceiling would
+// hand the model a new upper bound on what it can request from the search
+// service as a side effect of describing the tool honestly, which is not a
+// change this was asked to make. Raising it is a separate decision with its own
+// evidence. BrowserWebSearch's own schema says "up to 5" for the same reason.
+const (
+	defaultBrowserSearchResults = 5
+	maxBrowserSearchResults     = 5
+)
+
+// browserSearchTool is the definition the model receives.
+//
+// These parameters are what Execute below has always read; until they were
+// declared here the tool reached the model with an empty schema, which told it
+// browser.search takes no arguments at all.
+var browserSearchTool = api.ToolFunction{
+	Name:        "browser.search",
+	Description: "Search the web for information",
+	Parameters: api.ToolFunctionParameters{
+		Type:     "object",
+		Required: []string{"query"},
+		Properties: toolProperties([]namedProperty{
+			{"query", api.ToolProperty{
+				Type:        api.PropertyType{"string"},
+				Description: "The search query to run",
+			}},
+			{"topn", api.ToolProperty{
+				Type:        api.PropertyType{"integer"},
+				Description: fmt.Sprintf("How many results to return, from 1 to %d. Defaults to %d when omitted.", maxBrowserSearchResults, defaultBrowserSearchResults),
+			}},
+		}),
+	},
+}
+
 func (b *BrowserSearch) Name() string {
-	return "browser.search"
+	return browserSearchTool.Name
 }
 
 func (b *BrowserSearch) Description() string {
-	return "Search the web for information"
+	return browserSearchTool.Description
 }
 
 func (b *BrowserSearch) Prompt() string {
 	return ""
 }
 
+func (b *BrowserSearch) ToolFunction() api.ToolFunction {
+	return browserSearchTool
+}
+
 func (b *BrowserSearch) Schema() map[string]any {
-	return map[string]any{}
+	return schemaOf(browserSearchTool)
+}
+
+// browserSearchTopn reads the topn argument, falling back to the default the
+// tool definition advertises.
+//
+// Arguments arrive decoded from JSON, where every number is a float64, so
+// reading topn as an int alone never matched and the model's choice was
+// silently discarded. Both forms are accepted, as BrowserOpen already does for
+// its own numeric arguments, because callers inside this package pass Go ints.
+// A value of zero or less is ignored rather than forwarded, matching WebSearch,
+// and anything above the ceiling is clamped rather than refused: the model
+// asking for more results than the tool offers is not a reason to fail a search.
+func browserSearchTopn(args map[string]any) int {
+	requested := 0
+	switch value := args["topn"].(type) {
+	case float64:
+		requested = int(value)
+	case int:
+		requested = value
+	}
+
+	if requested <= 0 {
+		return defaultBrowserSearchResults
+	}
+	return min(requested, maxBrowserSearchResults)
 }
 
 func (b *BrowserSearch) Execute(ctx context.Context, args map[string]any) (any, string, error) {
@@ -133,10 +202,7 @@ func (b *BrowserSearch) Execute(ctx context.Context, args map[string]any) (any, 
 		return nil, "", fmt.Errorf("query parameter is required")
 	}
 
-	topn, ok := args["topn"].(int)
-	if !ok {
-		topn = 5
-	}
+	topn := browserSearchTopn(args)
 
 	searchArgs := map[string]any{
 		"queries":     []any{query},
@@ -484,20 +550,61 @@ func NewBrowserOpen(bb *Browser) *BrowserOpen {
 	}
 }
 
+// browserOpenTool is the definition the model receives.
+//
+// "id" is the reason this tool must supply its own definition rather than be
+// rebuilt from a map. Execute branches on the argument's type — a string is a
+// URL to open directly, a number is the index of a link on the current page —
+// and alternatives like that are expressed as anyOf, which the map form cannot
+// carry. Rebuilt from a map the property arrives with no type at all, leaving
+// the model to guess which of the two it is allowed to send.
+var browserOpenTool = api.ToolFunction{
+	Name:        "browser.open",
+	Description: "Open a link in the browser",
+	Parameters: api.ToolFunctionParameters{
+		Type: "object",
+		Properties: toolProperties([]namedProperty{
+			{"id", api.ToolProperty{
+				Description: "What to open. Omit to redisplay the current page.",
+				AnyOf: []api.ToolProperty{
+					{Type: api.PropertyType{"string"}, Description: "A URL to open directly. Only URLs the user supplied may be opened this way."},
+					{Type: api.PropertyType{"integer"}, Description: "The index of a link on the page being viewed."},
+				},
+			}},
+			{"cursor", api.ToolProperty{
+				Type:        api.PropertyType{"integer"},
+				Description: "Which page of the browsing history to open from. Defaults to the most recent page.",
+			}},
+			{"loc", api.ToolProperty{
+				Type:        api.PropertyType{"integer"},
+				Description: "The line to start viewing from. Defaults to the top of the page.",
+			}},
+			{"num_lines", api.ToolProperty{
+				Type:        api.PropertyType{"integer"},
+				Description: "How many lines to show. Defaults to as many as fit the viewport.",
+			}},
+		}),
+	},
+}
+
 func (b *BrowserOpen) Name() string {
-	return "browser.open"
+	return browserOpenTool.Name
 }
 
 func (b *BrowserOpen) Description() string {
-	return "Open a link in the browser"
+	return browserOpenTool.Description
 }
 
 func (b *BrowserOpen) Prompt() string {
 	return ""
 }
 
+func (b *BrowserOpen) ToolFunction() api.ToolFunction {
+	return browserOpenTool
+}
+
 func (b *BrowserOpen) Schema() map[string]any {
-	return map[string]any{}
+	return schemaOf(browserOpenTool)
 }
 
 func (b *BrowserOpen) Execute(ctx context.Context, args map[string]any) (any, string, error) {
@@ -727,20 +834,46 @@ func NewBrowserFind(bb *Browser) *BrowserFind {
 	}
 }
 
+// browserFindTool is the definition the model receives. As with the other two
+// browser tools, these parameters are what Execute has always read; before they
+// were declared the model was told the tool takes nothing.
+var browserFindTool = api.ToolFunction{
+	Name:        "browser.find",
+	Description: "Find a term in the browser",
+	Parameters: api.ToolFunctionParameters{
+		Type:     "object",
+		Required: []string{"pattern"},
+		Properties: toolProperties([]namedProperty{
+			{"pattern", api.ToolProperty{
+				Type:        api.PropertyType{"string"},
+				Description: "The text to look for. Matching ignores case.",
+			}},
+			{"cursor", api.ToolProperty{
+				Type:        api.PropertyType{"integer"},
+				Description: "Which page of the browsing history to search. Defaults to the most recent page.",
+			}},
+		}),
+	},
+}
+
 func (b *BrowserFind) Name() string {
-	return "browser.find"
+	return browserFindTool.Name
 }
 
 func (b *BrowserFind) Description() string {
-	return "Find a term in the browser"
+	return browserFindTool.Description
 }
 
 func (b *BrowserFind) Prompt() string {
 	return ""
 }
 
+func (b *BrowserFind) ToolFunction() api.ToolFunction {
+	return browserFindTool
+}
+
 func (b *BrowserFind) Schema() map[string]any {
-	return map[string]any{}
+	return schemaOf(browserFindTool)
 }
 
 func (b *BrowserFind) Execute(ctx context.Context, args map[string]any) (any, string, error) {

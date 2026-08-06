@@ -4,7 +4,6 @@ package tools
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -15,13 +14,19 @@ import (
 // OllamaTool is implemented by tools that already hold a faithful
 // api.ToolFunction.
 //
-// The desktop app's ordinary path describes a tool as a plain map and rebuilds
-// it with convertToOllamaTool, which keeps only each property's type and
-// description — enums, nested objects, array items and alternatives are all
-// lost. That is survivable for the first-party tools, whose schemas are simple
-// and hand-written. It is not survivable for an MCP tool, whose schema was
-// converted carefully from the server's own and would arrive at the model
-// stripped of exactly the parts that make a call valid.
+// The alternative path describes a tool as a plain map and rebuilds it with
+// toolFunctionFromSchema, which keeps only each property's type and description
+// — enums, nested objects, array items and alternatives are all lost. That is
+// not survivable for an MCP tool, whose schema was converted carefully from the
+// server's own and would arrive at the model stripped of exactly the parts that
+// make a call valid. Nor is it survivable for browser.open, whose "id" is a URL
+// or a link index and so needs anyOf to say so.
+//
+// Every tool the desktop app registers now implements this, so no tool the user
+// can reach goes through the derived path. That path stays because implementing
+// this interface is optional: Tool is the published contract and Register
+// accepts anything satisfying it, so a tool that only has a map must still get
+// a usable definition rather than none.
 type OllamaTool interface {
 	ToolFunction() api.ToolFunction
 }
@@ -51,12 +56,8 @@ func NewMCP(manager *mcp.Manager, tool mcp.Tool) (*MCP, error) {
 
 	// A map form is kept as well, because the registry's own listing describes
 	// tools that way and other callers read it.
-	encoded, err := json.Marshal(fn.Parameters)
+	schema, err := toolSchemaMap(fn.Parameters)
 	if err != nil {
-		return nil, fmt.Errorf("tool %q: %w", fn.Name, err)
-	}
-	var schema map[string]any
-	if err := json.Unmarshal(encoded, &schema); err != nil {
 		return nil, fmt.Errorf("tool %q: %w", fn.Name, err)
 	}
 
