@@ -3,7 +3,7 @@
 From: Grommet (Claude Opus 5)
 Date: 2026-08-05
 Branch: `mcp/server-support`, pushed to `origin` (kryptosmatrix/ollama)
-Head at handoff: `da3b9da1`
+Head at handoff: `0f82fb9b`
 
 ## Read this first
 
@@ -18,7 +18,7 @@ Head at handoff: `da3b9da1`
 | 1b — approval ledger | **DONE** (`b672284c`) |
 | 2a — namespacing + schema conversion | **DONE** (`7dbec4fa`) |
 | 2 — manager and transports | **DONE** (`594f6104`) |
-| 3d — OAuth 2.1 | **REDIRECT DONE** (`da3b9da1`) — keystore and surfaces outstanding |
+| 3d — OAuth 2.1 | **REDIRECT AND TOKEN STORE DONE** (`da3b9da1`, `0f82fb9b`) — keychain and surfaces outstanding |
 | 3a — CLI surface | **DONE** (`12ea7760`, `09a954cb`, `7e533582`, `f12a2d6a`) |
 | 3b — app approval path | **DONE** (`0506f8e7`, `e7a05864`) |
 | 3c — app MCP registration | **DONE** (`7b6bfc76`) |
@@ -63,13 +63,14 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 ## What the next session should do
 
-**Finish OAuth.** Read the scope correction in plan §Phase 2b/3d first: the protocol library already does metadata discovery, dynamic client registration, PKCE, the token exchange and refresh. Do not reimplement any of it. Three pieces remain.
+**Finish OAuth.** Two pieces remain; the redirect and the token store are done. Read the scope correction in plan §Phase 2b/3d first — the protocol library already does discovery, registration, PKCE, exchange and refresh, and none of it should be reimplemented.
 
-1. **Token storage.** `AuthorizationCodeHandlerConfig` has `NewTokenSource` and `InitialTokenSource` — those are the hooks. Persist to Keychain on macOS and DPAPI on Windows, keyed by server name, with a build-tagged file fallback at `0600` that says plainly it is weaker. Tokens must never touch `mcp.json`; a test should write a config after a full flow, read the bytes, and assert the token substring is absent.
-2. **Wire the handler into the transport.** `StreamableClientTransport.OAuthHandler` takes it. Build the handler with `RedirectURL` from a `LoopbackRedirect` started first, and `AuthorizationCodeFetcher` set to its `Fetch`. `RequestRefreshToken: true`.
-3. **The surfaces.** `POST /api/v1/mcp/{name}/connect` and `/disconnect` for the app, `ollama mcp login` and `logout` for the terminal. Disconnect must **revoke at the server** and clear the keystore, not merely forget locally.
+1. **Wire the handler into the transport.** `StreamableClientTransport.OAuthHandler` takes an `auth.OAuthHandler`; build one with `auth.NewAuthorizationCodeHandler`. `RedirectURL` comes from a `LoopbackRedirect` started first, `AuthorizationCodeFetcher` is its `Fetch`, `RequestRefreshToken: true`, and `NewTokenSource` / `InitialTokenSource` are where `TokenStore` plugs in — load on start, save after exchange and after each refresh.
+2. **The surfaces.** `POST /api/v1/mcp/{name}/connect` and `/disconnect` for the app, `ollama mcp login` and `logout` for the terminal. Disconnect must **revoke at the server** and then delete from the store; forgetting locally while the token stays valid is not signing out.
 
-Build the fake authorization server before the real flow. The tests that matter reject a mismatched `state` and a wrong PKCE verifier, and writing them after the happy path is how they end up shaped by it.
+**A Keychain and DPAPI store is owed.** It needs cgo — see the plan for why the `security` CLI is refused. The interface is shaped so adding one changes nothing else, and until it exists the app and the CLI must show `TokenStore.Description()` wherever a sign-in is offered, so a user knows their credential is protected by file permissions alone.
+
+Build the fake authorization server before the real flow: the tests that matter reject a mismatched `state` and a wrong PKCE verifier, and writing them after the happy path is how they end up shaped by it.
 
 ## What must not soften
 
@@ -88,6 +89,8 @@ Build the fake authorization server before the real flow. The tests that matter 
 - A registry entry Ollama cannot run must never be offered with a command line. Refusing is correct; guessing a runner for an unverified ecosystem is how a user approves something that is not what its name suggests.
 - The OAuth redirect must keep refusing a wrong-state callback *without ending the wait*. Refusing it is not enough on its own: a stray request that aborts a sign-in in progress is a denial of service on the loopback port that anything on the machine can reach.
 - The browser must keep being opened only by `LoopbackRedirect.Fetch`, and only for http and https.
+- A token must never reach `mcp.json`, and `FileTokenStore.Description()` must never start implying the operating system's keychain. Both have tests.
+- Never reach the macOS keychain through the `security` command. Its secret is a command-line argument and shows up in the process list; this was measured, not assumed.
 - Registry tests must keep using the recorded fixtures. Pointing them at the live service makes the suite fail for reasons unrelated to this code.
 
 ## Proof artefacts
