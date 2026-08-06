@@ -127,6 +127,12 @@ type Options struct {
 	// connect rather than offering a sign-in.
 	Tokens TokenStore
 
+	// OpenBrowser launches the user's browser at an authorization URL. Nil
+	// means the operating system's opener. It is a seam, like newTransport
+	// below: the full sign-in flow is driven through it in tests, and a
+	// headless caller can print the URL rather than launch anything.
+	OpenBrowser func(string) error
+
 	// newTransport is a seam for tests, which connect an in-process server over
 	// the SDK's in-memory transport. Production leaves it nil and gets the real
 	// subprocess and HTTP transports.
@@ -335,6 +341,7 @@ func (m *Manager) dial(ctx context.Context, spec *ServerSpec, mode signInMode) e
 	transport, release, err := m.opts.newTransport(m.lifetime, spec, transportOptions{
 		tokens: m.opts.Tokens,
 		signIn: mode,
+		open:   m.opts.OpenBrowser,
 	})
 	if err != nil {
 		release()

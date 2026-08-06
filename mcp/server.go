@@ -2,6 +2,7 @@ package mcp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"maps"
 	"net/http"
@@ -96,6 +97,50 @@ type transportOptions struct {
 	// signIn says whether this connection may open a browser. Every ordinary
 	// connection passes signInDisallowed.
 	signIn signInMode
+	// open launches the user's browser at the authorization URL. Nil means the
+	// operating system's opener, which is what production uses; it is a seam so
+	// the full sign-in flow can be driven without a browser, and so a headless
+	// caller can print the URL instead of launching anything.
+	open func(string) error
+}
+
+// signInRequiredTransport turns a server's authorization challenge into
+// ErrSignInRequired instead of letting an authorization begin.
+//
+// It is used by every connection that is not an explicit sign-in. Returning an
+// error rather than the response means the protocol library never reaches its
+// authorization branch, so nothing is discovered, nothing is registered, and
+// the authorization server is never contacted at all.
+type signInRequiredTransport struct {
+	base   http.RoundTripper
+	server string
+}
+
+func (t *signInRequiredTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	base := t.base
+	if base == nil {
+		base = http.DefaultTransport
+	}
+	resp, err := base.RoundTrip(req)
+	if err != nil || resp.StatusCode != http.StatusUnauthorized {
+		return resp, err
+	}
+	// Only a Bearer challenge means "sign in"; a 401 without one is an
+	// ordinary failure and must keep reading as one.
+	if !hasBearerChallenge(resp.Header) {
+		return resp, nil
+	}
+	resp.Body.Close()
+	return nil, fmt.Errorf("%w: %s", ErrSignInRequired, t.server)
+}
+
+func hasBearerChallenge(header http.Header) bool {
+	for _, value := range header.Values("WWW-Authenticate") {
+		if strings.HasPrefix(strings.ToLower(strings.TrimSpace(value)), "bearer") {
+			return true
+		}
+	}
+	return false
 }
 
 // newTransport builds the SDK transport for a spec. It resolves any ${env:NAME}
@@ -141,13 +186,40 @@ func newTransport(ctx context.Context, spec *ServerSpec, opts transportOptions) 
 			Endpoint:   spec.URL,
 			HTTPClient: client,
 		}
+		if opts.tokens == nil {
+			return transport, nothingToRelease, nil
+		}
 
-		session, err := oauthHandlerFor(spec, opts.tokens, opts.signIn)
+		// A handler is attached only when there is a token to send. Without
+		// one it could do nothing but begin an authorization, and beginning
+		// one is what an ordinary connection must never do.
+		signedIn := true
+		if _, err := opts.tokens.Load(spec.Name); err != nil {
+			if !errors.Is(err, ErrNoToken) {
+				return nil, nothingToRelease, err
+			}
+			signedIn = false
+		}
+
+		if opts.signIn != signInAllowed {
+			// Answer the challenge here rather than letting the protocol
+			// library see it. Its authorization flow performs discovery and
+			// dynamic client registration *before* it asks whether a browser
+			// may be opened, so a refusal at that point has already announced
+			// this installation to the service and left a client registration
+			// behind — on every launch and every reconnect, for a server the
+			// user has not signed in to. Turning the challenge into an error
+			// first means the ordinary path touches the MCP endpoint and
+			// nothing else.
+			client.Transport = &signInRequiredTransport{base: client.Transport, server: spec.Name}
+			if !signedIn {
+				return transport, nothingToRelease, nil
+			}
+		}
+
+		session, err := newOAuthSession(spec.Name, opts.tokens, opts.signIn, opts.open)
 		if err != nil {
 			return nil, nothingToRelease, err
-		}
-		if session == nil {
-			return transport, nothingToRelease, nil
 		}
 		transport.OAuthHandler = session.handler
 		return transport, session.close, nil

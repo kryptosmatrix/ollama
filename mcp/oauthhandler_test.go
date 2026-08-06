@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -28,7 +29,7 @@ func testStore(t *testing.T) TokenStore {
 // on a 401, rather than through refuseSignIn directly: the property is that an
 // ordinary connection is wired to a refusal, not merely that a refusal exists.
 func TestAnOrdinaryConnectionCannotOpenABrowser(t *testing.T) {
-	session, err := newOAuthSession("hosted", testStore(t), signInDisallowed)
+	session, err := newOAuthSession("hosted", testStore(t), signInDisallowed, nil)
 	if err != nil {
 		t.Fatalf("newOAuthSession: %v", err)
 	}
@@ -59,7 +60,7 @@ func TestAnOrdinaryConnectionCannotOpenABrowser(t *testing.T) {
 // TestAnOrdinaryConnectionOpensNoListener proves the browser is not merely
 // unused but unreachable: no redirect port is bound at all.
 func TestAnOrdinaryConnectionOpensNoListener(t *testing.T) {
-	session, err := newOAuthSession("hosted", testStore(t), signInDisallowed)
+	session, err := newOAuthSession("hosted", testStore(t), signInDisallowed, nil)
 	if err != nil {
 		t.Fatalf("newOAuthSession: %v", err)
 	}
@@ -83,7 +84,7 @@ func TestAnOrdinaryConnectionOpensNoListener(t *testing.T) {
 // when the user is already signed in at the authorization server and is
 // redirected straight back.
 func TestAnExplicitSignInOpensAListener(t *testing.T) {
-	session, err := newOAuthSession("hosted", testStore(t), signInAllowed)
+	session, err := newOAuthSession("hosted", testStore(t), signInAllowed, nil)
 	if err != nil {
 		t.Fatalf("newOAuthSession: %v", err)
 	}
@@ -111,7 +112,7 @@ func TestAnExplicitSignInOpensAListener(t *testing.T) {
 // TestClosingASignInReleasesTheListener keeps a refused or abandoned sign-in
 // from leaving a port bound for the life of the process.
 func TestClosingASignInReleasesTheListener(t *testing.T) {
-	session, err := newOAuthSession("hosted", testStore(t), signInAllowed)
+	session, err := newOAuthSession("hosted", testStore(t), signInAllowed, nil)
 	if err != nil {
 		t.Fatalf("newOAuthSession: %v", err)
 	}
@@ -126,7 +127,7 @@ func TestClosingASignInReleasesTheListener(t *testing.T) {
 }
 
 func TestOAuthNeedsSomewhereToKeepTokens(t *testing.T) {
-	if _, err := newOAuthSession("hosted", nil, signInDisallowed); err == nil {
+	if _, err := newOAuthSession("hosted", nil, signInDisallowed, nil); err == nil {
 		t.Fatal("a handler without a token store would sign the user in and then lose it")
 	}
 }
@@ -140,7 +141,7 @@ func TestOAuthUsesAStoredTokenWithoutAnySignIn(t *testing.T) {
 	// Disallowed mode: no listener, no browser. A stored token must still make
 	// a usable handler, which is the ordinary case for an already-signed-in
 	// server at start-up.
-	session, err := newOAuthSession("hosted", store, signInDisallowed)
+	session, err := newOAuthSession("hosted", store, signInDisallowed, nil)
 	if err != nil {
 		t.Fatalf("newOAuthSession: %v", err)
 	}
@@ -163,7 +164,7 @@ func TestOAuthUsesAStoredTokenWithoutAnySignIn(t *testing.T) {
 }
 
 func TestOAuthReportsAnUnreadableStore(t *testing.T) {
-	if _, err := newOAuthSession("hosted", &brokenStore{}, signInDisallowed); err == nil {
+	if _, err := newOAuthSession("hosted", &brokenStore{}, signInDisallowed, nil); err == nil {
 		t.Fatal("a store that cannot be read must fail loudly rather than silently signing the user out")
 	}
 }
@@ -263,7 +264,10 @@ func (c *countingStore) Save(server string, record *SignInRecord) error {
 	return c.TokenStore.Save(server, record)
 }
 
-func TestSavingTokenSourceStoresWhatItIsGiven(t *testing.T) {
+// TestSavingTokenSourceStoresTheTokenItWasBuiltWith covers the exchanged token.
+// It is written on the first use of the token source rather than at
+// construction, which is the same single write that stores every later refresh.
+func TestSavingTokenSourceStoresTheTokenItWasBuiltWith(t *testing.T) {
 	store := testStore(t)
 	build := savingTokenSource("hosted", store)
 
@@ -273,6 +277,9 @@ func TestSavingTokenSourceStoresWhatItIsGiven(t *testing.T) {
 	}
 	if source == nil {
 		t.Fatal("no token source was built")
+	}
+	if _, err := source.Token(); err != nil {
+		t.Fatalf("Token: %v", err)
 	}
 
 	stored, err := store.Load("hosted")
@@ -294,9 +301,13 @@ func TestSavingTokenSourceIgnoresAnEmptyToken(t *testing.T) {
 	store := testStore(t)
 	build := savingTokenSource("hosted", store)
 
-	if _, err := build(t.Context(), &oauth2.Config{}, nil); err != nil {
+	source, err := build(t.Context(), &oauth2.Config{}, nil)
+	if err != nil {
 		t.Fatalf("build: %v", err)
 	}
+	// The underlying source has nothing to hand out, so this fails — the point
+	// is that nothing was written on the way.
+	source.Token()
 	if _, err := store.Load("hosted"); !errors.Is(err, ErrNoToken) {
 		t.Errorf("an empty token must not be written, got %v", err)
 	}
@@ -306,7 +317,7 @@ func TestOAuthHandlerOnlyForRemoteServers(t *testing.T) {
 	store := testStore(t)
 
 	local := &ServerSpec{Name: "files", Command: "uvx"}
-	session, err := oauthHandlerFor(local, store, signInDisallowed)
+	session, err := oauthHandlerFor(local, store, signInDisallowed, nil)
 	if err != nil {
 		t.Fatalf("oauthHandlerFor: %v", err)
 	}
@@ -315,7 +326,7 @@ func TestOAuthHandlerOnlyForRemoteServers(t *testing.T) {
 	}
 
 	remote := &ServerSpec{Name: "hosted", URL: "https://mcp.example.com/v1"}
-	session, err = oauthHandlerFor(remote, store, signInDisallowed)
+	session, err = oauthHandlerFor(remote, store, signInDisallowed, nil)
 	if err != nil {
 		t.Fatalf("oauthHandlerFor: %v", err)
 	}
@@ -338,28 +349,68 @@ func TestSignInRequiredUnwraps(t *testing.T) {
 	}
 }
 
-// TestAnHTTPTransportCarriesTheOAuthHandler is the wiring itself. Everything
-// else in this file describes a handler that nothing uses unless it reaches the
-// transport, and the failure is silent: a server needing authorization would
-// answer 401 and simply never connect.
-func TestAnHTTPTransportCarriesTheOAuthHandler(t *testing.T) {
+// TestAnHTTPTransportCarriesAHandlerOnlyWhenThereIsATokenToSend is the wiring,
+// and the rule it encodes is narrower than it first looks.
+//
+// A handler with no token can do exactly one thing: begin an authorization.
+// The protocol library's flow performs discovery and dynamic client
+// registration *before* it asks whether a browser may be opened, so attaching
+// one to an ordinary connection means every launch and every reconnect
+// announces this installation to a service the user has not signed in to and
+// leaves a client registration behind. So the ordinary path gets no handler at
+// all, and the challenge is answered by signInRequiredTransport instead.
+func TestAnHTTPTransportCarriesAHandlerOnlyWhenThereIsATokenToSend(t *testing.T) {
 	spec := &ServerSpec{Name: "hosted", Type: TransportHTTP, URL: "https://mcp.example.com/v1"}
-	transport, release, err := newTransport(t.Context(), spec, transportOptions{
-		tokens: testStore(t),
-		signIn: signInDisallowed,
-	})
-	if err != nil {
-		t.Fatalf("newTransport: %v", err)
-	}
-	defer release()
 
-	streamable, ok := transport.(*sdk.StreamableClientTransport)
-	if !ok {
-		t.Fatalf("transport = %T, want a streamable http transport", transport)
+	streamable := func(t *testing.T, opts transportOptions) *sdk.StreamableClientTransport {
+		t.Helper()
+		transport, release, err := newTransport(t.Context(), spec, opts)
+		if err != nil {
+			t.Fatalf("newTransport: %v", err)
+		}
+		t.Cleanup(release)
+		typed, ok := transport.(*sdk.StreamableClientTransport)
+		if !ok {
+			t.Fatalf("transport = %T, want a streamable http transport", transport)
+		}
+		return typed
 	}
-	if streamable.OAuthHandler == nil {
-		t.Error("the http transport has no OAuth handler, so a server that asks for an authorization can never be signed in to")
-	}
+
+	t.Run("an ordinary connection with nothing stored", func(t *testing.T) {
+		transport := streamable(t, transportOptions{tokens: testStore(t), signIn: signInDisallowed})
+		if transport.OAuthHandler != nil {
+			t.Error("a handler with no token can only begin an authorization, which an ordinary connection must never do")
+		}
+		if _, ok := transport.HTTPClient.Transport.(*signInRequiredTransport); !ok {
+			t.Errorf("client transport = %T, want the one that turns a challenge into ErrSignInRequired; without it the connection fails with an unexplained 401", transport.HTTPClient.Transport)
+		}
+	})
+
+	t.Run("an ordinary connection with a token stored", func(t *testing.T) {
+		store := testStore(t)
+		if err := store.Save("hosted", &SignInRecord{Token: &oauth2.Token{AccessToken: "stored"}}); err != nil {
+			t.Fatalf("Save: %v", err)
+		}
+		transport := streamable(t, transportOptions{tokens: store, signIn: signInDisallowed})
+		if transport.OAuthHandler == nil {
+			t.Error("a stored token needs a handler to be sent and refreshed at all")
+		}
+		// Still wrapped: a token that has stopped working must read as needing
+		// a sign-in rather than starting one.
+		if _, ok := transport.HTTPClient.Transport.(*signInRequiredTransport); !ok {
+			t.Errorf("client transport = %T, want the challenge to be refused here too", transport.HTTPClient.Transport)
+		}
+	})
+
+	t.Run("an explicit sign-in", func(t *testing.T) {
+		transport := streamable(t, transportOptions{tokens: testStore(t), signIn: signInAllowed})
+		if transport.OAuthHandler == nil {
+			t.Fatal("without a handler an explicit sign-in has nothing to sign in with")
+		}
+		if _, ok := transport.HTTPClient.Transport.(*signInRequiredTransport); ok {
+			t.Error("the challenge was refused on the one path that is meant to answer it")
+		}
+	})
 }
 
 // TestAnHTTPTransportWithoutATokenStoreHasNoHandler keeps a build with no
@@ -378,6 +429,51 @@ func TestAnHTTPTransportWithoutATokenStoreHasNoHandler(t *testing.T) {
 	}
 	if streamable.OAuthHandler != nil {
 		t.Error("a handler was built with nowhere to keep the token it would obtain")
+	}
+}
+
+// TestOnlyABearerChallengeMeansSignIn keeps an ordinary 401 reading as one. A
+// server that rejects a request for its own reasons has not asked anyone to
+// sign in, and reporting that it has sends the user to a browser for nothing.
+func TestOnlyABearerChallengeMeansSignIn(t *testing.T) {
+	for name, header := range map[string]string{
+		"a bearer challenge": `Bearer resource_metadata="https://example.com/.well-known/oauth-protected-resource"`,
+		"lower case":         "bearer",
+		"another scheme":     "Basic realm=\"example\"",
+		"no challenge":       "",
+	} {
+		t.Run(name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if header != "" {
+					w.Header().Set("WWW-Authenticate", header)
+				}
+				w.WriteHeader(http.StatusUnauthorized)
+			}))
+			defer server.Close()
+
+			transport := &signInRequiredTransport{server: "hosted"}
+			client := &http.Client{Transport: transport}
+			resp, err := client.Get(server.URL)
+
+			wantSignIn := strings.HasPrefix(strings.ToLower(header), "bearer")
+			if wantSignIn {
+				if err == nil {
+					resp.Body.Close()
+					t.Fatal("a bearer challenge must be reported as needing a sign-in")
+				}
+				if !SignInRequired(err) {
+					t.Errorf("err = %v, want ErrSignInRequired", err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("a 401 that is not a bearer challenge must pass through as an ordinary response, got %v", err)
+			}
+			resp.Body.Close()
+			if resp.StatusCode != http.StatusUnauthorized {
+				t.Errorf("status = %d, want the response left alone", resp.StatusCode)
+			}
+		})
 	}
 }
 

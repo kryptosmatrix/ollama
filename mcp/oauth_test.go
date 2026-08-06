@@ -2,6 +2,7 @@ package mcp
 
 import (
 	"context"
+	"errors"
 	"net"
 	"net/http"
 	"net/url"
@@ -192,6 +193,37 @@ func TestASecondCallbackIsIgnored(t *testing.T) {
 	// A replay of the same redirect must not be accepted after the flow ended.
 	if status := callback(t, redirect, "code=second&state=s"); status != http.StatusBadRequest {
 		t.Errorf("a replayed callback returned %d, want 400", status)
+	}
+}
+
+// TestSignInStopsWhenTheCallerGivesUp covers the other way a sign-in ends: not
+// the timeout, but the caller abandoning it — the app quitting, or a connect
+// giving up. Without this the wait runs to its own timeout, holding a loopback
+// port and a goroutine for minutes after the thing that wanted them is gone.
+func TestSignInStopsWhenTheCallerGivesUp(t *testing.T) {
+	redirect, opened := startRedirect(t)
+	// Long enough that only the cancellation can end this wait.
+	redirect.Timeout = time.Minute
+
+	ctx, cancel := context.WithCancel(t.Context())
+	errs := make(chan error, 1)
+	go func() {
+		_, err := redirect.Fetch(ctx, &sdkauth.AuthorizationArgs{URL: authorizationURL("s")})
+		errs <- err
+	}()
+	<-opened
+	cancel()
+
+	select {
+	case err := <-errs:
+		if err == nil {
+			t.Fatal("an abandoned sign-in must fail rather than wait for its own timeout")
+		}
+		if !errors.Is(err, context.Canceled) {
+			t.Errorf("err = %v, want the cancellation reported", err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("Fetch ignored the cancellation and waited on its own timeout")
 	}
 }
 

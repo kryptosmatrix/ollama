@@ -56,7 +56,7 @@ type oauthSession struct {
 // registration, PKCE, the token exchange and refresh. Three things are ours:
 // which tokens it starts from, where refreshed tokens are written, and whether
 // a browser may be opened at all.
-func newOAuthSession(server string, store TokenStore, mode signInMode) (*oauthSession, error) {
+func newOAuthSession(server string, store TokenStore, mode signInMode, open func(string) error) (*oauthSession, error) {
 	if store == nil {
 		return nil, errors.New("oauth needs somewhere to keep tokens")
 	}
@@ -94,6 +94,9 @@ func newOAuthSession(server string, store TokenStore, mode signInMode) (*oauthSe
 		if err != nil {
 			return nil, err
 		}
+		if open != nil {
+			redirect.Open = open
+		}
 		session.close = func() { redirect.Close() }
 		session.redirectURL = redirect.RedirectURL()
 		session.fetch = redirect.Fetch
@@ -125,12 +128,19 @@ func refuseSignIn(server string) sdkauth.AuthorizationCodeFetcher {
 	}
 }
 
-// savingTokenSource writes every token the library obtains back to the store,
-// including the ones it gets by refreshing.
+// savingTokenSource wraps the library's token source in one that writes every
+// token back to the store, including the ones obtained by refreshing.
 //
-// Without this a refresh lives only in memory: the user is signed in until
-// Ollama restarts and then is sent back to the browser, which looks like the
-// sign-in not having worked.
+// Without this a token lives only in memory: the user is signed in until Ollama
+// restarts and then is sent back to the browser, which looks like the sign-in
+// not having worked.
+//
+// The freshly exchanged token is not written here. It was, and two attempts to
+// falsify that write both passed: the transport consults the token source
+// immediately after the exchange, so persistingTokenSource has already stored
+// it by the time anything can observe the difference — including on the path
+// where the connection then fails. Two writers for one fact, one of which
+// cannot be tested, is worse than one that can.
 func savingTokenSource(server string, store TokenStore) func(context.Context, *oauth2.Config, *oauth2.Token) (oauth2.TokenSource, error) {
 	return func(ctx context.Context, config *oauth2.Config, token *oauth2.Token) (oauth2.TokenSource, error) {
 		// config.ClientID is the identifier the library was issued when it
@@ -139,11 +149,6 @@ func savingTokenSource(server string, store TokenStore) func(context.Context, *o
 		clientID := ""
 		if config != nil {
 			clientID = config.ClientID
-		}
-		if token != nil && token.AccessToken != "" {
-			if err := store.Save(server, &SignInRecord{Token: token, ClientID: clientID}); err != nil {
-				return nil, err
-			}
 		}
 		return &persistingTokenSource{
 			server:   server,
@@ -194,9 +199,9 @@ func SignInRequired(err error) bool {
 // server can say — it says it with a 401. Attaching one costs nothing until
 // that happens, and in the ordinary case it then fails with ErrSignInRequired
 // rather than doing anything.
-func oauthHandlerFor(spec *ServerSpec, store TokenStore, mode signInMode) (*oauthSession, error) {
+func oauthHandlerFor(spec *ServerSpec, store TokenStore, mode signInMode, open func(string) error) (*oauthSession, error) {
 	if spec.transport() != TransportHTTP || store == nil {
 		return nil, nil
 	}
-	return newOAuthSession(spec.Name, store, mode)
+	return newOAuthSession(spec.Name, store, mode, open)
 }
