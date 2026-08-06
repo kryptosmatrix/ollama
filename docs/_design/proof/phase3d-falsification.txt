@@ -1,0 +1,74 @@
+=== PHASE 3d FALSIFICATION EVIDENCE (OAuth loopback redirect) ===
+captured: 2026-08-06T04:14:45Z
+Scope: this is the browser half of the authorization code flow — the part the protocol
+library explicitly leaves to the caller. Metadata discovery, client registration, PKCE, the
+token exchange and refresh are the library's and are not reimplemented here.
+Tests drive the redirect with an HTTP client rather than a browser.
+
+--- baseline ---
+ok  	github.com/ollama/ollama/mcp	10.727s
+BASELINE_TEST_EXIT=0
+
+--- F65: the listener accepts a callback carrying the wrong state ---
+141:	if false { // FALSIFICATION: state not checked at the listener
+# github.com/ollama/ollama/mcp [github.com/ollama/ollama/mcp.test]
+mcp/oauth.go:138:2: declared and not used: expected
+FAIL	github.com/ollama/ollama/mcp [build failed]
+FAIL
+F65_TEST_EXIT=1 (expect non-zero)
+
+--- F66: the listener binds every interface instead of loopback ---
+57:	listener, err := net.Listen("tcp", ":0") // FALSIFICATION: bound to every interface
+--- FAIL: TestRedirectListensOnLoopbackOnly (0.00s)
+    oauth_test.go:55: RedirectURL = "http://[::]:51054/callback", want a loopback address; anything else puts an authorization code on the network
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.456s
+FAIL
+F66_TEST_EXIT=1 (expect non-zero)
+
+--- F67: a refused sign-in reads as a successful one ---
+118:		// FALSIFICATION: refusal treated as success
+--- FAIL: TestARefusedSignInIsReported (0.00s)
+    oauth_test.go:170: a refusal must not read as a successful sign-in
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.468s
+FAIL
+F67_TEST_EXIT=1 (expect non-zero)
+
+--- F68: the listener outlives the sign-in ---
+203:	_ = ctx // FALSIFICATION: port left open
+--- FAIL: TestClosingStopsListening (0.00s)
+    oauth_test.go:258: the listener outlived Close; a port left open on the user's machine is an invitation
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.439s
+FAIL
+F68_TEST_EXIT=1 (expect non-zero)
+
+--- F69: any scheme is handed to the operating system's opener ---
+227:	if false { // FALSIFICATION: any scheme opened
+--- FAIL: TestOpenInBrowserRefusesAnUnexpectedScheme (0.01s)
+    oauth_test.go:298: openInBrowser("file:///etc/passwd") should refuse a non-web scheme
+    oauth_test.go:298: openInBrowser("ftp://example.com") should refuse a non-web scheme
+    oauth_test.go:298: openInBrowser("javascript:alert(1)") should refuse a non-web scheme
+    oauth_test.go:298: openInBrowser("vscode://extension/install") should refuse a non-web scheme
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.464s
+FAIL
+F69_TEST_EXIT=1 (expect non-zero)
+
+--- F70: an unfinished sign-in waits for ever ---
+124:	case <-make(chan time.Time): // FALSIFICATION: no timeout
+--- FAIL: TestSignInTimesOut (5.00s)
+    oauth_test.go:215: Fetch did not time out
+FAIL
+FAIL	github.com/ollama/ollama/mcp	5.437s
+FAIL
+F70_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/mcp	10.326s
+RESTORED_TEST_EXIT=0
+
+=== SCALE ===
+mcp package top-level tests: 80
