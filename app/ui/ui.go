@@ -300,6 +300,8 @@ func (s *Server) Handler() http.Handler {
 	mux.Handle("PUT /api/v1/mcp/{name}", handle(s.updateMCPServer))
 	mux.Handle("DELETE /api/v1/mcp/{name}", handle(s.deleteMCPServer))
 	mux.Handle("POST /api/v1/mcp/{name}/approve", handle(s.approveMCPServer))
+	mux.Handle("GET /api/v1/mcp-registry", handle(s.browseMCPRegistry))
+	mux.Handle("POST /api/v1/mcp-registry/resolve", handle(s.resolveMCPRegistryEntry))
 	mux.Handle("POST /api/v1/create-chat", handle(s.createChat))
 	mux.Handle("PUT /api/v1/chat/{id}/rename", handle(s.renameChat))
 

@@ -62,3 +62,51 @@ RESTORED_TEST_EXIT=0
 
 === SCALE ===
 mcp package tests: 68
+
+=== BROWSE ROUTES ===
+captured: 2026-08-06T00:53:05Z
+Handler tests point at the same recorded fixtures, never the live registry.
+
+--- F58: the browse surface stops saying the registry is not vetted ---
+43:		NotVetted:  false, // FALSIFICATION
+--- FAIL: TestBrowseAlwaysSaysItIsNotVetted (0.00s)
+    mcp_registry_test.go:97: the registry is open-publish; the response must say so
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	0.550s
+FAIL
+F58_TEST_EXIT=1 (expect non-zero)
+
+--- F59: an unrunnable entry is offered with an install button anyway ---
+64:		described.Installable = true // FALSIFICATION
+--- FAIL: TestBrowseReportsEntriesItCannotInstall (0.00s)
+    mcp_registry_test.go:108: io.github.example/exotic should not be installable
+    mcp_registry_test.go:108: io.github.example/empty should not be installable
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	0.567s
+FAIL
+F59_TEST_EXIT=1 (expect non-zero)
+
+--- F60: the suggested name keeps characters the config layer refuses ---
+93:	cleaned := tail // FALSIFICATION: no cleaning
+--- FAIL: TestSuggestedServerName (0.00s)
+    mcp_registry_test.go:169: suggestedServerName("io.github.example/a.b.c") = "a.b.c", want "a-b-c"
+    mcp_registry_test.go:169: suggestedServerName("io.github.example/") = "io.github.example/", want "io-github-example"
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	0.566s
+FAIL
+F60_TEST_EXIT=1 (expect non-zero)
+
+--- F61: an unreachable registry reads as an empty result ---
+30:		page = mcp.RegistryPage{} // FALSIFICATION: failure looks like nothing found
+--- FAIL: TestBrowseReportsAnUnreachableRegistry (0.00s)
+    mcp_registry_test.go:226: expected an error
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	0.561s
+FAIL
+F61_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/app/ui	4.868s
+ok  	github.com/ollama/ollama/mcp	10.386s
+RESTORED_TEST_EXIT=0

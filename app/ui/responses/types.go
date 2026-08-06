@@ -201,3 +201,45 @@ type MCPServer struct {
 type MCPServersResponse struct {
 	Servers []MCPServer `json:"servers"`
 }
+
+// MCPRegistryEntry is one server from the official MCP Registry, as the browse
+// surface presents it.
+//
+// Runs is the exact command line or URL an install would write, resolved here
+// so the user reads the real thing rather than a name. Installable is false
+// when Ollama does not know how to run the entry, and Reason says why — an
+// entry is never presented with an install button that would produce a command
+// line nobody has verified.
+type MCPRegistryEntry struct {
+	Name        string `json:"name"`
+	Title       string `json:"title,omitempty"`
+	Description string `json:"description,omitempty"`
+	Version     string `json:"version,omitempty"`
+	// Publisher is the namespace half of the reverse-DNS name. It is the only
+	// provenance the registry carries.
+	Publisher  string `json:"publisher"`
+	Repository string `json:"repository,omitempty"`
+	WebsiteURL string `json:"websiteUrl,omitempty"`
+
+	Installable bool   `json:"installable"`
+	Reason      string `json:"reason,omitempty"`
+	Transport   string `json:"transport,omitempty"`
+	Runs        string `json:"runs,omitempty"`
+	// SuggestedName is the name the server would be configured under. It is
+	// derived from the entry, and the user may change it.
+	SuggestedName string `json:"suggestedName,omitempty"`
+	// Variables are the environment references the entry declares, so the user
+	// can be told which values they must set before it will work.
+	Variables []string `json:"variables,omitempty"`
+}
+
+type MCPRegistryResponse struct {
+	Entries []MCPRegistryEntry `json:"entries"`
+	// NextCursor is empty when there are no more results.
+	NextCursor string `json:"nextCursor,omitempty"`
+	// NotVetted is always true. The registry is an open-publish metadata
+	// service; a listing is a claim by its publisher and not something Ollama
+	// has checked. It is a field rather than a comment so the interface cannot
+	// quietly stop saying it.
+	NotVetted bool `json:"notVetted"`
+}
