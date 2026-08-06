@@ -1,0 +1,10 @@
+{
+  "servers": [
+    {
+      "name": "io.github.example/last",
+      "description": "The final page",
+      "packages": [{ "registryType": "npm", "identifier": "@example/last" }]
+    }
+  ],
+  "metadata": { "count": 1 }
+}

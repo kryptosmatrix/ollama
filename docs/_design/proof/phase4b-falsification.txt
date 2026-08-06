@@ -1,0 +1,64 @@
+=== PHASE 4b FALSIFICATION EVIDENCE (official MCP Registry client) ===
+captured: 2026-08-06T00:50:01Z
+Tests run against recorded fixtures, never the live registry: a suite that depends on a third
+party's uptime and current contents fails for reasons unrelated to this code.
+
+--- baseline ---
+ok  	github.com/ollama/ollama/mcp	10.390s
+BASELINE_TEST_EXIT=0
+
+--- F53: an unknown ecosystem is guessed at instead of refused ---
+253:		return pkg.RegistryType, []string{identifier}, nil // FALSIFICATION: guessed command
+--- FAIL: TestResolveRefusesWhatItCannotBuild (0.00s)
+    --- FAIL: TestResolveRefusesWhatItCannotBuild/io.github.example/exotic (0.00s)
+        registry_test.go:210: expected a refusal, got &{Name: Type:stdio Command:cargo Args:[exotic-mcp] Env:map[] URL: Headers:map[] Disabled:false extra:map[]}
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.452s
+FAIL
+F53_TEST_EXIT=1 (expect non-zero)
+
+--- F54: a declared secret is written into the configuration as a literal ---
+294:		values[name] = variable.Description // FALSIFICATION: literal value
+--- FAIL: TestResolveNeverWritesASecret (0.00s)
+    registry_test.go:233: io.github.example/weather: env "WEATHER_API_KEY" = "", want an ${env:NAME} reference
+    registry_test.go:238: ac.inference.sh/mcp: header "Authorization" = "", want an ${env:NAME} reference
+--- FAIL: TestResolvedSpecsPassTheSameValidationAsTypedOnes (0.00s)
+    registry_test.go:266: resolved specs failed validation: map[ac-inference-sh:header "Authorization" must be written as "${env:NAME}" rather than a literal value]
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.457s
+FAIL
+F54_TEST_EXIT=1 (expect non-zero)
+
+--- F55: the resolved command line differs from what would be shown ---
+239:		return "npx", []string{"-y", identifier}, nil // FALSIFICATION: version and arguments dropped
+# github.com/ollama/ollama/mcp [github.com/ollama/ollama/mcp.test]
+mcp/registry.go:232:2: declared and not used: versioned
+FAIL	github.com/ollama/ollama/mcp [build failed]
+FAIL
+F55_TEST_EXIT=1 (expect non-zero)
+
+--- F56: a local package is preferred over a hosted endpoint ---
+192:	// FALSIFICATION: packages preferred
+--- FAIL: TestResolvePrefersAHostedEndpoint (0.00s)
+    registry_test.go:194: transport = "stdio", want http
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.454s
+FAIL
+F56_TEST_EXIT=1 (expect non-zero)
+
+--- F57: pagination silently stops after the first page ---
+122:	// FALSIFICATION: cursor dropped
+--- FAIL: TestRegistrySearchPaginates (0.00s)
+    registry_test.go:91: page = [{Name:io.github.example/weather Title:Weather Description:Current conditions and forecasts Version:1.2.0 WebsiteURL: Repository:0x5d7f6ee94100 Packages:[{RegistryType:npm Identifier:@example/weather-mcp Version:1.2.0 FileSHA256: RuntimeArguments:[] PackageArguments:[] EnvironmentVars:[{Name:WEATHER_API_KEY Description: IsSecret:true IsRequired:true}]}] Remotes:[]} {Name:ac.inference.sh/mcp Title:Inference Description:A hosted server Version:1.0.1 WebsiteURL: Repository:<nil> Packages:[] Remotes:[{Type:streamable-http URL:https://mcp.inference.sh/v1 Headers:[{Name:Authorization Description: IsSecret:true IsRequired:false}]}]} {Name:io.github.example/pythonic Title: Description:A python server Version:0.3.0 WebsiteURL: Repository:<nil> Packages:[{RegistryType:pypi Identifier:example-mcp Version:0.3.0 FileSHA256: RuntimeArguments:[] PackageArguments:[{Type:positional Name: Value:--read-only}] EnvironmentVars:[]}] Remotes:[]} {Name:io.github.example/containerised Title: Description:A docker server Version: WebsiteURL: Repository:<nil> Packages:[{RegistryType:oci Identifier:ghcr.io/example/mcp:latest Version: FileSHA256: RuntimeArguments:[{Type:named Name:--network Value:none}] PackageArguments:[] EnvironmentVars:[]}] Remotes:[]} {Name:io.github.example/exotic Title: Description:An ecosystem Ollama does not know Version: WebsiteURL: Repository:<nil> Packages:[{RegistryType:cargo Identifier:exotic-mcp Version: FileSHA256: RuntimeArguments:[] PackageArguments:[] EnvironmentVars:[]}] Remotes:[]} {Name:io.github.example/empty Title: Description:Neither a package nor a remote Version: WebsiteURL: Repository:<nil> Packages:[] Remotes:[]}]
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.449s
+FAIL
+F57_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/mcp	9.952s
+RESTORED_TEST_EXIT=0
+
+=== SCALE ===
+mcp package tests: 68
