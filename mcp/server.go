@@ -87,45 +87,73 @@ func (t *headerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return base.RoundTrip(clone)
 }
 
+// transportOptions carry what a transport needs beyond the spec itself.
+type transportOptions struct {
+	// tokens is where OAuth tokens are read from and written back to. A nil
+	// store means no authorization support at all: a server that answers 401
+	// simply fails to connect.
+	tokens TokenStore
+	// signIn says whether this connection may open a browser. Every ordinary
+	// connection passes signInDisallowed.
+	signIn signInMode
+}
+
 // newTransport builds the SDK transport for a spec. It resolves any ${env:NAME}
 // references at this moment rather than at load time, so a credential lives in
 // memory only for as long as a connection needs it.
 //
+// The returned function releases whatever the transport holds beyond the
+// session itself — today the OAuth redirect listener. It is always non-nil, so
+// a caller can defer it without checking, and it must be called even when the
+// connection fails.
+//
 // A stdio server is executed directly. It is never passed through a shell:
 // there is no point in the pipeline where a command string could be
 // re-interpreted, so a server name or argument cannot smuggle shell syntax.
-func newTransport(ctx context.Context, spec *ServerSpec) (sdk.Transport, error) {
+func newTransport(ctx context.Context, spec *ServerSpec, opts transportOptions) (sdk.Transport, func(), error) {
+	nothingToRelease := func() {}
+
 	switch spec.transport() {
 	case TransportStdio:
 		env, err := spec.ResolveEnv()
 		if err != nil {
-			return nil, err
+			return nil, nothingToRelease, err
 		}
 		if _, err := exec.LookPath(spec.Command); err != nil {
-			return nil, fmt.Errorf("command %q not found: %w", spec.Command, err)
+			return nil, nothingToRelease, fmt.Errorf("command %q not found: %w", spec.Command, err)
 		}
 
 		cmd := exec.CommandContext(ctx, spec.Command, spec.Args...)
 		cmd.Env = childEnv(env)
 		cmd.Stderr = os.Stderr
-		return &sdk.CommandTransport{Command: cmd}, nil
+		return &sdk.CommandTransport{Command: cmd}, nothingToRelease, nil
 
 	case TransportHTTP:
 		headers, err := spec.ResolveHeaders()
 		if err != nil {
-			return nil, err
+			return nil, nothingToRelease, err
 		}
 		client := &http.Client{}
 		if len(headers) > 0 {
 			client.Transport = &headerTransport{headers: headers}
 		}
-		return &sdk.StreamableClientTransport{
+		transport := &sdk.StreamableClientTransport{
 			Endpoint:   spec.URL,
 			HTTPClient: client,
-		}, nil
+		}
+
+		session, err := oauthHandlerFor(spec, opts.tokens, opts.signIn)
+		if err != nil {
+			return nil, nothingToRelease, err
+		}
+		if session == nil {
+			return transport, nothingToRelease, nil
+		}
+		transport.OAuthHandler = session.handler
+		return transport, session.close, nil
 
 	default:
-		return nil, fmt.Errorf("server %q declares no usable transport", spec.Name)
+		return nil, nothingToRelease, fmt.Errorf("server %q declares no usable transport", spec.Name)
 	}
 }
 

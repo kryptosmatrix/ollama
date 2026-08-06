@@ -196,6 +196,20 @@ type MCPServer struct {
 	Error         string           `json:"error,omitempty"`
 	Tools         []MCPTool        `json:"tools,omitempty"`
 	Skipped       []MCPSkippedTool `json:"skipped,omitempty"`
+	// CanSignIn reports that this is a remote server, so signing in is
+	// something that could apply to it. Whether it actually needs a sign-in is
+	// something only the server can say, and it says so with a 401.
+	CanSignIn bool `json:"canSignIn,omitempty"`
+	// SignedIn reports that a token for this server is stored on this machine.
+	SignedIn bool `json:"signedIn,omitempty"`
+	// SigningIn reports that a sign-in is in flight, so the browser window the
+	// user is looking at belongs to this server.
+	SigningIn bool `json:"signingIn,omitempty"`
+	// TokenStore says in one line where a token is kept and how well it is
+	// protected. It is shown wherever a sign-in is offered: someone signing in
+	// to a third-party service is entitled to know where the credential ends
+	// up before they create one.
+	TokenStore string `json:"tokenStore,omitempty"`
 }
 
 type MCPServersResponse struct {

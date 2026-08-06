@@ -648,6 +648,10 @@ export class MCPServer {
     error?: string;
     tools?: MCPTool[];
     skipped?: MCPSkippedTool[];
+    canSignIn?: boolean;
+    signedIn?: boolean;
+    signingIn?: boolean;
+    tokenStore?: string;
 
     constructor(source: any = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
@@ -662,6 +666,10 @@ export class MCPServer {
         this.error = source["error"];
         this.tools = this.convertValues(source["tools"], MCPTool);
         this.skipped = this.convertValues(source["skipped"], MCPSkippedTool);
+        this.canSignIn = source["canSignIn"];
+        this.signedIn = source["signedIn"];
+        this.signingIn = source["signingIn"];
+        this.tokenStore = source["tokenStore"];
     }
 
 	convertValues(a: any, classs: any, asMap: boolean = false): any {

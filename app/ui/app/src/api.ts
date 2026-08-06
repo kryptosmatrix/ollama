@@ -366,6 +366,31 @@ export async function removeMCPServer(name: string): Promise<void> {
   await mcpRequest(`/${encodeURIComponent(name)}`, { method: "DELETE" });
 }
 
+/**
+ * Starts a browser sign-in for a remote server.
+ *
+ * This returns as soon as the sign-in has started, not when it finishes: the
+ * user is in a browser at that point, and how long they take there is not a
+ * request timeout. The outcome shows up in the server's status.
+ */
+export async function signInMCPServer(name: string): Promise<void> {
+  await mcpRequest(`/${encodeURIComponent(name)}/signin`, { method: "POST" });
+}
+
+/**
+ * Revokes a server's token and deletes it from this machine.
+ *
+ * Resolves with the server as it now stands. When the token could not be
+ * revoked at the server it was still deleted here, and `error` says so — the
+ * caller must show it rather than treat the call as a clean sign-out.
+ */
+export async function signOutMCPServer(name: string): Promise<MCPServer> {
+  const response = await mcpRequest(`/${encodeURIComponent(name)}/signout`, {
+    method: "POST",
+  });
+  return new MCPServer(await response.json());
+}
+
 export interface MCPRegistryPage {
   entries: MCPRegistryEntry[];
   nextCursor?: string;
@@ -386,7 +411,9 @@ export async function browseMCPRegistry(
   );
   if (!response.ok) {
     const detail = (await response.text().catch(() => "")).trim();
-    throw new Error(detail || `Could not reach the registry: ${response.status}`);
+    throw new Error(
+      detail || `Could not reach the registry: ${response.status}`,
+    );
   }
   const data = await response.json();
   return {
@@ -415,7 +442,9 @@ export async function resolveMCPRegistryEntry(
   });
   if (!response.ok) {
     const detail = (await response.text().catch(() => "")).trim();
-    throw new Error(detail || `Could not resolve the entry: ${response.status}`);
+    throw new Error(
+      detail || `Could not resolve the entry: ${response.status}`,
+    );
   }
   return new MCPRegistryEntry(await response.json());
 }

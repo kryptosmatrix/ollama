@@ -24,6 +24,23 @@ const tokensFilename = "mcp-tokens.json"
 // credentials could not be read" call for different responses from the caller.
 var ErrNoToken = errors.New("no stored token for that MCP server")
 
+// SignInRecord is what Ollama keeps for a signed-in server.
+//
+// It is more than the token because signing out is more than forgetting. A
+// token is revoked at the authorization server by a client that identifies
+// itself, and the identifier Ollama was issued is knowable only at sign-in:
+// dynamic client registration issues a fresh one each time, so registering
+// again at sign-out would identify a different client and revoke nothing. A
+// record stored without it can be forgotten but never revoked.
+type SignInRecord struct {
+	// Token is the credential itself.
+	Token *oauth2.Token
+	// ClientID is the identifier this Ollama installation was issued when it
+	// registered with the authorization server. It may be empty for a server
+	// that issued a token without dynamic registration.
+	ClientID string
+}
+
 // TokenStore keeps the OAuth tokens for remote MCP servers.
 //
 // It is an interface because where a token lives is a platform question, and
@@ -31,10 +48,10 @@ var ErrNoToken = errors.New("no stored token for that MCP server")
 // could silently be either the operating system's keychain or a file would
 // leave a user unable to know how their credentials are protected.
 type TokenStore interface {
-	// Load returns the stored token, or ErrNoToken.
-	Load(server string) (*oauth2.Token, error)
-	// Save stores the token, replacing any previous one.
-	Save(server string, token *oauth2.Token) error
+	// Load returns the stored sign-in, or ErrNoToken.
+	Load(server string) (*SignInRecord, error)
+	// Save stores the sign-in, replacing any previous one.
+	Save(server string, record *SignInRecord) error
 	// Delete removes the token. Deleting an absent token is not an error: the
 	// caller's intent — that no token remain — is satisfied either way.
 	Delete(server string) error
@@ -101,6 +118,7 @@ type storedToken struct {
 	TokenType    string    `json:"tokenType,omitempty"`
 	RefreshToken string    `json:"refreshToken,omitempty"`
 	Expiry       time.Time `json:"expiry,omitempty"`
+	ClientID     string    `json:"clientId,omitempty"`
 }
 
 type tokenFile struct {
@@ -147,8 +165,8 @@ func (s *FileTokenStore) write(file *tokenFile, path string) error {
 	return writeFilePrivate(path, append(data, '\n'))
 }
 
-// Load returns the stored token for a server.
-func (s *FileTokenStore) Load(server string) (*oauth2.Token, error) {
+// Load returns the stored sign-in for a server.
+func (s *FileTokenStore) Load(server string) (*SignInRecord, error) {
 	file, _, err := s.read()
 	if err != nil {
 		return nil, err
@@ -157,20 +175,23 @@ func (s *FileTokenStore) Load(server string) (*oauth2.Token, error) {
 	if !ok {
 		return nil, fmt.Errorf("%w: %s", ErrNoToken, server)
 	}
-	return &oauth2.Token{
-		AccessToken:  stored.AccessToken,
-		TokenType:    stored.TokenType,
-		RefreshToken: stored.RefreshToken,
-		Expiry:       stored.Expiry,
+	return &SignInRecord{
+		Token: &oauth2.Token{
+			AccessToken:  stored.AccessToken,
+			TokenType:    stored.TokenType,
+			RefreshToken: stored.RefreshToken,
+			Expiry:       stored.Expiry,
+		},
+		ClientID: stored.ClientID,
 	}, nil
 }
 
-// Save stores a server's token.
-func (s *FileTokenStore) Save(server string, token *oauth2.Token) error {
+// Save stores a server's sign-in.
+func (s *FileTokenStore) Save(server string, record *SignInRecord) error {
 	if strings.TrimSpace(server) == "" {
 		return errors.New("a token needs a server name")
 	}
-	if token == nil || token.AccessToken == "" {
+	if record == nil || record.Token == nil || record.Token.AccessToken == "" {
 		return errors.New("refusing to store an empty token")
 	}
 
@@ -178,11 +199,18 @@ func (s *FileTokenStore) Save(server string, token *oauth2.Token) error {
 	if err != nil {
 		return err
 	}
+	// A refresh that arrives without a client identifier must not erase the one
+	// recorded at sign-in: losing it makes the sign-in unrevocable.
+	clientID := record.ClientID
+	if clientID == "" {
+		clientID = file.Tokens[server].ClientID
+	}
 	file.Tokens[server] = storedToken{
-		AccessToken:  token.AccessToken,
-		TokenType:    token.TokenType,
-		RefreshToken: token.RefreshToken,
-		Expiry:       token.Expiry,
+		AccessToken:  record.Token.AccessToken,
+		TokenType:    record.Token.TokenType,
+		RefreshToken: record.Token.RefreshToken,
+		Expiry:       record.Token.Expiry,
+		ClientID:     clientID,
 	}
 	return s.write(file, path)
 }

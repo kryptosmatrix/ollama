@@ -39,6 +39,12 @@ const (
 	StatusConnecting Status = "connecting"
 	// StatusConnected means the session is live and its tools are usable.
 	StatusConnected Status = "connected"
+	// StatusNeedsSignIn means the server answered that it wants an
+	// authorization the user has not given. It is kept apart from
+	// StatusFailed because the two ask for different things: a failure sends
+	// the user looking for a network or configuration problem, where this one
+	// is answered by signing in and by nothing else.
+	StatusNeedsSignIn Status = "needs-sign-in"
 	// StatusFailed means the last connection attempt did not succeed. Err
 	// carries the reason.
 	StatusFailed Status = "failed"
@@ -116,10 +122,15 @@ type Options struct {
 	// configuration names.
 	Approvals ApprovalPolicy
 
+	// Tokens is where OAuth tokens for remote servers are kept. A nil store
+	// means no authorization support: a server that answers 401 fails to
+	// connect rather than offering a sign-in.
+	Tokens TokenStore
+
 	// newTransport is a seam for tests, which connect an in-process server over
 	// the SDK's in-memory transport. Production leaves it nil and gets the real
 	// subprocess and HTTP transports.
-	newTransport func(context.Context, *ServerSpec) (sdk.Transport, error)
+	newTransport func(context.Context, *ServerSpec, transportOptions) (sdk.Transport, func(), error)
 }
 
 // Manager owns the live connections to configured MCP servers. It is safe for
@@ -137,7 +148,17 @@ type Manager struct {
 	mu      sync.RWMutex
 	states  map[string]*ServerState
 	clients map[string]*sdk.ClientSession
-	closed  bool
+	// releases holds what each live connection's transport is holding beyond
+	// the session — today an OAuth redirect listener. Ending a session without
+	// running its release leaves a loopback port bound for the life of the
+	// process.
+	releases map[string]func()
+	// signingIn holds the servers with a sign-in in flight. A second sign-in
+	// for the same server would open a second browser window and a second
+	// redirect listener, and whichever callback arrived second would be
+	// answering a request that no longer exists.
+	signingIn map[string]struct{}
+	closed    bool
 }
 
 // NewManager returns a manager with no connections.
@@ -164,6 +185,8 @@ func NewManager(opts Options) *Manager {
 		endOfLife: endOfLife,
 		states:    map[string]*ServerState{},
 		clients:   map[string]*sdk.ClientSession{},
+		releases:  map[string]func(){},
+		signingIn: map[string]struct{}{},
 	}
 }
 
@@ -214,7 +237,7 @@ func (m *Manager) Connect(ctx context.Context, cfg *Config) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			m.connectOne(ctx, j.spec)
+			m.connectOne(ctx, j.spec, signInDisallowed)
 		}()
 	}
 	wg.Wait()
@@ -229,8 +252,13 @@ func (m *Manager) closeSession(name string) {
 	m.mu.Lock()
 	session := m.clients[name]
 	delete(m.clients, name)
+	release := m.releases[name]
+	delete(m.releases, name)
 	m.mu.Unlock()
 
+	if release != nil {
+		release()
+	}
 	if session != nil {
 		if err := session.Close(); err != nil {
 			m.opts.Logger.Debug("mcp server closed on reconfigure", "server", name, "reason", err)
@@ -247,7 +275,7 @@ func (m *Manager) approves(spec *ServerSpec) bool {
 	return m.opts.Approvals.Allows(spec)
 }
 
-func (m *Manager) connectOne(ctx context.Context, spec *ServerSpec) {
+func (m *Manager) connectOne(ctx context.Context, spec *ServerSpec, mode signInMode) {
 	attempts := 1
 	if spec.transport() == TransportHTTP {
 		attempts = httpConnectAttempts
@@ -268,17 +296,35 @@ func (m *Manager) connectOne(ctx context.Context, spec *ServerSpec) {
 			}
 			m.opts.Logger.Debug("retrying mcp connection", "server", spec.Name, "attempt", attempt+1)
 		}
-		if err = m.dial(ctx, spec); err == nil {
+		if err = m.dial(ctx, spec, mode); err == nil {
 			return
+		}
+		// A server asking to be signed in will ask again on every attempt.
+		// Retrying turns one honest answer into three, and delays the state
+		// the user is waiting to see by the whole backoff.
+		if SignInRequired(err) {
+			break
 		}
 	}
 
+	if SignInRequired(err) {
+		m.setState(&ServerState{Name: spec.Name, Spec: spec, Status: StatusNeedsSignIn, Err: err})
+		m.opts.Logger.Info("mcp server needs a sign-in", "server", spec.Name)
+		return
+	}
 	m.setState(&ServerState{Name: spec.Name, Spec: spec, Status: StatusFailed, Err: err})
 	m.opts.Logger.Warn("mcp server unavailable", "server", spec.Name, "error", err)
 }
 
-func (m *Manager) dial(ctx context.Context, spec *ServerSpec) error {
-	dialCtx, cancelDial := context.WithTimeout(ctx, m.opts.ConnectTimeout)
+func (m *Manager) dial(ctx context.Context, spec *ServerSpec, mode signInMode) error {
+	// A sign-in is bounded by how long a person takes in a browser, not by how
+	// long a server takes to answer. Holding it to the connect timeout would
+	// cancel the exchange while the user was still reading the consent screen.
+	timeout := m.opts.ConnectTimeout
+	if mode == signInAllowed && timeout < DefaultAuthorizationTimeout {
+		timeout = DefaultAuthorizationTimeout
+	}
+	dialCtx, cancelDial := context.WithTimeout(ctx, timeout)
 	defer cancelDial()
 
 	// The process is tied to the manager's lifetime, not to dialCtx. Tying it
@@ -286,10 +332,22 @@ func (m *Manager) dial(ctx context.Context, spec *ServerSpec) error {
 	// finished, because that timeout is cancelled on the way out of this
 	// function — a defect this code had, and which
 	// TestConnectTimeoutDoesNotKillTheServer exists to catch.
-	transport, err := m.opts.newTransport(m.lifetime, spec)
+	transport, release, err := m.opts.newTransport(m.lifetime, spec, transportOptions{
+		tokens: m.opts.Tokens,
+		signIn: mode,
+	})
 	if err != nil {
+		release()
 		return err
 	}
+	// Every failure below this point must release the transport's resources.
+	// Only the successful path hands ownership to the manager.
+	handedOver := false
+	defer func() {
+		if !handedOver {
+			release()
+		}
+	}()
 
 	client := sdk.NewClient(&sdk.Implementation{Name: "ollama", Version: version.Version}, nil)
 	session, err := client.Connect(dialCtx, transport, nil)
@@ -327,7 +385,12 @@ func (m *Manager) dial(ctx context.Context, spec *ServerSpec) error {
 	if previous := m.clients[spec.Name]; previous != nil {
 		previous.Close()
 	}
+	if previous := m.releases[spec.Name]; previous != nil {
+		previous()
+	}
 	m.clients[spec.Name] = session
+	m.releases[spec.Name] = release
+	handedOver = true
 	m.states[spec.Name] = state
 	m.mu.Unlock()
 	return nil
@@ -493,6 +556,8 @@ func (m *Manager) Close() error {
 	m.closed = true
 	sessions := m.clients
 	m.clients = map[string]*sdk.ClientSession{}
+	releases := m.releases
+	m.releases = map[string]func(){}
 	for _, state := range m.states {
 		if state.Status == StatusConnected {
 			state.Status = StatusDisabled
@@ -511,6 +576,10 @@ func (m *Manager) Close() error {
 	// failure: shutting the server down is what this method is for, and a
 	// server that had to be signalled still shut down. Only errors that mean
 	// the cleanup itself went wrong are returned.
+	for _, release := range releases {
+		release()
+	}
+
 	var errs []error
 	for name, session := range sessions {
 		err := session.Close()
@@ -529,6 +598,38 @@ func (m *Manager) Close() error {
 	// manager outlives it.
 	m.endOfLife()
 	return errors.Join(errs...)
+}
+
+// TokenStore returns where this manager keeps its OAuth tokens, or nil when it
+// has none. Surfaces read it to tell the user where a credential will end up
+// before they create one.
+func (m *Manager) TokenStore() TokenStore {
+	return m.opts.Tokens
+}
+
+// beginSignIn claims the single in-flight sign-in slot for a server.
+func (m *Manager) beginSignIn(name string) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, busy := m.signingIn[name]; busy {
+		return false
+	}
+	m.signingIn[name] = struct{}{}
+	return true
+}
+
+func (m *Manager) endSignIn(name string) {
+	m.mu.Lock()
+	delete(m.signingIn, name)
+	m.mu.Unlock()
+}
+
+// SigningIn reports whether a sign-in is in flight for a server.
+func (m *Manager) SigningIn(name string) bool {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	_, busy := m.signingIn[name]
+	return busy
 }
 
 func (m *Manager) setState(state *ServerState) {

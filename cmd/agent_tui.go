@@ -302,7 +302,10 @@ func agentMCPManager(ctx context.Context) *mcp.Manager {
 	// Re-read on every question rather than snapshotted, so approving a server
 	// in another terminal takes effect on the next /mcp enable rather than
 	// requiring a restart.
-	manager := mcp.NewManager(mcp.Options{Approvals: mcp.ApprovalsFile(approvalsPath, nil)})
+	manager := mcp.NewManager(mcp.Options{
+		Approvals: mcp.ApprovalsFile(approvalsPath, nil),
+		Tokens:    &mcp.FileTokenStore{},
+	})
 	manager.Connect(ctx, cfg)
 	reportMCPStates(manager.States())
 	return manager
@@ -344,6 +347,8 @@ func setAgentMCPEnabled(ctx context.Context, manager *mcp.Manager, name string, 
 		case mcp.StatusConnected:
 		case mcp.StatusNeedsApproval:
 			return fmt.Errorf("%s is not approved to run; approve it with: ollama mcp approve %s", name, name)
+		case mcp.StatusNeedsSignIn:
+			return fmt.Errorf("%s needs you to sign in; sign in with: ollama mcp login %s", name, name)
 		default:
 			if state.Err != nil {
 				return state.Err
@@ -368,6 +373,9 @@ func reportMCPStates(states []mcp.ServerState) {
 			}
 		case mcp.StatusNeedsApproval:
 			fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m mcp %s is not approved to run: %s\n", state.Name, state.Spec.Summary())
+		case mcp.StatusNeedsSignIn:
+			// Not a failure, and not answered by retrying: say what to do.
+			fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m mcp %s needs you to sign in: ollama mcp login %s\n", state.Name, state.Name)
 		case mcp.StatusInvalid:
 			fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m mcp %s is misconfigured: %v\n", state.Name, state.Err)
 		case mcp.StatusFailed:

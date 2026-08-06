@@ -209,9 +209,9 @@ func TestManagerRefusesUnapprovedServers(t *testing.T) {
 		m := NewManager(Options{
 			ConnectTimeout: 5 * time.Second,
 			Approvals:      policy,
-			newTransport: func(context.Context, *ServerSpec) (sdk.Transport, error) {
+			newTransport: func(context.Context, *ServerSpec, transportOptions) (sdk.Transport, func(), error) {
 				reachedTransport = true
-				return clientTransport, nil
+				return clientTransport, func() {}, nil
 			},
 		})
 		t.Cleanup(func() { m.Close() })
@@ -282,9 +282,9 @@ func TestApprovalDoesNotSurviveAnEditedCommand(t *testing.T) {
 
 	manager := NewManager(Options{
 		Approvals: ledger,
-		newTransport: func(context.Context, *ServerSpec) (sdk.Transport, error) {
+		newTransport: func(context.Context, *ServerSpec, transportOptions) (sdk.Transport, func(), error) {
 			t.Error("a tampered spec reached the transport")
-			return nil, nil
+			return nil, func() {}, nil
 		},
 	})
 	t.Cleanup(func() { manager.Close() })

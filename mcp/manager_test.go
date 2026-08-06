@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -99,8 +100,8 @@ func (f *fakeServer) connect(t *testing.T, spec *ServerSpec) *Manager {
 		// policy; the policy has its own tests, including one proving that a
 		// manager with no policy connects to nothing.
 		Approvals: allowAll{},
-		newTransport: func(context.Context, *ServerSpec) (sdk.Transport, error) {
-			return clientTransport, nil
+		newTransport: func(context.Context, *ServerSpec, transportOptions) (sdk.Transport, func(), error) {
+			return clientTransport, func() {}, nil
 		},
 	})
 	t.Cleanup(func() { manager.Close() })
@@ -361,9 +362,9 @@ func TestToolsDigestChangesWhenTheServerChangesWhatItOffers(t *testing.T) {
 func TestManagerRecordsDisabledAndInvalidWithoutConnecting(t *testing.T) {
 	manager := NewManager(Options{
 		Approvals: allowAll{},
-		newTransport: func(context.Context, *ServerSpec) (sdk.Transport, error) {
+		newTransport: func(context.Context, *ServerSpec, transportOptions) (sdk.Transport, func(), error) {
 			t.Error("a disabled or invalid server must never reach the transport")
-			return nil, errors.New("must not be called")
+			return nil, func() {}, errors.New("must not be called")
 		},
 	})
 	t.Cleanup(func() { manager.Close() })
@@ -401,11 +402,11 @@ func TestOneFailedServerDoesNotStopTheOthers(t *testing.T) {
 	manager := NewManager(Options{
 		ConnectTimeout: 5 * time.Second,
 		Approvals:      allowAll{},
-		newTransport: func(_ context.Context, spec *ServerSpec) (sdk.Transport, error) {
+		newTransport: func(_ context.Context, spec *ServerSpec, _ transportOptions) (sdk.Transport, func(), error) {
 			if spec.Name == "works" {
-				return clientTransport, nil
+				return clientTransport, func() {}, nil
 			}
-			return nil, errors.New("command not found")
+			return nil, func() {}, errors.New("command not found")
 		},
 	})
 	t.Cleanup(func() { manager.Close() })
@@ -444,4 +445,74 @@ func TestCloseEndsSessionsAndIsIdempotent(t *testing.T) {
 	if _, err := manager.Call(t.Context(), "files__alpha", nil); err == nil {
 		t.Error("a closed manager must not execute tool calls")
 	}
+}
+
+// TestClosingAServerReleasesWhatItsTransportHeld covers the resources a
+// transport holds beyond the session — today an OAuth redirect listener. A
+// session ended without its release leaves a loopback port bound for the life
+// of the process, and nothing else in the system would notice.
+func TestClosingAServerReleasesWhatItsTransportHeld(t *testing.T) {
+	fake := newFakeServer(t, simpleTool("alpha"))
+	spec := stdioSpec("files")
+
+	var mu sync.Mutex
+	released := 0
+	newManager := func() *Manager {
+		clientTransport, serverTransport := sdk.NewInMemoryTransports()
+		session, err := fake.server.Connect(t.Context(), serverTransport, nil)
+		if err != nil {
+			t.Fatalf("fake server connect: %v", err)
+		}
+		t.Cleanup(func() { session.Close() })
+
+		return NewManager(Options{
+			ConnectTimeout: 5 * time.Second,
+			Approvals:      allowAll{},
+			newTransport: func(context.Context, *ServerSpec, transportOptions) (sdk.Transport, func(), error) {
+				return clientTransport, func() {
+					mu.Lock()
+					released++
+					mu.Unlock()
+				}, nil
+			},
+		})
+	}
+	count := func() int {
+		mu.Lock()
+		defer mu.Unlock()
+		return released
+	}
+
+	t.Run("switching a server off", func(t *testing.T) {
+		manager := newManager()
+		t.Cleanup(func() { manager.Close() })
+
+		cfg := &Config{}
+		cfg.Set(spec.Name, spec)
+		manager.Connect(t.Context(), cfg)
+		if count() != 0 {
+			t.Fatalf("released %d times before anything was closed", count())
+		}
+
+		spec.Disabled = true
+		manager.Connect(t.Context(), cfg)
+		spec.Disabled = false
+		if count() != 1 {
+			t.Errorf("released %d times, want 1: a server switched off must give back what its transport held", count())
+		}
+	})
+
+	t.Run("shutting the manager down", func(t *testing.T) {
+		before := count()
+		manager := newManager()
+
+		cfg := &Config{}
+		cfg.Set(spec.Name, spec)
+		manager.Connect(t.Context(), cfg)
+		manager.Close()
+
+		if count() != before+1 {
+			t.Errorf("released %d times, want %d: shutdown must give back every transport's resources", count()-before, 1)
+		}
+	})
 }

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	sdkauth "github.com/modelcontextprotocol/go-sdk/auth"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"golang.org/x/oauth2"
 )
 
@@ -132,7 +133,7 @@ func TestOAuthNeedsSomewhereToKeepTokens(t *testing.T) {
 
 func TestOAuthUsesAStoredTokenWithoutAnySignIn(t *testing.T) {
 	store := testStore(t)
-	if err := store.Save("hosted", &oauth2.Token{AccessToken: "stored", TokenType: "Bearer"}); err != nil {
+	if err := store.Save("hosted", &SignInRecord{Token: &oauth2.Token{AccessToken: "stored", TokenType: "Bearer"}}); err != nil {
 		t.Fatalf("Save: %v", err)
 	}
 
@@ -169,8 +170,8 @@ func TestOAuthReportsAnUnreadableStore(t *testing.T) {
 
 type brokenStore struct{}
 
-func (brokenStore) Load(string) (*oauth2.Token, error) { return nil, errors.New("disk on fire") }
-func (brokenStore) Save(string, *oauth2.Token) error   { return errors.New("disk on fire") }
+func (brokenStore) Load(string) (*SignInRecord, error) { return nil, errors.New("disk on fire") }
+func (brokenStore) Save(string, *SignInRecord) error   { return errors.New("disk on fire") }
 func (brokenStore) Delete(string) error                { return errors.New("disk on fire") }
 func (brokenStore) Description() string                { return "a broken store" }
 
@@ -199,7 +200,7 @@ func TestARefreshedTokenIsWrittenDown(t *testing.T) {
 		{AccessToken: "first", RefreshToken: "r1"},
 		{AccessToken: "second", RefreshToken: "r2"},
 	}}
-	source := &persistingTokenSource{server: "hosted", store: store, source: inner}
+	source := &persistingTokenSource{server: "hosted", store: store, clientID: "registered-client", source: inner}
 
 	if _, err := source.Token(); err != nil {
 		t.Fatalf("Token: %v", err)
@@ -208,8 +209,8 @@ func TestARefreshedTokenIsWrittenDown(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
-	if stored.AccessToken != "first" {
-		t.Errorf("AccessToken = %q, want the first token written down", stored.AccessToken)
+	if stored.Token.AccessToken != "first" {
+		t.Errorf("AccessToken = %q, want the first token written down", stored.Token.AccessToken)
 	}
 
 	if _, err := source.Token(); err != nil {
@@ -219,11 +220,14 @@ func TestARefreshedTokenIsWrittenDown(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
-	if stored.AccessToken != "second" {
-		t.Errorf("AccessToken = %q, want the refreshed token to replace it", stored.AccessToken)
+	if stored.Token.AccessToken != "second" {
+		t.Errorf("AccessToken = %q, want the refreshed token to replace it", stored.Token.AccessToken)
 	}
-	if stored.RefreshToken != "r2" {
-		t.Errorf("RefreshToken = %q, want the new refresh token too", stored.RefreshToken)
+	if stored.Token.RefreshToken != "r2" {
+		t.Errorf("RefreshToken = %q, want the new refresh token too", stored.Token.RefreshToken)
+	}
+	if stored.ClientID != "registered-client" {
+		t.Errorf("ClientID = %q, want the sign-in's client identifier carried through the refresh; without it the sign-in cannot be revoked", stored.ClientID)
 	}
 }
 
@@ -254,16 +258,16 @@ type countingStore struct {
 	saves int
 }
 
-func (c *countingStore) Save(server string, token *oauth2.Token) error {
+func (c *countingStore) Save(server string, record *SignInRecord) error {
 	c.saves++
-	return c.TokenStore.Save(server, token)
+	return c.TokenStore.Save(server, record)
 }
 
 func TestSavingTokenSourceStoresWhatItIsGiven(t *testing.T) {
 	store := testStore(t)
 	build := savingTokenSource("hosted", store)
 
-	source, err := build(t.Context(), &oauth2.Config{}, &oauth2.Token{AccessToken: "handed-over", RefreshToken: "r"})
+	source, err := build(t.Context(), &oauth2.Config{ClientID: "registered-client"}, &oauth2.Token{AccessToken: "handed-over", RefreshToken: "r"})
 	if err != nil {
 		t.Fatalf("build: %v", err)
 	}
@@ -275,8 +279,14 @@ func TestSavingTokenSourceStoresWhatItIsGiven(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
-	if stored.AccessToken != "handed-over" {
-		t.Errorf("the token from the exchange was not written down: %q", stored.AccessToken)
+	if stored.Token.AccessToken != "handed-over" {
+		t.Errorf("the token from the exchange was not written down: %q", stored.Token.AccessToken)
+	}
+	// The client identifier is visible only at this moment. Dynamic
+	// registration issues a fresh one on every registration, so a sign-out that
+	// registered again would identify a different client and revoke nothing.
+	if stored.ClientID != "registered-client" {
+		t.Errorf("ClientID = %q, want the identifier the token was issued to; without it the sign-in can be forgotten but never revoked", stored.ClientID)
 	}
 }
 
@@ -325,5 +335,68 @@ func TestSignInRequiredUnwraps(t *testing.T) {
 	}
 	if SignInRequired(nil) {
 		t.Error("nil is not a sign-in requirement")
+	}
+}
+
+// TestAnHTTPTransportCarriesTheOAuthHandler is the wiring itself. Everything
+// else in this file describes a handler that nothing uses unless it reaches the
+// transport, and the failure is silent: a server needing authorization would
+// answer 401 and simply never connect.
+func TestAnHTTPTransportCarriesTheOAuthHandler(t *testing.T) {
+	spec := &ServerSpec{Name: "hosted", Type: TransportHTTP, URL: "https://mcp.example.com/v1"}
+	transport, release, err := newTransport(t.Context(), spec, transportOptions{
+		tokens: testStore(t),
+		signIn: signInDisallowed,
+	})
+	if err != nil {
+		t.Fatalf("newTransport: %v", err)
+	}
+	defer release()
+
+	streamable, ok := transport.(*sdk.StreamableClientTransport)
+	if !ok {
+		t.Fatalf("transport = %T, want a streamable http transport", transport)
+	}
+	if streamable.OAuthHandler == nil {
+		t.Error("the http transport has no OAuth handler, so a server that asks for an authorization can never be signed in to")
+	}
+}
+
+// TestAnHTTPTransportWithoutATokenStoreHasNoHandler keeps a build with no
+// token store from signing a user in and then losing it.
+func TestAnHTTPTransportWithoutATokenStoreHasNoHandler(t *testing.T) {
+	spec := &ServerSpec{Name: "hosted", Type: TransportHTTP, URL: "https://mcp.example.com/v1"}
+	transport, release, err := newTransport(t.Context(), spec, transportOptions{})
+	if err != nil {
+		t.Fatalf("newTransport: %v", err)
+	}
+	defer release()
+
+	streamable, ok := transport.(*sdk.StreamableClientTransport)
+	if !ok {
+		t.Fatalf("transport = %T, want a streamable http transport", transport)
+	}
+	if streamable.OAuthHandler != nil {
+		t.Error("a handler was built with nowhere to keep the token it would obtain")
+	}
+}
+
+// TestEveryTransportReturnsSomethingToRelease lets a caller defer the release
+// without checking it, which is what stops a redirect listener leaking on the
+// paths nobody thinks about.
+func TestEveryTransportReturnsSomethingToRelease(t *testing.T) {
+	cases := map[string]*ServerSpec{
+		"stdio":   {Name: "files", Command: "go"},
+		"http":    {Name: "hosted", Type: TransportHTTP, URL: "https://mcp.example.com/v1"},
+		"neither": {Name: "broken"},
+	}
+	for name, spec := range cases {
+		t.Run(name, func(t *testing.T) {
+			_, release, _ := newTransport(t.Context(), spec, transportOptions{tokens: testStore(t)})
+			if release == nil {
+				t.Fatal("release is nil, so every caller must check before deferring and one of them will not")
+			}
+			release()
+		})
 	}
 }

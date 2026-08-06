@@ -3,9 +3,11 @@
 package ui
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -58,7 +60,7 @@ func (s *Server) listMCPServers(w http.ResponseWriter, _ *http.Request) error {
 	servers := make([]responses.MCPServer, 0, len(cfg.Names()))
 	for _, name := range cfg.Names() {
 		spec, _ := cfg.Get(name)
-		servers = append(servers, describeMCPServer(name, spec, problems[name], approvals, live[name]))
+		servers = append(servers, describeMCPServerWithSignIn(name, spec, problems[name], approvals, live[name], s.tokenStore(), s.signingIn(name)))
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -69,6 +71,28 @@ func (s *Server) listMCPServers(w http.ResponseWriter, _ *http.Request) error {
 // what the configuration says, whether it has been approved, and what the live
 // connection is doing.
 func describeMCPServer(name string, spec *mcp.ServerSpec, problem error, approvals *mcp.Approvals, state mcp.ServerState) responses.MCPServer {
+	return describeMCPServerWithSignIn(name, spec, problem, approvals, state, nil, false)
+}
+
+// describeMCPServerWithSignIn adds what only the running manager knows: whether
+// a token is stored for this server, whether a sign-in is in flight, and where
+// tokens are kept. A nil store means this build has no sign-in support, and the
+// surface must not offer one.
+func describeMCPServerWithSignIn(name string, spec *mcp.ServerSpec, problem error, approvals *mcp.Approvals, state mcp.ServerState, tokens mcp.TokenStore, signingIn bool) responses.MCPServer {
+	server := describeMCPServerCore(name, spec, problem, approvals, state)
+	if spec.URL == "" || tokens == nil {
+		return server
+	}
+	server.CanSignIn = true
+	server.SigningIn = signingIn
+	server.TokenStore = tokens.Description()
+	if _, err := tokens.Load(name); err == nil {
+		server.SignedIn = true
+	}
+	return server
+}
+
+func describeMCPServerCore(name string, spec *mcp.ServerSpec, problem error, approvals *mcp.Approvals, state mcp.ServerState) responses.MCPServer {
 	server := responses.MCPServer{
 		Name:      name,
 		Runs:      spec.Summary(),
@@ -125,6 +149,126 @@ func describeMCPServer(name string, spec *mcp.ServerSpec, problem error, approva
 		})
 	}
 	return server
+}
+
+// tokenStore is where the running manager keeps its tokens, or nil when there
+// is no manager. Reading it from the manager rather than resolving it again
+// means the surface can never name a different store from the one in use.
+func (s *Server) tokenStore() mcp.TokenStore {
+	if s.MCP == nil {
+		return nil
+	}
+	return s.MCP.TokenStore()
+}
+
+func (s *Server) signingIn(name string) bool {
+	return s.MCP != nil && s.MCP.SigningIn(name)
+}
+
+// signInMCPServer starts a browser sign-in for a remote server.
+//
+// It returns as soon as the sign-in has started rather than waiting for it. The
+// user is in a browser at that point, and how long they take there is not a
+// request timeout: holding the connection open for minutes would put the page
+// at the mercy of every proxy and idle timeout between it and this process. The
+// page follows the server's status instead, which is where the outcome — signed
+// in, refused, or failed — appears either way.
+func (s *Server) signInMCPServer(w http.ResponseWriter, r *http.Request) error {
+	name := r.PathValue("name")
+	if name == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return errors.New("server name is required")
+	}
+	if s.MCP == nil || s.tokenStore() == nil {
+		w.WriteHeader(http.StatusNotImplemented)
+		return errors.New("this build cannot sign in to MCP servers")
+	}
+
+	cfg, approvals, _, _, err := mcpState()
+	if err != nil {
+		return err
+	}
+	spec, ok := cfg.Get(name)
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return fmt.Errorf("no MCP server named %q", name)
+	}
+	if spec.URL == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return fmt.Errorf("%s runs on this machine and has nothing to sign in to", name)
+	}
+	if problem := cfg.Problems()[name]; problem != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return fmt.Errorf("%s cannot run as configured: %w", name, problem)
+	}
+	// The approval gate applies here as everywhere: a sign-in contacts the
+	// server, and approval is what says it may be contacted.
+	if !approvals.Allows(spec) {
+		w.WriteHeader(http.StatusForbidden)
+		return fmt.Errorf("%s has not been approved to run: %s", name, spec.Summary())
+	}
+	if s.MCP.SigningIn(name) {
+		w.WriteHeader(http.StatusConflict)
+		return fmt.Errorf("a sign-in to %s is already in progress", name)
+	}
+
+	// Deliberately not the request's context: the sign-in outlives this
+	// response, and cancelling it when the response is written would abort the
+	// exchange the moment the browser opened. Its own timeout bounds it.
+	manager := s.MCP
+	go func() {
+		if _, err := manager.SignIn(context.Background(), spec); err != nil {
+			slog.Warn("mcp sign-in failed", "server", name, "error", err)
+		}
+	}()
+
+	w.Header().Set("Content-Type", "application/json")
+	return json.NewEncoder(w).Encode(describeMCPServerWithSignIn(name, spec, nil, approvals, s.mcpStateFor(name), s.tokenStore(), true))
+}
+
+// signOutMCPServer revokes a server's token at the authorization server and
+// then deletes it here. A token that could not be revoked is still deleted, and
+// the response says so: the remedy is then the user's, in that service's own
+// account settings.
+func (s *Server) signOutMCPServer(w http.ResponseWriter, r *http.Request) error {
+	name := r.PathValue("name")
+	if name == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return errors.New("server name is required")
+	}
+	if s.MCP == nil || s.tokenStore() == nil {
+		w.WriteHeader(http.StatusNotImplemented)
+		return errors.New("this build cannot sign in to MCP servers")
+	}
+
+	cfg, approvals, _, _, err := mcpState()
+	if err != nil {
+		return err
+	}
+	spec, ok := cfg.Get(name)
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return fmt.Errorf("no MCP server named %q", name)
+	}
+	if spec.URL == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return fmt.Errorf("%s runs on this machine and is not signed in to", name)
+	}
+
+	signOutErr := s.MCP.SignOut(r.Context(), spec)
+	if signOutErr != nil && !errors.Is(signOutErr, mcp.ErrSignedOutLocallyOnly) {
+		return signOutErr
+	}
+
+	server := describeMCPServerWithSignIn(name, spec, cfg.Problems()[name], approvals, s.mcpStateFor(name), s.tokenStore(), false)
+	if signOutErr != nil {
+		// Reported on the server rather than as a failed request: the token was
+		// deleted, so the request succeeded. What did not happen is the
+		// revocation, and the user has to be told which of the two it was.
+		server.Error = signOutErr.Error()
+	}
+	w.Header().Set("Content-Type", "application/json")
+	return json.NewEncoder(w).Encode(server)
 }
 
 // addMCPServer writes a new server to the configuration. It does not approve

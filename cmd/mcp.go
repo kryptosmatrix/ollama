@@ -72,6 +72,8 @@ func MCPCmd() *cobra.Command {
 		mcpEnableDisableCmd("disable", true, "Disable an MCP server"),
 		mcpApproveCmd(),
 		mcpRevokeCmd(),
+		mcpLoginCmd(),
+		mcpLogoutCmd(),
 	)
 	return root
 }
@@ -402,6 +404,115 @@ func mcpRevokeCmd() *cobra.Command {
 				return err
 			}
 			fmt.Fprintf(cmd.OutOrStdout(), "Revoked approval for %s. Ollama will no longer run it.\n", name)
+			return nil
+		},
+	}
+}
+
+// signInManager builds a manager for the sign-in commands. It is given the
+// same approval policy as everything else — a sign-in contacts the server, so
+// it goes through the gate that says a server may be contacted at all.
+func signInManager() *mcp.Manager {
+	approvalsPath, err := mcp.ApprovalsPath()
+	if err != nil {
+		approvalsPath = ""
+	}
+	return mcp.NewManager(mcp.Options{
+		Approvals: mcp.ApprovalsFile(approvalsPath, nil),
+		Tokens:    &mcp.FileTokenStore{},
+	})
+}
+
+// remoteServer resolves a configured server and refuses one that is not remote,
+// so `login` and `logout` fail with a sentence rather than a surprise.
+func remoteServer(name string) (*mcp.ServerSpec, error) {
+	cfg, _, _, err := loadMCPState()
+	if err != nil {
+		return nil, err
+	}
+	spec, ok := cfg.Get(name)
+	if !ok {
+		return nil, fmt.Errorf("no MCP server named %q", name)
+	}
+	if problem := cfg.Problems()[name]; problem != nil {
+		return nil, fmt.Errorf("%s cannot run as configured: %w", name, problem)
+	}
+	if spec.URL == "" {
+		return nil, fmt.Errorf("%s runs on this machine and has nothing to sign in to", name)
+	}
+	return spec, nil
+}
+
+func mcpLoginCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "login NAME",
+		Short: "Sign in to a remote MCP server",
+		Long: "Sign in to a remote MCP server.\n\n" +
+			"A browser is opened for the server's own sign-in page. Ollama never sees\n" +
+			"your password: it receives only a token, which it stores and sends back to\n" +
+			"that server. This is the only command that opens a browser — servers that\n" +
+			"need a sign-in are otherwise reported and left alone.",
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			name := args[0]
+			spec, err := remoteServer(name)
+			if err != nil {
+				return err
+			}
+
+			manager := signInManager()
+			defer manager.Close()
+
+			out := cmd.OutOrStdout()
+			// Where the credential ends up is the user's to know before they
+			// create one, not after.
+			store := &mcp.FileTokenStore{}
+			fmt.Fprintf(out, "Signing in to %s (%s).\n", name, spec.URL)
+			fmt.Fprintf(out, "Your token will be kept in %s\n", store.Description())
+			fmt.Fprintf(out, "Opening your browser; finish there and come back.\n")
+
+			state, err := manager.SignIn(cmd.Context(), spec)
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(out, "\nSigned in to %s (%d tools).\n", name, len(state.Tools))
+			return nil
+		},
+	}
+}
+
+func mcpLogoutCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "logout NAME",
+		Short: "Sign out of a remote MCP server",
+		Long: "Sign out of a remote MCP server.\n\n" +
+			"The token is revoked at the server and then deleted from this machine. If\n" +
+			"the server offers no way to revoke it, the token is still deleted here and\n" +
+			"you are told, because withdrawing it then has to be done in that service's\n" +
+			"own account settings.",
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			name := args[0]
+			spec, err := remoteServer(name)
+			if err != nil {
+				return err
+			}
+
+			manager := signInManager()
+			defer manager.Close()
+
+			out := cmd.OutOrStdout()
+			err = manager.SignOut(cmd.Context(), spec)
+			if errors.Is(err, mcp.ErrSignedOutLocallyOnly) {
+				fmt.Fprintf(out, "Deleted the stored token for %s.\n", name)
+				fmt.Fprintf(out, "It could NOT be revoked at the server, so it may still be valid there:\n  %v\n", err)
+				fmt.Fprintf(out, "Withdraw Ollama's access in that service's account settings.\n")
+				return nil
+			}
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(out, "Signed out of %s. The token was revoked at the server and deleted here.\n", name)
 			return nil
 		},
 	}

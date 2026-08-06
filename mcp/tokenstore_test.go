@@ -19,12 +19,15 @@ func tokenStore(t *testing.T) (*FileTokenStore, string) {
 	return &FileTokenStore{Path: path}, path
 }
 
-func sampleToken() *oauth2.Token {
-	return &oauth2.Token{
-		AccessToken:  "access-abc123",
-		TokenType:    "Bearer",
-		RefreshToken: "refresh-def456",
-		Expiry:       time.Date(2026, 8, 6, 12, 0, 0, 0, time.UTC),
+func sampleSignIn() *SignInRecord {
+	return &SignInRecord{
+		Token: &oauth2.Token{
+			AccessToken:  "access-abc123",
+			TokenType:    "Bearer",
+			RefreshToken: "refresh-def456",
+			Expiry:       time.Date(2026, 8, 6, 12, 0, 0, 0, time.UTC),
+		},
+		ClientID: "client-xyz789",
 	}
 }
 
@@ -57,7 +60,7 @@ func TestTokensPath(t *testing.T) {
 
 func TestTokenRoundTrip(t *testing.T) {
 	store, _ := tokenStore(t)
-	want := sampleToken()
+	want := sampleSignIn()
 
 	if err := store.Save("hosted", want); err != nil {
 		t.Fatalf("Save: %v", err)
@@ -66,27 +69,55 @@ func TestTokenRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
-	if got.AccessToken != want.AccessToken {
-		t.Errorf("AccessToken = %q", got.AccessToken)
+	if got.Token.AccessToken != want.Token.AccessToken {
+		t.Errorf("AccessToken = %q", got.Token.AccessToken)
 	}
-	if got.RefreshToken != want.RefreshToken {
-		t.Errorf("the refresh token must survive, or the user is signed out at the first expiry: %q", got.RefreshToken)
+	if got.Token.RefreshToken != want.Token.RefreshToken {
+		t.Errorf("the refresh token must survive, or the user is signed out at the first expiry: %q", got.Token.RefreshToken)
 	}
-	if got.TokenType != want.TokenType {
-		t.Errorf("TokenType = %q", got.TokenType)
+	if got.Token.TokenType != want.Token.TokenType {
+		t.Errorf("TokenType = %q", got.Token.TokenType)
 	}
-	if !got.Expiry.Equal(want.Expiry) {
-		t.Errorf("Expiry = %v, want %v; a lost expiry means the token is never refreshed", got.Expiry, want.Expiry)
+	if !got.Token.Expiry.Equal(want.Token.Expiry) {
+		t.Errorf("Expiry = %v, want %v; a lost expiry means the token is never refreshed", got.Token.Expiry, want.Token.Expiry)
+	}
+	if got.ClientID != want.ClientID {
+		t.Errorf("ClientID = %q, want %q; without it the sign-in can be forgotten but never revoked", got.ClientID, want.ClientID)
+	}
+}
+
+// TestARefreshWithoutAClientIDKeepsTheRecordedOne guards the revocability of a
+// sign-in across refreshes. The identifier is issued once, at registration; a
+// later save that does not carry it must not erase it, or the sign-in becomes
+// unrevocable at the first token refresh.
+func TestARefreshWithoutAClientIDKeepsTheRecordedOne(t *testing.T) {
+	store, _ := tokenStore(t)
+	if err := store.Save("hosted", sampleSignIn()); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+	if err := store.Save("hosted", &SignInRecord{Token: &oauth2.Token{AccessToken: "refreshed"}}); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+
+	got, err := store.Load("hosted")
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if got.Token.AccessToken != "refreshed" {
+		t.Errorf("AccessToken = %q, want the refreshed one", got.Token.AccessToken)
+	}
+	if got.ClientID != "client-xyz789" {
+		t.Errorf("ClientID = %q, want the one recorded at sign-in to survive a refresh", got.ClientID)
 	}
 }
 
 func TestTokensArePerServer(t *testing.T) {
 	store, _ := tokenStore(t)
 
-	if err := store.Save("one", &oauth2.Token{AccessToken: "first"}); err != nil {
+	if err := store.Save("one", &SignInRecord{Token: &oauth2.Token{AccessToken: "first"}}); err != nil {
 		t.Fatalf("Save: %v", err)
 	}
-	if err := store.Save("two", &oauth2.Token{AccessToken: "second"}); err != nil {
+	if err := store.Save("two", &SignInRecord{Token: &oauth2.Token{AccessToken: "second"}}); err != nil {
 		t.Fatalf("Save: %v", err)
 	}
 
@@ -94,12 +125,12 @@ func TestTokensArePerServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
-	if first.AccessToken != "first" {
-		t.Errorf("one = %q; one server's credential must never be handed to another", first.AccessToken)
+	if first.Token.AccessToken != "first" {
+		t.Errorf("one = %q; one server's credential must never be handed to another", first.Token.AccessToken)
 	}
 	second, _ := store.Load("two")
-	if second.AccessToken != "second" {
-		t.Errorf("two = %q", second.AccessToken)
+	if second.Token.AccessToken != "second" {
+		t.Errorf("two = %q", second.Token.AccessToken)
 	}
 
 	servers, err := store.Servers()
@@ -122,7 +153,7 @@ func TestLoadWithoutAToken(t *testing.T) {
 	})
 
 	t.Run("a store without that server", func(t *testing.T) {
-		if err := store.Save("other", sampleToken()); err != nil {
+		if err := store.Save("other", sampleSignIn()); err != nil {
 			t.Fatalf("Save: %v", err)
 		}
 		if _, err := store.Load("hosted"); !errors.Is(err, ErrNoToken) {
@@ -133,7 +164,7 @@ func TestLoadWithoutAToken(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	store, _ := tokenStore(t)
-	if err := store.Save("hosted", sampleToken()); err != nil {
+	if err := store.Save("hosted", sampleSignIn()); err != nil {
 		t.Fatalf("Save: %v", err)
 	}
 
@@ -164,7 +195,7 @@ func TestStoreIsPrivate(t *testing.T) {
 		t.Skip("unix file modes are not meaningful on windows")
 	}
 	store, path := tokenStore(t)
-	if err := store.Save("hosted", sampleToken()); err != nil {
+	if err := store.Save("hosted", sampleSignIn()); err != nil {
 		t.Fatalf("Save: %v", err)
 	}
 
@@ -186,7 +217,7 @@ func TestStoreIsPrivate(t *testing.T) {
 
 func TestStoreLeavesNoTemporaryFiles(t *testing.T) {
 	store, path := tokenStore(t)
-	if err := store.Save("hosted", sampleToken()); err != nil {
+	if err := store.Save("hosted", sampleSignIn()); err != nil {
 		t.Fatalf("Save: %v", err)
 	}
 
@@ -214,7 +245,7 @@ func TestACorruptStoreIsReported(t *testing.T) {
 	if err == nil || errors.Is(err, ErrNoToken) {
 		t.Fatalf("err = %v; a store that cannot be read must not read as 'not signed in', which would sign the user out of everything and then overwrite it", err)
 	}
-	if err := store.Save("hosted", sampleToken()); err == nil {
+	if err := store.Save("hosted", sampleSignIn()); err == nil {
 		t.Error("saving over a store that could not be read would discard whatever was in it")
 	}
 }
@@ -222,13 +253,16 @@ func TestACorruptStoreIsReported(t *testing.T) {
 func TestRefusesToStoreNothing(t *testing.T) {
 	store, _ := tokenStore(t)
 
-	if err := store.Save("", sampleToken()); err == nil {
+	if err := store.Save("", sampleSignIn()); err == nil {
 		t.Error("a token needs a server name")
 	}
 	if err := store.Save("hosted", nil); err == nil {
 		t.Error("a nil token must be refused rather than written as an empty credential")
 	}
-	if err := store.Save("hosted", &oauth2.Token{}); err == nil {
+	if err := store.Save("hosted", &SignInRecord{}); err == nil {
+		t.Error("a record with no token must be refused; storing it would look like being signed in")
+	}
+	if err := store.Save("hosted", &SignInRecord{Token: &oauth2.Token{}}); err == nil {
 		t.Error("an empty token must be refused; storing it would look like being signed in")
 	}
 }
@@ -252,7 +286,7 @@ func TestTokensNeverReachTheConfiguration(t *testing.T) {
 	}
 
 	store := &FileTokenStore{Path: tokensPath}
-	if err := store.Save("hosted", sampleToken()); err != nil {
+	if err := store.Save("hosted", sampleSignIn()); err != nil {
 		t.Fatalf("Save: %v", err)
 	}
 
@@ -293,7 +327,7 @@ func TestDescriptionSaysWhereTokensLiveAndHowWeakItIs(t *testing.T) {
 
 func TestFileTokenStoreSatisfiesTheInterface(t *testing.T) {
 	var store TokenStore = &FileTokenStore{Path: filepath.Join(t.TempDir(), "t.json")}
-	if err := store.Save("hosted", sampleToken()); err != nil {
+	if err := store.Save("hosted", sampleSignIn()); err != nil {
 		t.Fatalf("Save: %v", err)
 	}
 	if _, err := store.Load("hosted"); err != nil {
@@ -311,7 +345,7 @@ func TestStoredShapeIsExplicit(t *testing.T) {
 	// The persisted form is written field by field rather than by embedding
 	// oauth2.Token, so a change to that type cannot silently alter the file.
 	store, path := tokenStore(t)
-	if err := store.Save("hosted", sampleToken()); err != nil {
+	if err := store.Save("hosted", sampleSignIn()); err != nil {
 		t.Fatalf("Save: %v", err)
 	}
 	data, err := os.ReadFile(path)

@@ -10,6 +10,8 @@ export interface MCPServerPresentation {
   needsApproval: boolean;
   /** Something is wrong and the user must act; distinct from merely switched off. */
   attention: boolean;
+  /** The server is waiting for the user to sign in, which no retry will fix. */
+  needsSignIn: boolean;
 }
 
 /**
@@ -27,10 +29,17 @@ export function presentMCPServer(server: MCPServer): MCPServerPresentation {
       detail: server.error ?? "This server cannot run as configured.",
       needsApproval: false,
       attention: true,
+      needsSignIn: false,
     };
   }
   if (!server.enabled) {
-    return { label: "Off", detail: "", needsApproval: false, attention: false };
+    return {
+      label: "Off",
+      detail: "",
+      needsApproval: false,
+      attention: false,
+      needsSignIn: false,
+    };
   }
   if (server.changed) {
     return {
@@ -40,6 +49,7 @@ export function presentMCPServer(server: MCPServer): MCPServerPresentation {
         : "This server has changed since it was approved.",
       needsApproval: true,
       attention: true,
+      needsSignIn: false,
     };
   }
   if (!server.approved) {
@@ -48,6 +58,27 @@ export function presentMCPServer(server: MCPServer): MCPServerPresentation {
       detail: "Ollama will not run this server until you approve it.",
       needsApproval: true,
       attention: true,
+      needsSignIn: false,
+    };
+  }
+  // A sign-in is not a failure and is not answered by waiting: it is kept
+  // apart so the page can offer the one thing that resolves it.
+  if (server.status === "needs-sign-in") {
+    return {
+      label: "Sign in required",
+      detail: "This server needs you to sign in before Ollama can use it.",
+      needsApproval: false,
+      attention: true,
+      needsSignIn: true,
+    };
+  }
+  if (server.signingIn) {
+    return {
+      label: "Signing in",
+      detail: "Finish signing in in your browser.",
+      needsApproval: false,
+      attention: false,
+      needsSignIn: false,
     };
   }
   if (server.status === "failed") {
@@ -56,6 +87,7 @@ export function presentMCPServer(server: MCPServer): MCPServerPresentation {
       detail: server.error ?? "This server could not be reached.",
       needsApproval: false,
       attention: true,
+      needsSignIn: false,
     };
   }
   if (server.status === "connected") {
@@ -65,6 +97,7 @@ export function presentMCPServer(server: MCPServer): MCPServerPresentation {
       detail: `${count} ${count === 1 ? "tool" : "tools"}`,
       needsApproval: false,
       attention: false,
+      needsSignIn: false,
     };
   }
   return {
@@ -72,6 +105,7 @@ export function presentMCPServer(server: MCPServer): MCPServerPresentation {
     detail: server.error ?? "",
     needsApproval: false,
     attention: false,
+    needsSignIn: false,
   };
 }
 

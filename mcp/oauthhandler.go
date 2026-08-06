@@ -82,8 +82,8 @@ func newOAuthSession(server string, store TokenStore, mode signInMode) (*oauthSe
 
 	// A token already stored means the ordinary case: use it, and never open a
 	// browser at all.
-	if token, err := store.Load(server); err == nil {
-		config.InitialTokenSource = oauth2.StaticTokenSource(token)
+	if record, err := store.Load(server); err == nil {
+		config.InitialTokenSource = oauth2.StaticTokenSource(record.Token)
 	} else if !errors.Is(err, ErrNoToken) {
 		return nil, err
 	}
@@ -133,25 +133,34 @@ func refuseSignIn(server string) sdkauth.AuthorizationCodeFetcher {
 // sign-in not having worked.
 func savingTokenSource(server string, store TokenStore) func(context.Context, *oauth2.Config, *oauth2.Token) (oauth2.TokenSource, error) {
 	return func(ctx context.Context, config *oauth2.Config, token *oauth2.Token) (oauth2.TokenSource, error) {
+		// config.ClientID is the identifier the library was issued when it
+		// registered. This is the only moment it is visible to us, and without
+		// it the sign-in can never be revoked.
+		clientID := ""
+		if config != nil {
+			clientID = config.ClientID
+		}
 		if token != nil && token.AccessToken != "" {
-			if err := store.Save(server, token); err != nil {
+			if err := store.Save(server, &SignInRecord{Token: token, ClientID: clientID}); err != nil {
 				return nil, err
 			}
 		}
 		return &persistingTokenSource{
-			server: server,
-			store:  store,
-			source: config.TokenSource(ctx, token),
+			server:   server,
+			store:    store,
+			clientID: clientID,
+			source:   config.TokenSource(ctx, token),
 		}, nil
 	}
 }
 
 // persistingTokenSource saves a token whenever the one underneath renews it.
 type persistingTokenSource struct {
-	server string
-	store  TokenStore
-	source oauth2.TokenSource
-	last   string
+	server   string
+	store    TokenStore
+	clientID string
+	source   oauth2.TokenSource
+	last     string
 }
 
 func (p *persistingTokenSource) Token() (*oauth2.Token, error) {
@@ -163,7 +172,7 @@ func (p *persistingTokenSource) Token() (*oauth2.Token, error) {
 	// every request, and rewriting the file each time would be a great deal of
 	// disk for no change.
 	if token != nil && token.AccessToken != "" && token.AccessToken != p.last {
-		if err := p.store.Save(p.server, token); err != nil {
+		if err := p.store.Save(p.server, &SignInRecord{Token: token, ClientID: p.clientID}); err != nil {
 			return nil, err
 		}
 		p.last = token.AccessToken

@@ -9,6 +9,8 @@ import {
   listMCPServers,
   removeMCPServer,
   setMCPServerEnabled,
+  signInMCPServer,
+  signOutMCPServer,
 } from "@/api";
 import type { MCPServer } from "@/gotypes";
 import {
@@ -146,6 +148,17 @@ export default function MCPServers() {
               run(() => setMCPServerEnabled(server.name, !server.enabled))
             }
             onRemove={() => run(() => removeMCPServer(server.name))}
+            onSignIn={() => run(() => signInMCPServer(server.name))}
+            onSignOut={() =>
+              run(async () => {
+                // A sign-out whose revocation failed still deleted the token,
+                // so the request succeeded. What failed is worth saying out
+                // loud, because withdrawing the token is then the user's to do
+                // in that service's own account settings.
+                const result = await signOutMCPServer(server.name);
+                if (result.error) throw new Error(result.error);
+              })
+            }
           />
         ))}
       </ul>
@@ -158,6 +171,8 @@ interface MCPServerRowProps {
   onApprove: () => void;
   onToggle: () => void;
   onRemove: () => void;
+  onSignIn: () => void;
+  onSignOut: () => void;
 }
 
 export function MCPServerRow({
@@ -165,6 +180,8 @@ export function MCPServerRow({
   onApprove,
   onToggle,
   onRemove,
+  onSignIn,
+  onSignOut,
 }: MCPServerRowProps) {
   const presentation = presentMCPServer(server);
 
@@ -226,9 +243,25 @@ export function MCPServerRow({
         </details>
       )}
 
+      {/* Where the credential ends up, said before one is created rather than
+          after. The file store is weaker than the operating system keychain,
+          and a user signing in to a third-party service is entitled to know. */}
+      {server.canSignIn && !server.signedIn && server.tokenStore && (
+        <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+          Your token will be kept in {server.tokenStore}
+        </p>
+      )}
+
       <div className="mt-3 flex flex-wrap gap-2">
         {presentation.needsApproval && (
           <Button onClick={onApprove}>Approve and run</Button>
+        )}
+        {server.canSignIn &&
+          !server.signedIn &&
+          !server.signingIn &&
+          server.approved && <Button onClick={onSignIn}>Sign in</Button>}
+        {server.canSignIn && server.signedIn && (
+          <Button onClick={onSignOut}>Sign out</Button>
         )}
         <Button onClick={onToggle}>
           {server.enabled ? "Switch off" : "Switch on"}

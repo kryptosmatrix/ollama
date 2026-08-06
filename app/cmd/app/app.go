@@ -554,7 +554,10 @@ func startMCPManager(ctx context.Context) *mcp.Manager {
 	// The ledger is read on every question rather than snapshotted here,
 	// because a user can approve a server from the app while it is running and
 	// expects it to start.
-	manager := mcp.NewManager(mcp.Options{Approvals: mcp.ApprovalsFile(approvalsPath, slog.Default())})
+	manager := mcp.NewManager(mcp.Options{
+		Approvals: mcp.ApprovalsFile(approvalsPath, slog.Default()),
+		Tokens:    &mcp.FileTokenStore{},
+	})
 	manager.Connect(ctx, cfg)
 	for _, state := range manager.States() {
 		switch state.Status {
@@ -565,6 +568,8 @@ func startMCPManager(ctx context.Context) *mcp.Manager {
 			}
 		case mcp.StatusNeedsApproval:
 			slog.Warn("mcp server is not approved to run", "server", state.Name, "runs", state.Spec.Summary())
+		case mcp.StatusNeedsSignIn:
+			slog.Info("mcp server needs a sign-in", "server", state.Name)
 		default:
 			slog.Warn("mcp server unavailable", "server", state.Name, "status", state.Status, "error", state.Err)
 		}

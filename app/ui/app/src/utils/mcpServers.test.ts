@@ -15,6 +15,31 @@ function server(overrides: Partial<MCPServer> = {}): MCPServer {
 }
 
 describe("presentMCPServer", () => {
+  it("reads a needed sign-in as its own state, not a failure", () => {
+    const presentation = presentMCPServer(
+      server({ status: "needs-sign-in", transport: "http" }),
+    );
+    expect(presentation.needsSignIn).toBe(true);
+    expect(presentation.attention).toBe(true);
+    expect(presentation.label).toBe("Sign in required");
+  });
+
+  it("says a sign-in is in flight rather than that nothing is happening", () => {
+    const presentation = presentMCPServer(
+      server({ status: "connecting", signingIn: true, transport: "http" }),
+    );
+    expect(presentation.label).toBe("Signing in");
+    expect(presentation.needsSignIn).toBe(false);
+  });
+
+  it("puts approval before a sign-in, because a sign-in contacts the server", () => {
+    const presentation = presentMCPServer(
+      server({ approved: false, status: "needs-sign-in", transport: "http" }),
+    );
+    expect(presentation.needsApproval).toBe(true);
+    expect(presentation.needsSignIn).toBe(false);
+  });
+
   it("reports a connected server and its tool count", () => {
     const shown = presentMCPServer(
       server({ tools: [{ name: "files__read", description: "" }] }),

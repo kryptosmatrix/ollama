@@ -22,11 +22,54 @@ function render(overrides: Partial<MCPServer> = {}) {
       onApprove={() => {}}
       onToggle={() => {}}
       onRemove={() => {}}
+      onSignIn={() => {}}
+      onSignOut={() => {}}
     />,
   );
 }
 
 describe("MCPServerRow", () => {
+  // A remote server is one Ollama sends a credential to. Everything below is
+  // about the user knowing which one, and where the credential ends up.
+  const remote = {
+    transport: "http",
+    runs: "https://mcp.example.com/v1",
+    canSignIn: true,
+    tokenStore:
+      "/Users/x/.ollama/mcp-tokens.json, readable by any program running as you",
+  } satisfies Partial<MCPServer>;
+
+  it("offers a sign-in only for a remote server that is approved and not signed in", () => {
+    expect(render({ ...remote })).toContain("Sign in");
+    // A local server has nothing to sign in to.
+    expect(render()).not.toContain("Sign in");
+    // Approval comes first: a sign-in contacts the server.
+    expect(render({ ...remote, approved: false })).not.toContain(">Sign in<");
+    // Already signed in: the offer is to sign out.
+    expect(render({ ...remote, signedIn: true })).toContain("Sign out");
+    expect(render({ ...remote, signedIn: true })).not.toContain(">Sign in<");
+    // While one is in flight, offering another would open a second browser.
+    expect(render({ ...remote, signingIn: true })).not.toContain(">Sign in<");
+  });
+
+  it("says where the token will be kept before one is created", () => {
+    const markup = render({ ...remote });
+    expect(markup).toContain("mcp-tokens.json");
+    expect(markup).toContain("readable by any program running as you");
+    // Not repeated once there is nothing to decide.
+    expect(render({ ...remote, signedIn: true })).not.toContain(
+      "Your token will be kept in",
+    );
+    // And never for a server no credential is sent to.
+    expect(render()).not.toContain("Your token will be kept in");
+  });
+
+  it("reads a needed sign-in as an instruction, not a failure", () => {
+    const markup = render({ ...remote, status: "needs-sign-in" });
+    expect(markup).toContain("Sign in required");
+    expect(markup).not.toContain("Unavailable");
+  });
+
   it("shows what the server runs, verbatim", () => {
     expect(render()).toContain("uvx mcp-server-files");
   });

@@ -86,6 +86,10 @@ func callMCP(t *testing.T, server *Server, method, path string, body any, pathVa
 		err = server.listMCPServers(recorder, request)
 	case method == http.MethodPost && strings.HasSuffix(path, "/approve"):
 		err = server.approveMCPServer(recorder, request)
+	case method == http.MethodPost && strings.HasSuffix(path, "/signin"):
+		err = server.signInMCPServer(recorder, request)
+	case method == http.MethodPost && strings.HasSuffix(path, "/signout"):
+		err = server.signOutMCPServer(recorder, request)
 	case method == http.MethodPost:
 		err = server.addMCPServer(recorder, request)
 	case method == http.MethodPut:
