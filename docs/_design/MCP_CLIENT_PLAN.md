@@ -390,11 +390,21 @@ Proof in `docs/_design/proof/phase3c-falsification.txt`: tests run against the r
 
 Proof: handler tests for every new route; a migration test proving v16→v17 preserves existing rows (the store already has `migration_test.go` conventions to follow).
 
-### Phase 3d — OAuth in the surfaces
+### Phase 3d — OAuth in the surfaces — **DONE 2026-08-06** (`75dc07cd`, `3104fd4e`)
 
-The desktop app gains a connect/disconnect affordance that opens the system browser and reports back (`POST /api/v1/mcp/{name}/connect`, `POST /api/v1/mcp/{name}/disconnect`); the CLI gains `ollama mcp login <name>` / `logout <name>`. Sequenced last deliberately: everything before this point is a shippable feature, so OAuth slipping delays OAuth and nothing else.
+The routes are `POST /api/v1/mcp/{name}/signin` and `/signout`, not `/connect` and `/disconnect`. The act is unchanged — an interactive sign-in, and a sign-out that revokes then deletes — but "connect" would name it after the ordinary connection it is deliberately not. The CLI is `ollama mcp login <name>` / `logout <name>` as specified.
 
-Proof: a handler test driving the full flow against the fake authorization server of Phase 2b, asserting the connected state is reached and that disconnect revokes and clears the keystore entry.
+**The distinction the phase turns on: an ordinary connection must never be able to open a browser.** Servers connect at start-up, on a configuration change and on every reconnect. A 401 answered the ordinary way would open a sign-in page on a machine nobody is sitting at, or three of them, since http connections are retried. So `signInDisallowed` starts no redirect listener and fails with `ErrSignInRequired`; `signInAllowed` is reachable only from `Manager.SignIn`, which is reachable only from the connect button and `ollama mcp login`. A server that needs a sign-in gets `StatusNeedsSignIn` rather than `StatusFailed` — they ask the user for different things — and is not retried, because a server that asks will ask again on every attempt.
+
+**Signing out revokes.** Forgetting a token locally leaves it valid at the service while the user believes they withdrew it. `SignOut` discovers the revocation endpoint through RFC 9728 resource metadata and RFC 8414 authorization-server metadata, revokes the refresh token in preference to the access token (RFC 7009 §2.1: a server SHOULD invalidate the access tokens issued from it), and deletes locally whether or not that succeeded — with `ErrSignedOutLocallyOnly` so the surfaces can say which of the two happened.
+
+**This forced a change to the token store, and it had to happen before any token was written.** RFC 7009 identifies the client, Ollama is a public client, and dynamic client registration issues a fresh identifier every time — so registering again at sign-out would identify a different client and revoke nothing. The identifier is visible exactly once, in the `oauth2.Config` handed to `NewTokenSource`. `TokenStore` therefore keeps a `SignInRecord`, not a bare `oauth2.Token`, and a refresh that arrives without an identifier does not erase the recorded one. Had this been deferred, every token written in the meantime would have been unrevocable for its whole life.
+
+**The app route returns as soon as the sign-in has started.** Holding an HTTP request open for the minutes a person spends in a browser puts the page at the mercy of every idle timeout between it and the process; the page follows the server's status instead, which is where the outcome appears either way. One sign-in at a time per server, enforced in the manager so both surfaces get it.
+
+Proof in `docs/_design/proof/phase3d-oauthhandler-falsification.txt`, `phase3d-signin-falsification.txt` and `phase3d-wiring-falsification.txt`: thirty protections falsified across the handler, sign-in, sign-out and the wiring. Two tests were rewritten before the first pass because they did not discriminate, and the record says which and why.
+
+**Owed, and stated rather than implied: no complete authorization-code flow has ever been run.** Every part has tests, and revocation runs against a fake authorization server serving real metadata documents — but nothing yet drives authorize → callback → exchange → connect end to end, so the tests that reject a mismatched `state` at the exchange and a wrong PKCE verifier do not exist. `RequestRefreshToken` is likewise set and unfalsified. The fake server in `mcp/signin_test.go` is where that work starts. Also owed: the Keychain and DPAPI store, which needs cgo.
 
 ### Phase 4 — The MCP Servers page — **DONE 2026-08-06** (`273c19bd`)
 
@@ -428,7 +438,7 @@ Also done (`0c540dac`): the browse surface. Results carry the publisher namespac
 
 **One correction made in the writing.** The first version sent only the rendered command line to the browser and split it back apart to build the install request — two implementations of one resolution, free to drift, with quoting silently mangling any argument containing a space. The resolved specification is now carried structurally alongside the string: `runs` is what the user reads, the fields are what gets stored, from one resolution.
 
-**Phase 4b is complete.** What remains in the whole plan is Phase 3d, OAuth.
+**Phase 4b is complete.** Phase 3d is complete too; what remains in the whole plan is the full-flow OAuth proof, the keychain store, and Phase 5 closeout.
 
 ### Phase 4b (original spec) — *(ruling §8.4)*
 

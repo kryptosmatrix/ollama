@@ -3,7 +3,7 @@
 From: Grommet (Claude Opus 5)
 Date: 2026-08-05
 Branch: `mcp/server-support`, pushed to `origin` (kryptosmatrix/ollama)
-Head at handoff: `0f82fb9b`
+Head at handoff: `3104fd4e`
 
 ## Read this first
 
@@ -18,11 +18,11 @@ Head at handoff: `0f82fb9b`
 | 1b — approval ledger | **DONE** (`b672284c`) |
 | 2a — namespacing + schema conversion | **DONE** (`7dbec4fa`) |
 | 2 — manager and transports | **DONE** (`594f6104`) |
-| 3d — OAuth 2.1 | **REDIRECT AND TOKEN STORE DONE** (`da3b9da1`, `0f82fb9b`) — keychain and surfaces outstanding |
+| 3d — OAuth 2.1 | **DONE** (`da3b9da1`, `0f82fb9b`, `75dc07cd`, `3104fd4e`) — keychain store still owed |
 | 3a — CLI surface | **DONE** (`12ea7760`, `09a954cb`, `7e533582`, `f12a2d6a`) |
 | 3b — app approval path | **DONE** (`0506f8e7`, `e7a05864`) |
 | 3c — app MCP registration | **DONE** (`7b6bfc76`) |
-| 3d — OAuth in the surfaces | not started |
+| 3d — OAuth in the surfaces | **DONE** (`3104fd4e`) |
 | 4 — MCP Servers page | **DONE** (`273c19bd`) |
 | 4b — registry browse | **DONE** (`8317a273`, `07b06d8d`, `0c540dac`) |
 | 5 — docs, cross-substrate review, closeout | not started |
@@ -63,14 +63,13 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 ## What the next session should do
 
-**Finish OAuth.** Two pieces remain; the redirect and the token store are done. Read the scope correction in plan §Phase 2b/3d first — the protocol library already does discovery, registration, PKCE, exchange and refresh, and none of it should be reimplemented.
+**OAuth is wired end to end and both surfaces can start and end a sign-in.** What remains is below, and the first item is the honest gap.
 
-1. **Wire the handler into the transport.** `StreamableClientTransport.OAuthHandler` takes an `auth.OAuthHandler`; build one with `auth.NewAuthorizationCodeHandler`. `RedirectURL` comes from a `LoopbackRedirect` started first, `AuthorizationCodeFetcher` is its `Fetch`, `RequestRefreshToken: true`, and `NewTokenSource` / `InitialTokenSource` are where `TokenStore` plugs in — load on start, save after exchange and after each refresh.
-2. **The surfaces.** `POST /api/v1/mcp/{name}/connect` and `/disconnect` for the app, `ollama mcp login` and `logout` for the terminal. Disconnect must **revoke at the server** and then delete from the store; forgetting locally while the token stays valid is not signing out.
+1. **No complete authorization-code flow has ever been run.** The redirect, the handler, the store, the transport wiring, the modes and revocation each have tests, and revocation runs against a fake authorization server in `mcp/signin_test.go` that serves RFC 9728 and RFC 8414 metadata. Nothing yet drives *authorize → callback → token exchange → connect* from end to end, so the tests that reject a mismatched `state` at the exchange and a wrong PKCE verifier do not exist. Extend that fake server into a full one rather than starting again; it already has the two metadata documents and the mux. Do this before claiming OAuth works against a real service — and then try one, because a fake server agrees with whatever you built.
+2. **A Keychain and DPAPI store is owed.** It needs cgo — see the plan for why the `security` CLI is refused. The interface is shaped so adding one changes nothing else. Until it exists, both surfaces must keep showing `TokenStore.Description()` wherever a sign-in is offered, so a user knows their credential is protected by file permissions alone. There are tests on that in `cmd/mcp_signin_test.go` and `app/ui/mcp_signin_test.go`.
+3. **Phase 5**: docs, cross-substrate review, closeout.
 
-**A Keychain and DPAPI store is owed.** It needs cgo — see the plan for why the `security` CLI is refused. The interface is shaped so adding one changes nothing else, and until it exists the app and the CLI must show `TokenStore.Description()` wherever a sign-in is offered, so a user knows their credential is protected by file permissions alone.
-
-Build the fake authorization server before the real flow: the tests that matter reject a mismatched `state` and a wrong PKCE verifier, and writing them after the happy path is how they end up shaped by it.
+What landed, so it is not re-derived: the transport seam is `newTransport(ctx, spec, transportOptions) (sdk.Transport, func(), error)` — the mode says whether a browser may open, and the returned function releases the redirect listener and must run on every path. `Manager.SignIn` is the only caller that passes `signInAllowed`. `TokenStore` keeps a `SignInRecord`, not a bare token, because RFC 7009 revocation needs the client identifier and dynamic registration issues a fresh one each time, so it is knowable only at sign-in. `SignOut` revokes then deletes, and returns `ErrSignedOutLocallyOnly` when the revocation did not happen. `StatusNeedsSignIn` is its own status, not a failure, and is never retried.
 
 ## What must not soften
 
@@ -92,6 +91,13 @@ Build the fake authorization server before the real flow: the tests that matter 
 - A token must never reach `mcp.json`, and `FileTokenStore.Description()` must never start implying the operating system's keychain. Both have tests.
 - Never reach the macOS keychain through the `security` command. Its secret is a command-line argument and shows up in the process list; this was measured, not assumed.
 - Registry tests must keep using the recorded fixtures. Pointing them at the live service makes the suite fail for reasons unrelated to this code.
+- An ordinary connection must never be able to open a browser. Servers connect at start-up, on a configuration change and on every reconnect; a 401 answered the ordinary way would open a sign-in page on a machine nobody is sitting at. `signInDisallowed` is the default and `Manager.SignIn` is the only exception.
+- Signing out must keep revoking at the server before it deletes. Forgetting a token locally leaves it valid at the service while the user believes they withdrew it. When revocation cannot happen the token is still deleted **and the user is told which of the two occurred** — that distinction is the whole point of `ErrSignedOutLocallyOnly`.
+- The client identifier must keep being written down at sign-in, and a refresh without one must not erase it. It is visible exactly once, in the `oauth2.Config` handed to `NewTokenSource`; registering again later issues a different client and revokes nothing.
+- `StatusNeedsSignIn` must not collapse back into `StatusFailed`. They ask the user for different things, and a sign-in is never fixed by retrying.
+- A sign-in must stay one-at-a-time per server. Two would open two browser windows and two redirect listeners, and the callback that arrived second would answer a request that no longer exists.
+- Both surfaces must keep naming the token store before a token exists. This is what makes the file store honest rather than merely convenient.
+- When falsifying, do not back files up by basename. This repository has two `mcp.go`, two `tools.go` and more; a harness that did cost an hour and nearly lost a surface. `docs/_design/proof/phase3d-wiring-falsification.txt` records it.
 
 ## Proof artefacts
 
