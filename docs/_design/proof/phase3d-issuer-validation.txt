@@ -1,0 +1,105 @@
+Phase 3d — RFC 9207 issuer handling, corrected
+
+An earlier version of this fix was wrong, and reading the RFC properly rather
+than paraphrasing it is what caught it.
+
+The first fix dropped the "iss" parameter whenever the authorization server had
+not advertised authorization_response_iss_parameter_supported, on the reasoning
+that a server which never promised an issuer offers no mix-up defence anyway.
+That reasoning does not survive RFC 9207 §2.4, which says clients that support
+the specification must extract the iss parameter from responses they receive
+"if the parameter is present", compare it with the issuer of the server the
+request was sent to, and reject the response on a mismatch. The obligation is
+conditioned on the parameter being present, not on it having been advertised.
+
+So the earlier fix accepted a callback naming a different authorization server
+without a murmur — precisely the attack the parameter exists to catch, and on
+the one real service this branch has signed in to, because Sentry does not
+advertise the parameter.
+
+What it does now: the issuer identifier is learned from the metadata at the
+same lookup, and a present iss is compared against it whatever the server
+advertised. A mismatch ends the sign-in with a message naming both. Only after
+that check does the advertised flag decide whether the value is passed on to
+the protocol library, which refuses a sign-in outright when it sees an
+unadvertised one.
+
+The discriminating evidence is in I5 below. Under that sabotage the "advertised"
+case still passes, because the library catches it — and the "not advertised"
+case fails, which is the half only this code can catch.
+
+FALSIFICATION
+
+hashes before:
+5bb6a7f88e0ad001d6f21335f1bfed924f71e42be7e122f13f85728182190185  mcp/oauth.go
+19d8d59729631cc7d4c6d4bfc39a5def01c2245673095921629ba59f7e540019  mcp/oauthhandler.go
+
+=== I5 a callback naming a different authorization server is accepted ===
+--- /tmp/iss2-oauth.go.orig	2026-08-07 21:47:47
++++ mcp/oauth.go	2026-08-07 21:47:47
+@@ -197,11 +197,7 @@
+ 	// attack the parameter exists for, so the comparison happens whether or not
+ 	// the server advertised that it would send one.
+ 	issuer := query.Get("iss")
+-	if issuer != "" && r.ExpectedIssuer != "" && issuer != r.ExpectedIssuer {
+-		http.Error(w, "This sign-in came back from the wrong authorization server.", http.StatusBadRequest)
+-		r.deliverFailure(fmt.Sprintf("the authorization response came from %q, not from %q", issuer, r.ExpectedIssuer))
+-		return
+-	}
++
+ 	if r.IgnoreIssuer {
+ 		issuer = ""
+ 	}
+--- go test -run TestAMismatchedIssuerEndsTheSignIn ./mcp/ ---
+=== RUN   TestAMismatchedIssuerEndsTheSignIn
+=== RUN   TestAMismatchedIssuerEndsTheSignIn/advertised
+=== RUN   TestAMismatchedIssuerEndsTheSignIn/not_advertised
+    oauthflow_test.go:898: a response from a different authorization server must end the sign-in
+--- FAIL: TestAMismatchedIssuerEndsTheSignIn (0.01s)
+    --- PASS: TestAMismatchedIssuerEndsTheSignIn/advertised (0.01s)
+    --- FAIL: TestAMismatchedIssuerEndsTheSignIn/not_advertised (0.01s)
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.458s
+FAIL
+EXIT=1
+restored: 5bb6a7f88e0ad001d6f21335f1bfed924f71e42be7e122f13f85728182190185
+
+=== I6 the expected issuer is never learned, so there is nothing to compare against ===
+--- /tmp/iss2-handler.go.orig	2026-08-07 21:47:47
++++ mcp/oauthhandler.go	2026-08-07 21:47:50
+@@ -225,7 +225,7 @@
+ 			return "", true
+ 		}
+ 		if server != nil {
+-			return server.Issuer, server.AuthorizationResponseIssParameterSupported
++			return "", server.AuthorizationResponseIssParameterSupported
+ 		}
+ 	}
+ 	return "", true
+--- go test -run TestAMismatchedIssuerEndsTheSignIn|TestIssuerExpectation ./mcp/ ---
+=== RUN   TestIssuerExpectationAnswersStrictlyWhenItCannotTell
+=== RUN   TestIssuerExpectationAnswersStrictlyWhenItCannotTell/advertised
+    oauthflow_test.go:848: issuer = "", want "http://127.0.0.1:63402"; without it there is nothing to compare a callback against
+=== RUN   TestIssuerExpectationAnswersStrictlyWhenItCannotTell/not_advertised
+    oauthflow_test.go:861: issuer = "", want "http://127.0.0.1:63404"; an unadvertised issuer still has to be compared against something
+=== RUN   TestIssuerExpectationAnswersStrictlyWhenItCannotTell/no_metadata_at_all
+--- FAIL: TestIssuerExpectationAnswersStrictlyWhenItCannotTell (0.00s)
+    --- FAIL: TestIssuerExpectationAnswersStrictlyWhenItCannotTell/advertised (0.00s)
+    --- FAIL: TestIssuerExpectationAnswersStrictlyWhenItCannotTell/not_advertised (0.00s)
+    --- PASS: TestIssuerExpectationAnswersStrictlyWhenItCannotTell/no_metadata_at_all (0.00s)
+=== RUN   TestAMismatchedIssuerEndsTheSignIn
+=== RUN   TestAMismatchedIssuerEndsTheSignIn/advertised
+=== RUN   TestAMismatchedIssuerEndsTheSignIn/not_advertised
+    oauthflow_test.go:898: a response from a different authorization server must end the sign-in
+--- FAIL: TestAMismatchedIssuerEndsTheSignIn (0.01s)
+    --- PASS: TestAMismatchedIssuerEndsTheSignIn/advertised (0.00s)
+    --- FAIL: TestAMismatchedIssuerEndsTheSignIn/not_advertised (0.01s)
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.460s
+FAIL
+EXIT=1
+restored: 19d8d59729631cc7d4c6d4bfc39a5def01c2245673095921629ba59f7e540019
+
+hashes after:
+5bb6a7f88e0ad001d6f21335f1bfed924f71e42be7e122f13f85728182190185  mcp/oauth.go
+19d8d59729631cc7d4c6d4bfc39a5def01c2245673095921629ba59f7e540019  mcp/oauthhandler.go

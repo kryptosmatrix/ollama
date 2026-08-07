@@ -196,35 +196,37 @@ func SignInRequired(err error) bool {
 	return errors.Is(err, ErrSignInRequired)
 }
 
-// advertisesIssuer reports whether a server's authorization server has
-// committed to returning the RFC 9207 "iss" parameter.
+// issuerExpectation looks up what a server's authorization server has said
+// about the RFC 9207 "iss" parameter: its issuer identifier, and whether it has
+// committed to returning one.
 //
-// Real services send an iss without advertising support for it — Sentry's
-// hosted MCP server does, and the protocol library refuses the whole sign-in
-// when that happens. RFC 9207 asks a client not to *rely* on an unadvertised
-// iss; it does not ask it to reject one. Looking the metadata up here is what
-// lets the callback drop an iss nobody promised while keeping the check for
-// every server that did promise, which is where the mix-up defence lives.
+// Both answers matter, for different reasons. The identifier is what a present
+// iss is compared against — RFC 9207 §2.4 requires that comparison whenever the
+// parameter arrives, which is the mix-up defence. Whether it was advertised
+// decides only whether the value is then passed on to the protocol library,
+// which refuses a sign-in outright when it sees an unadvertised one. Real
+// services send an iss without advertising it: Sentry's hosted MCP server does.
 //
-// A discovery that fails answers true, so the stricter behaviour is the one
-// that survives not knowing.
-func advertisesIssuer(ctx context.Context, serverURL string) bool {
+// A discovery that fails answers ("", true): nothing to compare against, and
+// the library's stricter handling left in place, so not knowing never quietly
+// relaxes anything.
+func issuerExpectation(ctx context.Context, serverURL string) (issuer string, advertised bool) {
 	ctx, cancel := context.WithTimeout(ctx, signInHTTPTimeout)
 	defer cancel()
 
 	client := &http.Client{Timeout: signInHTTPTimeout}
 	metadata, err := protectedResourceMetadata(ctx, serverURL, client)
 	if err != nil || metadata == nil {
-		return true
+		return "", true
 	}
-	for _, issuer := range metadata.AuthorizationServers {
-		server, err := sdkauth.GetAuthServerMetadata(ctx, issuer, client)
+	for _, candidate := range metadata.AuthorizationServers {
+		server, err := sdkauth.GetAuthServerMetadata(ctx, candidate, client)
 		if err != nil {
-			return true
+			return "", true
 		}
 		if server != nil {
-			return server.AuthorizationResponseIssParameterSupported
+			return server.Issuer, server.AuthorizationResponseIssParameterSupported
 		}
 	}
-	return true
+	return "", true
 }

@@ -64,6 +64,9 @@ type authorizedMCPServer struct {
 	// services exist that do the first without the second.
 	sendIssuer      bool
 	advertiseIssuer bool
+	// issuerOverride returns a different issuer in the authorization response
+	// than the one this server publishes, which is the mix-up case.
+	issuerOverride string
 	// issuedTokens are the access tokens this server has minted, in order.
 	issuedTokens []string
 }
@@ -204,7 +207,11 @@ func newAuthorizedMCPServer(t *testing.T, tools ...*sdk.Tool) *authorizedMCPServ
 		back.Set("state", query.Get("state"))
 		fake.mu.Lock()
 		if fake.sendIssuer {
-			back.Set("iss", fake.URL)
+			issuer := fake.URL
+			if fake.issuerOverride != "" {
+				issuer = fake.issuerOverride
+			}
+			back.Set("iss", issuer)
 		}
 		fake.mu.Unlock()
 		redirect.RawQuery = back.Encode()
@@ -825,23 +832,33 @@ func TestAnAdvertisedIssuerIsStillChecked(t *testing.T) {
 	})
 }
 
-// TestAdvertisesIssuerAnswersStrictlyWhenItCannotTell covers the lookup the
-// callback depends on. Its three answers are the whole decision: forward the
-// issuer, drop it, or — when the metadata cannot be read at all — keep the
-// stricter behaviour rather than quietly weakening a check on a guess.
-func TestAdvertisesIssuerAnswersStrictlyWhenItCannotTell(t *testing.T) {
+// TestIssuerExpectationAnswersStrictlyWhenItCannotTell covers the lookup the
+// callback depends on. Its answers are the whole decision: what a present
+// issuer is compared against, and whether the value is then passed on to a
+// library that refuses an unadvertised one.
+func TestIssuerExpectationAnswersStrictlyWhenItCannotTell(t *testing.T) {
 	t.Run("advertised", func(t *testing.T) {
 		fake := newAuthorizedMCPServer(t)
 		fake.advertiseIssuer = true
-		if !advertisesIssuer(t.Context(), fake.spec().URL) {
-			t.Error("a server that advertises the issuer parameter must have it forwarded and checked")
+		issuer, advertised := issuerExpectation(t.Context(), fake.spec().URL)
+		if !advertised {
+			t.Error("a server that advertises the issuer parameter must have it passed on and checked by the library too")
+		}
+		if issuer != fake.URL {
+			t.Errorf("issuer = %q, want %q; without it there is nothing to compare a callback against", issuer, fake.URL)
 		}
 	})
 
 	t.Run("not advertised", func(t *testing.T) {
 		fake := newAuthorizedMCPServer(t)
-		if advertisesIssuer(t.Context(), fake.spec().URL) {
-			t.Error("a server that never advertised it offers no mix-up defence, so an issuer that arrives must be ignored")
+		issuer, advertised := issuerExpectation(t.Context(), fake.spec().URL)
+		if advertised {
+			t.Error("a server that never advertised it would have its issuer passed to a library that refuses the sign-in over it")
+		}
+		// Still learned, because RFC 9207 asks for the comparison whenever an
+		// issuer arrives — not only when it was promised.
+		if issuer != fake.URL {
+			t.Errorf("issuer = %q, want %q; an unadvertised issuer still has to be compared against something", issuer, fake.URL)
 		}
 	})
 
@@ -850,8 +867,39 @@ func TestAdvertisesIssuerAnswersStrictlyWhenItCannotTell(t *testing.T) {
 			w.WriteHeader(http.StatusNotFound)
 		}))
 		defer silent.Close()
-		if !advertisesIssuer(t.Context(), silent.URL+"/mcp") {
+		issuer, advertised := issuerExpectation(t.Context(), silent.URL+"/mcp")
+		if !advertised {
 			t.Error("not knowing must answer strictly; guessing the laxer way turns an unreadable metadata document into a silently weakened check")
 		}
+		if issuer != "" {
+			t.Errorf("issuer = %q, want empty when nothing could be read", issuer)
+		}
 	})
+}
+
+// TestAMismatchedIssuerEndsTheSignIn is the mix-up attack RFC 9207 exists for,
+// and it is the case an earlier version of this fix got wrong: the issuer was
+// dropped whenever the server had not advertised it, so a callback naming a
+// different authorization server was accepted without a murmur. Section 2.4
+// requires the comparison whenever the parameter is present.
+func TestAMismatchedIssuerEndsTheSignIn(t *testing.T) {
+	for name, advertise := range map[string]bool{
+		"advertised":     true,
+		"not advertised": false,
+	} {
+		t.Run(name, func(t *testing.T) {
+			fake := newAuthorizedMCPServer(t, simpleTool("alpha"))
+			fake.sendIssuer = true
+			fake.advertiseIssuer = advertise
+			fake.issuerOverride = "https://not-this-server.example.com"
+
+			manager, store := flowManager(t, fake)
+			if _, err := manager.SignIn(t.Context(), fake.spec()); err == nil {
+				t.Fatal("a response from a different authorization server must end the sign-in")
+			}
+			if _, err := store.Load("hosted"); err == nil {
+				t.Error("a token was stored from a mixed-up authorization response")
+			}
+		})
+	}
 }

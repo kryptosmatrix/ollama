@@ -40,17 +40,29 @@ type LoopbackRedirect struct {
 	// Timeout bounds one sign-in. Zero means DefaultAuthorizationTimeout.
 	Timeout time.Duration
 
-	// IgnoreIssuer drops the RFC 9207 "iss" parameter from the callback.
+	// ExpectedIssuer is the authorization server's issuer identifier. When it
+	// is set, an "iss" parameter in the callback is compared against it and a
+	// mismatch ends the sign-in.
+	//
+	// RFC 9207 §2.4 requires a client to extract and compare the iss parameter
+	// whenever it is present — not only when the server advertised that it
+	// would send one. A mismatch is the mix-up attack the parameter exists to
+	// catch, and it must be caught wherever it arrives.
+	ExpectedIssuer string
+
+	// IgnoreIssuer stops the "iss" parameter being passed on to the protocol
+	// library after it has been checked here.
 	//
 	// It is set when the authorization server's metadata does not advertise
-	// authorization_response_iss_parameter_supported. RFC 9207 says a client
-	// must not rely on iss unless the server has committed to sending it, so
-	// one that arrives from a server that made no such commitment carries no
-	// defence against a mix-up and is ignored. Servers that do advertise it
-	// keep the check, which is where the defence actually lives.
+	// authorization_response_iss_parameter_supported, because the library
+	// treats an unadvertised issuer as fatal and refuses the whole sign-in.
+	// Real services do send one without advertising it. The check above still
+	// runs, so this withholds the value from a library that would choke on it
+	// rather than skipping the validation the RFC asks for.
 	//
-	// The zero value forwards the issuer, so a caller that has not looked at
-	// the metadata gets the stricter behaviour rather than the laxer one.
+	// The zero value passes the issuer on, so a caller that has not looked at
+	// the metadata gets the library's stricter behaviour rather than the laxer
+	// one.
 	IgnoreIssuer bool
 
 	listener net.Listener
@@ -58,6 +70,7 @@ type LoopbackRedirect struct {
 
 	mu       sync.Mutex
 	expected string
+	failure  string
 	results  chan sdkauth.AuthorizationResult
 	closed   bool
 }
@@ -129,6 +142,12 @@ func (r *LoopbackRedirect) Fetch(ctx context.Context, args *sdkauth.Authorizatio
 	select {
 	case result := <-r.results:
 		if result.Code == "" {
+			r.mu.Lock()
+			reason := r.failure
+			r.mu.Unlock()
+			if reason != "" {
+				return nil, errors.New(reason)
+			}
 			return nil, errors.New("the sign-in was not completed")
 		}
 		return &result, nil
@@ -172,7 +191,17 @@ func (r *LoopbackRedirect) handleCallback(w http.ResponseWriter, req *http.Reque
 		return
 	}
 
+	// RFC 9207 §2.4: an iss that is present must be compared with the issuer
+	// of the server the request was sent to, and a mismatch means the response
+	// must be rejected and the flow must not continue. This is the mix-up
+	// attack the parameter exists for, so the comparison happens whether or not
+	// the server advertised that it would send one.
 	issuer := query.Get("iss")
+	if issuer != "" && r.ExpectedIssuer != "" && issuer != r.ExpectedIssuer {
+		http.Error(w, "This sign-in came back from the wrong authorization server.", http.StatusBadRequest)
+		r.deliverFailure(fmt.Sprintf("the authorization response came from %q, not from %q", issuer, r.ExpectedIssuer))
+		return
+	}
 	if r.IgnoreIssuer {
 		issuer = ""
 	}
@@ -183,6 +212,15 @@ func (r *LoopbackRedirect) handleCallback(w http.ResponseWriter, req *http.Reque
 		State: query.Get("state"),
 		Iss:   issuer,
 	})
+}
+
+// deliverFailure ends the wait with a reason, so a refused sign-in says what
+// was wrong rather than timing out or reporting only that it did not finish.
+func (r *LoopbackRedirect) deliverFailure(reason string) {
+	r.mu.Lock()
+	r.failure = reason
+	r.mu.Unlock()
+	r.deliver(sdkauth.AuthorizationResult{})
 }
 
 // deliver hands the result to the waiter, once. The channel is buffered so a
