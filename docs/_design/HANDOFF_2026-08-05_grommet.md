@@ -3,7 +3,7 @@
 From: Grommet (Claude Opus 5)
 Date: 2026-08-05
 Branch: `mcp/server-support`, pushed to `origin` (kryptosmatrix/ollama)
-Head at handoff: `088215ce`
+Head at handoff: `1523ef80`
 
 ## Read this first
 
@@ -65,7 +65,7 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 **OAuth is wired end to end and both surfaces can start and end a sign-in.** What remains is below, and the first item is the honest gap.
 
-1. **Try it against a real hosted MCP server.** The whole flow now runs end to end in `mcp/oauthflow_test.go` against a fake authorization server that implements RFC 9728, 8414, 7591, 7636 and 7009 — but a fake server agrees with whatever you built. Nothing has been signed in to for real. Expect the gaps to be in what real services do differently: consent screens that need more than one round trip, `resource` handling, scope names, and authorization servers on a different host from the MCP endpoint (the fake has them on one).
+1. **Done, and it found a defect.** A real sign-in to Sentry now works end to end — see `docs/_design/proof/phase3d-real-signin.txt`. The first attempt failed because Sentry returns the RFC 9207 `iss` parameter without advertising `authorization_response_iss_parameter_supported`, and the protocol library rejects the whole sign-in when that happens. Linear and Notion do not advertise it either. `mcp/hosted_test.go` is the harness (skipped unless `OLLAMA_MCP_TEST_URL` is set; `OLLAMA_MCP_TEST_SIGNIN=1` allows a browser). **Report the strictness upstream to `modelcontextprotocol/go-sdk`** — it is at `auth/authorization_code.go` in `validateIssuerResponse`, and RFC 9207 does not require rejecting an unadvertised issuer.
 2. **The Windows and Linux stores are owed.** macOS is done (`mcp/tokenstore_darwin.go`, cgo + Security framework, one generic password per server). Windows should use DPAPI, Linux the desktop secret service. They were **not written** rather than written unproven: neither can be executed on this machine, and code that compiles but has never run is what full-or-stop forbids. `DefaultTokenStore` on those platforms returns the file store, whose `Description()` says what protects it. Follow the darwin file's shape — the interface takes a `SignInRecord`, `Save` must preserve a `ClientID` that a refresh does not carry, `Load` must return `ErrNoToken` for a miss, and `Delete` of an absent item is not an error. Migration from the file store belongs in `Load`, as it does there.
 3. **Phase 5**: docs, cross-substrate review, closeout.
 
@@ -97,6 +97,7 @@ What landed, so it is not re-derived: the transport seam is `newTransport(ctx, s
 - `StatusNeedsSignIn` must not collapse back into `StatusFailed`. They ask the user for different things, and a sign-in is never fixed by retrying.
 - A sign-in must stay one-at-a-time per server. Two would open two browser windows and two redirect listeners, and the callback that arrived second would answer a request that no longer exists.
 - Both surfaces must keep naming the token store before a token exists. This is what makes the file store honest rather than merely convenient.
+- The issuer must keep being forwarded **conditionally**. Dropping it for every server is not a simplification: a server that advertises `authorization_response_iss_parameter_supported` and then gets no issuer fails with the opposite complaint, and that check is the RFC 9207 mix-up defence. `advertisesIssuer` answering `true` when it cannot read the metadata is deliberate — not knowing must keep the stricter behaviour.
 - `signInRequiredTransport` must stay in front of every connection that is not an explicit sign-in. The protocol library performs discovery and dynamic client registration **before** it asks whether a browser may be opened, so a refusal at the fetcher comes too late: it has already announced this installation to the service and left a client registration behind, on every launch and every reconnect. Attaching an OAuth handler to a server with no stored token brings that back. `TestAServerThatNeedsASignInSaysSoRatherThanFailing` asserts zero registrations and zero authorization requests on the ordinary path.
 - A 401 without a Bearer challenge must keep reading as an ordinary failure. Reporting it as a needed sign-in sends the user to a browser for nothing.
 - There is exactly one place a token is written: `persistingTokenSource`. A second writer was deleted after two attempts to falsify it both passed. Do not add one back beside it.

@@ -416,7 +416,13 @@ It also found a redundant second writer for the stored token, deleted after two 
 
 `OLLAMA_MCP_TOKENS` now overrides the platform default with a file at that path. It is an explicit instruction about where credentials live, and it is also what isolates the `cmd` and `app/ui` suites — five of their tests build the production manager and would otherwise have read and deleted from the developer's own keychain.
 
-**Owed: a real service, and the other two platforms.** A fake authorization server agrees with whatever you built; nothing has been signed in to for real. Windows DPAPI and a Linux secret-service store are **not written** rather than written unproven — neither can be executed on this machine, and code that compiles but has never run is what full-or-stop forbids.
+**A real service has now been signed in to, and it found a defect.** Sentry's hosted MCP server returns the RFC 9207 `iss` parameter without advertising support for it, and the protocol library rejects the whole sign-in when that happens — after the user has been to the browser and come back. Linear and Notion do not advertise it either. Ollama now looks the metadata up once per sign-in and forwards the issuer only when the server said it would send one; dropping it everywhere would have traded one broken server for a silently weakened mix-up check on every compliant one. The library's strictness is worth reporting upstream.
+
+Wiring that fix exposed a dead function: `oauthHandlerFor` had stopped being called when the transport was restructured to stop registering clients, and survived only because its own test kept passing. Deleted.
+
+The second run signed in to Sentry MCP 0.37.0, listed nine tools, reconnected from the stored token with no browser, and signed out with Sentry accepting the revocation — the whole loop, against an authorization server nobody here controls. Evidence in `docs/_design/proof/phase3d-real-signin.txt` and `phase3d-hosted-servers.txt`.
+
+**Owed: the other two platforms.** Windows DPAPI and a Linux secret-service store are **not written** rather than written unproven — neither can be executed on this machine, and code that compiles but has never run is what full-or-stop forbids.
 
 ### Phase 4 — The MCP Servers page — **DONE 2026-08-06** (`273c19bd`)
 
