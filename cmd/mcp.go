@@ -419,7 +419,7 @@ func signInManager() *mcp.Manager {
 	}
 	return mcp.NewManager(mcp.Options{
 		Approvals: mcp.ApprovalsFile(approvalsPath, nil),
-		Tokens:    &mcp.FileTokenStore{},
+		Tokens:    mcp.DefaultTokenStore(),
 	})
 }
 
@@ -465,10 +465,11 @@ func mcpLoginCmd() *cobra.Command {
 
 			out := cmd.OutOrStdout()
 			// Where the credential ends up is the user's to know before they
-			// create one, not after.
-			store := &mcp.FileTokenStore{}
+			// create one, not after. It is read from the manager rather than
+			// resolved again, so this can never name a different store from
+			// the one the sign-in will actually write to.
 			fmt.Fprintf(out, "Signing in to %s (%s).\n", name, spec.URL)
-			fmt.Fprintf(out, "Your token will be kept in %s\n", store.Description())
+			fmt.Fprintf(out, "Your token will be kept in %s\n", manager.TokenStore().Description())
 			fmt.Fprintf(out, "Opening your browser; finish there and come back.\n")
 
 			state, err := manager.SignIn(cmd.Context(), spec)

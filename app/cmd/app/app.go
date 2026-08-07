@@ -556,7 +556,7 @@ func startMCPManager(ctx context.Context) *mcp.Manager {
 	// expects it to start.
 	manager := mcp.NewManager(mcp.Options{
 		Approvals: mcp.ApprovalsFile(approvalsPath, slog.Default()),
-		Tokens:    &mcp.FileTokenStore{},
+		Tokens:    mcp.DefaultTokenStore(),
 	})
 	manager.Connect(ctx, cfg)
 	for _, state := range manager.States() {

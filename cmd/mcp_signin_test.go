@@ -4,15 +4,21 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/ollama/ollama/mcp"
 )
 
 // signInEnv isolates the token store as well, so a test can never read or write
 // the developer's own credentials.
+//
+// Setting OLLAMA_MCP_TOKENS is what does it: an explicit path overrides the
+// platform default, so on macOS these tests use a file in a temporary directory
+// rather than reaching into the real keychain and deleting a token belonging to
+// an actual sign-in.
 func signInEnv(t *testing.T) (configPath, approvalsPath, tokensPath string) {
 	t.Helper()
 	configPath, approvalsPath = mcpEnv(t)
 	tokensPath = filepath.Join(filepath.Dir(configPath), "mcp-tokens.json")
-	t.Setenv("OLLAMA_MCP_TOKENS", tokensPath)
 	return configPath, approvalsPath, tokensPath
 }
 
@@ -69,7 +75,7 @@ func TestMCPLoginRefusesAnUnknownServer(t *testing.T) {
 // proves. `ollama mcp add` approves what the user typed at their own keyboard,
 // so a freshly added server is already approved and would be dialled.
 func TestMCPLoginSaysWhereTheTokenWillBeKeptAndStopsAtApproval(t *testing.T) {
-	_, _, tokensPath := signInEnv(t)
+	signInEnv(t)
 	if out, err := runMCP(t, "", "add", "hosted", "--url", "https://mcp.example.com/v1"); err != nil {
 		t.Fatalf("add: %v\n%s", err, out)
 	}
@@ -84,11 +90,12 @@ func TestMCPLoginSaysWhereTheTokenWillBeKeptAndStopsAtApproval(t *testing.T) {
 	if !strings.Contains(err.Error(), "approved") {
 		t.Errorf("err = %v, want it to say the server is not approved", err)
 	}
-	if !strings.Contains(out, tokensPath) {
-		t.Errorf("the user was not told where their token would be kept before the browser opened, got:\n%s", out)
-	}
-	if !strings.Contains(out, "readable by any program running as you") {
-		t.Errorf("the store's protection was not stated, got:\n%s", out)
+	// Compared against the store actually in use rather than against a fixed
+	// sentence: the wording differs by platform — a keychain on macOS, a file
+	// elsewhere — and what must never differ is that the user is told which,
+	// before the browser opens.
+	if want := mcp.DefaultTokenStore().Description(); !strings.Contains(out, want) {
+		t.Errorf("the user was not told where their token would be kept before the browser opened.\nwant: %s\ngot:\n%s", want, out)
 	}
 }
 

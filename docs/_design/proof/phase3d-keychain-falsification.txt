@@ -1,0 +1,306 @@
+Phase 3d — the macOS keychain token store
+Falsification record
+
+Eleven protections, each broken in mcp/tokenstore_darwin.go, observed to fail
+its test, and restored byte-identical. Hash before and after every attempt:
+1458d4bd8cb6a7be228523d649a1d4c236f02925e12018f7dd370e62310d11af
+
+THESE TESTS USE THE REAL LOGIN KEYCHAIN. A keychain that is stood in for proves
+nothing about the keychain, so they write to the actual one — scoped to a
+service name carrying the test's own name, cleared before the test as well as
+after, and never touching the "Ollama MCP" service a real sign-in uses. The
+record ends with a count of leftover items, which is zero.
+
+WHAT THE MEASUREMENT SHOWED, and why the description is worded as it is. Before
+writing any of this, a spike wrote a keychain item from one unsigned binary and
+read it back from a *different* unsigned binary. It succeeded with no prompt.
+So on this platform an item added by an unsigned build is readable by any
+process running as the same user. The honest claim is therefore encryption at
+rest — the token stops sitting in cleartext in a file that gets swept into
+backups, sync folders and support bundles — and not isolation from other
+programs. K9 breaks the description into the overclaiming version and the test
+fails, which is the only way that wording stays honest as the code changes.
+
+A DEFECT THE PASS ITSELF CAUSED, recorded rather than tidied away. K10 removes
+the account from the item query. Under that sabotage the store created items
+with no account, and the test's own cleanup — which listed servers through the
+same broken query — could no longer find them. Two items were left in the real
+login keychain and had to be removed by hand. The cleanup now sweeps by service
+name through `security delete-generic-password`, which shares no code with the
+store under test. That tool is refused for *storing* a token because the secret
+would appear in the process list; deleting by service name passes no secret, so
+the objection does not apply. K10 was then re-run and left nothing behind.
+
+Not built, and not written as unproven code: the Windows DPAPI store and a
+Linux secret-service store. Both are owed. Neither can be run on this machine,
+and code that compiles but has never executed is exactly what "full or stop"
+forbids — so DefaultTokenStore on those platforms returns the file store, whose
+Description says plainly what protects it, and every surface shows that string
+before a token exists.
+
+Re-run of every keychain falsifier after the C helpers replaced the
+unsafe.Pointer conversions, so the record matches the committed file.
+hash before: 1458d4bd8cb6a7be228523d649a1d4c236f02925e12018f7dd370e62310d11af
+
+=== K1 a second sign-in to the same server duplicates instead of replacing ===
+--- sabotage diff ---
+--- /tmp/kc-darwin.go.orig	2026-08-07 21:00:13
++++ mcp/tokenstore_darwin.go	2026-08-07 21:00:13
+@@ -235,13 +235,7 @@
+ 	defer C.CFRelease(C.CFTypeRef(update))
+ 	setValue(update, C.kSecValueData, C.CFTypeRef(secret))
+ 
+-	switch status := C.SecItemUpdate(C.CFDictionaryRef(query), C.CFDictionaryRef(update)); status {
+-	case 0:
+-		return nil
+-	case errSecItemNotFound:
+-	default:
+-		return keychainError("update the keychain item for "+server, status)
+-	}
++
+ 
+ 	label := cfString(keychainService + ": " + server)
+ 	defer C.CFRelease(C.CFTypeRef(label))
+--- go test -run TestKeychainSaveReplacesRatherThanDuplicates ./mcp/ ---
+--- FAIL: TestKeychainSaveReplacesRatherThanDuplicates (0.08s)
+    tokenstore_darwin_test.go:109: Save "second": add the keychain item for hosted: The specified item already exists in the keychain.
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.557s
+FAIL
+EXIT=1
+restored: 1458d4bd8cb6a7be228523d649a1d4c236f02925e12018f7dd370e62310d11af
+
+=== K2 a missing item reads as a failure rather than as not signed in ===
+--- sabotage diff ---
+--- /tmp/kc-darwin.go.orig	2026-08-07 21:00:13
++++ mcp/tokenstore_darwin.go	2026-08-07 21:00:16
+@@ -210,7 +210,7 @@
+ 	switch status := C.SecItemCopyMatching(C.CFDictionaryRef(query), &result); status {
+ 	case 0:
+ 	case errSecItemNotFound:
+-		return nil, fmt.Errorf("%w: %s", ErrNoToken, server)
++		return nil, fmt.Errorf("no item for %s", server)
+ 	default:
+ 		return nil, keychainError("read the keychain item for "+server, status)
+ 	}
+--- go test -run TestKeychainLoadWithoutAToken ./mcp/ ---
+--- FAIL: TestKeychainLoadWithoutAToken (0.08s)
+    tokenstore_darwin_test.go:196: err = no item for hosted, want ErrNoToken; not being signed in is not a failure to read
+    tokenstore_darwin_test.go:202: err = no item for hosted, want ErrNoToken
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.541s
+FAIL
+EXIT=1
+restored: 1458d4bd8cb6a7be228523d649a1d4c236f02925e12018f7dd370e62310d11af
+
+=== K3 deleting an absent token is an error ===
+--- sabotage diff ---
+--- /tmp/kc-darwin.go.orig	2026-08-07 21:00:13
++++ mcp/tokenstore_darwin.go	2026-08-07 21:00:19
+@@ -154,7 +154,7 @@
+ 	defer C.CFRelease(C.CFTypeRef(query))
+ 
+ 	switch status := C.SecItemDelete(C.CFDictionaryRef(query)); status {
+-	case 0, errSecItemNotFound:
++	case 0:
+ 		return nil
+ 	default:
+ 		return keychainError("delete the keychain item for "+server, status)
+--- go test -run TestKeychainDelete ./mcp/ ---
+--- FAIL: TestKeychainDelete (0.09s)
+    tokenstore_darwin_test.go:219: deleting an absent token is not a failure; the intent is satisfied: delete the keychain item for hosted: The specified item could not be found in the keychain.
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.534s
+FAIL
+EXIT=1
+restored: 1458d4bd8cb6a7be228523d649a1d4c236f02925e12018f7dd370e62310d11af
+
+=== K4 a refresh erases the client identifier the sign-in was issued ===
+--- sabotage diff ---
+--- /tmp/kc-darwin.go.orig	2026-08-07 21:00:13
++++ mcp/tokenstore_darwin.go	2026-08-07 21:00:22
+@@ -126,14 +126,6 @@
+ 	// not carry one, exactly as in the file store: losing it makes the sign-in
+ 	// unrevocable.
+ 	clientID := record.ClientID
+-	if clientID == "" {
+-		if previous, err := s.read(server); err == nil {
+-			var stored storedToken
+-			if json.Unmarshal(previous, &stored) == nil {
+-				clientID = stored.ClientID
+-			}
+-		}
+-	}
+ 
+ 	data, err := json.Marshal(storedToken{
+ 		AccessToken:  record.Token.AccessToken,
+--- go test -run TestKeychainKeepsTheClientIDAcrossARefresh ./mcp/ ---
+--- FAIL: TestKeychainKeepsTheClientIDAcrossARefresh (0.10s)
+    tokenstore_darwin_test.go:154: ClientID = "", want the one recorded at sign-in to survive a refresh
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.575s
+FAIL
+EXIT=1
+restored: 1458d4bd8cb6a7be228523d649a1d4c236f02925e12018f7dd370e62310d11af
+
+=== K5 a migrated token is left behind in cleartext ===
+--- sabotage diff ---
+--- /tmp/kc-darwin.go.orig	2026-08-07 21:00:13
++++ mcp/tokenstore_darwin.go	2026-08-07 21:00:25
+@@ -107,9 +107,7 @@
+ 	if saveErr := s.Save(server, record); saveErr != nil {
+ 		return nil, saveErr
+ 	}
+-	if deleteErr := s.Fallback.Delete(server); deleteErr != nil {
+-		return nil, deleteErr
+-	}
++
+ 	return record, nil
+ }
+ 
+--- go test -run TestKeychainMigratesATokenOutOfTheFile ./mcp/ ---
+--- FAIL: TestKeychainMigratesATokenOutOfTheFile (0.08s)
+    tokenstore_darwin_test.go:276: the file still holds the token: <nil>
+    tokenstore_darwin_test.go:284: a migrated secret is still in the file: access-abc123
+    tokenstore_darwin_test.go:284: a migrated secret is still in the file: refresh-def456
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.529s
+FAIL
+EXIT=1
+restored: 1458d4bd8cb6a7be228523d649a1d4c236f02925e12018f7dd370e62310d11af
+
+=== K6 a migrated token is returned but never written to the keychain ===
+--- sabotage diff ---
+--- /tmp/kc-darwin.go.orig	2026-08-07 21:00:13
++++ mcp/tokenstore_darwin.go	2026-08-07 21:00:28
+@@ -104,9 +104,7 @@
+ 		// consulted to migrate. Report the original miss.
+ 		return nil, err
+ 	}
+-	if saveErr := s.Save(server, record); saveErr != nil {
+-		return nil, saveErr
+-	}
++
+ 	if deleteErr := s.Fallback.Delete(server); deleteErr != nil {
+ 		return nil, deleteErr
+ 	}
+--- go test -run TestKeychainMigratesATokenOutOfTheFile ./mcp/ ---
+--- FAIL: TestKeychainMigratesATokenOutOfTheFile (0.06s)
+    tokenstore_darwin_test.go:271: the token was returned but not written to the keychain: no stored token for that MCP server: hosted
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.517s
+FAIL
+EXIT=1
+restored: 1458d4bd8cb6a7be228523d649a1d4c236f02925e12018f7dd370e62310d11af
+
+=== K7 the keychain is built but nothing uses it ===
+--- sabotage diff ---
+--- /tmp/kc-darwin.go.orig	2026-08-07 21:00:13
++++ mcp/tokenstore_darwin.go	2026-08-07 21:00:31
+@@ -359,5 +359,5 @@
+ 	if strings.TrimSpace(os.Getenv(TokensPathEnv)) != "" {
+ 		return &FileTokenStore{}
+ 	}
+-	return &KeychainStore{Fallback: &FileTokenStore{}}
++	return &FileTokenStore{}
+ }
+--- go test -run TestDefaultTokenStoreIsTheKeychainOnThisPlatform ./mcp/ ---
+--- FAIL: TestDefaultTokenStoreIsTheKeychainOnThisPlatform (0.00s)
+    tokenstore_darwin_test.go:323: DefaultTokenStore() = *mcp.FileTokenStore, want the keychain on a darwin cgo build
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.452s
+FAIL
+EXIT=1
+restored: 1458d4bd8cb6a7be228523d649a1d4c236f02925e12018f7dd370e62310d11af
+
+=== K8 an explicit tokens path is ignored in favour of the keychain ===
+--- sabotage diff ---
+--- /tmp/kc-darwin.go.orig	2026-08-07 21:00:13
++++ mcp/tokenstore_darwin.go	2026-08-07 21:00:34
+@@ -356,8 +356,6 @@
+ // TokenStore.Description(), so what it costs is stated wherever a sign-in is
+ // offered.
+ func DefaultTokenStore() TokenStore {
+-	if strings.TrimSpace(os.Getenv(TokensPathEnv)) != "" {
+-		return &FileTokenStore{}
+-	}
++
+ 	return &KeychainStore{Fallback: &FileTokenStore{}}
+ }
+--- go test -run TestAnExplicitTokensPathIsHonoured ./mcp/ ---
+# github.com/ollama/ollama/mcp [github.com/ollama/ollama/mcp.test]
+mcp/tokenstore_darwin.go:31:2: "os" imported and not used
+FAIL	github.com/ollama/ollama/mcp [build failed]
+FAIL
+EXIT=1
+restored: 1458d4bd8cb6a7be228523d649a1d4c236f02925e12018f7dd370e62310d11af
+
+=== K9 the description overclaims what a keychain item protects ===
+--- sabotage diff ---
+--- /tmp/kc-darwin.go.orig	2026-08-07 21:00:13
++++ mcp/tokenstore_darwin.go	2026-08-07 21:00:36
+@@ -77,7 +77,7 @@
+ 
+ // Description tells the user where their tokens are and what protects them.
+ func (s *KeychainStore) Description() string {
+-	return "your macOS keychain, encrypted at rest and unlocked with your login"
++	return "your macOS keychain, where no other program can read it"
+ }
+ 
+ // Load returns the stored sign-in for a server.
+--- go test -run TestKeychainDescriptionDoesNotOverclaim ./mcp/ ---
+--- FAIL: TestKeychainDescriptionDoesNotOverclaim (0.00s)
+    tokenstore_darwin_test.go:307: Description() = "your macOS keychain, where no other program can read it", want it to say what the protection actually is
+    tokenstore_darwin_test.go:311: Description() claims "no other", which an unsigned build does not deliver
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.437s
+FAIL
+EXIT=1
+restored: 1458d4bd8cb6a7be228523d649a1d4c236f02925e12018f7dd370e62310d11af
+
+=== K10 one server's credential is handed to another ===
+--- sabotage diff ---
+--- /tmp/kc-darwin.go.orig	2026-08-07 21:00:13
++++ mcp/tokenstore_darwin.go	2026-08-07 21:00:39
+@@ -267,7 +267,6 @@
+ 
+ 	setValue(query, C.kSecClass, C.CFTypeRef(C.kSecClassGenericPassword))
+ 	setValue(query, C.kSecAttrService, C.CFTypeRef(service))
+-	setValue(query, C.kSecAttrAccount, C.CFTypeRef(account))
+ 	return query
+ }
+ 
+--- go test -run TestKeychainTokensArePerServer ./mcp/ ---
+--- FAIL: TestKeychainTokensArePerServer (0.10s)
+    tokenstore_darwin_test.go:173: one = "second"; one server's credential must never be handed to another
+    tokenstore_darwin_test.go:188: Servers() = [], want a stable sorted list
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.541s
+FAIL
+EXIT=1
+restored: 1458d4bd8cb6a7be228523d649a1d4c236f02925e12018f7dd370e62310d11af
+
+=== K11 an empty token is stored and reads as being signed in ===
+--- sabotage diff ---
+--- /tmp/kc-darwin.go.orig	2026-08-07 21:00:13
++++ mcp/tokenstore_darwin.go	2026-08-07 21:00:45
+@@ -118,7 +118,7 @@
+ 	if strings.TrimSpace(server) == "" {
+ 		return errors.New("a token needs a server name")
+ 	}
+-	if record == nil || record.Token == nil || record.Token.AccessToken == "" {
++	if record == nil || record.Token == nil {
+ 		return errors.New("refusing to store an empty token")
+ 	}
+ 
+--- go test -run TestKeychainRefusesToStoreNothing ./mcp/ ---
+--- FAIL: TestKeychainRefusesToStoreNothing (0.08s)
+    tokenstore_darwin_test.go:236: an empty token must be refused; storing it would look like being signed in
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.523s
+FAIL
+EXIT=1
+restored: 1458d4bd8cb6a7be228523d649a1d4c236f02925e12018f7dd370e62310d11af
+
+hash after: 1458d4bd8cb6a7be228523d649a1d4c236f02925e12018f7dd370e62310d11af
+leftover keychain items: 0

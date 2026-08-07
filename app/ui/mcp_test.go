@@ -27,6 +27,10 @@ func mcpFiles(t *testing.T) (configPath, approvalsPath string) {
 	approvalsPath = filepath.Join(dir, "mcp-approvals.json")
 	t.Setenv("OLLAMA_MCP_CONFIG", configPath)
 	t.Setenv("OLLAMA_MCP_APPROVALS", approvalsPath)
+	// The token store too. On macOS the default is the real keychain, and a
+	// test that reached it could read or delete a credential belonging to an
+	// actual sign-in.
+	t.Setenv("OLLAMA_MCP_TOKENS", filepath.Join(dir, "mcp-tokens.json"))
 	return configPath, approvalsPath
 }
 

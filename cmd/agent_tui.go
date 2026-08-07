@@ -304,7 +304,7 @@ func agentMCPManager(ctx context.Context) *mcp.Manager {
 	// requiring a restart.
 	manager := mcp.NewManager(mcp.Options{
 		Approvals: mcp.ApprovalsFile(approvalsPath, nil),
-		Tokens:    &mcp.FileTokenStore{},
+		Tokens:    mcp.DefaultTokenStore(),
 	})
 	manager.Connect(ctx, cfg)
 	reportMCPStates(manager.States())
