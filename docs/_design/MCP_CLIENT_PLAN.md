@@ -410,7 +410,13 @@ Proof in `docs/_design/proof/phase3d-oauthhandler-falsification.txt`, `phase3d-s
 
 It also found a redundant second writer for the stored token, deleted after two attempts to falsify it both passed — the same rule that removed the reaping code in Phase 2.
 
-**Owed: a real service.** A fake authorization server agrees with whatever you built. Nothing has been signed in to for real, and that is where the remaining surprises are. Also owed: the Keychain and DPAPI store, which needs cgo.
+**The macOS keychain store landed** (`088215ce`): one generic password item per server through the Security framework, with the file store kept as a fallback that is migrated out of on first read, so an upgrade takes the credential out of cleartext rather than leaving a copy behind. cgo costs nothing here — this build already links Foundation, Metal, WebKit and Cocoa on darwin.
+
+**Its description is deliberately modest, and that is a finding.** Before writing any of it, a spike wrote a keychain item from one unsigned binary and read it back from a *different* unsigned binary: it succeeded with no prompt. So an item added by an unsigned build is readable by any process running as the same user, and the keychain's real benefit here is encryption at rest — the token stops sitting in cleartext in a file that gets swept into backups, sync folders and support bundles. The store says exactly that, and a test fails if the wording grows.
+
+`OLLAMA_MCP_TOKENS` now overrides the platform default with a file at that path. It is an explicit instruction about where credentials live, and it is also what isolates the `cmd` and `app/ui` suites — five of their tests build the production manager and would otherwise have read and deleted from the developer's own keychain.
+
+**Owed: a real service, and the other two platforms.** A fake authorization server agrees with whatever you built; nothing has been signed in to for real. Windows DPAPI and a Linux secret-service store are **not written** rather than written unproven — neither can be executed on this machine, and code that compiles but has never run is what full-or-stop forbids.
 
 ### Phase 4 — The MCP Servers page — **DONE 2026-08-06** (`273c19bd`)
 
