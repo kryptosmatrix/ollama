@@ -1,13 +1,15 @@
-# Handoff — MCP client support, session 1
+# Handoff — MCP client support
 
 From: Grommet (Claude Opus 5)
-Date: 2026-08-05
+Sessions: 1 (2026-08-05) and 2 (2026-08-06 to 2026-08-07)
 Branch: `mcp/server-support`, pushed to `origin` (kryptosmatrix/ollama)
-Head at handoff: `65e4b144`
+Head at handoff: `3f925cfc` — 49 commits ahead of `main`, 108 files, ~24,000 lines added
 
 ## Read this first
 
-`docs/_design/MCP_CLIENT_PLAN.md` is the governing document. It carries the codebase analysis, the operator's rulings, the security model, the UI contract, and the phase plan with each phase's proof obligations. This handoff says only what changed in session 1 and what the next session should do.
+`docs/_design/MCP_CLIENT_PLAN.md` is the governing document. It carries the codebase analysis, the operator's rulings, the security model, the UI contract, and the phase plan with each phase's proof obligations. This handoff is the current state and what remains.
+
+**The feature is complete and works end to end, in both surfaces, against real hosted servers.** `mcp/` is 13 production files and 147 tests. Two things are outstanding and both are named below: the Windows and Linux token stores, and an independent review by a different substrate.
 
 ## State
 
@@ -25,13 +27,22 @@ Head at handoff: `65e4b144`
 | 3d — OAuth in the surfaces | **DONE** (`3104fd4e`) |
 | 4 — MCP Servers page | **DONE** (`273c19bd`) |
 | 4b — registry browse | **DONE** (`8317a273`, `07b06d8d`, `0c540dac`) |
-| 5 — docs, cross-substrate review, closeout | not started |
+| 5 — docs and closeout | **DONE** — docs current, 24 proof artefacts, this handoff |
+| 5 — cross-substrate review | **NOT DONE** — see below; this is the largest outstanding risk |
 
-The whole tree builds and vets clean; `mcp`, `agent/...` and `cmd` all pass. MCP is live in `ollama` agent mode: configured, approved servers are connected at start-up and their tools are offered to the model behind per-tool approval.
+### Verified at closeout (2026-08-07)
 
-**The feature is now usable end to end from the terminal.** `ollama mcp add|list|remove|enable|disable|approve|revoke` exists and is registered on the root command; `ollama` in agent mode connects approved servers and offers their tools behind per-tool approval.
+`go build ./...` clean. `go test ./...` — 65 packages ok, 0 failures. `go vet ./...` — one failure, `tokenizer/bytepairencoding_test.go:542`, which is the pre-existing baseline. Frontend: 102 tests in 11 files pass; eslint reports 43 problems in 13 files and prettier 8 files, both **below** the Phase 0 baseline of 122/14 and 9, and none of them in a file this work owns. The single warning in `ChatSidebar.tsx` is at line 170, in chat date-grouping code this branch never touched.
 
-`/mcp` inside the agent TUI lists servers and toggles them; it deliberately cannot approve one. **Phases 3a, 3b, 3c and 4 are complete.** MCP works end to end in both surfaces, and the desktop app now has its MCP Servers page: a top-level sidebar destination that lists, approves, switches, removes and adds servers. **Everything is complete except the rest of OAuth.** MCP works end to end in both surfaces, the desktop app manages servers from its own page, and that page can browse and install from the official registry.
+`app/updater`'s `TestAutoUpdateDisabledSkipsDownload` is flaky and pre-existing; it passed at closeout, which proves nothing either way.
+
+### What works
+
+From the terminal: `ollama mcp add|list|remove|enable|disable|approve|revoke|login|logout`, all registered on the root command. `ollama` in agent mode connects approved servers at start-up and offers their tools to the model behind per-tool approval. `/mcp` in the TUI lists and toggles servers and deliberately cannot approve one.
+
+From the desktop app: an MCP Servers page that lists, approves, switches, removes and adds servers, browses and installs from the official MCP Registry, and signs in to and out of remote servers. Tool calls are gated by an approval prompt.
+
+Against real services: a public hosted server connects and a tool call round-trips; three OAuth-protected services report a needed sign-in rather than failing; and a complete sign-in to Sentry works — discovery, dynamic registration, PKCE, browser, exchange, nine tools, reconnect from the stored token with no browser, and a sign-out Sentry accepted as a revocation.
 
 ## Operator rulings in force
 
@@ -47,9 +58,9 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 **`go build ./...` fails on a clean checkout.** `app/ui/app.go` embeds `app/dist`, so the frontend must be built first: `npm ci && npm run build` in `app/ui/app`. This is not a broken tree.
 
-**Three checks are already red and are not yours to fix.** `go vet ./...` fails on `tokenizer/bytepairencoding_test.go:542`. `npm run lint` fails with 122 problems across 14 files. `npm run prettier:check` fails on 9 files. Full detail in `docs/_design/proof/phase0-baseline.txt`. Completion is "no new problems against that baseline", not "zero problems".
+**Three checks were already red at Phase 0 and are not yours to fix.** `go vet ./...` on `tokenizer/bytepairencoding_test.go:542`; `npm run lint` with 122 problems across 14 files; `npm run prettier:check` on 9 files. Full detail in `docs/_design/proof/phase0-baseline.txt`. Completion is "no new problems against that baseline", not "zero problems". At closeout the frontend numbers had *fallen* to 43 and 8 — something else in the tree improved — so measure before you assume a number is yours.
 
-**Do not run `prettier --write` on an existing file.** `ChatSidebar.tsx` must be edited for the sidebar entry and is already format-dirty; reformatting it would bury a three-line change in a hundred-line diff and work against the upstream ruling. Hand-edit in the surrounding style.
+**Do not run `prettier --write` on a file you did not create.** Reformatting buries a small change in a large diff and works against the upstream ruling. Hand-edit in the surrounding style. (`ChatSidebar.tsx` was the case that mattered; it is prettier-clean now, but the rule stands for the eight files that are not.)
 
 **`mcp/` cannot import `cmd/internal/fileutil`.** Go's internal rule. It writes atomically itself.
 
@@ -61,15 +72,31 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 **`app/updater`'s `TestAutoUpdateDisabledSkipsDownload` is flaky.** It fails roughly one full app-tree run in three and always passes when that package is run alone — proven against a clean tree with this work stashed. It is not MCP's. Do not chase it, and do not read a single green app-tree run as proof of anything.
 
-## What the next session should do
+## What remains
 
-**OAuth is wired end to end and both surfaces can start and end a sign-in.** What remains is below, and the first item is the honest gap.
+Two items, in the order I would do them.
 
-1. **Done, and it found a defect.** A real sign-in to Sentry now works end to end — see `docs/_design/proof/phase3d-real-signin.txt`. The first attempt failed because Sentry returns the RFC 9207 `iss` parameter without advertising `authorization_response_iss_parameter_supported`, and the protocol library rejects the whole sign-in when that happens. Linear and Notion do not advertise it either. `mcp/hosted_test.go` is the harness (skipped unless `OLLAMA_MCP_TEST_URL` is set; `OLLAMA_MCP_TEST_SIGNIN=1` allows a browser). **Reported upstream: https://github.com/modelcontextprotocol/go-sdk/issues/1152** — `auth/authorization_code.go`, `validateIssuerResponse`. If it is fixed there, the local comparison in `LoopbackRedirect` can stop withholding the value from the library, but **the comparison itself must stay**: RFC 9207 §2.4 requires the client to validate a present issuer, and the library only ever sees the ones it was told to expect.
-2. **The Windows and Linux stores are owed.** macOS is done (`mcp/tokenstore_darwin.go`, cgo + Security framework, one generic password per server). Windows should use DPAPI, Linux the desktop secret service. They were **not written** rather than written unproven: neither can be executed on this machine, and code that compiles but has never run is what full-or-stop forbids. `DefaultTokenStore` on those platforms returns the file store, whose `Description()` says what protects it. Follow the darwin file's shape — the interface takes a `SignInRecord`, `Save` must preserve a `ClientID` that a refresh does not carry, `Load` must return `ErrNoToken` for a miss, and `Delete` of an absent item is not an error. Migration from the file store belongs in `Load`, as it does there.
-3. **Phase 5**: docs, cross-substrate review, closeout.
+### 1. An independent review by a different substrate — NOT DONE, and the largest outstanding risk
 
-What landed, so it is not re-derived: the transport seam is `newTransport(ctx, spec, transportOptions) (sdk.Transport, func(), error)` — the mode says whether a browser may open, and the returned function releases the redirect listener and must run on every path. `Manager.SignIn` is the only caller that passes `signInAllowed`. `TokenStore` keeps a `SignInRecord`, not a bare token, because RFC 7009 revocation needs the client identifier and dynamic registration issues a fresh one each time, so it is knowable only at sign-in. `SignOut` revokes then deletes, and returns `ErrSignedOutLocallyOnly` when the revocation did not happen. `StatusNeedsSignIn` is its own status, not a failure, and is never retried.
+Forty-nine commits of security-sensitive code — a code-execution config, an approval gate, an OAuth client, a credential store — have been read by exactly one pair of eyes, mine, and proven by tests I also wrote. Falsification catches a great deal but it cannot catch what I did not think to test, and this session produced two demonstrations of that in a single hour: a real service found an interoperability defect no fake would ever have shown, and reading RFC 9207 properly found a security hole in my own fix for it that every one of my tests had passed over.
+
+Run Codex or Kimi over the branch before this goes anywhere near an upstream PR. Give the reviewer the plan, this handoff and the diff against `main`, and ask specifically about the approval gate, the token store, and `mcp/oauth.go`. `$HOME/GitHub/TECHNE/Tools/codex/ask.sh` is the harness; the blind protocol matters — the reviewer gets the pinned HEAD and the claims, not my reasoning about why each is fine.
+
+### 2. The Windows and Linux token stores
+
+macOS is done (`mcp/tokenstore_darwin.go`, cgo + Security framework, one generic password item per server). Windows should use DPAPI, Linux the desktop secret service. They were **not written** rather than written unproven: neither can be executed on this machine, and code that compiles but has never run is what full-or-stop forbids. `DefaultTokenStore` on those platforms returns the file store, whose `Description()` says what protects it, and every surface shows that string before a token exists.
+
+Follow the darwin file's shape. The interface takes a `SignInRecord`, not a bare token. `Save` must preserve a `ClientID` that a refresh does not carry. `Load` must return `ErrNoToken` for a miss and is also where migration from the file store belongs. `Delete` of an absent item is not an error. And whatever you write, make its `Description()` say only what you have measured it to deliver.
+
+### Also worth knowing
+
+**The real-service harness.** `mcp/hosted_test.go` is skipped unless `OLLAMA_MCP_TEST_URL` names an endpoint; `OLLAMA_MCP_TEST_SIGNIN=1` additionally allows a browser sign-in, and `OLLAMA_MCP_TEST_TOOL`/`OLLAMA_MCP_TEST_ARGS` call one tool. It uses a token store in a temporary directory, never the platform default, and the sign-in test signs out at the end so a run leaves no credential at either end. Use it whenever you touch the transport or the OAuth path.
+
+**An upstream issue is open and may change this code.** https://github.com/modelcontextprotocol/go-sdk/issues/1152 — `auth/authorization_code.go`, `validateIssuerResponse` rejects a correct-but-unadvertised RFC 9207 `iss`. A real sign-in to Sentry is what found it, and it is why `LoopbackRedirect` compares the issuer itself. If the SDK is fixed, `IgnoreIssuer` can stop withholding the value — but **the comparison itself must stay**, because RFC 9207 §2.4 puts that obligation on the client whenever the parameter is present, and the library only ever sees the values it was told to expect.
+
+## The shape of what landed, so it is not re-derived
+
+, so it is not re-derived: the transport seam is `newTransport(ctx, spec, transportOptions) (sdk.Transport, func(), error)` — the mode says whether a browser may open, and the returned function releases the redirect listener and must run on every path. `Manager.SignIn` is the only caller that passes `signInAllowed`. `TokenStore` keeps a `SignInRecord`, not a bare token, because RFC 7009 revocation needs the client identifier and dynamic registration issues a fresh one each time, so it is knowable only at sign-in. `SignOut` revokes then deletes, and returns `ErrSignedOutLocallyOnly` when the revocation did not happen. `StatusNeedsSignIn` is its own status, not a failure, and is never retried.
 
 ## What must not soften
 
@@ -124,3 +151,21 @@ What landed, so it is not re-derived: the transport seam is `newTransport(ctx, s
 - `docs/_design/proof/phase4-falsification.txt` — the MCP Servers page, five protections, plus two falsifiers that initially passed: one a wrong sabotage, one a test that did not discriminate.
 - `docs/_design/proof/phase4b-falsification.txt` — the registry client and browse routes, nine protections, all against recorded fixtures.
 - `docs/_design/proof/phase2-falsification.txt` — the manager, including three attempts that **failed to falsify** and the removal that followed. Read that section before adding any safety mechanism to this package: the protocol library already reaps processes, and code written to do it again cannot be tested.
+- `docs/_design/proof/phase3d-oauthhandler-falsification.txt` — the OAuth handler, ten protections, plus two of my own tests rewritten first because they did not discriminate.
+- `docs/_design/proof/phase3d-signin-falsification.txt` — sign-in and sign-out, ten protections against a fake authorization server.
+- `docs/_design/proof/phase3d-wiring-falsification.txt` — the transport wiring and the connect surfaces, ten protections, and a harness fault that overwrote a surface file and how it was recovered.
+- `docs/_design/proof/phase3d-flow-falsification.txt` — the complete authorization-code flow, ten protections, two defects found before any sabotage, and one protection recorded as **not falsifiable against our code** (PKCE lives in the library) rather than counted.
+- `docs/_design/proof/phase3d-keychain-falsification.txt` — the macOS keychain store, eleven protections against the real login keychain, and the measurement that decided the wording of its description.
+- `docs/_design/proof/phase3d-hosted-servers.txt` — runs against DeepWiki, Linear, Sentry and Notion, with what they do and do not prove stated separately.
+- `docs/_design/proof/phase3d-real-signin.txt` — the complete sign-in to Sentry: the run that failed, the defect it found, and the run that succeeded.
+- `docs/_design/proof/phase3d-issuer-validation.txt` — the correction to that fix, where reading RFC 9207 rather than paraphrasing it showed my own first attempt accepted a mismatched issuer.
+
+## What this session got wrong
+
+Kept deliberately, because a handoff that lists only successes teaches the next reader nothing about where the traps are.
+
+- I wrote a confident paragraph about what RFC 9207 required before reading it, and the paragraph was wrong in the direction that weakened a security check. The tests I had written all passed over the hole. **Read the specification text, not your memory of it, whenever a check is being relaxed.**
+- A falsification harness that backed files up by basename overwrote `app/ui/mcp.go` with `cmd/mcp.go`. Recovered from HEAD plus re-applied edits.
+- A keychain sabotage broke the item query and with it the test's own cleanup, leaving two items in the real login keychain. Cleanups must not go through the code under test.
+- `oauthHandlerFor` went dead when the transport was restructured and survived only because its own test kept passing. A green test is not evidence that production uses the thing it tests.
+- Two protections could not be falsified and the code behind them was deleted rather than kept: the per-server reaping in Phase 2, and a second token writer in Phase 3d.

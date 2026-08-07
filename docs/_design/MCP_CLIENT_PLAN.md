@@ -422,6 +422,8 @@ Wiring that fix exposed a dead function: `oauthHandlerFor` had stopped being cal
 
 The second run signed in to Sentry MCP 0.37.0, listed nine tools, reconnected from the stored token with no browser, and signed out with Sentry accepting the revocation — the whole loop, against an authorization server nobody here controls. Evidence in `docs/_design/proof/phase3d-real-signin.txt` and `phase3d-hosted-servers.txt`.
 
+**Closeout (2026-08-07).** The branch is 49 commits ahead of `main`. `go build ./...` clean, `go test ./...` 65 packages ok with 0 failures, `go vet` showing only the pre-existing baseline failure, 102 frontend tests passing, and lint and format both below the Phase 0 baseline with nothing in a file this work owns. 24 proof artefacts in `docs/_design/proof/`. **No independent review by a different substrate has been run**, and that is the largest outstanding risk: this is security-sensitive code proven entirely by tests its own author wrote. See the handoff.
+
 **Owed: the other two platforms.** Windows DPAPI and a Linux secret-service store are **not written** rather than written unproven — neither can be executed on this machine, and code that compiles but has never run is what full-or-stop forbids.
 
 ### Phase 4 — The MCP Servers page — **DONE 2026-08-06** (`273c19bd`)
