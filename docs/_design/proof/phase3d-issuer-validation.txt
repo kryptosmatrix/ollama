@@ -103,3 +103,31 @@ restored: 19d8d59729631cc7d4c6d4bfc39a5def01c2245673095921629ba59f7e540019
 hashes after:
 5bb6a7f88e0ad001d6f21335f1bfed924f71e42be7e122f13f85728182190185  mcp/oauth.go
 19d8d59729631cc7d4c6d4bfc39a5def01c2245673095921629ba59f7e540019  mcp/oauthhandler.go
+
+=== third run: the same real sign-in, with the issuer comparison in place ===
+This is the run that matters for the correction. The check compares Sentry's
+actual iss against the issuer identifier in its own metadata, so a fix that
+guarded the mix-up case at the cost of breaking the one real service it was
+written for would show up here. It does not: 9 tools, reconnect, revocation
+accepted. Faster than the second run only because Sentry remembered the
+consent from it.
+
+=== RUN   TestAHostedSignIn
+    hosted_test.go:201: a browser will open for https://mcp.sentry.dev/mcp; finish signing in there
+    hosted_test.go:209: signed in: Sentry MCP 0.37.0 (protocol 2026-07-28), 9 tools
+    hosted_test.go:210: 9 tools offered, 0 refused
+    hosted_test.go:210:   tool hosted__analyze_issue_with_seer
+    hosted_test.go:210:   tool hosted__execute_sentry_tool
+    hosted_test.go:210:   tool hosted__find_organizations
+    hosted_test.go:210:   tool hosted__find_projects
+    hosted_test.go:210:   tool hosted__get_sentry_resource
+    hosted_test.go:210:   tool hosted__search_events
+    hosted_test.go:210:   tool hosted__search_issues
+    hosted_test.go:210:   tool hosted__search_sentry_tools
+    hosted_test.go:210:   tool hosted__update_issue
+    hosted_test.go:221: stored: access token 57 chars, refresh token present=true, client id present=true, expiry=2026-08-07 22:50:34.560576 +1000 AEST
+    hosted_test.go:250: signed out: the token was revoked at the server and deleted here
+--- PASS: TestAHostedSignIn (9.15s)
+PASS
+ok  	github.com/ollama/ollama/mcp	9.460s
+EXIT=0
