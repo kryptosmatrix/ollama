@@ -1,0 +1,219 @@
+Phase 3d — a complete sign-in against a real hosted service, and the defect it found
+
+WHAT HAPPENED
+
+The first run against Sentry's hosted MCP server failed, after the operator had
+been to the browser and come back:
+
+    SignIn: connect: calling "initialize": sending "initialize": rejected by
+    transport: authorization server does not advertise RFC 9207 iss parameter
+    support but iss was received in the authorization response
+
+Sentry's authorization server returns the RFC 9207 "iss" parameter in its
+authorization response. Its metadata does not advertise
+authorization_response_iss_parameter_supported. The protocol library treats
+that combination as fatal, so Ollama could not sign in to Sentry at all.
+
+Checked against all three services this branch has verified — none of them
+advertises the parameter:
+
+    mcp.sentry.dev    authorization_response_iss_parameter_supported: absent
+    mcp.linear.app    authorization_response_iss_parameter_supported: absent
+    mcp.notion.com    authorization_response_iss_parameter_supported: absent
+
+WHOSE DEFECT
+
+The protocol library's, at auth/authorization_code.go validateIssuerResponse.
+RFC 9207 asks a client not to *rely* on an unadvertised issuer; it does not ask
+it to reject one. A server that never committed to sending an issuer offers no
+mix-up defence whether it sends one or not, so the safe reading is to ignore
+it — rejecting turns a harmless extra parameter into a sign-in nobody can
+complete. This is worth reporting upstream to modelcontextprotocol/go-sdk.
+
+WHAT OLLAMA DOES ABOUT IT
+
+Not a blanket drop, which would have traded one broken server for a silently
+weakened check on every compliant one: dropping the issuer everywhere makes a
+server that *does* advertise it fail with the opposite complaint, and that
+check is where the mix-up defence actually lives.
+
+Instead the metadata is looked up once per sign-in, and the callback forwards
+the issuer only when the authorization server said it would send one. A lookup
+that fails answers "advertised", so not knowing keeps the stricter behaviour
+rather than guessing the laxer one.
+
+WIRING IT EXPOSED A SECOND THING. The fix went into oauthHandlerFor, and the
+regression test still failed. That function had become dead when the transport
+was restructured to stop registering clients: production called newOAuthSession
+directly, and oauthHandlerFor survived only because its own test kept passing.
+It has been deleted and the property it guarded — a stdio server gets no
+authorization machinery — asserted against the transport that is actually
+built.
+
+THE SECOND RUN
+
+    signed in: Sentry MCP 0.37.0 (protocol 2026-07-28), 9 tools
+    9 tools offered, 0 refused
+    stored: access token 57 chars, refresh token present=true, client id
+      present=true, expiry=2026-08-07 22:33:48.675168 +1000 AEST
+    signed out: the token was revoked at the server and deleted here
+    --- PASS: TestAHostedSignIn (127.62s)
+
+Every stage against a real authorization server: discovery, dynamic client
+registration, PKCE, a browser a person finished by hand, the token exchange,
+nine real tools converted, a second manager over the same store reconnecting
+with no browser at all, and a sign-out that Sentry accepted — the revocation
+endpoint took the client identifier recorded at registration and the refresh
+token, which is the whole reason SignInRecord carries a ClientID.
+
+The credential is gone from both ends: revoked at Sentry, deleted from the
+temporary store the run used. Nothing was written to the operator's keychain.
+
+The regression is now deterministic and does not depend on Sentry: the fake
+authorization server in mcp/oauthflow_test.go can send an issuer it never
+advertised, which is exactly what Sentry does.
+
+FALSIFICATION
+
+hashes before:
+a8a581796f49621dbab0e7e06cc3c40fb525881ed6676aba397ef05e52d94080  mcp/oauth.go
+d50eadaa4d57ffe46a6a090195f48ffb147de77c79ac4ba3d70227a2b8fe4ced  mcp/oauthhandler.go
+f6fc42bb6c47a94f505b5eb142ebfb424d6f0c6c507229c3130b15652b581655  mcp/server.go
+
+=== I1 an issuer nobody advertised is forwarded anyway (the Sentry failure) ===
+--- sabotage diff ---
+--- /tmp/iss-oauth.go.orig	2026-08-07 21:34:37
++++ mcp/oauth.go	2026-08-07 21:34:37
+@@ -173,9 +173,6 @@
+ 	}
+ 
+ 	issuer := query.Get("iss")
+-	if r.IgnoreIssuer {
+-		issuer = ""
+-	}
+ 
+ 	writeSignInPage(w, "Signed in. You can close this window and return to Ollama.")
+ 	r.deliver(sdkauth.AuthorizationResult{
+--- go test -run TestASignInSurvivesAnUnadvertisedIssuer ./mcp/ ---
+--- FAIL: TestASignInSurvivesAnUnadvertisedIssuer (0.01s)
+    oauthflow_test.go:785: SignIn: connect: calling "initialize": sending "initialize": rejected by transport: authorization server does not advertise RFC 9207 iss parameter support but iss was received in the authorization response
+        this is the Sentry failure: a server that sends an issuer it never advertised must not break the sign-in
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.461s
+FAIL
+EXIT=1
+restored: a8a581796f49621dbab0e7e06cc3c40fb525881ed6676aba397ef05e52d94080
+
+=== I2 the issuer is dropped for every server, weakening the servers that do advertise it ===
+--- sabotage diff ---
+--- /tmp/iss-oauth.go.orig	2026-08-07 21:34:37
++++ mcp/oauth.go	2026-08-07 21:34:40
+@@ -172,10 +172,7 @@
+ 		return
+ 	}
+ 
+-	issuer := query.Get("iss")
+-	if r.IgnoreIssuer {
+-		issuer = ""
+-	}
++	issuer := ""
+ 
+ 	writeSignInPage(w, "Signed in. You can close this window and return to Ollama.")
+ 	r.deliver(sdkauth.AuthorizationResult{
+--- go test -run TestAnAdvertisedIssuerIsStillChecked ./mcp/ ---
+--- FAIL: TestAnAdvertisedIssuerIsStillChecked (0.01s)
+    --- FAIL: TestAnAdvertisedIssuerIsStillChecked/advertised_and_sent (0.01s)
+        oauthflow_test.go:809: SignIn: connect: calling "initialize": sending "initialize": rejected by transport: authorization server advertises RFC 9207 iss parameter support but none was received in the authorization response
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.463s
+FAIL
+EXIT=1
+restored: a8a581796f49621dbab0e7e06cc3c40fb525881ed6676aba397ef05e52d94080
+
+=== I3 the lookup exists but the transport never applies it ===
+--- sabotage diff ---
+--- /tmp/iss-server.go.orig	2026-08-07 21:34:37
++++ mcp/server.go	2026-08-07 21:34:43
+@@ -221,12 +221,7 @@
+ 		if err != nil {
+ 			return nil, nothingToRelease, err
+ 		}
+-		if session.redirect != nil {
+-			// Only an explicit sign-in has a redirect, and only a sign-in
+-			// receives an issuer, so this lookup happens once per sign-in
+-			// rather than on every connection.
+-			session.redirect.IgnoreIssuer = !advertisesIssuer(ctx, spec.URL)
+-		}
++
+ 		transport.OAuthHandler = session.handler
+ 		return transport, session.close, nil
+ 
+--- go test -run TestASignInSurvivesAnUnadvertisedIssuer ./mcp/ ---
+--- FAIL: TestASignInSurvivesAnUnadvertisedIssuer (0.01s)
+    oauthflow_test.go:785: SignIn: connect: calling "initialize": sending "initialize": rejected by transport: authorization server does not advertise RFC 9207 iss parameter support but iss was received in the authorization response
+        this is the Sentry failure: a server that sends an issuer it never advertised must not break the sign-in
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.459s
+FAIL
+EXIT=1
+restored: f6fc42bb6c47a94f505b5eb142ebfb424d6f0c6c507229c3130b15652b581655
+
+=== I4 unreadable metadata answers the laxer way ===
+--- sabotage diff ---
+--- /tmp/iss-handler.go.orig	2026-08-07 21:34:37
++++ mcp/oauthhandler.go	2026-08-07 21:34:46
+@@ -215,7 +215,7 @@
+ 	client := &http.Client{Timeout: signInHTTPTimeout}
+ 	metadata, err := protectedResourceMetadata(ctx, serverURL, client)
+ 	if err != nil || metadata == nil {
+-		return true
++		return false
+ 	}
+ 	for _, issuer := range metadata.AuthorizationServers {
+ 		server, err := sdkauth.GetAuthServerMetadata(ctx, issuer, client)
+--- go test -run TestAdvertisesIssuerAnswersStrictlyWhenItCannotTell ./mcp/ ---
+--- FAIL: TestAdvertisesIssuerAnswersStrictlyWhenItCannotTell (0.00s)
+    --- FAIL: TestAdvertisesIssuerAnswersStrictlyWhenItCannotTell/no_metadata_at_all (0.00s)
+        oauthflow_test.go:854: not knowing must answer strictly; guessing the laxer way turns an unreadable metadata document into a silently weakened check
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.462s
+FAIL
+EXIT=1
+restored: d50eadaa4d57ffe46a6a090195f48ffb147de77c79ac4ba3d70227a2b8fe4ced
+
+hashes after:
+a8a581796f49621dbab0e7e06cc3c40fb525881ed6676aba397ef05e52d94080  mcp/oauth.go
+d50eadaa4d57ffe46a6a090195f48ffb147de77c79ac4ba3d70227a2b8fe4ced  mcp/oauthhandler.go
+f6fc42bb6c47a94f505b5eb142ebfb424d6f0c6c507229c3130b15652b581655  mcp/server.go
+
+=== the two runs, verbatim ===
+--- first, before the fix ---
+=== RUN   TestAHostedSignIn
+    hosted_test.go:201: a browser will open for https://mcp.sentry.dev/mcp; finish signing in there
+    hosted_test.go:204: SignIn: connect: calling "initialize": sending "initialize": rejected by transport: authorization server does not advertise RFC 9207 iss parameter support but iss was received in the authorization response
+--- FAIL: TestAHostedSignIn (119.18s)
+FAIL
+FAIL	github.com/ollama/ollama/mcp	119.629s
+FAIL
+EXIT=1
+
+--- second, after the fix ---
+=== RUN   TestAHostedSignIn
+    hosted_test.go:201: a browser will open for https://mcp.sentry.dev/mcp; finish signing in there
+    hosted_test.go:209: signed in: Sentry MCP 0.37.0 (protocol 2026-07-28), 9 tools
+    hosted_test.go:210: 9 tools offered, 0 refused
+    hosted_test.go:210:   tool hosted__analyze_issue_with_seer
+    hosted_test.go:210:   tool hosted__execute_sentry_tool
+    hosted_test.go:210:   tool hosted__find_organizations
+    hosted_test.go:210:   tool hosted__find_projects
+    hosted_test.go:210:   tool hosted__get_sentry_resource
+    hosted_test.go:210:   tool hosted__search_events
+    hosted_test.go:210:   tool hosted__search_issues
+    hosted_test.go:210:   tool hosted__search_sentry_tools
+    hosted_test.go:210:   tool hosted__update_issue
+    hosted_test.go:221: stored: access token 57 chars, refresh token present=true, client id present=true, expiry=2026-08-07 22:33:48.675168 +1000 AEST
+    hosted_test.go:250: signed out: the token was revoked at the server and deleted here
+--- PASS: TestAHostedSignIn (127.62s)
+PASS
+ok  	github.com/ollama/ollama/mcp	127.871s
+EXIT=0

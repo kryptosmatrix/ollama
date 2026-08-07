@@ -221,6 +221,12 @@ func newTransport(ctx context.Context, spec *ServerSpec, opts transportOptions) 
 		if err != nil {
 			return nil, nothingToRelease, err
 		}
+		if session.redirect != nil {
+			// Only an explicit sign-in has a redirect, and only a sign-in
+			// receives an issuer, so this lookup happens once per sign-in
+			// rather than on every connection.
+			session.redirect.IgnoreIssuer = !advertisesIssuer(ctx, spec.URL)
+		}
 		transport.OAuthHandler = session.handler
 		return transport, session.close, nil
 

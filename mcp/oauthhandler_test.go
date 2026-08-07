@@ -313,29 +313,6 @@ func TestSavingTokenSourceIgnoresAnEmptyToken(t *testing.T) {
 	}
 }
 
-func TestOAuthHandlerOnlyForRemoteServers(t *testing.T) {
-	store := testStore(t)
-
-	local := &ServerSpec{Name: "files", Command: "uvx"}
-	session, err := oauthHandlerFor(local, store, signInDisallowed, nil)
-	if err != nil {
-		t.Fatalf("oauthHandlerFor: %v", err)
-	}
-	if session != nil {
-		t.Error("a stdio server has no authorization to do; a handler there is noise")
-	}
-
-	remote := &ServerSpec{Name: "hosted", URL: "https://mcp.example.com/v1"}
-	session, err = oauthHandlerFor(remote, store, signInDisallowed, nil)
-	if err != nil {
-		t.Fatalf("oauthHandlerFor: %v", err)
-	}
-	if session == nil {
-		t.Fatal("a remote server must get a handler; only the server can say whether it needs authorization, and it says so with a 401")
-	}
-	session.close()
-}
-
 func TestSignInRequiredUnwraps(t *testing.T) {
 	wrapped := fmt.Errorf("connect: %w", fmt.Errorf("transport: %w", ErrSignInRequired))
 	if !SignInRequired(wrapped) {
@@ -399,6 +376,20 @@ func TestAnHTTPTransportCarriesAHandlerOnlyWhenThereIsATokenToSend(t *testing.T)
 		// a sign-in rather than starting one.
 		if _, ok := transport.HTTPClient.Transport.(*signInRequiredTransport); !ok {
 			t.Errorf("client transport = %T, want the challenge to be refused here too", transport.HTTPClient.Transport)
+		}
+	})
+
+	t.Run("a stdio server", func(t *testing.T) {
+		local := &ServerSpec{Name: "files", Command: "go"}
+		transport, release, err := newTransport(t.Context(), local, transportOptions{tokens: testStore(t), signIn: signInAllowed})
+		if err != nil {
+			t.Fatalf("newTransport: %v", err)
+		}
+		t.Cleanup(release)
+		// A subprocess has no authorization to do. Anything that could carry a
+		// handler here would be carrying it for no server.
+		if _, ok := transport.(*sdk.CommandTransport); !ok {
+			t.Errorf("transport = %T, want a command transport", transport)
 		}
 	})
 

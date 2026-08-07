@@ -40,6 +40,19 @@ type LoopbackRedirect struct {
 	// Timeout bounds one sign-in. Zero means DefaultAuthorizationTimeout.
 	Timeout time.Duration
 
+	// IgnoreIssuer drops the RFC 9207 "iss" parameter from the callback.
+	//
+	// It is set when the authorization server's metadata does not advertise
+	// authorization_response_iss_parameter_supported. RFC 9207 says a client
+	// must not rely on iss unless the server has committed to sending it, so
+	// one that arrives from a server that made no such commitment carries no
+	// defence against a mix-up and is ignored. Servers that do advertise it
+	// keep the check, which is where the defence actually lives.
+	//
+	// The zero value forwards the issuer, so a caller that has not looked at
+	// the metadata gets the stricter behaviour rather than the laxer one.
+	IgnoreIssuer bool
+
 	listener net.Listener
 	server   *http.Server
 
@@ -159,11 +172,16 @@ func (r *LoopbackRedirect) handleCallback(w http.ResponseWriter, req *http.Reque
 		return
 	}
 
+	issuer := query.Get("iss")
+	if r.IgnoreIssuer {
+		issuer = ""
+	}
+
 	writeSignInPage(w, "Signed in. You can close this window and return to Ollama.")
 	r.deliver(sdkauth.AuthorizationResult{
 		Code:  code,
 		State: query.Get("state"),
-		Iss:   query.Get("iss"),
+		Iss:   issuer,
 	})
 }
 

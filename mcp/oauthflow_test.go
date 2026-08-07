@@ -59,6 +59,11 @@ type authorizedMCPServer struct {
 	// arrives, so a test can separate "the sign-in worked" from "the
 	// connection worked".
 	breakAfterAuthorization bool
+	// sendIssuer returns the RFC 9207 "iss" parameter in the authorization
+	// response. advertiseIssuer declares support for it in the metadata. Real
+	// services exist that do the first without the second.
+	sendIssuer      bool
+	advertiseIssuer bool
 	// issuedTokens are the access tokens this server has minted, in order.
 	issuedTokens []string
 }
@@ -130,7 +135,7 @@ func newAuthorizedMCPServer(t *testing.T, tools ...*sdk.Tool) *authorizedMCPServ
 	})
 
 	mux.HandleFunc("/.well-known/oauth-authorization-server", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, map[string]any{
+		meta := map[string]any{
 			"issuer":                                fake.URL,
 			"authorization_endpoint":                fake.URL + "/authorize",
 			"token_endpoint":                        fake.URL + "/token",
@@ -140,7 +145,14 @@ func newAuthorizedMCPServer(t *testing.T, tools ...*sdk.Tool) *authorizedMCPServ
 			"token_endpoint_auth_methods_supported": []string{"none"},
 			"scopes_supported":                      []string{"mcp.read", "offline_access"},
 			"grant_types_supported":                 []string{"authorization_code", "refresh_token"},
-		})
+		}
+		fake.mu.Lock()
+		advertise := fake.advertiseIssuer
+		fake.mu.Unlock()
+		if advertise {
+			meta["authorization_response_iss_parameter_supported"] = true
+		}
+		writeJSON(w, meta)
 	})
 
 	// RFC 7591 dynamic client registration.
@@ -190,6 +202,11 @@ func newAuthorizedMCPServer(t *testing.T, tools ...*sdk.Tool) *authorizedMCPServ
 		back := redirect.Query()
 		back.Set("code", code)
 		back.Set("state", query.Get("state"))
+		fake.mu.Lock()
+		if fake.sendIssuer {
+			back.Set("iss", fake.URL)
+		}
+		fake.mu.Unlock()
 		redirect.RawQuery = back.Encode()
 		http.Redirect(w, r, redirect.String(), http.StatusFound)
 	})
@@ -743,4 +760,98 @@ func TestAServerThatNeedsASignInSaysSoRatherThanFailing(t *testing.T) {
 	if len(registrations) != 0 {
 		t.Errorf("an ordinary connection registered a client %d times", len(registrations))
 	}
+}
+
+// TestASignInSurvivesAnUnadvertisedIssuer is a regression test for a real
+// service. Sentry's hosted MCP server returns the RFC 9207 "iss" parameter in
+// its authorization response while its metadata does not advertise
+// authorization_response_iss_parameter_supported, and the protocol library
+// refuses the entire sign-in when that happens — after the user has been to
+// the browser and come back.
+//
+// RFC 9207 asks a client not to *rely* on an unadvertised iss. It does not ask
+// it to reject one, and rejecting it makes the server unusable for no gain:
+// a server that never committed to sending an issuer offers no mix-up defence
+// whether it sends one or not. So an iss that nobody promised is dropped at the
+// callback.
+func TestASignInSurvivesAnUnadvertisedIssuer(t *testing.T) {
+	fake := newAuthorizedMCPServer(t, simpleTool("alpha"))
+	fake.sendIssuer = true
+	fake.advertiseIssuer = false
+
+	manager, store := flowManager(t, fake)
+	state, err := manager.SignIn(t.Context(), fake.spec())
+	if err != nil {
+		t.Fatalf("SignIn: %v\nthis is the Sentry failure: a server that sends an issuer it never advertised must not break the sign-in", err)
+	}
+	if state.Status != StatusConnected {
+		t.Fatalf("status = %q (%v), want connected", state.Status, state.Err)
+	}
+	if _, err := store.Load("hosted"); err != nil {
+		t.Errorf("nothing was stored: %v", err)
+	}
+}
+
+// TestAnAdvertisedIssuerIsStillChecked is the other half, and the reason the
+// fix is conditional rather than a blanket drop. When a server does commit to
+// returning an issuer, that value is the mix-up defence and must keep being
+// validated — dropping it everywhere would trade one broken server for a
+// silently weakened check on every compliant one.
+func TestAnAdvertisedIssuerIsStillChecked(t *testing.T) {
+	t.Run("advertised and sent", func(t *testing.T) {
+		fake := newAuthorizedMCPServer(t, simpleTool("alpha"))
+		fake.sendIssuer = true
+		fake.advertiseIssuer = true
+
+		manager, _ := flowManager(t, fake)
+		state, err := manager.SignIn(t.Context(), fake.spec())
+		if err != nil {
+			t.Fatalf("SignIn: %v", err)
+		}
+		if state.Status != StatusConnected {
+			t.Fatalf("status = %q (%v), want connected", state.Status, state.Err)
+		}
+	})
+
+	t.Run("advertised and withheld", func(t *testing.T) {
+		fake := newAuthorizedMCPServer(t, simpleTool("alpha"))
+		fake.sendIssuer = false
+		fake.advertiseIssuer = true
+
+		manager, _ := flowManager(t, fake)
+		if _, err := manager.SignIn(t.Context(), fake.spec()); err == nil {
+			t.Fatal("a server that advertised the issuer parameter and then withheld it must not be accepted; that is the mix-up case the check exists for")
+		}
+	})
+}
+
+// TestAdvertisesIssuerAnswersStrictlyWhenItCannotTell covers the lookup the
+// callback depends on. Its three answers are the whole decision: forward the
+// issuer, drop it, or — when the metadata cannot be read at all — keep the
+// stricter behaviour rather than quietly weakening a check on a guess.
+func TestAdvertisesIssuerAnswersStrictlyWhenItCannotTell(t *testing.T) {
+	t.Run("advertised", func(t *testing.T) {
+		fake := newAuthorizedMCPServer(t)
+		fake.advertiseIssuer = true
+		if !advertisesIssuer(t.Context(), fake.spec().URL) {
+			t.Error("a server that advertises the issuer parameter must have it forwarded and checked")
+		}
+	})
+
+	t.Run("not advertised", func(t *testing.T) {
+		fake := newAuthorizedMCPServer(t)
+		if advertisesIssuer(t.Context(), fake.spec().URL) {
+			t.Error("a server that never advertised it offers no mix-up defence, so an issuer that arrives must be ignored")
+		}
+	})
+
+	t.Run("no metadata at all", func(t *testing.T) {
+		silent := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		}))
+		defer silent.Close()
+		if !advertisesIssuer(t.Context(), silent.URL+"/mcp") {
+			t.Error("not knowing must answer strictly; guessing the laxer way turns an unreadable metadata document into a silently weakened check")
+		}
+	})
 }

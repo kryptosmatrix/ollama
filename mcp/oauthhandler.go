@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 
 	sdkauth "github.com/modelcontextprotocol/go-sdk/auth"
 	"github.com/modelcontextprotocol/go-sdk/oauthex"
@@ -46,6 +47,9 @@ type oauthSession struct {
 	// fetch is what the handler calls when the server wants an authorization.
 	// It is the only route to a browser.
 	fetch sdkauth.AuthorizationCodeFetcher
+	// redirect is the loopback listener, or nil when this connection is not
+	// allowed to sign in and none was started.
+	redirect *LoopbackRedirect
 	// close releases the redirect listener. It is always non-nil.
 	close func()
 }
@@ -97,6 +101,7 @@ func newOAuthSession(server string, store TokenStore, mode signInMode, open func
 		if open != nil {
 			redirect.Open = open
 		}
+		session.redirect = redirect
 		session.close = func() { redirect.Close() }
 		session.redirectURL = redirect.RedirectURL()
 		session.fetch = redirect.Fetch
@@ -191,17 +196,35 @@ func SignInRequired(err error) bool {
 	return errors.Is(err, ErrSignInRequired)
 }
 
-// oauthHandlerFor returns the handler to attach to an http transport, or nil
-// when the server needs no authorization support.
+// advertisesIssuer reports whether a server's authorization server has
+// committed to returning the RFC 9207 "iss" parameter.
 //
-// A handler is attached to every http server rather than only to ones known to
-// need it, because whether authorization is required is something only the
-// server can say — it says it with a 401. Attaching one costs nothing until
-// that happens, and in the ordinary case it then fails with ErrSignInRequired
-// rather than doing anything.
-func oauthHandlerFor(spec *ServerSpec, store TokenStore, mode signInMode, open func(string) error) (*oauthSession, error) {
-	if spec.transport() != TransportHTTP || store == nil {
-		return nil, nil
+// Real services send an iss without advertising support for it — Sentry's
+// hosted MCP server does, and the protocol library refuses the whole sign-in
+// when that happens. RFC 9207 asks a client not to *rely* on an unadvertised
+// iss; it does not ask it to reject one. Looking the metadata up here is what
+// lets the callback drop an iss nobody promised while keeping the check for
+// every server that did promise, which is where the mix-up defence lives.
+//
+// A discovery that fails answers true, so the stricter behaviour is the one
+// that survives not knowing.
+func advertisesIssuer(ctx context.Context, serverURL string) bool {
+	ctx, cancel := context.WithTimeout(ctx, signInHTTPTimeout)
+	defer cancel()
+
+	client := &http.Client{Timeout: signInHTTPTimeout}
+	metadata, err := protectedResourceMetadata(ctx, serverURL, client)
+	if err != nil || metadata == nil {
+		return true
 	}
-	return newOAuthSession(spec.Name, store, mode, open)
+	for _, issuer := range metadata.AuthorizationServers {
+		server, err := sdkauth.GetAuthServerMetadata(ctx, issuer, client)
+		if err != nil {
+			return true
+		}
+		if server != nil {
+			return server.AuthorizationResponseIssParameterSupported
+		}
+	}
+	return true
 }
