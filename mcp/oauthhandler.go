@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sync"
 
 	sdkauth "github.com/modelcontextprotocol/go-sdk/auth"
 	"github.com/modelcontextprotocol/go-sdk/oauthex"
@@ -170,7 +171,10 @@ type persistingTokenSource struct {
 	store    TokenStore
 	clientID string
 	source   oauth2.TokenSource
-	last     string
+	// mu guards last. A token source is consulted from whatever goroutine is
+	// making a request, so two of them can reach here at once.
+	mu   sync.Mutex
+	last string
 }
 
 func (p *persistingTokenSource) Token() (*oauth2.Token, error) {
@@ -178,6 +182,9 @@ func (p *persistingTokenSource) Token() (*oauth2.Token, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	// Only write when it has actually changed. A token source is consulted on
 	// every request, and rewriting the file each time would be a great deal of
 	// disk for no change.

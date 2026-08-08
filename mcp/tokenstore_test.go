@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -367,5 +370,124 @@ func TestStoredShapeIsExplicit(t *testing.T) {
 		if _, present := stored[field]; !present {
 			t.Errorf("field %q is missing from the stored shape: %v", field, stored)
 		}
+	}
+}
+
+// TestConcurrentSavesDoNotLoseATokenInThisProcess. Save and Delete read the
+// whole file, change one entry and write it back. Without serialisation two
+// saves for *different* servers interleave and the second overwrites the
+// first's change — measured before the fix: eight concurrent saves for eight
+// servers left one token on disk.
+//
+// It closes the window inside one process. Between processes it stays open, and
+// the store's comment says so: the desktop app and a terminal can still lose
+// one, and closing that needs a lock file with all the staleness that implies.
+func TestConcurrentSavesDoNotLoseATokenInThisProcess(t *testing.T) {
+	store := &FileTokenStore{Path: filepath.Join(t.TempDir(), "mcp-tokens.json")}
+	names := []string{"one", "two", "three", "four", "five", "six", "seven", "eight"}
+
+	var wg sync.WaitGroup
+	for _, name := range names {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := store.Save(name, &SignInRecord{Token: &oauth2.Token{AccessToken: "t-" + name}}); err != nil {
+				t.Errorf("Save %s: %v", name, err)
+			}
+		}()
+	}
+	wg.Wait()
+
+	got, err := store.Servers()
+	if err != nil {
+		t.Fatalf("Servers: %v", err)
+	}
+	if len(got) != len(names) {
+		t.Errorf("%d of %d tokens survived concurrent saves: %v", len(got), len(names), got)
+	}
+	for _, name := range names {
+		record, err := store.Load(name)
+		if err != nil {
+			t.Errorf("Load %s: %v", name, err)
+			continue
+		}
+		if record.Token.AccessToken != "t-"+name {
+			t.Errorf("%s holds %q", name, record.Token.AccessToken)
+		}
+	}
+}
+
+// TestAConcurrentlyUsedTokenSourceIsNotARace. A token source is consulted from
+// whatever goroutine is making a request, and this one keeps the last access
+// token it wrote so it does not rewrite the store on every call.
+func TestAConcurrentlyUsedTokenSourceIsNotARace(t *testing.T) {
+	store := &FileTokenStore{Path: filepath.Join(t.TempDir(), "mcp-tokens.json")}
+	source := &persistingTokenSource{
+		server: "hosted", store: store, clientID: "client-1",
+		source: oauth2.StaticTokenSource(&oauth2.Token{AccessToken: "same"}),
+	}
+
+	var wg sync.WaitGroup
+	for range 8 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for range 50 {
+				if _, err := source.Token(); err != nil {
+					t.Errorf("Token: %v", err)
+					return
+				}
+			}
+		}()
+	}
+	wg.Wait()
+
+	record, err := store.Load("hosted")
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if record.Token.AccessToken != "same" {
+		t.Errorf("AccessToken = %q", record.Token.AccessToken)
+	}
+}
+
+// TestAStdioServerThatFailsItsHandshakeIsNotLeft records a REFUTED finding
+// rather than a repair, because the answer is worth keeping.
+//
+// The review expected a subprocess that starts and then fails the MCP handshake
+// to survive until the manager closes, since the stdio release function is a
+// no-op. It does not: the protocol library kills it. This is the same guarantee
+// that led to deleting a per-server reaping mechanism in Phase 2 after three
+// attempts to falsify it all passed — and it is worth a standing test, because
+// the next reader will have the same suspicion.
+func TestAStdioServerThatFailsItsHandshakeIsNotLeft(t *testing.T) {
+	if _, err := exec.LookPath("pgrep"); err != nil {
+		t.Skip("pgrep is needed to look for a surviving process")
+	}
+	marker := "ollama-mcp-handshake-probe-" + strconv.FormatInt(time.Now().UnixNano(), 10)
+	spec := &ServerSpec{
+		Name:    "leaky",
+		Command: "sh",
+		Args:    []string{"-c", "echo " + marker + " >&2; echo not-json; sleep 30"},
+	}
+
+	manager := NewManager(Options{ConnectTimeout: 3 * time.Second, Approvals: allowAll{}})
+	t.Cleanup(func() {
+		manager.Close()
+		exec.Command("pkill", "-f", marker).Run()
+	})
+
+	cfg := &Config{}
+	cfg.Set(spec.Name, spec)
+	manager.Connect(t.Context(), cfg)
+
+	if state, _ := manager.State(spec.Name); state.Status == StatusConnected {
+		t.Fatal("setup: this server was supposed to fail its handshake")
+	}
+
+	time.Sleep(500 * time.Millisecond)
+	out, _ := exec.Command("pgrep", "-fl", marker).Output()
+	if alive := strings.TrimSpace(string(out)); alive != "" {
+		t.Errorf("a subprocess survived a failed handshake:\n%s", alive)
 	}
 }

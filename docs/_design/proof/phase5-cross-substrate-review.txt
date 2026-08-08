@@ -198,6 +198,7 @@ D-2  Call reads state.Status and state.Tools after releasing the read lock,
      [CONFIRMED by the race detector and REPAIRED — batch 1]
 D-5  A stdio subprocess that starts and then fails the handshake is not killed
      until the manager closes, because the stdio release function is a no-op.
+     [REFUTED — the protocol library kills it; standing test added — batch 3]
 D-4  dial closes the previous session while holding the write lock; closeSession
      deliberately does the same work outside it.
 D-6  Connect does not check m.closed before setting states and spawning.
@@ -205,7 +206,9 @@ C-3  FileTokenStore.Save and Delete are read-modify-write over the whole file,
      so two processes saving tokens for different servers can lose one. The
      desktop app and a terminal running at once is not a hypothetical.
      [CONFIRMED and REPAIRED — batch 1]
+     [CONFIRMED (1 of 8 tokens survived) and REPAIRED in-process — batch 3; cross-process still open]
 B-5  persistingTokenSource.last is read and written without synchronisation.
+     [CONFIRMED by the race detector and REPAIRED — batch 3]
 B-3  Revocation goes to the first authorization server that advertises a
      revocation endpoint; the record does not say which one issued the token,
      and RFC 7009 has the wrong server answer 200 for a token it never knew.

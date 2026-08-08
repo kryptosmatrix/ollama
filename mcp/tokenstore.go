@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/oauth2"
@@ -60,6 +61,27 @@ type TokenStore interface {
 	// signing in to a third-party service is entitled to know where the
 	// credential ends up.
 	Description() string
+}
+
+// fileStoreLocks serialises the read-modify-write that Save and Delete perform
+// over the whole file.
+//
+// Keyed by resolved path rather than held on the store, because nothing stops a
+// process from building two FileTokenStore values for the same file — several
+// places do exactly that — and a lock on one of them would not see the other.
+//
+// This closes the window inside one process. It does not close it between
+// processes: the desktop app and a terminal saving tokens for different servers
+// at the same instant can still lose one, and fixing that needs a lock file
+// with all the staleness that implies. Measured before it was written: eight
+// concurrent saves for eight servers left one token on disk.
+var fileStoreLocks sync.Map
+
+func lockTokenFile(path string) func() {
+	value, _ := fileStoreLocks.LoadOrStore(path, &sync.Mutex{})
+	mu := value.(*sync.Mutex)
+	mu.Lock()
+	return mu.Unlock
 }
 
 // FileTokenStore keeps tokens in a JSON file in the user's configuration
@@ -195,6 +217,12 @@ func (s *FileTokenStore) Save(server string, record *SignInRecord) error {
 		return errors.New("refusing to store an empty token")
 	}
 
+	resolved, err := s.path()
+	if err != nil {
+		return err
+	}
+	defer lockTokenFile(resolved)()
+
 	file, path, err := s.read()
 	if err != nil {
 		return err
@@ -217,6 +245,12 @@ func (s *FileTokenStore) Save(server string, record *SignInRecord) error {
 
 // Delete removes a server's token.
 func (s *FileTokenStore) Delete(server string) error {
+	resolved, err := s.path()
+	if err != nil {
+		return err
+	}
+	defer lockTokenFile(resolved)()
+
 	file, path, err := s.read()
 	if err != nil {
 		return err
