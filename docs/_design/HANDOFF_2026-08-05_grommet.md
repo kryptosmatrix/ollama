@@ -123,7 +123,15 @@ The choice was false. `Problems()` answers yes or no and there was nowhere to sa
 
 One finding was REFUTED, and why is worth reading: my shard boundaries cut a call site away from its callee, so the reviewer correctly reported dead code that is not dead. Give the next reviewer whole call paths.
 
-### 2. The Windows and Linux token stores
+### 2. The Windows and Linux token stores — SETTLED
+
+**Windows is done and proven on real Windows** (`a71c6614`, proof in `phase5-windows-token-store.txt`). The token store gained an optional `Protector`; Windows encrypts the same file at rest with DPAPI. A protected file names itself, so an existing cleartext store still reads and is encrypted on the next write; a protected file read by a build without a protector fails loudly rather than reading as empty; and an encryption that fails fails the write rather than falling back to cleartext.
+
+**How it was proven matters more than the code.** I refused this twice saying I could not execute Windows code — true of this machine, false of the situation. Ollama's CI runs the Go suite on `windows-latest`, and Actions is enabled on the fork, so a throwaway branch with a minimal workflow gave real runners. **The first run failed on Windows** after cross-compiling and vetting cleanly for windows/amd64. The cause was my workflow not creating `app/ui/app/dist` — the trap this handoff has documented since session one — not the store, whose DPAPI tests passed on that same run. Shipping on "it compiles" would have gone upstream broken.
+
+**Linux gets no keyring store, deliberately** (`68bbbae9`, reasoning in `mcp/tokenstore_other.go`). The Secret Service is a desktop service on a session bus, and Ollama's own installer creates a system account (`useradd -r -s /bin/false`) with no session, no bus and no keyring — so it would fall back to the file every time on the standard install while adding a dependency the module does not have. And unlocking a keyring is interactive, so a background token save could raise a prompt with nobody at the keyboard: the failure the Windows store designs out with `CRYPTPROTECT_UI_FORBIDDEN`. Building it anyway is a maintainer's call; the tradeoff is written where the decision lives.
+
+### Superseded — the original note
 
 macOS is done (`mcp/tokenstore_darwin.go`, cgo + Security framework, one generic password item per server). Windows should use DPAPI, Linux the desktop secret service. They were **not written** rather than written unproven: neither can be executed on this machine, and code that compiles but has never run is what full-or-stop forbids. `DefaultTokenStore` on those platforms returns the file store, whose `Description()` says what protects it, and every surface shows that string before a token exists.
 
