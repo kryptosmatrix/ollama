@@ -73,6 +73,16 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 **`app/updater`'s `TestAutoUpdateDisabledSkipsDownload` is flaky.** It fails roughly one full app-tree run in three and always passes when that package is run alone — proven against a clean tree with this work stashed. It is not MCP's. Do not chase it, and do not read a single green app-tree run as proof of anything.
 
+## Upstream
+
+**Asked, not opened** (2026-08-08). Ollama's CONTRIBUTING requires an issue before a non-trivial PR, and one already exists: [#7865, "Model Context Protocol (MCP) support"](https://github.com/ollama/ollama/issues/7865), open with 59 comments. A proposal has been posted there: https://github.com/ollama/ollama/issues/7865#issuecomment-5226050792
+
+It describes what the branch does, states what is unfinished, and asks three questions: whether they want it at all, how it relates to [#13554](https://github.com/ollama/ollama/pull/13554) and the earlier `Parth/agents` work, and how they would like it split — because 70 commits is far too large as one PR. The suggested sequence is the `mcp` package and config, then the CLI, then the app page, then OAuth, then registry browse; each is usable without the ones after it.
+
+**Do not open a PR before there is an answer.** A cold PR of this size contradicts their written process, ignores the thread where the feature is actually being discussed, and lands beside a maintainer's own branch. The branch merges cleanly against `upstream/main` (14 behind, 0 conflicts), so there is no urgency to rush it.
+
+Related: [modelcontextprotocol/go-sdk#1152](https://github.com/modelcontextprotocol/go-sdk/issues/1152), filed from this work.
+
 ## What remains
 
 **Do the repairs first. The branch is not ready for an upstream PR.**
