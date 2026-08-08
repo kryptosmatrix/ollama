@@ -29,7 +29,7 @@ Head at handoff: `3f925cfc` — 49 commits ahead of `main`, 108 files, ~24,000 l
 | 4b — registry browse | **DONE** (`8317a273`, `07b06d8d`, `0c540dac`) |
 | 5 — docs and closeout | **DONE** — docs current, 24 proof artefacts, this handoff |
 | 5 — cross-substrate review | **DONE** (glm-5.2:cloud, 2026-08-07) — 7 confirmed defects |
-| 5 — repairs | **ALL 7 confirmed DONE**; unverified list **19 of 20 settled** — 1 left, and it is a decision |
+| 5 — repairs | **ALL 7 confirmed DONE**; unverified list **ALL 20 settled** |
 
 ### Verified at closeout (2026-08-07)
 
@@ -99,11 +99,15 @@ The approval ledger *was* reviewed in the end, after its first shard returned an
 
 The ones worth knowing about: a data race between `Call` and `Close`; a server that came back connected when a slow dial outlived the user switching it off, fixed with a per-server **epoch** rather than a fourth patch to a fourth branch; concurrent saves that destroyed seven of eight tokens; a revocation endpoint never required to be https; a credential in a preserved configuration field; and the cannot-compute fingerprint marker, which the review thought unreachable and is not.
 
-**One remains, and it is a decision rather than work.**
+**Nothing remains on the review's list.** All twenty unverified findings are settled — eighteen confirmed and fixed, one refuted with a standing test, and the last ruled on.
 
-`A1-3` — a credential in `Args`. This is the **third finding sharing one shape**, alongside credentials in a URL query string and docker runtime arguments supplied by a registry publisher. In all three, any rule strict enough to catch the abuse also refuses legitimate configurations: the pattern that catches `--api-key=sk-...` also catches `--token-file=/etc/foo`, and here there is no safe alternative to point at, because expanding `${env:NAME}` into argv puts the secret in the process list — the thing being avoided. The control that remains in all three is the approval gate showing the command line verbatim. **Rule on the three together.**
+**The ruling, because it changed the shape of the code** (`61449141`, `phase5-warning-channel.txt`). Three questions had been left open: a credential in stdio `Args`, a credential in a URL query string, and docker runtime arguments from a registry publisher. They were framed as refuse-or-allow, and both answers were wrong — refusing strands a user whose `--token-file=/etc/creds` trips the same pattern as `--api-key=sk-...`, and allowing in silence lets them believe nothing was given away.
 
-`B-3` and `D-4` are done (`b785ca01`). Revocation now goes to the server recorded as having issued the token — `SignInRecord` carries the issuer, learned at sign-in and preserved across refreshes exactly as `ClientID` is — because posting a token to a server that never issued it gets a 200 under RFC 7009, telling the user they are signed out while the token stays live, and handing the credential to a third party besides. And `dial` no longer shuts the previous server down while holding the write lock, which used to stall every other server behind one that would not die.
+The choice was false. `Problems()` answers yes or no and there was nowhere to say anything else; that is a missing mechanism, not a dilemma. **`Config.Warnings()` now answers the other question** — a problem is "this cannot work", a warning is "this works, and here is what it costs you" — and it is shown at approval in both surfaces, next to the thing being agreed to.
+
+**Do not turn a warning into a refusal.** Each of the three has a legitimate form the pattern cannot distinguish, and there is no safe alternative to send those users to. Userinfo in a URL is the exception and stays a hard refusal: it is unambiguous, and a header with `${env:NAME}` is a real alternative.
+
+**Do not let the channel fire on ordinary servers.** One that warns about everything is one nobody reads, and there is a test asserting an ordinary remote server produces nothing.
 
 **A warning worth having before you start.** Three times in this branch a test of mine passed its first sabotage, and the fault was always the same: it asserted that a mechanism existed rather than that the path under test used it. Write the sabotage first and watch it fail before believing any of these.
 
