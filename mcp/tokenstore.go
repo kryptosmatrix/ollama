@@ -92,6 +92,31 @@ func lockTokenFile(path string) func() {
 	return mu.Unlock
 }
 
+// Protector encrypts and decrypts the token store's contents at rest.
+//
+// It exists because "where the file is" and "what protects it" are different
+// questions, and only the second one varies by platform. Windows has DPAPI,
+// which needs no daemon and no user interaction; macOS has the keychain, which
+// is a different shape entirely and has its own store. A platform with neither
+// leaves this nil and the file is protected by its permissions alone — and says
+// so, which is the point of Describe.
+type Protector interface {
+	// Protect encrypts the store's contents for this user on this machine.
+	Protect(plaintext []byte) ([]byte, error)
+	// Unprotect reverses it.
+	Unprotect(ciphertext []byte) ([]byte, error)
+	// Describe says in one clause what the protection actually is, for the
+	// sentence a user reads before creating a credential.
+	Describe() string
+}
+
+// protectedFile is what a protected store looks like on disk. The field is
+// distinct from "tokens" so a reader can tell the two apart without guessing,
+// which is what makes migrating from an unprotected file free.
+type protectedFile struct {
+	Protected []byte `json:"protected"`
+}
+
 // FileTokenStore keeps tokens in a JSON file in the user's configuration
 // directory, protected by file permissions alone.
 //
@@ -107,6 +132,9 @@ func lockTokenFile(path string) func() {
 type FileTokenStore struct {
 	// Path is the store's location. Empty means the resolved default.
 	Path string
+	// Protect encrypts the contents at rest. Nil means the file is protected by
+	// its permissions alone, which is what Description then says.
+	Protect Protector
 }
 
 // TokensPath returns the token store's location, resolved like ConfigPath.
@@ -135,7 +163,10 @@ func (s *FileTokenStore) path() (string, error) {
 func (s *FileTokenStore) Description() string {
 	path, err := s.path()
 	if err != nil {
-		return "a file in your Ollama configuration directory, readable by any program running as you"
+		path = "a file in your Ollama configuration directory"
+	}
+	if s.Protect != nil {
+		return path + ", " + s.Protect.Describe()
 	}
 	return path + ", readable by any program running as you"
 }
@@ -173,6 +204,21 @@ func (s *FileTokenStore) read() (*tokenFile, string, error) {
 		return &tokenFile{Tokens: map[string]storedToken{}}, path, nil
 	}
 
+	// A protected file names itself. An unprotected one read by a build that
+	// protects is migrated on the next write rather than refused, which is what
+	// makes turning protection on cost the user nothing.
+	var envelope protectedFile
+	if json.Unmarshal(data, &envelope) == nil && len(envelope.Protected) > 0 {
+		if s.Protect == nil {
+			return nil, path, fmt.Errorf("mcp tokens %s are encrypted and this build cannot read them; sign in again", path)
+		}
+		plaintext, err := s.Protect.Unprotect(envelope.Protected)
+		if err != nil {
+			return nil, path, fmt.Errorf("decrypt mcp tokens %s: %w", path, err)
+		}
+		data = plaintext
+	}
+
 	var file tokenFile
 	// A store that cannot be parsed is an error rather than an empty store.
 	// Treating it as empty would silently sign the user out of everything and
@@ -190,6 +236,15 @@ func (s *FileTokenStore) write(file *tokenFile, path string) error {
 	data, err := json.MarshalIndent(file, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal mcp tokens: %w", err)
+	}
+	if s.Protect != nil {
+		ciphertext, err := s.Protect.Protect(data)
+		if err != nil {
+			return fmt.Errorf("encrypt mcp tokens: %w", err)
+		}
+		if data, err = json.MarshalIndent(protectedFile{Protected: ciphertext}, "", "  "); err != nil {
+			return fmt.Errorf("marshal mcp tokens: %w", err)
+		}
 	}
 	// Same private write as the configuration: 0600 in a 0700 directory,
 	// temp file and rename, so a crash cannot leave a half-written store.

@@ -491,3 +491,147 @@ func TestAStdioServerThatFailsItsHandshakeIsNotLeft(t *testing.T) {
 		t.Errorf("a subprocess survived a failed handshake:\n%s", alive)
 	}
 }
+
+// reversingProtector stands in for a real one so the envelope, the migration
+// and the failure paths are provable on any platform. The syscalls it stands in
+// for are the small part; this plumbing is where the mistakes live.
+type reversingProtector struct{ fail bool }
+
+func (reversingProtector) Describe() string {
+	return "reversed, which protects nothing and is for tests"
+}
+
+func (p reversingProtector) Protect(plaintext []byte) ([]byte, error) {
+	if p.fail {
+		return nil, errors.New("cannot encrypt")
+	}
+	return reverseBytes(plaintext), nil
+}
+
+func (p reversingProtector) Unprotect(ciphertext []byte) ([]byte, error) {
+	if p.fail {
+		return nil, errors.New("cannot decrypt")
+	}
+	return reverseBytes(ciphertext), nil
+}
+
+func reverseBytes(b []byte) []byte {
+	out := make([]byte, len(b))
+	for i := range b {
+		out[len(b)-1-i] = b[i]
+	}
+	return out
+}
+
+// TestAProtectedStoreKeepsNoCleartextOnDisk is the property the Windows store
+// exists for: the file stops being readable by anything that can read the file.
+func TestAProtectedStoreKeepsNoCleartextOnDisk(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "mcp-tokens.json")
+	store := &FileTokenStore{Path: path, Protect: reversingProtector{}}
+
+	if err := store.Save("hosted", sampleSignIn()); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	for _, secret := range []string{"access-abc123", "refresh-def456", "client-xyz789"} {
+		if strings.Contains(string(data), secret) {
+			t.Errorf("%q is on disk in cleartext:\n%s", secret, data)
+		}
+	}
+	if !strings.Contains(string(data), "protected") {
+		t.Errorf("a protected file must name itself so a reader can tell:\n%s", data)
+	}
+
+	got, err := store.Load("hosted")
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if got.Token.AccessToken != "access-abc123" || got.ClientID != "client-xyz789" {
+		t.Errorf("the round trip lost something: %+v", got)
+	}
+}
+
+// TestTurningProtectionOnMigratesAnExistingFile. A user upgrading has a
+// cleartext store already. Refusing to read it would sign them out of
+// everything; reading it and leaving it in cleartext would make the upgrade
+// pointless.
+func TestTurningProtectionOnMigratesAnExistingFile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "mcp-tokens.json")
+	plain := &FileTokenStore{Path: path}
+	if err := plain.Save("hosted", sampleSignIn()); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+
+	protected := &FileTokenStore{Path: path, Protect: reversingProtector{}}
+	got, err := protected.Load("hosted")
+	if err != nil {
+		t.Fatalf("an existing cleartext store must still be readable: %v", err)
+	}
+	if got.Token.AccessToken != "access-abc123" {
+		t.Errorf("AccessToken = %q", got.Token.AccessToken)
+	}
+
+	// The next write is what encrypts it.
+	if err := protected.Save("hosted", got); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+	data, _ := os.ReadFile(path)
+	if strings.Contains(string(data), "access-abc123") {
+		t.Errorf("the store is still cleartext after a protected write:\n%s", data)
+	}
+}
+
+// TestAProtectedStoreCannotBeReadWithoutTheProtector. A file carried to a
+// machine whose build has no protector must say so rather than read as corrupt
+// or, worse, as empty — which would sign the user out and then overwrite it.
+func TestAProtectedStoreCannotBeReadWithoutTheProtector(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "mcp-tokens.json")
+	if err := (&FileTokenStore{Path: path, Protect: reversingProtector{}}).Save("hosted", sampleSignIn()); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+
+	_, err := (&FileTokenStore{Path: path}).Load("hosted")
+	if err == nil {
+		t.Fatal("an encrypted store was read by a build with no protector")
+	}
+	if errors.Is(err, ErrNoToken) {
+		t.Error("an unreadable store must not read as 'not signed in'; that would sign the user out and then overwrite it")
+	}
+	if !strings.Contains(err.Error(), "sign in again") {
+		t.Errorf("the error does not say what to do: %v", err)
+	}
+}
+
+// TestAFailingProtectorNeverWritesCleartext. If encryption fails, the write
+// must fail — never fall back to writing the token in the clear.
+func TestAFailingProtectorNeverWritesCleartext(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "mcp-tokens.json")
+	store := &FileTokenStore{Path: path, Protect: reversingProtector{fail: true}}
+
+	if err := store.Save("hosted", sampleSignIn()); err == nil {
+		t.Fatal("a save whose encryption failed must fail")
+	}
+	if data, err := os.ReadFile(path); err == nil && strings.Contains(string(data), "access-abc123") {
+		t.Errorf("a failed encryption wrote the token in the clear:\n%s", data)
+	}
+}
+
+// TestDescriptionSaysWhatActuallyProtectsIt. The sentence a user reads before
+// creating a credential has to change when the protection does.
+func TestDescriptionSaysWhatActuallyProtectsIt(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "mcp-tokens.json")
+	plain := (&FileTokenStore{Path: path}).Description()
+	if !strings.Contains(plain, "readable by any program running as you") {
+		t.Errorf("an unprotected store must still say so: %q", plain)
+	}
+	protected := (&FileTokenStore{Path: path, Protect: reversingProtector{}}).Description()
+	if strings.Contains(protected, "readable by any program running as you") {
+		t.Errorf("a protected store still claims to be unprotected: %q", protected)
+	}
+	if !strings.Contains(protected, "protects nothing") {
+		t.Errorf("the description does not carry the protector's own words: %q", protected)
+	}
+}
