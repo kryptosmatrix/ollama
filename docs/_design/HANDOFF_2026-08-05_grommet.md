@@ -90,9 +90,11 @@ The two that matter most, both confirmed by running a probe:
 
 Then: a refused sign-in loses the server's reason (`mcp/oauth.go` error branch calls `deliver` rather than `deliverFailure`); a failed migration leaves the credential in cleartext for ever (`mcp/tokenstore_darwin.go`, `Load`); and a registry identifier is not checked for being a flag (`mcp/registry.go`, `resolvePackage`).
 
-**The approval ledger itself has not been reviewed.** That shard returned an empty response after six minutes, was re-submitted alone, and had not finished when this was written. An empty answer is a failed review, not a pass — `mcp/approvals.go` is the most security-critical file here and it remains unexamined by anything but its author. Re-run it.
+**The same credential is copied into the approval ledger** (`mcp/approvals.go`, `Approve`, via `Summary()`), so a secret in a URL or in stdio args lands in `mcp-approvals.json` too — and a user who scrubs `mcp.json` has no reason to look there. Confirmed by probe. Fix these two together; they are one defect with two outlets.
 
-Nineteen further findings are recorded as UNVERIFIED with reasons — concurrency in the manager, the file store's read-modify-write across processes, revocation targeting, several schema-conversion gaps. Work them down; do not treat the list as conclusions.
+The approval ledger *was* reviewed in the end, after its first shard returned an empty response, and it produced the one negative result worth having: **no path was found by which a server can be started without a current approval**, and the fingerprint holds against config tampering. That is the claim this branch rests on and it is no longer only mine.
+
+Twenty further findings are recorded as UNVERIFIED with reasons — concurrency in the manager, the file store's read-modify-write across processes, revocation targeting, several schema-conversion gaps. Work them down; do not treat the list as conclusions.
 
 One finding was REFUTED, and why is worth reading: my shard boundaries cut a call site away from its callee, so the reviewer correctly reported dead code that is not dead. Give the next reviewer whole call paths.
 

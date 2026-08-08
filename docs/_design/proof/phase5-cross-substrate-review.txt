@@ -61,6 +61,22 @@ Probe output, verbatim — the file as written to disk:
       }
     }
 
+A2-1 — THE SAME CREDENTIAL IS COPIED INTO THE APPROVAL LEDGER, IN CLEARTEXT, IN
+A SECOND FILE.  mcp/approvals.go, Approve, via ServerSpec.Summary.
+
+Approve stores spec.Summary() so the ledger can show a user what they previously
+agreed to. Summary returns the URL verbatim for an http server and the command
+joined with its arguments for a stdio one — so a credential in either lands in
+mcp-approvals.json as well as mcp.json. The fingerprint beside it is a SHA-256
+and gives nothing away; the summary undoes that. Worse than the config leak on
+its own: a user who notices the secret in mcp.json and removes it has no reason
+to think a second copy is sitting in the approvals file.
+
+Probe output, verbatim:
+
+    CONFIRMED A2-1: "s3cr3t" is in mcp-approvals.json in cleartext
+    CONFIRMED A2-1: "sk-LEAKED" is in mcp-approvals.json in cleartext
+
 E-1 — TWO PROPERTIES SHARING ONE $ref: THE SECOND SILENTLY BECOMES EMPTY.
 mcp/tools.go, refResolver.visited.
 
@@ -135,6 +151,12 @@ UNVERIFIED — PLAUSIBLE, NOT YET RUN DOWN
 These are work, not conclusions. Ordered roughly by how much I would want to
 know the answer.
 
+A2-2 Fingerprint() returns the constant "unmarshalable" when json.Marshal
+     fails, and the comment beside it claims that value "matches nothing". It
+     matches every other spec that also fails to marshal, so approving one such
+     spec would approve all of them. Unreachable with the current struct, but
+     the safety reasoning written into the comment is simply wrong, which is
+     how it would survive a change to ServerSpec that made it reachable.
 A1-2 An unknown field on a server object is preserved in "extra" and written
      back, and the credential checks run only over Env and Headers — so a
      pasted config carrying "apiKey" at the top level stores it as a literal.
@@ -180,17 +202,22 @@ E-7  A "type" that is neither a string nor an array of strings is treated as no
      type at all.
 
 ================================================================================
-STILL OUTSTANDING IN THE REVIEW ITSELF
+THE ONE MEANINGFUL NEGATIVE RESULT
 ================================================================================
 
-The approval-ledger shard (mcp/approvals.go) has not returned. Its first attempt,
-bundled with config.go, ran for 363 seconds and returned an empty response —
-recorded here because an empty answer is a failure of the review, not a clean
-bill of health, and the approval gate is the single most security-critical file
-in this branch. It was re-submitted on its own and had not completed when this
-was written. **The approval ledger has not been independently reviewed.** Until
-it has, treat that gap the way this file treats everything else: as unknown, not
-as passed.
+The approval ledger was the hardest shard to get an answer out of: bundled with
+config.go it ran 363 seconds and returned nothing at all, and an empty response
+is a failed review rather than a clean bill. Re-submitted on its own it
+completed, and reported, on the question that matters most:
+
+    No path was found by which a server can be started without a current
+    approval. The name-keyed lookup plus fingerprint comparison is sound
+    against config tampering: changing the command, args, env, URL, or
+    headers changes the fingerprint and causes denial.
+
+That is the single claim this whole branch rests on, and it is the only place in
+this file where "no defect found" is worth more than the ink. It is one
+reviewer's negative result, not a proof — but it is no longer only mine.
 
 ================================================================================
 WHAT THIS SAYS ABOUT THE PROOF THAT CAME BEFORE IT
