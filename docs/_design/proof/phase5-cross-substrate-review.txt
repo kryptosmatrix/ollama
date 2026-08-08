@@ -1,0 +1,183 @@
+Cross-substrate review — glm-5.2:cloud over branch mcp/server-support
+
+Run 2026-08-07 against commit 3f925cfc by Grommet (Claude Opus 5), at Ash's
+instruction. Five reviews, each given a threat model and the relevant production
+files with line numbers, and asked for concrete defects with a failure scenario.
+The reviewer was NOT given my reasoning about why any choice was correct — only
+what the code must guarantee and the code itself. Raw output is in the session
+scratchpad; this file records the findings and, for each, what verifying it
+showed.
+
+A REVIEWER IS NOT AN ORACLE. Every finding below carries a status. CONFIRMED
+means I reproduced it, by execution where possible. REFUTED means I checked and
+it is wrong. UNVERIFIED means it is plausible and I have not yet run it down —
+those are work, not conclusions.
+
+THE HEADLINE: two structural defects confirmed by execution, in code my own
+tests passed over completely.
+
+================================================================================
+CONFIRMED BY EXECUTION
+================================================================================
+
+D-1 — A SERVER REMOVED FROM THE CONFIGURATION KEEPS RUNNING AND KEEPS OFFERING
+ITS TOOLS TO THE MODEL.  mcp/manager.go, Connect.
+
+Connect iterates cfg.Names() and reconciles every server the configuration
+mentions. It never looks at the servers it is already holding, so one that has
+been deleted is never reconciled at all: its subprocess keeps running, its state
+stays StatusConnected, Tools() keeps returning its tools and Schemas() keeps
+offering them to the model.
+
+This is the same class of defect I found and fixed earlier in the session for a
+*disabled* server — and I fixed only the branch I was looking at. Delete is the
+path I never tested. A user who removes an MCP server from the app has not
+removed it.
+
+Probe output, verbatim:
+
+    CONFIRMED D-1: 1 tools still offered after the server was removed from the config
+    CONFIRMED D-1: state survives removal: connected
+    CONFIRMED D-1: 1 schemas still offered to the model
+
+E-1 — TWO PROPERTIES SHARING ONE $ref: THE SECOND SILENTLY BECOMES EMPTY.
+mcp/tools.go, refResolver.visited.
+
+The resolver's visited list is created once per tool and never reset between
+properties, so the second sibling to reference a definition is treated as a
+cycle. The reviewer expected the tool to be rejected. What actually happens is
+worse: the property is emitted empty, with no type, no enum and no description.
+
+    converted parameters: {"type":"object","properties":{
+      "from":{"type":"string","enum":["USD","EUR"]},"to":{}}}
+
+Sharing a $ref between two properties is ordinary schema practice — any tool
+with two currency fields, two date fields, two IDs of the same kind. The model
+receives a parameter it knows nothing about, and the whole design principle of
+this file is that a constraint which cannot be carried is written into the
+description rather than dropped. Here it is dropped in silence.
+
+================================================================================
+CONFIRMED BY READING
+================================================================================
+
+B-1 — A SIGN-IN REFUSED BY THE SERVER LOSES THE REASON.  mcp/oauth.go,
+handleCallback.
+
+The error branch calls deliver() rather than deliverFailure(), so r.failure is
+never set and Fetch reports the generic "the sign-in was not completed". The
+authorization server's own error and error_description are shown on the browser
+page and then thrown away. I added deliverFailure for the issuer-mismatch path
+in the previous commit and did not route this older branch through it.
+
+C-1 — A FAILED MIGRATION LEAVES THE CREDENTIAL IN CLEARTEXT FOR EVER.
+mcp/tokenstore_darwin.go, KeychainStore.Load.
+
+Load saves the token into the keychain and then deletes the file copy. If the
+save succeeds and the delete fails, the token now exists in both places — and
+every later Load finds the keychain item first and returns, so the cleartext
+copy is never retried and never removed. The stated purpose of the migration is
+to take the credential out of cleartext; on that path it does the opposite and
+says nothing further.
+
+E-2 — A REGISTRY IDENTIFIER IS NOT CHECKED FOR BEING A FLAG.  mcp/registry.go,
+resolvePackage.
+
+The registry-supplied identifier is placed straight into the runner's argument
+list with no check that it does not begin with "-" and no "--" separator, for
+all three ecosystems. A registry entry naming itself "--call=..." produces a
+command line that npx reads as an instruction rather than a package.
+
+The approval gate still stands in front of this — the user is shown the exact
+command line and must agree to it — so this is not a direct compromise. But
+"the user will read it" is precisely the mitigation this codebase refuses to
+rely on everywhere else, and the resolver's own contract says a command line is
+derived, never guessed.
+
+================================================================================
+REFUTED
+================================================================================
+
+B-2 — "ExpectedIssuer and IgnoreIssuer are never set; issuerExpectation is dead
+code." They are set, in mcp/server.go lines 229-230, on every explicit sign-in.
+
+The reviewer hedged this correctly as "never called anywhere in the shown code",
+and the reason it was not shown is that my shard for the OAuth review omitted
+server.go. That is my error in designing the review, not the reviewer's in
+performing it, and it is the reason this file records shard contents: a review
+whose boundaries cut a call site away from its callee will invent dead code.
+
+================================================================================
+UNVERIFIED — PLAUSIBLE, NOT YET RUN DOWN
+================================================================================
+
+These are work, not conclusions. Ordered roughly by how much I would want to
+know the answer.
+
+D-3  Two concurrent Connect calls can resurrect a disabled server: the second
+     call cannot cancel the first call's in-flight dial, which then writes a
+     connected session and state over the disabled one.
+D-2  Call reads state.Status and state.Tools after releasing the read lock,
+     while Close writes both under the write lock.
+D-5  A stdio subprocess that starts and then fails the handshake is not killed
+     until the manager closes, because the stdio release function is a no-op.
+D-4  dial closes the previous session while holding the write lock; closeSession
+     deliberately does the same work outside it.
+D-6  Connect does not check m.closed before setting states and spawning.
+C-3  FileTokenStore.Save and Delete are read-modify-write over the whole file,
+     so two processes saving tokens for different servers can lose one. The
+     desktop app and a terminal running at once is not a hypothetical.
+B-5  persistingTokenSource.last is read and written without synchronisation.
+B-3  Revocation goes to the first authorization server that advertises a
+     revocation endpoint; the record does not say which one issued the token,
+     and RFC 7009 has the wrong server answer 200 for a token it never knew.
+B-4  Nothing in this code requires the revocation endpoint to be https. Whether
+     the protocol library's metadata validation already covers it is exactly the
+     thing to check rather than assume.
+E-6  sanitiseText builds the whole sanitised string and then a full []rune copy
+     before truncating, with no bound on the input.
+E-3  additionalProperties given as a schema rather than false is neither carried
+     nor recorded as a lost constraint.
+E-4  The depth-limit branch returns schema.Description without sanitising it,
+     unlike the branch beside it.
+E-5  Two header names that differ only in punctuation resolve to one environment
+     variable reference.
+C-2  KeychainStore.Servers() lists only keychain items, so a server whose token
+     is still in the fallback file is invisible. No production caller today.
+C-4  goString returns "" when CFStringGetCString fails, which would put an empty
+     name into the server list rather than an error.
+E-7  A "type" that is neither a string nor an array of strings is treated as no
+     type at all.
+
+================================================================================
+WHAT THIS SAYS ABOUT THE PROOF THAT CAME BEFORE IT
+================================================================================
+
+Thirty-odd protections were falsified in this branch, each one broken in the
+production code and observed to fail its test. That discipline is sound and I
+would run it again. It did not catch either confirmed defect, for the same
+reason in both cases: falsification proves that the property you thought of is
+guarded. It is silent about the property you never thought of. Nobody wrote a
+test for "the user deletes a server" or "two properties share a definition",
+so no sabotage could fail one.
+
+The race detector also has nothing to say here: go test -race passes on this
+package, which means only that the existing tests do not drive the interleavings
+D-2 and D-3 describe.
+
+That is the argument for a different substrate, and it is now an argument from
+evidence rather than from principle.
+
+=== probe run, verbatim ===
+=== RUN   TestProbeRemovedServerIsForgotten
+    zz_probe_test.go:45: CONFIRMED D-1: 1 tools still offered after the server was removed from the config
+    zz_probe_test.go:48: CONFIRMED D-1: state survives removal: connected
+    zz_probe_test.go:51: CONFIRMED D-1: 1 schemas still offered to the model
+--- FAIL: TestProbeRemovedServerIsForgotten (0.00s)
+=== RUN   TestProbeSharedRefIsNotCyclic
+    zz_probe_test.go:74: converted parameters: {"type":"object","properties":{"from":{"type":"string","enum":["USD","EUR"]},"to":{}}}
+    zz_probe_test.go:81: CONFIRMED E-1: the shared $ref did not resolve for both properties: {"type":"object","properties":{"from":{"type":"string","enum":["USD","EUR"]},"to":{}}}
+--- FAIL: TestProbeSharedRefIsNotCyclic (0.00s)
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.280s
+FAIL

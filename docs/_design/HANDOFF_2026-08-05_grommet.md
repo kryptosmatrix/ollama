@@ -28,7 +28,7 @@ Head at handoff: `3f925cfc` — 49 commits ahead of `main`, 108 files, ~24,000 l
 | 4 — MCP Servers page | **DONE** (`273c19bd`) |
 | 4b — registry browse | **DONE** (`8317a273`, `07b06d8d`, `0c540dac`) |
 | 5 — docs and closeout | **DONE** — docs current, 24 proof artefacts, this handoff |
-| 5 — cross-substrate review | **NOT DONE** — see below; this is the largest outstanding risk |
+| 5 — cross-substrate review | **DONE** (glm-5.2:cloud, 2026-08-07) — **found 5 confirmed defects; repairs NOT done** |
 
 ### Verified at closeout (2026-08-07)
 
@@ -74,13 +74,23 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 ## What remains
 
-Two items, in the order I would do them.
+**Do the repairs first. The branch is not ready for an upstream PR.**
 
-### 1. An independent review by a different substrate — NOT DONE, and the largest outstanding risk
+### 1. Repair what the cross-substrate review found — NOT DONE
 
-Forty-nine commits of security-sensitive code — a code-execution config, an approval gate, an OAuth client, a credential store — have been read by exactly one pair of eyes, mine, and proven by tests I also wrote. Falsification catches a great deal but it cannot catch what I did not think to test, and this session produced two demonstrations of that in a single hour: a real service found an interoperability defect no fake would ever have shown, and reading RFC 9207 properly found a security hole in my own fix for it that every one of my tests had passed over.
+A blind review by `glm-5.2:cloud` over commit `3f925cfc` found five confirmed defects, two of them by execution. Full record with per-finding verification status in `docs/_design/proof/phase5-cross-substrate-review.txt`; the reviewer's raw output is beside it under `glm-review-raw/`. Nothing has been fixed.
 
-Run Codex or Kimi over the branch before this goes anywhere near an upstream PR. Give the reviewer the plan, this handoff and the diff against `main`, and ask specifically about the approval gate, the token store, and `mcp/oauth.go`. `$HOME/GitHub/TECHNE/Tools/codex/ask.sh` is the harness; the blind protocol matters — the reviewer gets the pinned HEAD and the claims, not my reasoning about why each is fine.
+The two that matter most, both confirmed by running a probe:
+
+**A server removed from the configuration keeps running and keeps offering its tools to the model** (`mcp/manager.go`, `Connect`). It reconciles every server the config mentions and never looks at the ones it is already holding. Earlier in the session I found and fixed exactly this for a *disabled* server, and fixed only the branch I was looking at. Delete is the path nobody tested.
+
+**Two properties sharing one `$ref` make the second one empty** (`mcp/tools.go`, `refResolver.visited`, never reset between properties). Not an error — an empty property, no type, no enum, no description, handed to the model. Sharing a definition between two fields is ordinary schema practice.
+
+Then: a refused sign-in loses the server's reason (`mcp/oauth.go` error branch calls `deliver` rather than `deliverFailure`); a failed migration leaves the credential in cleartext for ever (`mcp/tokenstore_darwin.go`, `Load`); and a registry identifier is not checked for being a flag (`mcp/registry.go`, `resolvePackage`).
+
+Sixteen further findings are recorded as UNVERIFIED with reasons — concurrency in the manager, the file store's read-modify-write across processes, revocation targeting, several schema-conversion gaps. Work them down; do not treat the list as conclusions.
+
+One finding was REFUTED, and why is worth reading: my shard boundaries cut a call site away from its callee, so the reviewer correctly reported dead code that is not dead. Give the next reviewer whole call paths.
 
 ### 2. The Windows and Linux token stores
 
