@@ -425,8 +425,16 @@ func recordLost(schema *jsonSchema, path string, lost *lostConstraints) {
 	if schema.Not != nil {
 		details = append(details, "constrained by a negated schema")
 	}
-	if len(schema.AdditionalProperties) > 0 && string(schema.AdditionalProperties) == "false" {
+	// additionalProperties is a boolean or a schema. Only "false" was reported
+	// before, so a server that said "anything extra must look like this" had
+	// its constraint dropped in silence — and silence here reads as "anything
+	// extra is fine", which is the opposite of what was said.
+	switch raw := strings.TrimSpace(string(schema.AdditionalProperties)); raw {
+	case "", "true":
+	case "false":
 		details = append(details, "no properties beyond those listed")
+	default:
+		details = append(details, "extra properties are allowed but must match a shape this tool definition cannot express")
 	}
 
 	if len(details) > 0 {

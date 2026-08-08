@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -299,12 +300,30 @@ func declaredValues(variables []RegistryVariable) map[string]string {
 		return nil
 	}
 	values := make(map[string]string, len(variables))
+	// Two names that differ only in punctuation reduce to the same environment
+	// variable — "X-Custom-Auth" and "X_Custom_Auth" both become
+	// X_CUSTOM_AUTH. Sharing one variable between two headers means the user
+	// sets one value and both receive it, and if they were meant to carry
+	// different credentials one of them is silently wrong. Each name gets its
+	// own reference instead.
+	taken := make(map[string]bool, len(variables))
 	for _, variable := range variables {
 		name := strings.TrimSpace(variable.Name)
 		if name == "" {
 			continue
 		}
-		values[name] = "${env:" + envReferenceName(name) + "}"
+		reference := envReferenceName(name)
+		if taken[reference] {
+			for suffix := 2; ; suffix++ {
+				candidate := reference + "_" + strconv.Itoa(suffix)
+				if !taken[candidate] {
+					reference = candidate
+					break
+				}
+			}
+		}
+		taken[reference] = true
+		values[name] = "${env:" + reference + "}"
 	}
 	if len(values) == 0 {
 		return nil

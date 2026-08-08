@@ -362,3 +362,58 @@ func TestApprovalStillShowsTheUserEverything(t *testing.T) {
 		t.Errorf("Summary() = %q; the user must read exactly what will run before agreeing to it", got)
 	}
 }
+
+// TestASpecWhoseFingerprintCannotBeComputedIsNeverApproved. The marker returned
+// when marshalling fails was once described in a comment as matching nothing.
+// It matches every other spec that also fails to marshal, so approving one
+// would have approved them all — a fingerprint collision that admits an
+// entirely different server.
+//
+// It is reachable: an unknown field preserved from the configuration file is
+// carried as raw JSON, and raw JSON that cannot be re-marshalled makes the
+// whole spec unmarshalable.
+func TestASpecWhoseFingerprintCannotBeComputedIsNeverApproved(t *testing.T) {
+	broken := func(name, command string) *ServerSpec {
+		return &ServerSpec{
+			Name:    name,
+			Command: command,
+			extra:   map[string]json.RawMessage{"odd": json.RawMessage("this is not json")},
+		}
+	}
+
+	one := broken("one", "srv-one")
+	two := broken("two", "srv-two")
+	if one.Fingerprint() != unmarshalableFingerprint {
+		t.Fatalf("setup: fingerprint = %q, want the cannot-compute marker", one.Fingerprint())
+	}
+	if one.Fingerprint() != two.Fingerprint() {
+		t.Fatal("setup: two unmarshalable specs should produce the same marker; that is the collision")
+	}
+
+	approvals := &Approvals{}
+	approvals.Approve(one, time.Now())
+
+	// Nothing was recorded, so nothing is approved.
+	if _, stored := approvals.Entries["one"]; stored {
+		t.Error("a spec whose fingerprint could not be computed was written to the ledger")
+	}
+	if approvals.Allows(one) {
+		t.Error("the spec that was approved is allowed to run, on a marker rather than a fingerprint")
+	}
+	// And emphatically not a different server that merely fails the same way.
+	if approvals.Allows(two) {
+		t.Error("a different server was approved by the collision")
+	}
+
+	// A ledger written by an earlier build on this branch *does* contain the
+	// marker, because Approve used to store it. Reading one back must not
+	// admit anything either — which is why the check in Allows is not
+	// redundant with the one in Approve.
+	legacy := &Approvals{Entries: map[string]Approval{
+		"one": {Fingerprint: unmarshalableFingerprint, Summary: "srv-one"},
+		"two": {Fingerprint: unmarshalableFingerprint, Summary: "srv-two"},
+	}}
+	if legacy.Allows(one) || legacy.Allows(two) {
+		t.Error("a ledger carrying the marker from an older build approved a server on it")
+	}
+}

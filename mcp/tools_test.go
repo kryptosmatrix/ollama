@@ -577,3 +577,37 @@ func TestATypeTheServerDeclaredButOllamaCannotReadIsSaidSoFar(t *testing.T) {
 		t.Errorf("a readable type was reported as unreadable: %q", plain.Description)
 	}
 }
+
+// TestAdditionalPropertiesAsASchemaIsReported. Only the literal false was
+// reported before, so a server saying "anything extra must look like this" had
+// its constraint dropped — and silence there reads to the model as "anything
+// extra is fine", which is the opposite of what was said.
+func TestAdditionalPropertiesAsASchemaIsReported(t *testing.T) {
+	withSchema, err := (Tool{Server: "hosted", Name: "t", Description: "d",
+		InputSchema: json.RawMessage(`{"type":"object","properties":{"a":{"type":"string"}},"additionalProperties":{"type":"string"}}`)}).Schema()
+	if err != nil {
+		t.Fatalf("Schema: %v", err)
+	}
+	if !strings.Contains(withSchema.Description, "extra properties are allowed") {
+		t.Errorf("the constraint was dropped: %q", withSchema.Description)
+	}
+
+	withFalse, err := (Tool{Server: "hosted", Name: "t", Description: "d",
+		InputSchema: json.RawMessage(`{"type":"object","properties":{"a":{"type":"string"}},"additionalProperties":false}`)}).Schema()
+	if err != nil {
+		t.Fatalf("Schema: %v", err)
+	}
+	if !strings.Contains(withFalse.Description, "no properties beyond those listed") {
+		t.Errorf("the false case stopped being reported: %q", withFalse.Description)
+	}
+
+	// And "true" says nothing, because it constrains nothing.
+	withTrue, err := (Tool{Server: "hosted", Name: "t", Description: "d",
+		InputSchema: json.RawMessage(`{"type":"object","properties":{"a":{"type":"string"}},"additionalProperties":true}`)}).Schema()
+	if err != nil {
+		t.Fatalf("Schema: %v", err)
+	}
+	if strings.Contains(withTrue.Description, "extra properties") {
+		t.Errorf("a permissive additionalProperties was reported as a constraint: %q", withTrue.Description)
+	}
+}

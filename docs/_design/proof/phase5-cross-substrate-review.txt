@@ -179,6 +179,7 @@ A2-2 Fingerprint() returns the constant "unmarshalable" when json.Marshal
      spec would approve all of them. Unreachable with the current struct, but
      the safety reasoning written into the comment is simply wrong, which is
      how it would survive a change to ServerSpec that made it reachable.
+     [CONFIRMED (reachable via a preserved unknown field) and REPAIRED — batch 4]
 A1-2 An unknown field on a server object is preserved in "extra" and written
      back, and the credential checks run only over Env and Headers — so a
      pasted config carrying "apiKey" at the top level stores it as a literal.
@@ -220,13 +221,16 @@ E-6  sanitiseText builds the whole sanitised string and then a full []rune copy
      before truncating, with no bound on the input.
 E-3  additionalProperties given as a schema rather than false is neither carried
      nor recorded as a lost constraint.
+     [CONFIRMED and REPAIRED — batch 4]
 E-4  The depth-limit branch returns schema.Description without sanitising it,
      unlike the branch beside it.
      [CONFIRMED and REPAIRED — batch 2]
 E-5  Two header names that differ only in punctuation resolve to one environment
      variable reference.
+     [CONFIRMED and REPAIRED — batch 4]
 C-2  KeychainStore.Servers() lists only keychain items, so a server whose token
      is still in the fallback file is invisible. No production caller today.
+     [CONFIRMED, no production caller, REPAIRED — batch 4]
 C-4  goString returns "" when CFStringGetCString fails, which would put an empty
      name into the server list rather than an error.
      [REPAIRED defensively, no falsifier possible — batch 2]

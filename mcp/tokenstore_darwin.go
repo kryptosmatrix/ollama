@@ -218,6 +218,18 @@ func (s *KeychainStore) Servers() ([]string, error) {
 		}
 		servers = append(servers, name)
 	}
+	// A server whose token has not been migrated yet lives only in the
+	// fallback, and a caller listing sign-ins would not see it.
+	if lister, ok := s.Fallback.(interface{ Servers() ([]string, error) }); ok {
+		pending, err := lister.Servers()
+		if err == nil {
+			for _, name := range pending {
+				if !slices.Contains(servers, name) {
+					servers = append(servers, name)
+				}
+			}
+		}
+	}
 	slices.Sort(servers)
 	return servers, nil
 }

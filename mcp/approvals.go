@@ -159,11 +159,18 @@ func (a *Approvals) Save(path string) error {
 
 // Approve records agreement to run the spec exactly as it currently stands.
 func (a *Approvals) Approve(spec *ServerSpec, at time.Time) {
+	fingerprint := spec.Fingerprint()
+	if fingerprint == unmarshalableFingerprint {
+		// Storing it would put a value in the ledger that every other
+		// unmarshalable spec also produces. Nothing is recorded, so nothing is
+		// approved, and the server simply stays unapproved.
+		return
+	}
 	if a.Entries == nil {
 		a.Entries = map[string]Approval{}
 	}
 	a.Entries[spec.Name] = Approval{
-		Fingerprint: spec.Fingerprint(),
+		Fingerprint: fingerprint,
 		ApprovedAt:  at.UTC(),
 		Summary:     spec.redactedSummary(),
 	}
@@ -187,7 +194,14 @@ func (a *Approvals) Allows(spec *ServerSpec) bool {
 	if !ok {
 		return false
 	}
-	return entry.Fingerprint == spec.Fingerprint()
+	fingerprint := spec.Fingerprint()
+	if fingerprint == unmarshalableFingerprint {
+		// Not a fingerprint: a marker that one could not be computed. Two specs
+		// bearing it are not the same spec, and treating them as equal would
+		// approve one server on the strength of another.
+		return false
+	}
+	return entry.Fingerprint == fingerprint
 }
 
 // Names returns the approved server names in a stable order.
@@ -222,9 +236,12 @@ func (s *ServerSpec) Fingerprint() string {
 
 	data, err := json.Marshal(clone)
 	if err != nil {
-		// A spec that cannot be marshalled cannot be approved. Returning a
-		// value that matches nothing is the safe failure.
-		return "unmarshalable"
+		// A spec that cannot be marshalled cannot be approved. This value was
+		// once described as matching nothing; it matches every other spec that
+		// also fails to marshal, so approving one such spec would have approved
+		// them all. Approve refuses to store it and Allows refuses to accept
+		// it, which is what actually makes it match nothing.
+		return unmarshalableFingerprint
 	}
 	sum := sha256.Sum256(data)
 	return hex.EncodeToString(sum[:])
@@ -284,6 +301,10 @@ func redactArgs(args []string) []string {
 	}
 	return out
 }
+
+// unmarshalableFingerprint marks a spec whose fingerprint could not be
+// computed. It is never stored and never matched.
+const unmarshalableFingerprint = "unmarshalable"
 
 // Summary is the one-line description of what a server would do, for the user
 // to read when approving it or when its fingerprint stops matching.

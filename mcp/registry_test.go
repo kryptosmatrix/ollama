@@ -331,3 +331,43 @@ func TestAPackageIdentifierMayNotBeAFlag(t *testing.T) {
 		}
 	})
 }
+
+// TestTwoHeaderNamesGetTwoEnvironmentReferences. Names that differ only in
+// punctuation reduce to the same environment variable — "X-Custom-Auth" and
+// "X_Custom_Auth" both become X_CUSTOM_AUTH. Sharing one variable means the
+// user sets a value and both headers receive it, and if they were meant to
+// carry different credentials one of them is silently wrong.
+func TestTwoHeaderNamesGetTwoEnvironmentReferences(t *testing.T) {
+	entry := RegistryEntry{
+		Name: "example/remote",
+		Remotes: []RegistryRemote{{
+			Type: "streamable-http",
+			URL:  "https://mcp.example.com/v1",
+			Headers: []RegistryVariable{
+				{Name: "X-Custom-Auth", IsSecret: true},
+				{Name: "X_Custom_Auth", IsSecret: true},
+			},
+		}},
+	}
+	spec, err := entry.Resolve()
+	if err != nil {
+		t.Fatalf("Resolve: %v", err)
+	}
+
+	seen := map[string]string{}
+	for name, value := range spec.Headers {
+		if other, duplicate := seen[value]; duplicate {
+			t.Errorf("%q and %q share %s; one of them would receive the other's credential", other, name, value)
+		}
+		seen[value] = name
+	}
+	if len(spec.Headers) != 2 {
+		t.Errorf("headers = %v, want both", spec.Headers)
+	}
+	// Still references, never literals.
+	for name, value := range spec.Headers {
+		if !strings.HasPrefix(value, "${env:") {
+			t.Errorf("header %q carries %q rather than an environment reference", name, value)
+		}
+	}
+}
