@@ -76,19 +76,17 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 **Do the repairs first. The branch is not ready for an upstream PR.**
 
-### 1. Repair what the cross-substrate review found — NOT DONE
+### 1. Repair what the cross-substrate review found — 2 of 7 DONE
 
-A blind review by `glm-5.2:cloud` over commit `3f925cfc` found five confirmed defects, two of them by execution. Full record with per-finding verification status in `docs/_design/proof/phase5-cross-substrate-review.txt`; the reviewer's raw output is beside it under `glm-review-raw/`. Nothing has been fixed.
+A blind review by `glm-5.2:cloud` over commit `3f925cfc` found seven confirmed defects, four of them by execution. Full record with per-finding verification status in `docs/_design/proof/phase5-cross-substrate-review.txt`; the reviewer's raw output is beside it under `glm-review-raw/`.
 
-The two that matter most, both confirmed by running a probe:
+**The two structural defects are repaired** (`4d0e9120`, proof in `phase5-repairs-falsification.txt`): a server removed from the configuration now stops and is forgotten, and two properties may share one `$ref`. Read that proof before touching the resolver — the obvious fix, making the reference chain local to one resolution, silently traded sibling sharing for the accurate cycle diagnosis, and only the pre-existing cyclic-schema test caught it. The chain is threaded down the nesting path for that reason.
 
-**A server removed from the configuration keeps running and keeps offering its tools to the model** (`mcp/manager.go`, `Connect`). It reconciles every server the config mentions and never looks at the ones it is already holding. Earlier in the session I found and fixed exactly this for a *disabled* server, and fixed only the branch I was looking at. Delete is the path nobody tested.
-
-**Two properties sharing one `$ref` make the second one empty** (`mcp/tools.go`, `refResolver.visited`, never reset between properties). Not an error — an empty property, no type, no enum, no description, handed to the model. Sharing a definition between two fields is ordinary schema practice.
+**Five confirmed defects remain, and the credential pair is the one to take next.**
 
 **A password embedded in a server URL is accepted and written to `mcp.json` as a literal** (`mcp/config.go`, `validateURL` never looks at the userinfo). The one rule that file exists to enforce is that credentials appear only as `${env:NAME}`.
 
-Then: a refused sign-in loses the server's reason (`mcp/oauth.go` error branch calls `deliver` rather than `deliverFailure`); a failed migration leaves the credential in cleartext for ever (`mcp/tokenstore_darwin.go`, `Load`); and a registry identifier is not checked for being a flag (`mcp/registry.go`, `resolvePackage`).
+And then: a refused sign-in loses the server's reason (`mcp/oauth.go` error branch calls `deliver` rather than `deliverFailure`); a failed migration leaves the credential in cleartext for ever (`mcp/tokenstore_darwin.go`, `Load`); and a registry identifier is not checked for being a flag (`mcp/registry.go`, `resolvePackage`).
 
 **The same credential is copied into the approval ledger** (`mcp/approvals.go`, `Approve`, via `Summary()`), so a secret in a URL or in stdio args lands in `mcp-approvals.json` too — and a user who scrubs `mcp.json` has no reason to look there. Confirmed by probe. Fix these two together; they are one defect with two outlets.
 
