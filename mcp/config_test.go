@@ -537,3 +537,63 @@ func TestALoopbackHostIsRecognisedWhateverItsCase(t *testing.T) {
 		t.Error("plain http to a real host must still be refused")
 	}
 }
+
+// TestAPreservedFieldMayNotCarryACredential. Fields this version of Ollama does
+// not understand are kept and written back, which is what keeps a configuration
+// portable between MCP clients — and is how a credential arrives in one. The
+// env and header checks never saw a name like "apiKey" sitting directly on the
+// server object, so it went through untouched and was saved as a literal.
+func TestAPreservedFieldMayNotCarryACredential(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "mcp.json")
+	if err := os.WriteFile(path, []byte(`{"mcpServers":{"s":{"command":"srv","apiKey":"sk-LEAKED"}}}`), 0o600); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	cfg, err := Load(path)
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+
+	problem := cfg.Problems()["s"]
+	if problem == nil {
+		t.Fatal("a credential in an unknown field was accepted")
+	}
+	if !strings.Contains(problem.Error(), "${env:") {
+		t.Errorf("the refusal does not name the safe form: %v", problem)
+	}
+
+	// An unknown field that is not credential-shaped is still preserved, which
+	// is the whole reason unknown fields are kept.
+	plain := filepath.Join(dir, "plain.json")
+	if err := os.WriteFile(plain, []byte(`{"mcpServers":{"s":{"command":"srv","displayOrder":3}}}`), 0o600); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	kept, err := Load(plain)
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if problem := kept.Problems()["s"]; problem != nil {
+		t.Errorf("an ordinary unknown field was refused: %v", problem)
+	}
+	out := filepath.Join(dir, "out.json")
+	if err := kept.Save(out); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+	data, _ := os.ReadFile(out)
+	if !strings.Contains(string(data), "displayOrder") {
+		t.Errorf("an unknown field was lost on the way back out:\n%s", data)
+	}
+
+	// And an environment reference in such a field is left alone.
+	referenced := filepath.Join(dir, "ref.json")
+	if err := os.WriteFile(referenced, []byte(`{"mcpServers":{"s":{"command":"srv","apiKey":"${env:MY_TOKEN}"}}}`), 0o600); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	safe, err := Load(referenced)
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if problem := safe.Problems()["s"]; problem != nil {
+		t.Errorf("an environment reference in an unknown field was refused: %v", problem)
+	}
+}

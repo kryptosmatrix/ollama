@@ -2,6 +2,7 @@ package mcp
 
 import (
 	"encoding/json"
+	"runtime"
 	"slices"
 	"strings"
 	"testing"
@@ -609,5 +610,34 @@ func TestAdditionalPropertiesAsASchemaIsReported(t *testing.T) {
 	}
 	if strings.Contains(withTrue.Description, "extra properties") {
 		t.Errorf("a permissive additionalProperties was reported as a constraint: %q", withTrue.Description)
+	}
+}
+
+// TestAHugeDescriptionIsCutBeforeItIsCopied. sanitiseText walked every rune of
+// its input, built the whole sanitised string, then made a second full copy as
+// runes to keep the first four thousand. A description arrives from an MCP
+// server with no length agreed anywhere, so a hostile one would be copied twice
+// at full size before nearly all of it was discarded.
+func TestAHugeDescriptionIsCutBeforeItIsCopied(t *testing.T) {
+	huge := strings.Repeat("x", 8_000_000)
+
+	var before, after runtime.MemStats
+	runtime.GC()
+	runtime.ReadMemStats(&before)
+	got := sanitiseText(huge, maxDescriptionRunes)
+	runtime.ReadMemStats(&after)
+
+	if runes := []rune(got); len(runes) > maxDescriptionRunes+32 {
+		t.Errorf("the result is %d runes, over the cap", len(runes))
+	}
+	if !strings.Contains(got, "truncated by Ollama") {
+		t.Error("the result does not say it was truncated")
+	}
+
+	// The input is 8MB. Copying it even once would show here; the allowance is
+	// generous so this measures the difference between "cut first" and "copy
+	// the lot twice", not an exact byte count.
+	if allocated := after.TotalAlloc - before.TotalAlloc; allocated > 2_000_000 {
+		t.Errorf("sanitising an 8MB description allocated %d bytes; it must cut before it copies", allocated)
 	}
 }

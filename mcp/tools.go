@@ -446,6 +446,15 @@ func recordLost(schema *jsonSchema, path string, lost *lostConstraints) {
 // characters are stripped so a description cannot forge message structure, and
 // the text is truncated so a server cannot consume the context window.
 func sanitiseText(text string, maxRunes int) string {
+	// Cut before doing any work. Everything below allocates in proportion to
+	// what it is given, and what it is given arrives from an MCP server with no
+	// length agreed anywhere. A generous multiple of the cap is kept so the
+	// stripping below still has room to remove characters without the result
+	// coming up short.
+	if trimmed, cut := truncateRunes(text, maxRunes*4); cut {
+		text = trimmed
+	}
+
 	var b strings.Builder
 	b.Grow(len(text))
 	for _, r := range text {
@@ -467,6 +476,22 @@ func sanitiseText(text string, maxRunes int) string {
 		out = string(runes[:maxRunes]) + "… (truncated by Ollama)"
 	}
 	return out
+}
+
+// truncateRunes cuts a string to at most limit runes without walking past that
+// point. It exists so a hostile description does not get copied twice at full
+// size before being thrown away — a hundred-megabyte description would
+// otherwise allocate the builder and then a rune slice of the whole thing to
+// keep four thousand characters.
+func truncateRunes(text string, limit int) (string, bool) {
+	count := 0
+	for index := range text {
+		if count == limit {
+			return text[:index], true
+		}
+		count++
+	}
+	return text, false
 }
 
 // maps_Keys is a tiny local helper so this file does not depend on the ordering

@@ -413,8 +413,37 @@ func validateServer(name string, spec *ServerSpec) error {
 
 	errs = append(errs, validateEnv(spec.Env)...)
 	errs = append(errs, validateHeaders(spec.Headers)...)
+	errs = append(errs, validatePreservedFields(spec)...)
 
 	return errors.Join(errs...)
+}
+
+// validatePreservedFields checks the fields this version of Ollama does not
+// understand.
+//
+// Preserving them is what keeps a configuration portable between MCP clients,
+// and it is also how a credential arrives in one: the env and header checks
+// never saw a name like "apiKey" sitting directly on the server object, so it
+// went through untouched and was written back as a literal.
+func validatePreservedFields(spec *ServerSpec) []error {
+	var errs []error
+	for _, key := range slices.Sorted(maps.Keys(spec.extra)) {
+		if !secretishEnvKey.MatchString(key) {
+			continue
+		}
+		raw := strings.TrimSpace(string(spec.extra[key]))
+		if raw == "" || raw == "null" || raw == `""` {
+			continue
+		}
+		// An environment reference is the safe form and is left alone, even
+		// though nothing here reads it: a newer Ollama might.
+		var text string
+		if json.Unmarshal(spec.extra[key], &text) == nil && isEnvRef(text) {
+			continue
+		}
+		errs = append(errs, fmt.Errorf(`%q looks like a credential and this version of Ollama does not use it; remove it, or write it as "${env:NAME}"`, key))
+	}
+	return errs
 }
 
 func validateEnv(env map[string]string) []error {

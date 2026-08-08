@@ -1,0 +1,130 @@
+Phase 5 — working down the unverified list, batch 5
+
+Two confirmed and fixed. Three left standing, with reasons.
+
+A1-2 — A CREDENTIAL IN A PRESERVED FIELD WENT STRAIGHT THROUGH
+
+Fields this version of Ollama does not understand are kept and written back,
+which is what keeps a configuration portable between MCP clients. It is also how
+a credential arrives in one: the env and header checks never saw a name like
+"apiKey" sitting directly on the server object.
+
+    CONFIRMED A1-2: an unknown field carried a credential straight through
+
+Refused now, by the same name pattern the env check already uses, and the
+refusal names the safe form. An unknown field that is not credential-shaped is
+still preserved — that is the whole point of keeping them — and an environment
+reference in such a field is left alone, because a newer Ollama might read it.
+
+E-6 — A HOSTILE DESCRIPTION WAS COPIED TWICE AT FULL SIZE
+
+sanitiseText walked every rune of its input, built the whole sanitised string,
+and then made a second full copy as runes to keep the first four thousand. Tool
+descriptions arrive from an MCP server with no length agreed anywhere. It now
+cuts to a generous multiple of the cap before doing any work; the test sanitises
+an eight-megabyte description and asserts the allocation stays under two
+megabytes.
+
+WHAT IS LEFT, AND WHY IT IS LEFT
+
+A1-3 — Args are neither checked for credentials nor expandable from the
+environment. This is a judgement, not an oversight, and it is the same shape as
+the query-string and docker-runtime-argument cases already put to the operator.
+The threat model names the process argument list explicitly, so the right answer
+looks like refusing a credential there — but the pattern that would catch
+"--api-key=sk-..." also catches "--token-file=/etc/foo", where the value is a
+path and refusing it strands the user with no alternative, since expanding
+${env:NAME} into argv would put the secret in the process list, which is the
+thing being avoided. Three cases now share this shape; they should be ruled on
+together rather than one at a time.
+
+B-3 — Revocation goes to the first authorization server advertising a
+revocation endpoint, and the record does not say which one issued the token. The
+fix is to store the issuer at sign-in beside the client identifier, which is
+another field on SignInRecord threaded through the same places ClientID goes.
+That is a clean change and a wrong one to make at the tail of a long session:
+the last credential-store reshape needed care over migration and a refresh that
+arrives carrying nothing. It is specified here rather than half-done.
+
+D-4 — dial closes the previous session while holding the write lock, where
+closeSession deliberately does the same work outside it. Real, and a liveness
+issue rather than a correctness one. A discriminating test needs a session whose
+Close blocks; the transport seam controls the release function but not the
+protocol library's session, so only half of it can be driven from here. Left
+with the analysis rather than fixed on a test that would not have caught it.
+
+FALSIFICATION
+
+hashes before:
+bfe7af1474aa20809f749c3b0e370307b4e91d28ffefc91a58a4e2c736bbfa38  mcp/config.go
+424bba8bd7ec67fdb9bea1bd66e3ddc88b9bbfc6d5ebd95e1d992bd0634e0135  mcp/tools.go
+
+=== Y1 preserved fields are never checked for credentials ===
+--- /tmp/b5-c.go.orig	2026-08-08 17:16:14
++++ mcp/config.go	2026-08-08 17:16:14
+@@ -413,7 +413,6 @@
+ 
+ 	errs = append(errs, validateEnv(spec.Env)...)
+ 	errs = append(errs, validateHeaders(spec.Headers)...)
+-	errs = append(errs, validatePreservedFields(spec)...)
+ 
+ 	return errors.Join(errs...)
+ }
+--- go test -run TestAPreservedFieldMayNotCarryACredential ./mcp/ ---
+--- FAIL: TestAPreservedFieldMayNotCarryACredential (0.00s)
+    config_test.go:559: a credential in an unknown field was accepted
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.451s
+FAIL
+EXIT=1
+restored: bfe7af1474aa20809f749c3b0e370307b4e91d28ffefc91a58a4e2c736bbfa38
+
+=== Y2 an environment reference in a preserved field is refused too ===
+--- /tmp/b5-c.go.orig	2026-08-08 17:16:14
++++ mcp/config.go	2026-08-08 17:16:17
+@@ -437,10 +437,7 @@
+ 		}
+ 		// An environment reference is the safe form and is left alone, even
+ 		// though nothing here reads it: a newer Ollama might.
+-		var text string
+-		if json.Unmarshal(spec.extra[key], &text) == nil && isEnvRef(text) {
+-			continue
+-		}
++
+ 		errs = append(errs, fmt.Errorf(`%q looks like a credential and this version of Ollama does not use it; remove it, or write it as "${env:NAME}"`, key))
+ 	}
+ 	return errs
+--- go test -run TestAPreservedFieldMayNotCarryACredential ./mcp/ ---
+--- FAIL: TestAPreservedFieldMayNotCarryACredential (0.01s)
+    config_test.go:597: an environment reference in an unknown field was refused: "apiKey" looks like a credential and this version of Ollama does not use it; remove it, or write it as "${env:NAME}"
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.460s
+FAIL
+EXIT=1
+restored: bfe7af1474aa20809f749c3b0e370307b4e91d28ffefc91a58a4e2c736bbfa38
+
+=== Y3 a huge description is copied in full before being cut ===
+--- /tmp/b5-t.go.orig	2026-08-08 17:16:14
++++ mcp/tools.go	2026-08-08 17:16:20
+@@ -451,9 +451,6 @@
+ 	// length agreed anywhere. A generous multiple of the cap is kept so the
+ 	// stripping below still has room to remove characters without the result
+ 	// coming up short.
+-	if trimmed, cut := truncateRunes(text, maxRunes*4); cut {
+-		text = trimmed
+-	}
+ 
+ 	var b strings.Builder
+ 	b.Grow(len(text))
+--- go test -run TestAHugeDescriptionIsCutBeforeItIsCopied ./mcp/ ---
+--- FAIL: TestAHugeDescriptionIsCutBeforeItIsCopied (0.04s)
+    tools_test.go:641: sanitising an 8MB description allocated 40023608 bytes; it must cut before it copies
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.488s
+FAIL
+EXIT=1
+restored: 424bba8bd7ec67fdb9bea1bd66e3ddc88b9bbfc6d5ebd95e1d992bd0634e0135
+
+hashes after:
+bfe7af1474aa20809f749c3b0e370307b4e91d28ffefc91a58a4e2c736bbfa38  mcp/config.go
+424bba8bd7ec67fdb9bea1bd66e3ddc88b9bbfc6d5ebd95e1d992bd0634e0135  mcp/tools.go

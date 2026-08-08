@@ -183,9 +183,11 @@ A2-2 Fingerprint() returns the constant "unmarshalable" when json.Marshal
 A1-2 An unknown field on a server object is preserved in "extra" and written
      back, and the credential checks run only over Env and Headers — so a
      pasted config carrying "apiKey" at the top level stores it as a literal.
+     [CONFIRMED and REPAIRED — batch 5]
 A1-3 Args are never checked for secretish content and have no ${env:NAME}
      expansion, so a stdio server needing a token on its command line has no
      safe form; the threat model names the process argument list explicitly.
+     [OPEN — a judgement for the operator, with the query-string and docker cases]
 A1-4 isLoopbackHost compares host == "localhost" case-sensitively, so
      http://Localhost is wrongly told to use https.
      [CONFIRMED and REPAIRED — batch 2]
@@ -202,6 +204,7 @@ D-5  A stdio subprocess that starts and then fails the handshake is not killed
      [REFUTED — the protocol library kills it; standing test added — batch 3]
 D-4  dial closes the previous session while holding the write lock; closeSession
      deliberately does the same work outside it.
+     [OPEN — real, liveness only; no discriminating test available from here]
 D-6  Connect does not check m.closed before setting states and spawning.
 C-3  FileTokenStore.Save and Delete are read-modify-write over the whole file,
      so two processes saving tokens for different servers can lose one. The
@@ -213,12 +216,14 @@ B-5  persistingTokenSource.last is read and written without synchronisation.
 B-3  Revocation goes to the first authorization server that advertises a
      revocation endpoint; the record does not say which one issued the token,
      and RFC 7009 has the wrong server answer 200 for a token it never knew.
+     [OPEN — fix specified in batch 5: store the issuer at sign-in]
 B-4  Nothing in this code requires the revocation endpoint to be https. Whether
      the protocol library's metadata validation already covers it is exactly the
      thing to check rather than assume.
      [CONFIRMED by reading the SDK and REPAIRED — batch 2]
 E-6  sanitiseText builds the whole sanitised string and then a full []rune copy
      before truncating, with no bound on the input.
+     [CONFIRMED and REPAIRED — batch 5]
 E-3  additionalProperties given as a schema rather than false is neither carried
      nor recorded as a lost constraint.
      [CONFIRMED and REPAIRED — batch 4]
