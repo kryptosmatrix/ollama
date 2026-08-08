@@ -29,7 +29,7 @@ Head at handoff: `3f925cfc` — 49 commits ahead of `main`, 108 files, ~24,000 l
 | 4b — registry browse | **DONE** (`8317a273`, `07b06d8d`, `0c540dac`) |
 | 5 — docs and closeout | **DONE** — docs current, 24 proof artefacts, this handoff |
 | 5 — cross-substrate review | **DONE** (glm-5.2:cloud, 2026-08-07) — 7 confirmed defects |
-| 5 — repairs | **ALL 7 confirmed DONE**; unverified list **8 of 20 worked down** (`0103a4d0`, `d3529e55`) |
+| 5 — repairs | **ALL 7 confirmed DONE**; unverified list **17 of 20 settled** — 3 left, all named below |
 
 ### Verified at closeout (2026-08-07)
 
@@ -95,13 +95,17 @@ That repair required **deleting a pre-existing test that asserted the defective 
 
 The approval ledger *was* reviewed in the end, after its first shard returned an empty response, and it produced the one negative result worth having: **no path was found by which a server can be started without a current approval**, and the fingerprint holds against config tampering. That is the claim this branch rests on and it is no longer only mine.
 
-**What actually remains is the unverified list — twelve of the twenty.** Eight have been worked down in two batches, and every one of the eight turned out to be real. Records in `phase5-unverified-batch1.txt` and `batch2.txt`; the review file carries a per-finding status line.
+**The unverified list is 17 of 20 settled.** Sixteen were confirmed and fixed; one — a stdio subprocess surviving a failed handshake — was **refuted**, and carries a standing test because the next reader will have the same suspicion and a refutation that leaves no trace gets re-litigated. Records in `phase5-unverified-batch1.txt` through `batch5.txt`; the review file carries a per-finding status line.
 
-Batch 1 (`0103a4d0`) fixed a data race between `Call` and `Close` that the race detector finds instantly once the two overlap, a server that came back connected when a slow dial outlived the user switching it off, and a closed manager that still connected. The resurrection fix is a **per-server epoch** rather than a fourth patch to a fourth branch — that defect had already appeared twice before in different guises (a disabled server keeping its process, a removed server keeping everything), and patching branches one at a time is exactly why it kept coming back.
+The ones worth knowing about: a data race between `Call` and `Close`; a server that came back connected when a slow dial outlived the user switching it off, fixed with a per-server **epoch** rather than a fourth patch to a fourth branch; concurrent saves that destroyed seven of eight tokens; a revocation endpoint never required to be https; a credential in a preserved configuration field; and the cannot-compute fingerprint marker, which the review thought unreachable and is not.
 
-Batch 2 (`d3529e55`) fixed a case-sensitive loopback comparison, an unsanitised description at the schema depth limit, an unreadable `type` that read to the model as no constraint at all, and a revocation endpoint that was never required to be https — the protocol library validates that endpoint's scheme but omits it from the https-or-loopback list it applies to the token and authorization endpoints.
+**Three remain, and each is a decision rather than a gap in the work.**
 
-**Twelve remain**, in the review file: `A2-2` (the `unmarshalable` fingerprint constant), `A1-2` (unknown top-level fields round-tripped without a credential check), `A1-3` (`Args` neither checked nor env-expandable), `D-5` (a stdio subprocess that fails its handshake is not killed until the manager closes), `D-4` (`dial` closes the previous session while holding the lock), `C-3` (the file store's read-modify-write loses an update across processes), `B-5` (`persistingTokenSource.last` unsynchronised), `B-3` (revocation may target the wrong authorization server), `E-6` (`sanitiseText` allocates the whole input before truncating), `E-3` (`additionalProperties` as a schema dropped silently), `E-5` (env-reference name collisions), `C-2` (`Servers()` misses fallback-only entries).
+`A1-3` — a credential in `Args`. This is the **third finding with one shape**, alongside query-string credentials and docker runtime arguments: any rule strict enough to catch the abuse also refuses legitimate configurations, and here there is no safe alternative to point at, since expanding `${env:NAME}` into argv puts the secret in the process list — the thing being avoided. **Rule on all three together.**
+
+`B-3` — revocation may target the wrong authorization server. Clean fix, specified in `batch5.txt`: store the issuer at sign-in beside the client identifier, threading it exactly where `ClientID` goes. Not done because the last reshape of that record needed care over migration and over a refresh arriving with nothing, and that is not tail-of-session work.
+
+`D-4` — `dial` closes the previous session while holding the write lock, where `closeSession` deliberately does it outside. Real, liveness only. No discriminating test is available from here: the transport seam controls the release function but not the protocol library's session.
 
 **A warning worth having before you start.** Three times in this branch a test of mine passed its first sabotage, and the fault was always the same: it asserted that a mechanism existed rather than that the path under test used it. Write the sabotage first and watch it fail before believing any of these.
 
