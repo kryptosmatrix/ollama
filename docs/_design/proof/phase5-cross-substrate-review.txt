@@ -34,6 +34,8 @@ This is the same class of defect I found and fixed earlier in the session for a
 path I never tested. A user who removes an MCP server from the app has not
 removed it.
 
+REPAIRED. See docs/_design/proof/phase5-repairs-falsification.txt.
+
 Probe output, verbatim:
 
     CONFIRMED D-1: 1 tools still offered after the server was removed from the config
@@ -89,10 +91,17 @@ worse: the property is emitted empty, with no type, no enum and no description.
       "from":{"type":"string","enum":["USD","EUR"]},"to":{}}}
 
 Sharing a $ref between two properties is ordinary schema practice — any tool
-with two currency fields, two date fields, two IDs of the same kind. The model
-receives a parameter it knows nothing about, and the whole design principle of
-this file is that a constraint which cannot be carried is written into the
-description rather than dropped. Here it is dropped in silence.
+with two currency fields, two date fields, two IDs of the same kind.
+
+CORRECTION, made while repairing it: this is not silent. The lost-constraint
+note does reach the tool description, and it says
+
+    - to: reference "#/$defs/currency" is cyclic
+
+which is a false statement about the server's schema. A confident wrong
+diagnosis handed to the model is worse than silence, not better.
+
+REPAIRED. See docs/_design/proof/phase5-repairs-falsification.txt.
 
 ================================================================================
 CONFIRMED BY READING

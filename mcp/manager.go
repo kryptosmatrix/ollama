@@ -209,6 +209,13 @@ func (m *Manager) Connect(ctx context.Context, cfg *Config) {
 	}
 	problems := cfg.Problems()
 
+	// A server the configuration no longer mentions is not merely switched off
+	// — it is gone, and reconciling only the servers cfg names would never
+	// touch it. Its process would keep running, its state would stay whatever
+	// it last was, and Tools and Schemas would keep offering it to the model.
+	// Deleting a server has to actually delete it.
+	m.forgetServersOutside(cfg.Names())
+
 	type job struct {
 		name string
 		spec *ServerSpec
@@ -247,6 +254,34 @@ func (m *Manager) Connect(ctx context.Context, cfg *Config) {
 		}()
 	}
 	wg.Wait()
+}
+
+// forgetServersOutside drops every server this manager is holding that the
+// configuration no longer names: the session ends, the transport gives back
+// what it held, and the state disappears rather than lingering as a status for
+// something that is not configured.
+func (m *Manager) forgetServersOutside(configured []string) {
+	m.mu.RLock()
+	var removed []string
+	for name := range m.states {
+		if !slices.Contains(configured, name) {
+			removed = append(removed, name)
+		}
+	}
+	for name := range m.clients {
+		if !slices.Contains(configured, name) && !slices.Contains(removed, name) {
+			removed = append(removed, name)
+		}
+	}
+	m.mu.RUnlock()
+
+	for _, name := range removed {
+		// closeSession does the session and the release, outside the lock.
+		m.closeSession(name)
+		m.mu.Lock()
+		delete(m.states, name)
+		m.mu.Unlock()
+	}
 }
 
 // closeSession ends any live session for a server that should no longer be

@@ -142,7 +142,7 @@ func parseSchemaObject(raw json.RawMessage) (*jsonSchema, error) {
 // convertRoot maps the tool's top-level schema, which must describe an object.
 func convertRoot(root *jsonSchema, lost *lostConstraints) (api.ToolFunctionParameters, error) {
 	resolver := &refResolver{root: root}
-	resolved, err := resolver.resolve(root, 0)
+	resolved, chain, err := resolver.resolve(root, 0, nil)
 	if err != nil {
 		return api.ToolFunctionParameters{}, err
 	}
@@ -164,7 +164,7 @@ func convertRoot(root *jsonSchema, lost *lostConstraints) (api.ToolFunctionParam
 	recordLost(resolved, "", lost)
 
 	for _, name := range slices.Sorted(maps.Keys(resolved.Properties)) {
-		property, err := convertProperty(resolver, resolved.Properties[name], name, 0, lost)
+		property, err := convertProperty(resolver, resolved.Properties[name], name, 0, lost, chain)
 		if err != nil {
 			return api.ToolFunctionParameters{}, err
 		}
@@ -173,7 +173,7 @@ func convertRoot(root *jsonSchema, lost *lostConstraints) (api.ToolFunctionParam
 	return params, nil
 }
 
-func convertProperty(resolver *refResolver, schema *jsonSchema, path string, depth int, lost *lostConstraints) (api.ToolProperty, error) {
+func convertProperty(resolver *refResolver, schema *jsonSchema, path string, depth int, lost *lostConstraints, ancestors []string) (api.ToolProperty, error) {
 	if schema == nil {
 		return api.ToolProperty{}, nil
 	}
@@ -182,7 +182,7 @@ func convertProperty(resolver *refResolver, schema *jsonSchema, path string, dep
 		return api.ToolProperty{Description: schema.Description}, nil
 	}
 
-	resolved, err := resolver.resolve(schema, depth)
+	resolved, chain, err := resolver.resolve(schema, depth, ancestors)
 	if err != nil {
 		// An unresolvable reference degrades the property to untyped rather
 		// than losing the whole tool.
@@ -200,7 +200,7 @@ func convertProperty(resolver *refResolver, schema *jsonSchema, path string, dep
 	recordLost(resolved, path, lost)
 
 	for _, alternative := range resolved.AnyOf {
-		converted, err := convertProperty(resolver, alternative, path+".anyOf", depth+1, lost)
+		converted, err := convertProperty(resolver, alternative, path+".anyOf", depth+1, lost, chain)
 		if err != nil {
 			return api.ToolProperty{}, err
 		}
@@ -208,7 +208,7 @@ func convertProperty(resolver *refResolver, schema *jsonSchema, path string, dep
 	}
 
 	if resolved.Items != nil {
-		items, err := convertProperty(resolver, resolved.Items, path+"[]", depth+1, lost)
+		items, err := convertProperty(resolver, resolved.Items, path+"[]", depth+1, lost, chain)
 		if err != nil {
 			return api.ToolProperty{}, err
 		}
@@ -218,7 +218,7 @@ func convertProperty(resolver *refResolver, schema *jsonSchema, path string, dep
 	if len(resolved.Properties) > 0 {
 		nested := api.NewToolPropertiesMap()
 		for _, name := range slices.Sorted(maps.Keys(resolved.Properties)) {
-			child, err := convertProperty(resolver, resolved.Properties[name], path+"."+name, depth+1, lost)
+			child, err := convertProperty(resolver, resolved.Properties[name], path+"."+name, depth+1, lost, chain)
 			if err != nil {
 				return api.ToolProperty{}, err
 			}
@@ -234,31 +234,54 @@ func convertProperty(resolver *refResolver, schema *jsonSchema, path string, dep
 // against the tool's own schema. Remote references are not followed: a tool
 // definition must not cause a network fetch.
 type refResolver struct {
-	root    *jsonSchema
-	visited []string
+	root *jsonSchema
 }
 
-func (r *refResolver) resolve(schema *jsonSchema, depth int) (*jsonSchema, error) {
+// resolve follows a property's references and returns both the schema it lands
+// on and the chain of references followed to get there, extending the chain it
+// was given.
+//
+// The chain is the path from the root to this property, not a list of every
+// reference the tool has ever used. It was once a field on the resolver, which
+// meant it accumulated across siblings: the second property to reference a
+// shared definition found it already there and was reported as a cycle, when
+// sharing one definition between two fields is ordinary schema practice. What
+// that property got was no type, no enum, and a note telling the model its
+// reference was cyclic — a false statement about the server's own schema.
+//
+// Threading it down the nesting path instead keeps the real diagnosis: a
+// definition that contains a property referring back to itself closes a cycle
+// along one path, and is still caught and named as cyclic rather than degrading
+// into an unhelpful note about depth.
+func (r *refResolver) resolve(schema *jsonSchema, depth int, ancestors []string) (*jsonSchema, []string, error) {
 	current := schema
+	chain := ancestors
+
 	for hops := 0; current != nil && current.Ref != ""; hops++ {
 		if hops > maxRefDepth || depth > maxRefDepth {
-			return nil, fmt.Errorf("reference %q nests too deeply to resolve", schema.Ref)
+			return nil, chain, fmt.Errorf("reference %q nests too deeply to resolve", schema.Ref)
 		}
-		if slices.Contains(r.visited, current.Ref) {
-			return nil, fmt.Errorf("reference %q is cyclic", current.Ref)
+		if slices.Contains(chain, current.Ref) {
+			return nil, chain, fmt.Errorf("reference %q is cyclic", current.Ref)
 		}
-		r.visited = append(r.visited, current.Ref)
+		// Appended to a copy. The correctness of sibling sharing comes from
+		// threading the path, not from this copy — and an attempt to falsify
+		// the copy passed, because nothing here retains a chain long enough
+		// for two siblings writing into one backing array to be observed. It
+		// is kept as a guard against that changing, and recorded as
+		// unfalsified rather than counted as a protection.
+		chain = append(slices.Clone(chain), current.Ref)
 
 		target, err := r.lookup(current.Ref)
 		if err != nil {
-			return nil, err
+			return nil, chain, err
 		}
 		current = target
 	}
 	if current == nil {
-		return &jsonSchema{}, nil
+		return &jsonSchema{}, chain, nil
 	}
-	return current, nil
+	return current, chain, nil
 }
 
 func (r *refResolver) lookup(ref string) (*jsonSchema, error) {

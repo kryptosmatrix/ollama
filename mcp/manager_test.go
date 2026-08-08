@@ -516,3 +516,72 @@ func TestClosingAServerReleasesWhatItsTransportHeld(t *testing.T) {
 		}
 	})
 }
+
+// TestARemovedServerStopsAndIsForgotten is a defect a cross-substrate review
+// found and a probe confirmed.
+//
+// Connect reconciled every server the configuration mentioned and never looked
+// at the ones it was already holding, so a server the user deleted was never
+// reconciled at all: its process kept running, its state stayed connected, and
+// Tools and Schemas kept offering it to the model. The same class of defect was
+// found and fixed earlier for a *disabled* server — and only that branch was
+// fixed. Delete is the path nobody tested.
+func TestARemovedServerStopsAndIsForgotten(t *testing.T) {
+	fake := newFakeServer(t, simpleTool("alpha"))
+	spec := stdioSpec("files")
+
+	clientTransport, serverTransport := sdk.NewInMemoryTransports()
+	session, err := fake.server.Connect(t.Context(), serverTransport, nil)
+	if err != nil {
+		t.Fatalf("fake server connect: %v", err)
+	}
+	t.Cleanup(func() { session.Close() })
+
+	var mu sync.Mutex
+	released := 0
+	manager := NewManager(Options{
+		ConnectTimeout: 5 * time.Second,
+		Approvals:      allowAll{},
+		newTransport: func(context.Context, *ServerSpec, transportOptions) (sdk.Transport, func(), error) {
+			return clientTransport, func() {
+				mu.Lock()
+				released++
+				mu.Unlock()
+			}, nil
+		},
+	})
+	t.Cleanup(func() { manager.Close() })
+
+	cfg := &Config{}
+	cfg.Set(spec.Name, spec)
+	manager.Connect(t.Context(), cfg)
+	if len(manager.Tools()) == 0 {
+		t.Fatal("setup: the server offered no tools")
+	}
+
+	// The user removes the server, and the configuration is applied again.
+	manager.Connect(t.Context(), &Config{})
+
+	if got := manager.Tools(); len(got) != 0 {
+		t.Errorf("%d tools are still offered after the server was removed", len(got))
+	}
+	schemas, err := manager.Schemas()
+	if err != nil {
+		t.Fatalf("Schemas: %v", err)
+	}
+	if len(schemas) != 0 {
+		t.Errorf("%d schemas are still offered to the model after the server was removed", len(schemas))
+	}
+	if state, ok := manager.State(spec.Name); ok {
+		t.Errorf("the server still has a state after being removed: %s", state.Status)
+	}
+	if states := manager.States(); len(states) != 0 {
+		t.Errorf("States() still reports %d servers", len(states))
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+	if released != 1 {
+		t.Errorf("released %d times, want 1: a removed server must give back what its transport held", released)
+	}
+}

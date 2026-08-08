@@ -1,0 +1,151 @@
+Phase 5 repairs — the two structural defects from the cross-substrate review
+
+Both were confirmed by probe before any fix; both now have a committed test
+that fails without the change. Method as everywhere else: the protection was
+broken in production code, the test observed to fail, and the file restored
+byte-identical. Hashes before and after every attempt are in this file and
+match.
+
+D-1 — A SERVER REMOVED FROM THE CONFIGURATION KEPT RUNNING
+
+Connect reconciled every server the configuration mentioned and never looked at
+the ones the manager was already holding. forgetServersOutside now ends the
+session, runs the transport's release, and deletes the state for every server
+the configuration no longer names.
+
+Deleting the state rather than marking it disabled is deliberate: a server that
+is not configured has no status to report, and leaving one behind would put a
+row in the app's list for something the user removed.
+
+Two falsifiers, F3 and F4. F4 is the one worth having — it drops the state but
+leaves the session, which is exactly the half-fix that would look right in the
+interface while the subprocess kept running.
+
+E-1 — TWO PROPERTIES SHARING ONE DEFINITION
+
+The resolver's visited list lived on the resolver, one per tool, and was never
+reset. The second sibling to reference a definition found it already there and
+was reported as a cycle. The property was not dropped; it was emitted with no
+type and no enum, and the note attached to the tool description told the model:
+
+    - to: reference "#/$defs/currency" is cyclic
+
+which is a false statement about the server's own schema. Correcting an earlier
+description of this defect: it is not silent. It reaches the model as a
+confident lie, which is worse.
+
+The first repair made the chain local to one resolve call. That fixed siblings
+and broke something else, and the pre-existing TestSchemaCyclicRefDegrades-
+InsteadOfHanging caught it inside a minute: a definition containing a property
+that refers back to itself closes its cycle through the *nesting*, not within
+one chain of hops. With a purely local chain that case fell through to the
+depth limit and the model was told the schema was "nested beyond the depth this
+tool schema can express" — true, but a much less useful diagnosis than
+"cyclic", and the test asserted the accurate one.
+
+The chain is now threaded down the nesting path: siblings each extend the path
+they share, and a self-referential definition is still caught and still named.
+That is the shape that satisfies both cases rather than trading one for the
+other, and the old test is what forced it.
+
+NOT FALSIFIED, and kept anyway with the reason written beside it: the
+slices.Clone in resolve. F1 replaced it with a plain append and the sibling test
+still passed, because nothing in this package retains a chain long enough for
+two siblings writing into one backing array to be observed. Sibling correctness
+comes from threading the path, not from the copy. It is kept as a guard against
+that changing and is recorded here as unfalsified rather than counted — the same
+treatment given to the PKCE assertions in the flow record.
+
+hashes before:
+e55c1454fd14581dc77cea985400af8d409b48f3823b7c3dfad66929c8ca30de  mcp/tools.go
+7ab25dadc107090e180fcd601416cdb3aa7d6b3b76fbcceb37474b567f276858  mcp/manager.go
+
+=== F1 siblings share one chain slice, so the second still sees the first's reference ===
+--- /tmp/fx-tools.go.orig	2026-08-08 15:24:53
++++ mcp/tools.go	2026-08-08 15:24:54
+@@ -266,7 +266,7 @@
+ 		}
+ 		// Appended to a copy: two sibling properties must each extend the path
+ 		// they share, never each other's.
+-		chain = append(slices.Clone(chain), current.Ref)
++		chain = append(chain, current.Ref)
+ 
+ 		target, err := r.lookup(current.Ref)
+ 		if err != nil {
+--- go test -run TestTwoPropertiesMayShareOneDefinition ./mcp/ ---
+ok  	github.com/ollama/ollama/mcp	0.580s
+EXIT=0
+restored: e55c1454fd14581dc77cea985400af8d409b48f3823b7c3dfad66929c8ca30de
+
+=== F2 the ancestor chain is not threaded, so a self-referential definition is no longer named cyclic ===
+--- /tmp/fx-tools.go.orig	2026-08-08 15:24:53
++++ mcp/tools.go	2026-08-08 15:24:57
+@@ -182,7 +182,7 @@
+ 		return api.ToolProperty{Description: schema.Description}, nil
+ 	}
+ 
+-	resolved, chain, err := resolver.resolve(schema, depth, ancestors)
++	resolved, chain, err := resolver.resolve(schema, depth, nil)
+ 	if err != nil {
+ 		// An unresolvable reference degrades the property to untyped rather
+ 		// than losing the whole tool.
+--- go test -run TestSchemaCyclicRefDegradesInsteadOfHanging ./mcp/ ---
+--- FAIL: TestSchemaCyclicRefDegradesInsteadOfHanging (0.00s)
+    tools_test.go:215: the model should be told the schema was cyclic, got description:
+        does a thing
+        
+        Argument rules this tool definition cannot express, still enforced by the server:
+        - root.child.child.child.child.child.child.child.child.child: nested beyond the depth this tool schema can express
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.647s
+FAIL
+EXIT=1
+restored: e55c1454fd14581dc77cea985400af8d409b48f3823b7c3dfad66929c8ca30de
+
+=== F3 a removed server is never reconciled ===
+--- /tmp/fx-manager.go.orig	2026-08-08 15:24:53
++++ mcp/manager.go	2026-08-08 15:25:00
+@@ -214,7 +214,6 @@
+ 	// touch it. Its process would keep running, its state would stay whatever
+ 	// it last was, and Tools and Schemas would keep offering it to the model.
+ 	// Deleting a server has to actually delete it.
+-	m.forgetServersOutside(cfg.Names())
+ 
+ 	type job struct {
+ 		name string
+--- go test -run TestARemovedServerStopsAndIsForgotten ./mcp/ ---
+--- FAIL: TestARemovedServerStopsAndIsForgotten (0.00s)
+    manager_test.go:566: 1 tools are still offered after the server was removed
+    manager_test.go:573: 1 schemas are still offered to the model after the server was removed
+    manager_test.go:576: the server still has a state after being removed: connected
+    manager_test.go:579: States() still reports 1 servers
+    manager_test.go:585: released 0 times, want 1: a removed server must give back what its transport held
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.602s
+FAIL
+EXIT=1
+restored: 7ab25dadc107090e180fcd601416cdb3aa7d6b3b76fbcceb37474b567f276858
+
+=== F4 the state is dropped but the session and its process are left running ===
+--- /tmp/fx-manager.go.orig	2026-08-08 15:24:53
++++ mcp/manager.go	2026-08-08 15:25:03
+@@ -277,7 +277,6 @@
+ 
+ 	for _, name := range removed {
+ 		// closeSession does the session and the release, outside the lock.
+-		m.closeSession(name)
+ 		m.mu.Lock()
+ 		delete(m.states, name)
+ 		m.mu.Unlock()
+--- go test -run TestARemovedServerStopsAndIsForgotten ./mcp/ ---
+--- FAIL: TestARemovedServerStopsAndIsForgotten (0.00s)
+    manager_test.go:585: released 0 times, want 1: a removed server must give back what its transport held
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.586s
+FAIL
+EXIT=1
+restored: 7ab25dadc107090e180fcd601416cdb3aa7d6b3b76fbcceb37474b567f276858
+
+hashes after:
+e55c1454fd14581dc77cea985400af8d409b48f3823b7c3dfad66929c8ca30de  mcp/tools.go
+7ab25dadc107090e180fcd601416cdb3aa7d6b3b76fbcceb37474b567f276858  mcp/manager.go

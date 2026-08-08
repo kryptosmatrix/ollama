@@ -2,6 +2,7 @@ package mcp
 
 import (
 	"encoding/json"
+	"slices"
 	"strings"
 	"testing"
 
@@ -402,5 +403,81 @@ func TestSchemaHandlesUnionTypes(t *testing.T) {
 	}`))
 	if !strings.Contains(got, `["string","null"]`) {
 		t.Errorf("a union type should survive conversion:\n%s", got)
+	}
+}
+
+// TestTwoPropertiesMayShareOneDefinition is a defect a cross-substrate review
+// found and a probe confirmed: the resolver's visited list was created once per
+// tool and never reset, so the second sibling to reference a definition was
+// reported as a cycle.
+//
+// Sharing a definition between two fields is ordinary schema practice — two
+// currency fields, two dates, two identifiers of the same kind. The property
+// was not dropped, which would at least have been visible; it was emitted with
+// no type and no enum, and the note attached to the description said the
+// reference was cyclic, which was not true.
+func TestTwoPropertiesMayShareOneDefinition(t *testing.T) {
+	tool := Tool{
+		Server:      "hosted",
+		Name:        "convert",
+		Description: "convert an amount",
+		InputSchema: json.RawMessage(`{
+			"type": "object",
+			"properties": {
+				"from": {"$ref": "#/$defs/currency"},
+				"to":   {"$ref": "#/$defs/currency"}
+			},
+			"$defs": {"currency": {"type": "string", "enum": ["USD", "EUR"]}}
+		}`),
+	}
+
+	schema, err := tool.Schema()
+	if err != nil {
+		t.Fatalf("Schema: %v", err)
+	}
+	for _, name := range []string{"from", "to"} {
+		property, ok := schema.Parameters.Properties.Get(name)
+		if !ok {
+			t.Fatalf("property %q is missing", name)
+		}
+		if !slices.Contains(property.Type, "string") {
+			t.Errorf("property %q has type %v, want string; a shared definition must resolve for every property that uses it", name, property.Type)
+		}
+		if len(property.Enum) != 2 {
+			t.Errorf("property %q has enum %v, want both values", name, property.Enum)
+		}
+	}
+	// And nothing was reported as lost, because nothing was.
+	if strings.Contains(schema.Description, "cyclic") {
+		t.Errorf("the description claims a cycle that does not exist: %q", schema.Description)
+	}
+}
+
+// TestAGenuineCycleIsStillCaught is the other half. Resetting the chain per
+// resolution must not stop a schema that really does refer to itself from being
+// caught — it is bounded by depth, and what the model is told must be true.
+func TestAGenuineCycleIsStillCaught(t *testing.T) {
+	tool := Tool{
+		Server:      "hosted",
+		Name:        "walk",
+		Description: "walk a tree",
+		InputSchema: json.RawMessage(`{
+			"type": "object",
+			"properties": {"node": {"$ref": "#/$defs/node"}},
+			"$defs": {"node": {"$ref": "#/$defs/node"}}
+		}`),
+	}
+
+	schema, err := tool.Schema()
+	if err != nil {
+		// Refusing the tool is an acceptable answer too; what must not happen
+		// is hanging or a stack overflow.
+		return
+	}
+	if _, ok := schema.Parameters.Properties.Get("node"); !ok {
+		t.Error("the property vanished entirely rather than being reported")
+	}
+	if !strings.Contains(schema.Description, "cyclic") {
+		t.Errorf("a genuine cycle was not reported to the model: %q", schema.Description)
 	}
 }
