@@ -213,6 +213,17 @@ export function MCPServerRow({
         </p>
       )}
 
+      {/* What this configuration costs, beside the approve button rather than
+          buried somewhere else. Amber, not red: nothing here is broken. */}
+      {server.warnings?.map((warning) => (
+        <p
+          key={warning}
+          className="mt-1 text-xs text-amber-700 dark:text-amber-400"
+        >
+          Note: {warning}
+        </p>
+      ))}
+
       {server.skipped?.map((skipped) => (
         <p
           key={skipped.name}

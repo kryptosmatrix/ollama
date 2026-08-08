@@ -205,6 +205,11 @@ type MCPServer struct {
 	// SigningIn reports that a sign-in is in flight, so the browser window the
 	// user is looking at belongs to this server.
 	SigningIn bool `json:"signingIn,omitempty"`
+	// Warnings say what this configuration costs without refusing it — a
+	// credential on a command line, a credential in an address, a container
+	// flag that reaches outside the container. They are shown beside the
+	// server and, above all, next to the approve button.
+	Warnings []string `json:"warnings,omitempty"`
 	// TokenStore says in one line where a token is kept and how well it is
 	// protected. It is shown wherever a sign-in is offered: someone signing in
 	// to a third-party service is entitled to know where the credential ends

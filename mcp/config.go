@@ -379,6 +379,113 @@ func (c *Config) Problems() map[string]error {
 	return problems
 }
 
+// Warnings reports what is worth telling a user about a server without refusing
+// to run it.
+//
+// Problems and Warnings answer different questions. A problem is "this cannot
+// work"; a warning is "this works, and here is what it costs you". The
+// distinction exists because three separate findings all came down to the same
+// false choice: refuse a configuration and strand a user who has no safe
+// alternative, or accept it in silence and let them believe nothing was given
+// away. Neither is right when the honest answer is "you can do this, and here
+// is what happens when you do".
+//
+// Warnings are shown wherever a server is listed and, most importantly, at the
+// moment of approval — which is when the user is actually deciding.
+func (c *Config) Warnings() map[string][]string {
+	var warnings map[string][]string
+	for _, name := range c.Names() {
+		spec, _ := c.Get(name)
+		if notices := warnAbout(spec); len(notices) > 0 {
+			if warnings == nil {
+				warnings = make(map[string][]string)
+			}
+			warnings[name] = notices
+		}
+	}
+	return warnings
+}
+
+// argvSecretPattern matches an argument that looks like it carries a credential
+// on the command line, in either the "--api-key=value" or "--api-key value"
+// form.
+//
+// It is deliberately a warning rather than a refusal. The same pattern that
+// catches "--api-key=sk-live-..." also catches "--token-file=/etc/creds", where
+// the value is a path and nothing is exposed — and there is no safe alternative
+// to point the first user at, because expanding an environment reference into
+// argv would put the secret in the process list, which is the thing being
+// avoided.
+var argvSecretPattern = secretishEnvKey
+
+// privilegedContainerFlags widen what a container can reach beyond the
+// container. A registry publisher supplies these, and a user reading
+// "docker run --rm -i -v /:/host image" has no reason to know what the middle
+// of that line does.
+var privilegedContainerFlags = map[string]string{
+	"--privileged":   "runs the container with full access to this machine",
+	"-v":             "gives the container access to a path on this machine",
+	"--volume":       "gives the container access to a path on this machine",
+	"--mount":        "gives the container access to a path on this machine",
+	"--network=host": "puts the container on this machine's network",
+	"--net=host":     "puts the container on this machine's network",
+	"--pid=host":     "lets the container see this machine's processes",
+	"--ipc=host":     "shares this machine's memory with the container",
+}
+
+// warnAbout collects the non-fatal notices for one server.
+func warnAbout(spec *ServerSpec) []string {
+	if spec == nil {
+		return nil
+	}
+	var notices []string
+
+	// A credential on a command line is readable by any program that can list
+	// processes, for as long as the server runs.
+	for index, arg := range spec.Args {
+		name, _, inline := strings.Cut(arg, "=")
+		carriesValue := inline
+		if !inline && strings.HasPrefix(arg, "-") && index+1 < len(spec.Args) && !strings.HasPrefix(spec.Args[index+1], "-") {
+			carriesValue = true
+			name = arg
+		}
+		if carriesValue && argvSecretPattern.MatchString(name) {
+			notices = append(notices, fmt.Sprintf("%s puts a value on the command line, where any program running as you can read it from the process list; prefer the server's own environment block", strings.TrimSpace(name)))
+			break
+		}
+	}
+
+	// A credential in a URL is written to mcp.json in cleartext and travels
+	// with the configuration wherever it is copied.
+	if spec.URL != "" {
+		if parsed, err := url.Parse(spec.URL); err == nil {
+			for key, values := range parsed.Query() {
+				if !secretishEnvKey.MatchString(key) {
+					continue
+				}
+				if len(values) == 0 || strings.TrimSpace(values[0]) == "" {
+					continue
+				}
+				notices = append(notices, fmt.Sprintf("the %q parameter in this address is stored in mcp.json as written and travels with the file; prefer a header with \"${env:NAME}\"", key))
+				break
+			}
+		}
+	}
+
+	// Flags that let a container out of its container.
+	if strings.EqualFold(filepath.Base(spec.Command), "docker") {
+		for _, arg := range spec.Args {
+			flag, _, _ := strings.Cut(arg, "=")
+			if reason, dangerous := privilegedContainerFlags[flag]; dangerous {
+				notices = append(notices, fmt.Sprintf("%s %s", flag, reason))
+				break
+			}
+		}
+	}
+
+	return notices
+}
+
 func validateServer(name string, spec *ServerSpec) error {
 	var errs []error
 

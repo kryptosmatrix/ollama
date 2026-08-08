@@ -131,4 +131,17 @@ describe("MCPServerRow", () => {
     expect(markup).not.toContain("<b>bold</b>");
     expect(markup).toContain("&lt;script&gt;");
   });
+
+  it("says what a configuration costs beside the button that accepts it", () => {
+    const markup = render({
+      approved: false,
+      status: "needs-approval",
+      warnings: [
+        "--api-key puts a value on the command line, where any program running as you can read it from the process list",
+      ],
+    });
+    expect(markup).toContain("process list");
+    // A note, not a refusal: the approve button is still there.
+    expect(markup).toContain("Approve and run");
+  });
 });

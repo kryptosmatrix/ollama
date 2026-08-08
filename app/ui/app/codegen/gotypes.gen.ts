@@ -651,6 +651,7 @@ export class MCPServer {
     canSignIn?: boolean;
     signedIn?: boolean;
     signingIn?: boolean;
+    warnings?: string[];
     tokenStore?: string;
 
     constructor(source: any = {}) {
@@ -669,6 +670,7 @@ export class MCPServer {
         this.canSignIn = source["canSignIn"];
         this.signedIn = source["signedIn"];
         this.signingIn = source["signingIn"];
+        this.warnings = source["warnings"];
         this.tokenStore = source["tokenStore"];
     }
 

@@ -18,9 +18,9 @@ tests passed over completely.
 
 ALL SEVEN CONFIRMED FINDINGS ARE REPAIRED. Of the twenty unverified, nineteen
 are now settled — eighteen confirmed and fixed, one refuted with a standing
-test. One is left, and it is a decision for the operator rather than work: a
-credential in Args, which shares its shape with the query-string and
-docker-runtime-argument cases.
+test. ALL TWENTY ARE NOW SETTLED. Nineteen confirmed and fixed or refuted; the last
+was ruled on with a warning channel, together with the two related questions
+that were never on this list.
 
 ================================================================================
 CONFIRMED BY EXECUTION
@@ -191,6 +191,7 @@ A1-3 Args are never checked for secretish content and have no ${env:NAME}
      expansion, so a stdio server needing a token on its command line has no
      safe form; the threat model names the process argument list explicitly.
      [OPEN — a judgement for the operator, with the query-string and docker cases]
+     [RULED — a warning channel rather than a refusal; see phase5-warning-channel.txt]
 A1-4 isLoopbackHost compares host == "localhost" case-sensitively, so
      http://Localhost is wrongly told to use https.
      [CONFIRMED and REPAIRED — batch 2]

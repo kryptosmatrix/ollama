@@ -1,0 +1,220 @@
+The ruling on three findings — a warning channel
+
+Ash asked for one ruling covering three findings left open: a credential in
+stdio Args, a credential in a URL query string, and docker runtime arguments
+supplied by a registry publisher.
+
+FIRST, A CORRECTION TO MY OWN FRAMING
+
+I had said three times that these share one shape. Two of them do: a credential
+the user has put somewhere Ollama cannot protect. The docker case is different
+in kind — a third party's flags widening what gets run. That is code-execution
+scope, not credential exposure, and I should have separated them earlier rather
+than repeating a tidy sentence.
+
+SECOND, AND THE ACTUAL RULING: THE CHOICE WAS FALSE
+
+I had framed each as refuse-or-allow. Refusing strands a user who has no safe
+alternative — the pattern that catches "--api-key=sk-live-..." also catches
+"--token-file=/etc/creds", and expanding an environment reference into argv puts
+the secret in the process list, which is the thing being avoided. Allowing in
+silence lets a user believe nothing was given away.
+
+The reason I could not choose was that Problems() answers yes or no and there
+was nowhere to say anything else. That is a missing mechanism, not a genuine
+dilemma, and I let it decide a security question for four exchanges. KANON 5
+says extend the honest path rather than work around it; the honest path here was
+one that did not exist yet.
+
+Config.Warnings() now answers a different question from Problems(). A problem is
+"this cannot work". A warning is "this works, and here is what it costs you".
+
+WHAT IS WARNED ABOUT, AND WHY EACH IS A WARNING RATHER THAN A REFUSAL
+
+  Args carrying a value under a credential-shaped name — "any program running
+  as you can read it from the process list". Not refused, because the pattern
+  cannot tell a secret from a path, and the user with a real secret has no safe
+  alternative to be sent to.
+
+  A credential-shaped query parameter in a server URL — "stored in mcp.json as
+  written and travels with the file". Not refused, for the same reason: no
+  environment-reference mechanism exists for URLs, unlike headers. Userinfo in
+  a URL stays a hard refusal, because that is unambiguous and a header with
+  ${env:NAME} is a real alternative.
+
+  Container flags that reach outside the container — -v, --mount, --privileged,
+  --net=host and their kin, each named with what it does. Not refused, because
+  a server that legitimately needs a volume is ordinary, and the user is the one
+  who has to weigh it.
+
+An ordinary server produces no warning at all. A channel that fires on
+everything is a channel nobody reads.
+
+WHERE IT IS SHOWN — WHICH IS THE PART THAT MATTERS
+
+At approval, in both surfaces, next to the thing being agreed to. Also in
+`ollama mcp list` and on the MCP Servers page. A warning that exists and is not
+shown where the decision is made would be a mechanism rather than a protection,
+which is the failure this whole review has been finding in other guises.
+
+WHAT THIS DOES NOT CLAIM
+
+It does not make any of the three safe. A credential on a command line is still
+readable from the process list. What changes is that the person who put it there
+is told, at the moment they are deciding, in words that say what happens rather
+than what rule was matched.
+
+FALSIFICATION
+
+W5 appears twice. Its first sabotage removed the assignment and the test
+"failed" — on a compile error, because the local variable became unused. That is
+the compiler talking, not the test, and it proves nothing about behaviour. The
+re-run keeps the variable alive and is the honest one.
+
+hashes before:
+8218111b814b7eb2480061538b4dbfc72913e11e224785d6a0a2e870332978bf  mcp/config.go
+932dc2de4fbc6d43c1bd5e7074e840d723c2065168dbe53caf4d166bc26397f5  cmd/mcp.go
+675c3d17953a583fbc1b98e3033005aa581f095b705a5fa28cda9e2b91e5a689  app/ui/mcp.go
+
+=== W1 a credential on the command line is not mentioned ===
+--- /tmp/w-c.go.orig	2026-08-08 21:41:31
++++ mcp/config.go	2026-08-08 21:41:32
+@@ -449,7 +449,7 @@
+ 			carriesValue = true
+ 			name = arg
+ 		}
+-		if carriesValue && argvSecretPattern.MatchString(name) {
++		if false && carriesValue && argvSecretPattern.MatchString(name) {
+ 			notices = append(notices, fmt.Sprintf("%s puts a value on the command line, where any program running as you can read it from the process list; prefer the server's own environment block", strings.TrimSpace(name)))
+ 			break
+ 		}
+--- go test -run TestWarningsSayWhatAConfigurationCosts ./mcp/ ---
+--- FAIL: TestWarningsSayWhatAConfigurationCostsWithoutRefusingIt (0.00s)
+    config_test.go:626: argv got no warning
+    config_test.go:626: argv-separate got no warning
+    config_test.go:630: the argv warning does not say what is exposed: []
+    config_test.go:649: note: --token-file was not warned about; the pattern may have narrowed
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.506s
+FAIL
+EXIT=1
+restored: 8218111b814b7eb2480061538b4dbfc72913e11e224785d6a0a2e870332978bf
+
+=== W2 a credential in an address is not mentioned ===
+--- /tmp/w-c.go.orig	2026-08-08 21:41:31
++++ mcp/config.go	2026-08-08 21:41:35
+@@ -466,7 +466,7 @@
+ 				if len(values) == 0 || strings.TrimSpace(values[0]) == "" {
+ 					continue
+ 				}
+-				notices = append(notices, fmt.Sprintf("the %q parameter in this address is stored in mcp.json as written and travels with the file; prefer a header with \"${env:NAME}\"", key))
++				_ = key
+ 				break
+ 			}
+ 		}
+--- go test -run TestWarningsSayWhatAConfigurationCosts ./mcp/ ---
+--- FAIL: TestWarningsSayWhatAConfigurationCostsWithoutRefusingIt (0.00s)
+    config_test.go:626: query got no warning
+    config_test.go:633: the query warning does not say where it ends up: []
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.463s
+FAIL
+EXIT=1
+restored: 8218111b814b7eb2480061538b4dbfc72913e11e224785d6a0a2e870332978bf
+
+=== W3 a container flag that reaches outside the container is not mentioned ===
+--- /tmp/w-c.go.orig	2026-08-08 21:41:31
++++ mcp/config.go	2026-08-08 21:41:38
+@@ -476,10 +476,7 @@
+ 	if strings.EqualFold(filepath.Base(spec.Command), "docker") {
+ 		for _, arg := range spec.Args {
+ 			flag, _, _ := strings.Cut(arg, "=")
+-			if reason, dangerous := privilegedContainerFlags[flag]; dangerous {
+-				notices = append(notices, fmt.Sprintf("%s %s", flag, reason))
+-				break
+-			}
++			_ = flag
+ 		}
+ 	}
+ 
+--- go test -run TestWarningsSayWhatAConfigurationCosts ./mcp/ ---
+--- FAIL: TestWarningsSayWhatAConfigurationCostsWithoutRefusingIt (0.00s)
+    config_test.go:626: container got no warning
+    config_test.go:636: the container warning does not say what the flag does: []
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.468s
+FAIL
+EXIT=1
+restored: 8218111b814b7eb2480061538b4dbfc72913e11e224785d6a0a2e870332978bf
+
+=== W4 approval no longer says what the configuration costs ===
+--- /tmp/w-cmd.go.orig	2026-08-08 21:41:31
++++ cmd/mcp.go	2026-08-08 21:41:41
+@@ -372,10 +372,6 @@
+ 			}
+ 			// What this configuration costs, said before the question rather
+ 			// than after the answer. This is the moment the user is deciding.
+-			for _, warning := range cfg.Warnings()[name] {
+-				fmt.Fprintf(out, "\nNote: %s\n", warning)
+-			}
+-
+ 			if previous := approvals.Entries[name]; previous.Fingerprint != "" {
+ 				fmt.Fprintf(out, "\nThis server was previously approved to run:\n  %s\n", previous.Summary)
+ 				fmt.Fprintf(out, "It has changed since. Approve only if you made that change.\n")
+--- go test -run TestApprovalSaysWhatTheConfigurationCosts ./cmd/ ---
+--- FAIL: TestApprovalSaysWhatTheConfigurationCosts (0.03s)
+    mcp_test.go:418: approval did not say what the configuration costs:
+        Approving leaky will let Ollama run:
+        
+          srv --api-key=sk-live-1
+        Approved leaky
+FAIL
+FAIL	github.com/ollama/ollama/cmd	0.657s
+FAIL
+EXIT=1
+restored: 932dc2de4fbc6d43c1bd5e7074e840d723c2065168dbe53caf4d166bc26397f5
+
+=== W5 the app is never given the warnings ===
+--- /tmp/w-ui.go.orig	2026-08-08 21:41:31
++++ app/ui/mcp.go	2026-08-08 21:41:43
+@@ -62,7 +62,6 @@
+ 	for _, name := range cfg.Names() {
+ 		spec, _ := cfg.Get(name)
+ 		server := describeMCPServerWithSignIn(name, spec, problems[name], approvals, live[name], s.tokenStore(), s.signingIn(name))
+-		server.Warnings = warnings[name]
+ 		servers = append(servers, server)
+ 	}
+ 
+--- go test -run TestTheListSaysWhereACredentialWouldGo ./app/ui/ ---
+# github.com/ollama/ollama/app/ui [github.com/ollama/ollama/app/ui.test]
+app/ui/mcp.go:60:2: declared and not used: warnings
+FAIL	github.com/ollama/ollama/app/ui [build failed]
+FAIL
+EXIT=1
+restored: 675c3d17953a583fbc1b98e3033005aa581f095b705a5fa28cda9e2b91e5a689
+
+hashes after:
+8218111b814b7eb2480061538b4dbfc72913e11e224785d6a0a2e870332978bf  mcp/config.go
+932dc2de4fbc6d43c1bd5e7074e840d723c2065168dbe53caf4d166bc26397f5  cmd/mcp.go
+675c3d17953a583fbc1b98e3033005aa581f095b705a5fa28cda9e2b91e5a689  app/ui/mcp.go
+
+=== W5 re-run against a test that asserts the warnings, not the compiler ===
+--- /tmp/w2-ui.go.orig	2026-08-08 21:42:09
++++ app/ui/mcp.go	2026-08-08 21:42:09
+@@ -62,7 +62,7 @@
+ 	for _, name := range cfg.Names() {
+ 		spec, _ := cfg.Get(name)
+ 		server := describeMCPServerWithSignIn(name, spec, problems[name], approvals, live[name], s.tokenStore(), s.signingIn(name))
+-		server.Warnings = warnings[name]
++		_ = warnings
+ 		servers = append(servers, server)
+ 	}
+ 
+--- go test -run TestTheListCarriesWhatAConfigurationCosts ./app/ui/ ---
+--- FAIL: TestTheListCarriesWhatAConfigurationCosts (0.01s)
+    mcp_signin_test.go:287: the page is never told what this configuration costs
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	0.586s
+FAIL
+EXIT=1
+restored: 675c3d17953a583fbc1b98e3033005aa581f095b705a5fa28cda9e2b91e5a689

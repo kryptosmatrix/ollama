@@ -264,3 +264,35 @@ func TestSignInRoutesAreRegistered(t *testing.T) {
 		}
 	}
 }
+
+// TestTheListCarriesWhatAConfigurationCosts. The warning channel exists so a
+// user can be told what a configuration costs without being refused. The page
+// cannot say it unless the API sends it.
+func TestTheListCarriesWhatAConfigurationCosts(t *testing.T) {
+	configPath, _ := mcpFiles(t)
+	cfg, err := mcp.Load(configPath)
+	if err != nil {
+		t.Fatalf("load: %v", err)
+	}
+	cfg.Set("leaky", &mcp.ServerSpec{Command: "srv", Args: []string{"--api-key=sk-live-1"}})
+	cfg.Set("plain", &mcp.ServerSpec{Command: "srv", Args: []string{"--verbose"}})
+	if err := cfg.Save(configPath); err != nil {
+		t.Fatalf("save: %v", err)
+	}
+
+	server, _ := mcpSignInServer(t)
+	servers := serversByName(t, server)
+
+	if len(servers["leaky"].Warnings) == 0 {
+		t.Error("the page is never told what this configuration costs")
+	} else if !strings.Contains(strings.Join(servers["leaky"].Warnings, " "), "process list") {
+		t.Errorf("the warning does not say what is exposed: %v", servers["leaky"].Warnings)
+	}
+	if len(servers["plain"].Warnings) != 0 {
+		t.Errorf("an ordinary server was warned about: %v", servers["plain"].Warnings)
+	}
+	// And it is a note, not a refusal.
+	if servers["leaky"].Status == string(mcp.StatusInvalid) {
+		t.Error("the warning became a refusal")
+	}
+}

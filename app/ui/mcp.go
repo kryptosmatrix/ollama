@@ -57,10 +57,13 @@ func (s *Server) listMCPServers(w http.ResponseWriter, _ *http.Request) error {
 		}
 	}
 
+	warnings := cfg.Warnings()
 	servers := make([]responses.MCPServer, 0, len(cfg.Names()))
 	for _, name := range cfg.Names() {
 		spec, _ := cfg.Get(name)
-		servers = append(servers, describeMCPServerWithSignIn(name, spec, problems[name], approvals, live[name], s.tokenStore(), s.signingIn(name)))
+		server := describeMCPServerWithSignIn(name, spec, problems[name], approvals, live[name], s.tokenStore(), s.signingIn(name))
+		server.Warnings = warnings[name]
+		servers = append(servers, server)
 	}
 
 	w.Header().Set("Content-Type", "application/json")

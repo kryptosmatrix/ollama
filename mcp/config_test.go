@@ -597,3 +597,55 @@ func TestAPreservedFieldMayNotCarryACredential(t *testing.T) {
 		t.Errorf("an environment reference in an unknown field was refused: %v", problem)
 	}
 }
+
+// TestWarningsSayWhatAConfigurationCostsWithoutRefusingIt covers the ruling on
+// three findings that had been left open as one question.
+//
+// Each was a credential or a privilege in a place Ollama cannot protect, and
+// each looked like a choice between refusing a configuration — stranding a user
+// with no safe alternative — and accepting it in silence, letting them believe
+// nothing was given away. That was a false choice created by there being no way
+// to say anything other than yes or no. There is one now.
+func TestWarningsSayWhatAConfigurationCostsWithoutRefusingIt(t *testing.T) {
+	cfg := &Config{}
+	cfg.Set("argv", &ServerSpec{Command: "srv", Args: []string{"--api-key=sk-live-1"}})
+	cfg.Set("argv-separate", &ServerSpec{Command: "srv", Args: []string{"--token", "sk-live-2"}})
+	cfg.Set("query", &ServerSpec{Type: TransportHTTP, URL: "https://mcp.example.com/v1?api_key=sk-live-3"})
+	cfg.Set("container", &ServerSpec{Command: "docker", Args: []string{"run", "--rm", "-i", "-v", "/:/host", "image"}})
+	cfg.Set("plain", &ServerSpec{Command: "srv", Args: []string{"--verbose", "--token-file", "/etc/creds"}})
+	cfg.Set("remote", &ServerSpec{Type: TransportHTTP, URL: "https://mcp.example.com/v1?region=eu"})
+
+	// Nothing here is refused. That is the whole point.
+	if problems := cfg.Problems(); len(problems) != 0 {
+		t.Fatalf("a warning must not become a refusal: %v", problems)
+	}
+
+	warnings := cfg.Warnings()
+	for _, name := range []string{"argv", "argv-separate", "query", "container"} {
+		if len(warnings[name]) == 0 {
+			t.Errorf("%s got no warning", name)
+		}
+	}
+	if !strings.Contains(strings.Join(warnings["argv"], " "), "process list") {
+		t.Errorf("the argv warning does not say what is exposed: %v", warnings["argv"])
+	}
+	if !strings.Contains(strings.Join(warnings["query"], " "), "mcp.json") {
+		t.Errorf("the query warning does not say where it ends up: %v", warnings["query"])
+	}
+	if !strings.Contains(strings.Join(warnings["container"], " "), "access to a path") {
+		t.Errorf("the container warning does not say what the flag does: %v", warnings["container"])
+	}
+
+	// An ordinary server is not nagged, or the warnings stop being read.
+	if len(warnings["remote"]) != 0 {
+		t.Errorf("an ordinary remote server was warned about: %v", warnings["remote"])
+	}
+
+	// "--token-file /etc/creds" names a path, not a secret. It is warned about
+	// anyway, and deliberately: the pattern cannot tell the two apart, and a
+	// warning a user can read and dismiss is the price of not refusing the one
+	// that matters. What must never happen is refusing it.
+	if len(warnings["plain"]) == 0 {
+		t.Log("note: --token-file was not warned about; the pattern may have narrowed")
+	}
+}

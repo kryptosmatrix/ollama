@@ -97,15 +97,28 @@ func mcpListCmd() *cobra.Command {
 				return nil
 			}
 			problems := cfg.Problems()
+			warnings := cfg.Warnings()
 
 			writer := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 0, 2, ' ', 0)
 			fmt.Fprintln(writer, "NAME\tSTATUS\tRUNS")
 			for _, name := range names {
 				spec, _ := cfg.Get(name)
-				fmt.Fprintf(writer, "%s\t%s\t%s\n", name, mcpStatusWord(spec, problems[name], approvals), spec.Summary())
+				status := mcpStatusWord(spec, problems[name], approvals)
+				if len(warnings[name]) > 0 {
+					status += " (see notes)"
+				}
+				fmt.Fprintf(writer, "%s\t%s\t%s\n", name, status, spec.Summary())
 			}
 			if err := writer.Flush(); err != nil {
 				return err
+			}
+
+			// Printed after the table so the columns stay readable, and in full
+			// rather than as a count: a note nobody can read is not a note.
+			for _, name := range names {
+				for _, warning := range warnings[name] {
+					fmt.Fprintf(cmd.OutOrStdout(), "\nNote on %s: %s\n", name, warning)
+				}
 			}
 
 			if unapproved := mcpUnapproved(cfg, problems, approvals); len(unapproved) > 0 {
@@ -357,6 +370,12 @@ func mcpApproveCmd() *cobra.Command {
 					fmt.Fprintf(out, "  %s: %s\n", key, spec.Headers[key])
 				}
 			}
+			// What this configuration costs, said before the question rather
+			// than after the answer. This is the moment the user is deciding.
+			for _, warning := range cfg.Warnings()[name] {
+				fmt.Fprintf(out, "\nNote: %s\n", warning)
+			}
+
 			if previous := approvals.Entries[name]; previous.Fingerprint != "" {
 				fmt.Fprintf(out, "\nThis server was previously approved to run:\n  %s\n", previous.Summary)
 				fmt.Fprintf(out, "It has changed since. Approve only if you made that change.\n")

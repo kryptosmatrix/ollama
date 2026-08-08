@@ -393,3 +393,39 @@ func TestMCPCommandIsRegisteredOnTheRootCommand(t *testing.T) {
 		t.Fatal("ollama mcp is not registered on the root command")
 	}
 }
+
+// TestApprovalSaysWhatTheConfigurationCosts. The three findings this ruling
+// covers all end at the same moment: a person deciding whether to let Ollama
+// run something. A warning that exists but is not shown there would be a
+// mechanism, not a protection.
+func TestApprovalSaysWhatTheConfigurationCosts(t *testing.T) {
+	configPath, _ := mcpEnv(t)
+
+	cfg, err := mcp.Load(configPath)
+	if err != nil {
+		t.Fatalf("load: %v", err)
+	}
+	cfg.Set("leaky", &mcp.ServerSpec{Command: "srv", Args: []string{"--api-key=sk-live-1"}})
+	if err := cfg.Save(configPath); err != nil {
+		t.Fatalf("save: %v", err)
+	}
+
+	out, err := runMCP(t, "", "approve", "leaky", "--yes")
+	if err != nil {
+		t.Fatalf("approve: %v\n%s", err, out)
+	}
+	if !strings.Contains(out, "process list") {
+		t.Errorf("approval did not say what the configuration costs:\n%s", out)
+	}
+	if !strings.Contains(out, "Approved leaky") {
+		t.Errorf("the warning became a refusal:\n%s", out)
+	}
+
+	listed, err := runMCP(t, "", "list")
+	if err != nil {
+		t.Fatalf("list: %v\n%s", err, listed)
+	}
+	if !strings.Contains(listed, "see notes") || !strings.Contains(listed, "process list") {
+		t.Errorf("list did not carry the note:\n%s", listed)
+	}
+}
