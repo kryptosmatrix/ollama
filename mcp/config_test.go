@@ -517,3 +517,23 @@ func TestAURLMayNotCarryEmbeddedCredentials(t *testing.T) {
 		}
 	})
 }
+
+// TestALoopbackHostIsRecognisedWhateverItsCase. Host names are
+// case-insensitive (RFC 4343), and the check compared against "localhost"
+// exactly — so http://Localhost was told to use https for an address that never
+// leaves the machine.
+func TestALoopbackHostIsRecognisedWhateverItsCase(t *testing.T) {
+	for _, host := range []string{"localhost", "Localhost", "LOCALHOST"} {
+		cfg := &Config{}
+		cfg.Set("local", &ServerSpec{Type: TransportHTTP, URL: "http://" + host + ":8080/mcp"})
+		if problem := cfg.Problems()["local"]; problem != nil {
+			t.Errorf("http://%s was refused: %v", host, problem)
+		}
+	}
+	// And a real host still has to use https.
+	cfg := &Config{}
+	cfg.Set("remote", &ServerSpec{Type: TransportHTTP, URL: "http://api.example.com/mcp"})
+	if cfg.Problems()["remote"] == nil {
+		t.Error("plain http to a real host must still be refused")
+	}
+}

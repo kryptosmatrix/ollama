@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/ollama/ollama/api"
 )
 
 // schemaJSON renders a converted tool as the JSON the model would be shown,
@@ -479,5 +481,99 @@ func TestAGenuineCycleIsStillCaught(t *testing.T) {
 	}
 	if !strings.Contains(schema.Description, "cyclic") {
 		t.Errorf("a genuine cycle was not reported to the model: %q", schema.Description)
+	}
+}
+
+// controlBytes is a carriage return and a NUL, built rather than written so the
+// source file stays free of them.
+var controlBytes = string([]byte{13, 0})
+
+// TestADeepPropertyDescriptionIsSanitised. The depth-limit branch returned the
+// server's raw description while the branch beside it sanitised. It was the one
+// place a careless or hostile server could put control characters and unbounded
+// text into a model's prompt.
+func TestADeepPropertyDescriptionIsSanitised(t *testing.T) {
+	// The description has to sit at every level, not only the innermost: the
+	// depth-limit branch returns the schema it was handed when the limit is
+	// crossed, and an intermediate object with no description of its own would
+	// exercise nothing. An earlier version of this test nested a description
+	// twelve deep, never reached the branch, and passed against the defect.
+	nasty := "deep " + controlBytes + strings.Repeat("x", 9000)
+	inner := map[string]any{"type": "object", "description": nasty}
+	for range 12 {
+		inner = map[string]any{
+			"type":        "object",
+			"description": nasty,
+			"properties":  map[string]any{"a": inner},
+		}
+	}
+	raw, err := json.Marshal(inner)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+
+	fn, err := (Tool{Server: "hosted", Name: "deep", Description: "d", InputSchema: raw}).Schema()
+	if err != nil {
+		t.Fatalf("Schema: %v", err)
+	}
+	encoded, err := json.Marshal(fn)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	if strings.ContainsAny(string(encoded), controlBytes) {
+		t.Error("a raw control character from a deep property reached the model")
+	}
+	for _, escaped := range []string{"\\u0000", "\\r"} {
+		if strings.Contains(string(encoded), escaped) {
+			t.Errorf("an escaped control character reached the model: %.200s", encoded)
+		}
+	}
+	// Total size is legitimately large here — every level carries a
+	// description and each is capped separately. What must not happen is one
+	// description arriving uncapped, so the cap is checked per description
+	// rather than in aggregate.
+	var check func(props *api.ToolPropertiesMap)
+	check = func(props *api.ToolPropertiesMap) {
+		if props == nil {
+			return
+		}
+		for name, property := range props.All() {
+			// The cap plus the visible truncation marker sanitiseText appends.
+			const allowance = 32
+			if got := len([]rune(property.Description)); got > maxDescriptionRunes+allowance {
+				t.Errorf("property %q has a description of %d runes, over the %d cap", name, got, maxDescriptionRunes)
+			}
+			check(property.Properties)
+		}
+	}
+	check(fn.Parameters.Properties)
+}
+
+// TestATypeTheServerDeclaredButOllamaCannotReadIsSaidSoFar. A "type" that is
+// neither a string nor an array of strings was treated exactly like an absent
+// one, so the model was told nothing at all — the opposite of the truth. The
+// server said something; Ollama could not read it, and that is what the model
+// now hears.
+func TestATypeTheServerDeclaredButOllamaCannotReadIsSaidSoFar(t *testing.T) {
+	fn, err := (Tool{
+		Server: "hosted", Name: "odd", Description: "d",
+		InputSchema: json.RawMessage(`{"type":"object","properties":{"n":{"type":123}}}`),
+	}).Schema()
+	if err != nil {
+		t.Fatalf("Schema: %v", err)
+	}
+	if !strings.Contains(fn.Description, "could not read") {
+		t.Errorf("the model was not told the type was unreadable: %q", fn.Description)
+	}
+
+	plain, err := (Tool{
+		Server: "hosted", Name: "plain", Description: "d",
+		InputSchema: json.RawMessage(`{"type":"object","properties":{"n":{"type":"string"}}}`),
+	}).Schema()
+	if err != nil {
+		t.Fatalf("Schema: %v", err)
+	}
+	if strings.Contains(plain.Description, "could not read") {
+		t.Errorf("a readable type was reported as unreadable: %q", plain.Description)
 	}
 }

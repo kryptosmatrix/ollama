@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -16,6 +17,7 @@ import (
 	"time"
 
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
+	"golang.org/x/oauth2"
 )
 
 // authorizedMCPServer is a hosted MCP server that requires an authorization,
@@ -67,6 +69,10 @@ type authorizedMCPServer struct {
 	// issuerOverride returns a different issuer in the authorization response
 	// than the one this server publishes, which is the mix-up case.
 	issuerOverride string
+	// revocationOverride advertises a revocation endpoint somewhere other than
+	// this server, so a test can put an address on a real network into the
+	// metadata.
+	revocationOverride string
 	// issuedTokens are the access tokens this server has minted, in order.
 	issuedTokens []string
 }
@@ -143,7 +149,7 @@ func newAuthorizedMCPServer(t *testing.T, tools ...*sdk.Tool) *authorizedMCPServ
 			"authorization_endpoint":                fake.URL + "/authorize",
 			"token_endpoint":                        fake.URL + "/token",
 			"registration_endpoint":                 fake.URL + "/register",
-			"revocation_endpoint":                   fake.URL + "/revoke",
+			"revocation_endpoint":                   fake.revocationEndpoint(),
 			"code_challenge_methods_supported":      []string{"S256"},
 			"token_endpoint_auth_methods_supported": []string{"none"},
 			"scopes_supported":                      []string{"mcp.read", "offline_access"},
@@ -338,6 +344,17 @@ func oauthError(w http.ResponseWriter, code string) {
 func pkceChallenge(verifier string) string {
 	sum := sha256.Sum256([]byte(verifier))
 	return base64.RawURLEncoding.EncodeToString(sum[:])
+}
+
+// revocationEndpoint is this server's own /revoke unless a test has pointed it
+// somewhere else.
+func (f *authorizedMCPServer) revocationEndpoint() string {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.revocationOverride != "" {
+		return f.revocationOverride
+	}
+	return f.URL + "/revoke"
 }
 
 func (f *authorizedMCPServer) spec() *ServerSpec {
@@ -901,5 +918,38 @@ func TestAMismatchedIssuerEndsTheSignIn(t *testing.T) {
 				t.Error("a token was stored from a mixed-up authorization response")
 			}
 		})
+	}
+}
+
+// TestSigningOutRefusesToPostATokenOverPlainHTTP drives the check through the
+// real sign-out rather than calling the predicate directly. An earlier version
+// of this test exercised requireSecureEndpoint on its own and passed happily
+// with the call removed from revokeSignIn — a predicate nothing consults is not
+// a protection.
+func TestSigningOutRefusesToPostATokenOverPlainHTTP(t *testing.T) {
+	fake := newAuthorizedMCPServer(t, simpleTool("alpha"))
+	fake.revocationOverride = "http://revocation.example.com/revoke"
+
+	store := &FileTokenStore{Path: filepath.Join(t.TempDir(), "mcp-tokens.json")}
+	if err := store.Save("hosted", &SignInRecord{
+		Token:    &oauth2.Token{AccessToken: "access-1", RefreshToken: "refresh-1"},
+		ClientID: "client-1",
+	}); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+
+	manager := NewManager(Options{ConnectTimeout: 20 * time.Second, Approvals: allowAll{}, Tokens: store})
+	t.Cleanup(func() { manager.Close() })
+
+	err := manager.SignOut(t.Context(), fake.spec())
+	if !errors.Is(err, ErrSignedOutLocallyOnly) {
+		t.Fatalf("err = %v, want ErrSignedOutLocallyOnly; the token must not be posted to an http endpoint", err)
+	}
+	if !strings.Contains(err.Error(), "https") {
+		t.Errorf("err = %v, want it to say why the endpoint was refused", err)
+	}
+	// The token is still forgotten locally, as every sign-out does.
+	if _, err := store.Load("hosted"); !errors.Is(err, ErrNoToken) {
+		t.Errorf("the token survived the sign-out: %v", err)
 	}
 }

@@ -187,6 +187,7 @@ A1-3 Args are never checked for secretish content and have no ${env:NAME}
      safe form; the threat model names the process argument list explicitly.
 A1-4 isLoopbackHost compares host == "localhost" case-sensitively, so
      http://Localhost is wrongly told to use https.
+     [CONFIRMED and REPAIRED — batch 2]
 
 D-3  Two concurrent Connect calls can resurrect a disabled server: the second
      call cannot cancel the first call's in-flight dial, which then writes a
@@ -211,20 +212,24 @@ B-3  Revocation goes to the first authorization server that advertises a
 B-4  Nothing in this code requires the revocation endpoint to be https. Whether
      the protocol library's metadata validation already covers it is exactly the
      thing to check rather than assume.
+     [CONFIRMED by reading the SDK and REPAIRED — batch 2]
 E-6  sanitiseText builds the whole sanitised string and then a full []rune copy
      before truncating, with no bound on the input.
 E-3  additionalProperties given as a schema rather than false is neither carried
      nor recorded as a lost constraint.
 E-4  The depth-limit branch returns schema.Description without sanitising it,
      unlike the branch beside it.
+     [CONFIRMED and REPAIRED — batch 2]
 E-5  Two header names that differ only in punctuation resolve to one environment
      variable reference.
 C-2  KeychainStore.Servers() lists only keychain items, so a server whose token
      is still in the fallback file is invisible. No production caller today.
 C-4  goString returns "" when CFStringGetCString fails, which would put an empty
      name into the server list rather than an error.
+     [REPAIRED defensively, no falsifier possible — batch 2]
 E-7  A "type" that is neither a string nor an array of strings is treated as no
      type at all.
+     [CONFIRMED and REPAIRED — batch 2]
 
 ================================================================================
 THE ONE MEANINGFUL NEGATIVE RESULT

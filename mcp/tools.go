@@ -179,7 +179,11 @@ func convertProperty(resolver *refResolver, schema *jsonSchema, path string, dep
 	}
 	if depth > maxRefDepth {
 		lost.add(path, "nested beyond the depth this tool schema can express")
-		return api.ToolProperty{Description: schema.Description}, nil
+		// Sanitised like every other description that reaches the model. This
+		// branch returned the server's raw text, which is the one place a
+		// hostile or careless server could put control characters and
+		// unbounded length into a prompt.
+		return api.ToolProperty{Description: sanitiseText(schema.Description, maxDescriptionRunes)}, nil
 	}
 
 	resolved, chain, err := resolver.resolve(schema, depth, ancestors)
@@ -195,6 +199,9 @@ func convertProperty(resolver *refResolver, schema *jsonSchema, path string, dep
 		Description: sanitiseText(resolved.Description, maxDescriptionRunes),
 		Enum:        resolved.Enum,
 		Required:    resolved.Required,
+	}
+	if schemaTypeUnreadable(resolved.Type) {
+		lost.add(path, "the server declared a type this tool definition could not read, so no type is stated here")
 	}
 
 	recordLost(resolved, path, lost)
@@ -303,6 +310,22 @@ func (r *refResolver) lookup(ref string) (*jsonSchema, error) {
 }
 
 // schemaTypes reads the "type" keyword, which is a string or an array of them.
+// schemaTypeUnreadable reports a "type" keyword that is present but is neither
+// a string nor an array of strings. It is distinct from an absent type: the
+// server said something about this property and Ollama could not read it, and
+// treating that as "no constraint" tells the model the opposite of the truth.
+func schemaTypeUnreadable(raw json.RawMessage) bool {
+	if len(raw) == 0 {
+		return false
+	}
+	var single string
+	if json.Unmarshal(raw, &single) == nil {
+		return false
+	}
+	var many []string
+	return json.Unmarshal(raw, &many) != nil
+}
+
 func schemaTypes(raw json.RawMessage) api.PropertyType {
 	if len(raw) == 0 {
 		return nil

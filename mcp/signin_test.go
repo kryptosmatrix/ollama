@@ -370,3 +370,31 @@ func TestSignInIsTheOnlyPathThatMayOpenABrowser(t *testing.T) {
 		t.Errorf("an explicit sign-in connected with mode %v, so it could never open a browser", explicit[0])
 	}
 }
+
+// TestATokenIsNeverSentOverPlainHTTP. The protocol library validates the scheme
+// of a revocation endpoint but leaves it out of the https-or-loopback list it
+// applies to the token and authorization endpoints — read in its source, not
+// assumed. A revocation request carries the refresh token in its body, so an
+// authorization server naming an http endpoint would put a live credential on
+// the wire in cleartext.
+func TestATokenIsNeverSentOverPlainHTTP(t *testing.T) {
+	for _, endpoint := range []string{
+		"https://auth.example.com/revoke",
+		"http://127.0.0.1:8080/revoke",
+		"http://localhost:8080/revoke",
+	} {
+		if err := requireSecureEndpoint(endpoint); err != nil {
+			t.Errorf("%s was refused: %v", endpoint, err)
+		}
+	}
+
+	for _, endpoint := range []string{
+		"http://auth.example.com/revoke",
+		"http://10.0.0.5/revoke",
+		"ftp://auth.example.com/revoke",
+	} {
+		if err := requireSecureEndpoint(endpoint); err == nil {
+			t.Errorf("%s was accepted; a token must not be sent where a network can read it", endpoint)
+		}
+	}
+}

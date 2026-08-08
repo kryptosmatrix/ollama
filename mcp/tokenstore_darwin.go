@@ -209,7 +209,14 @@ func (s *KeychainStore) Servers() ([]string, error) {
 		if value == 0 {
 			continue
 		}
-		servers = append(servers, goString(C.CFStringRef(value)))
+		name := goString(C.CFStringRef(value))
+		if name == "" {
+			// goString answers "" when the item's account cannot be read back.
+			// An empty name in this list would be a server nobody can act on,
+			// so the item is skipped rather than reported as one.
+			continue
+		}
+		servers = append(servers, name)
 	}
 	slices.Sort(servers)
 	return servers, nil

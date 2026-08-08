@@ -142,6 +142,14 @@ func revokeSignIn(ctx context.Context, spec *ServerSpec, record *SignInRecord) e
 	if endpoint == "" {
 		return fmt.Errorf("%s offers no revocation endpoint", spec.Name)
 	}
+	// The protocol library validates the scheme of this URL but deliberately
+	// leaves it out of its https-or-loopback list, unlike the token and
+	// authorization endpoints. A revocation request carries the refresh token
+	// in its body, so a metadata document naming an http endpoint would put a
+	// live credential on the wire in cleartext.
+	if err := requireSecureEndpoint(endpoint); err != nil {
+		return err
+	}
 
 	token, hint := record.Token.RefreshToken, "refresh_token"
 	if token == "" {
@@ -182,6 +190,23 @@ func revokeSignIn(ctx context.Context, spec *ServerSpec, record *SignInRecord) e
 		return fmt.Errorf("revocation refused with %s", resp.Status)
 	}
 	return nil
+}
+
+// requireSecureEndpoint refuses to send a token anywhere a network can read it.
+// Loopback is allowed because a server running on this machine has no network
+// to be read on, and because that is where tests and local development live.
+func requireSecureEndpoint(endpoint string) error {
+	parsed, err := url.Parse(endpoint)
+	if err != nil {
+		return fmt.Errorf("revocation endpoint %q is not a usable URL: %w", endpoint, err)
+	}
+	if parsed.Scheme == "https" {
+		return nil
+	}
+	if parsed.Scheme == "http" && isLoopbackHost(parsed.Hostname()) {
+		return nil
+	}
+	return fmt.Errorf("refusing to send a token to %q: a revocation endpoint must use https", endpoint)
 }
 
 // revocationEndpoint discovers where a server's tokens are revoked: the MCP

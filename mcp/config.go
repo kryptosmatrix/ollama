@@ -497,7 +497,9 @@ func redactURL(raw string) string {
 const redactedMarker = "[redacted]"
 
 func isLoopbackHost(host string) bool {
-	if host == "localhost" {
+	// Host names are case-insensitive (RFC 4343), so "Localhost" is the same
+	// address as "localhost" and must not be told to use https instead.
+	if strings.EqualFold(host, "localhost") {
 		return true
 	}
 	if ip := net.ParseIP(host); ip != nil {
