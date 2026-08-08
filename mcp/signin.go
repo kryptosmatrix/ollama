@@ -135,7 +135,7 @@ func revokeSignIn(ctx context.Context, spec *ServerSpec, record *SignInRecord) e
 	}
 
 	client := &http.Client{Timeout: signInHTTPTimeout}
-	endpoint, err := revocationEndpoint(ctx, spec.URL, client)
+	endpoint, err := revocationEndpoint(ctx, spec.URL, record.Issuer, client)
 	if err != nil {
 		return err
 	}
@@ -213,7 +213,26 @@ func requireSecureEndpoint(endpoint string) error {
 // endpoint names its authorization servers, and an authorization server's
 // metadata names its revocation endpoint. An empty string with no error means
 // the server does not offer one.
-func revocationEndpoint(ctx context.Context, serverURL string, client *http.Client) (string, error) {
+func revocationEndpoint(ctx context.Context, serverURL, issued string, client *http.Client) (string, error) {
+	// When the record says which server issued the token, ask that one and
+	// nothing else. A protected resource may name several, and revoking at the
+	// wrong one is worse than not revoking: RFC 7009 §2.2 has a server answer
+	// 200 for a token it has never heard of, so the user would be told they
+	// were signed out while the token stayed live at the server that issued it.
+	if issued = strings.TrimSpace(issued); issued != "" {
+		server, err := sdkauth.GetAuthServerMetadata(ctx, issued, client)
+		if err != nil {
+			return "", err
+		}
+		if server == nil {
+			return "", fmt.Errorf("%s publishes no metadata", issued)
+		}
+		return server.RevocationEndpoint, nil
+	}
+
+	// No issuer recorded — a record written before this was kept. Falling back
+	// to the resource's own list is the old behaviour, and its weakness is
+	// exactly why the issuer is now stored.
 	metadata, err := protectedResourceMetadata(ctx, serverURL, client)
 	if err != nil {
 		return "", err

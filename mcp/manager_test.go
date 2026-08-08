@@ -691,3 +691,69 @@ func TestAClosedManagerConnectsToNothing(t *testing.T) {
 		t.Errorf("a closed manager reported %q rather than declining to connect", state.Status)
 	}
 }
+
+// TestReplacingAServerDoesNotHoldTheLockWhileShuttingTheOldOneDown. Closing a
+// session waits for the server process to exit. dial did that while holding the
+// write lock, so an unresponsive server being replaced would stall every Call,
+// States and Close for every *other* server until it died. closeSession has
+// always done the same work outside the lock; this path had not.
+//
+// Only the release half can be driven from here — the transport seam controls
+// that function but not the protocol library's session — and both are moved out
+// together, so the release standing in for the session is the honest test
+// available.
+func TestReplacingAServerDoesNotHoldTheLockWhileShuttingTheOldOneDown(t *testing.T) {
+	fake := newFakeServer(t, simpleTool("alpha"))
+
+	blocked := make(chan struct{})
+	released := make(chan struct{})
+	var once sync.Once
+
+	manager := NewManager(Options{
+		ConnectTimeout: 10 * time.Second,
+		Approvals:      allowAll{},
+		newTransport: func(context.Context, *ServerSpec, transportOptions) (sdk.Transport, func(), error) {
+			clientTransport, serverTransport := sdk.NewInMemoryTransports()
+			session, err := fake.server.Connect(t.Context(), serverTransport, nil)
+			if err != nil {
+				return nil, func() {}, err
+			}
+			t.Cleanup(func() { session.Close() })
+			return clientTransport, func() {
+				// The first server's release hangs, standing in for a process
+				// that will not die.
+				once.Do(func() {
+					close(released)
+					<-blocked
+				})
+			}, nil
+		},
+	})
+	t.Cleanup(func() {
+		close(blocked)
+		manager.Close()
+	})
+
+	spec := stdioSpec("files")
+	cfg := &Config{}
+	cfg.Set(spec.Name, spec)
+	manager.Connect(t.Context(), cfg)
+
+	// Reconnect, which replaces the session and shuts the old one down.
+	go manager.Connect(t.Context(), cfg)
+	select {
+	case <-released:
+	case <-time.After(5 * time.Second):
+		t.Fatal("the replacement never reached the old server's release")
+	}
+
+	// The old release is now hanging. Anything else asking the manager a
+	// question must still get an answer.
+	answered := make(chan int, 1)
+	go func() { answered <- len(manager.States()) }()
+	select {
+	case <-answered:
+	case <-time.After(5 * time.Second):
+		t.Fatal("States() blocked behind a server that would not shut down")
+	}
+}

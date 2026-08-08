@@ -16,8 +16,11 @@ those are work, not conclusions.
 THE HEADLINE: two structural defects confirmed by execution, in code my own
 tests passed over completely.
 
-ALL SEVEN CONFIRMED FINDINGS ARE NOW REPAIRED. Twenty remain UNVERIFIED and are
-work, not conclusions.
+ALL SEVEN CONFIRMED FINDINGS ARE REPAIRED. Of the twenty unverified, nineteen
+are now settled — eighteen confirmed and fixed, one refuted with a standing
+test. One is left, and it is a decision for the operator rather than work: a
+credential in Args, which shares its shape with the query-string and
+docker-runtime-argument cases.
 
 ================================================================================
 CONFIRMED BY EXECUTION
@@ -205,6 +208,7 @@ D-5  A stdio subprocess that starts and then fails the handshake is not killed
 D-4  dial closes the previous session while holding the write lock; closeSession
      deliberately does the same work outside it.
      [OPEN — real, liveness only; no discriminating test available from here]
+     [CONFIRMED and REPAIRED — batch 6; release half proven, session half moved with it]
 D-6  Connect does not check m.closed before setting states and spawning.
 C-3  FileTokenStore.Save and Delete are read-modify-write over the whole file,
      so two processes saving tokens for different servers can lose one. The
@@ -217,6 +221,7 @@ B-3  Revocation goes to the first authorization server that advertises a
      revocation endpoint; the record does not say which one issued the token,
      and RFC 7009 has the wrong server answer 200 for a token it never knew.
      [OPEN — fix specified in batch 5: store the issuer at sign-in]
+     [CONFIRMED and REPAIRED — batch 6; the issuer is now recorded at sign-in]
 B-4  Nothing in this code requires the revocation endpoint to be https. Whether
      the protocol library's metadata validation already covers it is exactly the
      thing to check rather than assume.

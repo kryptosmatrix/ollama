@@ -73,6 +73,13 @@ type authorizedMCPServer struct {
 	// this server, so a test can put an address on a real network into the
 	// metadata.
 	revocationOverride string
+	// noRevocation withholds this server's revocation endpoint from its
+	// metadata, which is how a test builds an issuer that cannot revoke.
+	noRevocation bool
+	// listAlso names another authorization server to advertise after this one
+	// in the protected-resource metadata. The protocol library signs in
+	// against the first, so this one is only ever a bystander.
+	listAlso string
 	// issuedTokens are the access tokens this server has minted, in order.
 	issuedTokens []string
 }
@@ -136,9 +143,15 @@ func newAuthorizedMCPServer(t *testing.T, tools ...*sdk.Tool) *authorizedMCPServ
 	})
 
 	mux.HandleFunc("/.well-known/oauth-protected-resource/mcp", func(w http.ResponseWriter, r *http.Request) {
+		fake.mu.Lock()
+		servers := []string{fake.URL}
+		if fake.listAlso != "" {
+			servers = []string{fake.URL, fake.listAlso}
+		}
+		fake.mu.Unlock()
 		writeJSON(w, map[string]any{
 			"resource":              fake.URL + "/mcp",
-			"authorization_servers": []string{fake.URL},
+			"authorization_servers": servers,
 			"scopes_supported":      []string{"mcp.read"},
 		})
 	})
@@ -149,7 +162,6 @@ func newAuthorizedMCPServer(t *testing.T, tools ...*sdk.Tool) *authorizedMCPServ
 			"authorization_endpoint":                fake.URL + "/authorize",
 			"token_endpoint":                        fake.URL + "/token",
 			"registration_endpoint":                 fake.URL + "/register",
-			"revocation_endpoint":                   fake.revocationEndpoint(),
 			"code_challenge_methods_supported":      []string{"S256"},
 			"token_endpoint_auth_methods_supported": []string{"none"},
 			"scopes_supported":                      []string{"mcp.read", "offline_access"},
@@ -157,7 +169,11 @@ func newAuthorizedMCPServer(t *testing.T, tools ...*sdk.Tool) *authorizedMCPServ
 		}
 		fake.mu.Lock()
 		advertise := fake.advertiseIssuer
+		withhold := fake.noRevocation
 		fake.mu.Unlock()
+		if !withhold {
+			meta["revocation_endpoint"] = fake.revocationEndpoint()
+		}
 		if advertise {
 			meta["authorization_response_iss_parameter_supported"] = true
 		}
@@ -949,6 +965,84 @@ func TestSigningOutRefusesToPostATokenOverPlainHTTP(t *testing.T) {
 		t.Errorf("err = %v, want it to say why the endpoint was refused", err)
 	}
 	// The token is still forgotten locally, as every sign-out does.
+	if _, err := store.Load("hosted"); !errors.Is(err, ErrNoToken) {
+		t.Errorf("the token survived the sign-out: %v", err)
+	}
+}
+
+// TestRevocationGoesToTheServerThatIssuedTheToken. A protected resource may
+// name several authorization servers. Revocation walked that list and used the
+// first one advertising a revocation endpoint, while the record did not say
+// which had issued the token.
+//
+// The scenario that exposes it: the issuing server offers no revocation
+// endpoint and a second one on the list does. The old path posted the token to
+// the second — a server that never issued it — and RFC 7009 §2.2 has such a
+// server answer 200 for a token it has never heard of, so the user was told
+// they were signed out while the token stayed live at the server that issued
+// it. Being told the truth, that it could not be revoked, is strictly better
+// than being told a comfortable lie.
+func TestRevocationGoesToTheServerThatIssuedTheToken(t *testing.T) {
+	issuer := newAuthorizedMCPServer(t, simpleTool("alpha"))
+	issuer.noRevocation = true // the issuing server offers no revocation endpoint
+
+	// A bystander that does advertise one, and issued nothing.
+	var strangerMu sync.Mutex
+	var strangerCalls int
+	var stranger *httptest.Server
+	stranger = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/.well-known/oauth-authorization-server":
+			writeJSON(w, map[string]any{
+				"issuer":                           stranger.URL,
+				"authorization_endpoint":           stranger.URL + "/authorize",
+				"token_endpoint":                   stranger.URL + "/token",
+				"revocation_endpoint":              stranger.URL + "/revoke",
+				"code_challenge_methods_supported": []string{"S256"},
+			})
+		case "/revoke":
+			strangerMu.Lock()
+			strangerCalls++
+			strangerMu.Unlock()
+			w.WriteHeader(http.StatusOK)
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer stranger.Close()
+	issuer.listAlso = stranger.URL
+
+	store := &FileTokenStore{Path: filepath.Join(t.TempDir(), "mcp-tokens.json")}
+	manager := NewManager(Options{
+		ConnectTimeout: 20 * time.Second,
+		Approvals:      allowAll{},
+		Tokens:         store,
+		OpenBrowser:    issuer.browser(),
+	})
+	t.Cleanup(func() { manager.Close() })
+
+	if _, err := manager.SignIn(t.Context(), issuer.spec()); err != nil {
+		t.Fatalf("SignIn: %v", err)
+	}
+	stored, err := store.Load("hosted")
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if stored.Issuer != issuer.URL {
+		t.Fatalf("Issuer = %q, want %q recorded at sign-in", stored.Issuer, issuer.URL)
+	}
+
+	err = manager.SignOut(t.Context(), issuer.spec())
+	if !errors.Is(err, ErrSignedOutLocallyOnly) {
+		t.Fatalf("err = %v, want ErrSignedOutLocallyOnly: the issuing server cannot revoke, and saying otherwise is the lie", err)
+	}
+
+	strangerMu.Lock()
+	seen := strangerCalls
+	strangerMu.Unlock()
+	if seen != 0 {
+		t.Errorf("the token was posted to a server that never issued it (%d times)", seen)
+	}
 	if _, err := store.Load("hosted"); !errors.Is(err, ErrNoToken) {
 		t.Errorf("the token survived the sign-out: %v", err)
 	}

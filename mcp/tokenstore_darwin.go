@@ -141,12 +141,17 @@ func (s *KeychainStore) Save(server string, record *SignInRecord) error {
 	// A client identifier recorded at sign-in must survive a refresh that does
 	// not carry one, exactly as in the file store: losing it makes the sign-in
 	// unrevocable.
-	clientID := record.ClientID
-	if clientID == "" {
+	clientID, issuer := record.ClientID, record.Issuer
+	if clientID == "" || issuer == "" {
 		if previous, err := s.read(server); err == nil {
 			var stored storedToken
 			if json.Unmarshal(previous, &stored) == nil {
-				clientID = stored.ClientID
+				if clientID == "" {
+					clientID = stored.ClientID
+				}
+				if issuer == "" {
+					issuer = stored.Issuer
+				}
 			}
 		}
 	}
@@ -157,6 +162,7 @@ func (s *KeychainStore) Save(server string, record *SignInRecord) error {
 		RefreshToken: record.Token.RefreshToken,
 		Expiry:       record.Token.Expiry,
 		ClientID:     clientID,
+		Issuer:       issuer,
 	})
 	if err != nil {
 		return fmt.Errorf("marshal the keychain item for %s: %w", server, err)
@@ -325,6 +331,7 @@ func (t storedToken) record() *SignInRecord {
 			Expiry:       t.Expiry,
 		},
 		ClientID: t.ClientID,
+		Issuer:   t.Issuer,
 	}
 }
 

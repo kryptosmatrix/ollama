@@ -61,7 +61,7 @@ type oauthSession struct {
 // registration, PKCE, the token exchange and refresh. Three things are ours:
 // which tokens it starts from, where refreshed tokens are written, and whether
 // a browser may be opened at all.
-func newOAuthSession(server string, store TokenStore, mode signInMode, open func(string) error) (*oauthSession, error) {
+func newOAuthSession(server string, store TokenStore, mode signInMode, open func(string) error, issuer string) (*oauthSession, error) {
 	if store == nil {
 		return nil, errors.New("oauth needs somewhere to keep tokens")
 	}
@@ -82,7 +82,7 @@ func newOAuthSession(server string, store TokenStore, mode signInMode, open func
 		// Ollama can store refresh tokens, so ask for one: without it the user
 		// is sent back to the browser every time the access token expires.
 		RequestRefreshToken: true,
-		NewTokenSource:      savingTokenSource(server, store),
+		NewTokenSource:      savingTokenSource(server, store, issuer),
 	}
 
 	// A token already stored means the ordinary case: use it, and never open a
@@ -147,7 +147,7 @@ func refuseSignIn(server string) sdkauth.AuthorizationCodeFetcher {
 // it by the time anything can observe the difference — including on the path
 // where the connection then fails. Two writers for one fact, one of which
 // cannot be tested, is worse than one that can.
-func savingTokenSource(server string, store TokenStore) func(context.Context, *oauth2.Config, *oauth2.Token) (oauth2.TokenSource, error) {
+func savingTokenSource(server string, store TokenStore, issuer string) func(context.Context, *oauth2.Config, *oauth2.Token) (oauth2.TokenSource, error) {
 	return func(ctx context.Context, config *oauth2.Config, token *oauth2.Token) (oauth2.TokenSource, error) {
 		// config.ClientID is the identifier the library was issued when it
 		// registered. This is the only moment it is visible to us, and without
@@ -160,6 +160,7 @@ func savingTokenSource(server string, store TokenStore) func(context.Context, *o
 			server:   server,
 			store:    store,
 			clientID: clientID,
+			issuer:   issuer,
 			source:   config.TokenSource(ctx, token),
 		}, nil
 	}
@@ -170,6 +171,7 @@ type persistingTokenSource struct {
 	server   string
 	store    TokenStore
 	clientID string
+	issuer   string
 	source   oauth2.TokenSource
 	// mu guards last. A token source is consulted from whatever goroutine is
 	// making a request, so two of them can reach here at once.
@@ -189,7 +191,7 @@ func (p *persistingTokenSource) Token() (*oauth2.Token, error) {
 	// every request, and rewriting the file each time would be a great deal of
 	// disk for no change.
 	if token != nil && token.AccessToken != "" && token.AccessToken != p.last {
-		if err := p.store.Save(p.server, &SignInRecord{Token: token, ClientID: p.clientID}); err != nil {
+		if err := p.store.Save(p.server, &SignInRecord{Token: token, ClientID: p.clientID, Issuer: p.issuer}); err != nil {
 			return nil, err
 		}
 		p.last = token.AccessToken

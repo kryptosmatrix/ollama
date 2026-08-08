@@ -217,15 +217,22 @@ func newTransport(ctx context.Context, spec *ServerSpec, opts transportOptions) 
 			}
 		}
 
-		session, err := newOAuthSession(spec.Name, opts.tokens, opts.signIn, opts.open)
+		// Only an explicit sign-in needs this, and only a sign-in obtains a
+		// token, so the lookup happens once per sign-in rather than on every
+		// connection. The issuer is wanted for two separate reasons: comparing
+		// it against a callback, and recording it with the token so a sign-out
+		// revokes at the server that actually issued it.
+		var issuer string
+		var advertised bool
+		if opts.signIn == signInAllowed {
+			issuer, advertised = issuerExpectation(ctx, spec.URL)
+		}
+
+		session, err := newOAuthSession(spec.Name, opts.tokens, opts.signIn, opts.open, issuer)
 		if err != nil {
 			return nil, nothingToRelease, err
 		}
 		if session.redirect != nil {
-			// Only an explicit sign-in has a redirect, and only a sign-in
-			// receives an issuer, so this lookup happens once per sign-in
-			// rather than on every connection.
-			issuer, advertised := issuerExpectation(ctx, spec.URL)
 			session.redirect.ExpectedIssuer = issuer
 			session.redirect.IgnoreIssuer = !advertised
 		}

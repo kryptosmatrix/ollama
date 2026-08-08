@@ -1,0 +1,143 @@
+Phase 5 — the last two: B-3 and D-4
+
+Both confirmed and fixed. Three protections falsified.
+
+B-3 — REVOCATION COULD GO TO A SERVER THAT NEVER ISSUED THE TOKEN
+
+A protected resource may name several authorization servers. Revocation walked
+that list and used the first one advertising a revocation endpoint, and the
+stored record did not say which had issued the token.
+
+The scenario that exposes it is narrower than "several servers": the issuing
+server offers no revocation endpoint and a later one on the list does. The old
+path then posted the refresh token to a server that had never issued it — and
+RFC 7009 §2.2 has such a server answer 200 for a token it does not recognise,
+because an unknown token already satisfies the request. So the user was told
+they were signed out, the token stayed live at the server that issued it, and
+the credential had additionally been handed to a third party.
+
+SignInRecord now carries the issuer, learned at sign-in from the same metadata
+lookup that decides the RFC 9207 issuer comparison, and kept across refreshes by
+the same rule as ClientID: a refresh arriving without one must not erase it.
+Both stores preserve it. Revocation asks that server and no other.
+
+A record written before this carries no issuer, and the old list-walking
+behaviour remains for exactly that case — its weakness named in the comment
+beside it rather than left for someone to rediscover.
+
+Being told the truth — that the token could not be revoked — is strictly better
+than being told a comfortable lie, and that is what the test asserts.
+
+D-4 — THE PREVIOUS SERVER WAS SHUT DOWN WHILE THE WRITE LOCK WAS HELD
+
+Closing a session waits for the server process to exit. dial did that inside the
+critical section, so replacing an unresponsive server would stall every Call,
+States and Close for every *other* server until it died. closeSession has always
+done this work outside the lock; this path had not. Both the session and the
+release are now taken out under the lock and shut down after it.
+
+Only the release half can be driven from a test — the transport seam controls
+that function but not the protocol library's session — and both moved together,
+so the release standing in for the session is the honest proof available. Said
+here rather than implied.
+
+FALSIFICATION
+
+hashes before:
+9cae446a92fa544607039f49741ba2263346344bfff6d8407219deed2b758d40  mcp/signin.go
+64c6676f2b6304a784556fc4de07a78e24f7ace3fcb58caf661305a7b5b91dcb  mcp/manager.go
+0fa41a3b6e98581337796cab0a6d7f960dcc59173943631f6d2c2124e7de5add  mcp/oauthhandler.go
+
+=== Z1 revocation walks the resource's list instead of asking the issuer ===
+--- /tmp/b6-s.go.orig	2026-08-08 18:04:45
++++ mcp/signin.go	2026-08-08 18:04:45
+@@ -219,16 +219,6 @@
+ 	// wrong one is worse than not revoking: RFC 7009 §2.2 has a server answer
+ 	// 200 for a token it has never heard of, so the user would be told they
+ 	// were signed out while the token stayed live at the server that issued it.
+-	if issued = strings.TrimSpace(issued); issued != "" {
+-		server, err := sdkauth.GetAuthServerMetadata(ctx, issued, client)
+-		if err != nil {
+-			return "", err
+-		}
+-		if server == nil {
+-			return "", fmt.Errorf("%s publishes no metadata", issued)
+-		}
+-		return server.RevocationEndpoint, nil
+-	}
+ 
+ 	// No issuer recorded — a record written before this was kept. Falling back
+ 	// to the resource's own list is the old behaviour, and its weakness is
+--- go test -run TestRevocationGoesToTheServerThatIssuedTheToken ./mcp/ ---
+--- FAIL: TestRevocationGoesToTheServerThatIssuedTheToken (0.03s)
+    oauthflow_test.go:1037: err = <nil>, want ErrSignedOutLocallyOnly: the issuing server cannot revoke, and saying otherwise is the lie
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.576s
+FAIL
+EXIT=1
+restored: 9cae446a92fa544607039f49741ba2263346344bfff6d8407219deed2b758d40
+
+=== Z2 the issuer is never recorded with the token ===
+--- /tmp/b6-h.go.orig	2026-08-08 18:04:45
++++ mcp/oauthhandler.go	2026-08-08 18:04:48
+@@ -160,7 +160,6 @@
+ 			server:   server,
+ 			store:    store,
+ 			clientID: clientID,
+-			issuer:   issuer,
+ 			source:   config.TokenSource(ctx, token),
+ 		}, nil
+ 	}
+--- go test -run TestRevocationGoesToTheServerThatIssuedTheToken ./mcp/ ---
+--- FAIL: TestRevocationGoesToTheServerThatIssuedTheToken (0.03s)
+    oauthflow_test.go:1032: Issuer = "", want "http://127.0.0.1:53445" recorded at sign-in
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.469s
+FAIL
+EXIT=1
+restored: 0fa41a3b6e98581337796cab0a6d7f960dcc59173943631f6d2c2124e7de5add
+
+=== Z3 the previous server is shut down while the write lock is held ===
+--- /tmp/b6-m.go.orig	2026-08-08 18:04:45
++++ mcp/manager.go	2026-08-08 18:04:51
+@@ -475,21 +475,17 @@
+ 	// die — and every Call, States and Close for every *other* server would
+ 	// wait behind it. closeSession has always done this work outside the lock;
+ 	// this path did not.
+-	previousSession := m.clients[spec.Name]
+-	previousRelease := m.releases[spec.Name]
+-
++	if previous := m.clients[spec.Name]; previous != nil {
++		previous.Close()
++	}
++	if previous := m.releases[spec.Name]; previous != nil {
++		previous()
++	}
+ 	m.clients[spec.Name] = session
+ 	m.releases[spec.Name] = release
+ 	handedOver = true
+ 	m.states[spec.Name] = state
+ 	m.mu.Unlock()
+-
+-	if previousSession != nil {
+-		previousSession.Close()
+-	}
+-	if previousRelease != nil {
+-		previousRelease()
+-	}
+ 	return nil
+ }
+ 
+--- go test -run TestReplacingAServerDoesNotHoldTheLockWhileShuttingTheOldOneDown ./mcp/ ---
+--- FAIL: TestReplacingAServerDoesNotHoldTheLockWhileShuttingTheOldOneDown (5.00s)
+    manager_test.go:757: States() blocked behind a server that would not shut down
+FAIL
+FAIL	github.com/ollama/ollama/mcp	5.455s
+FAIL
+EXIT=1
+restored: 64c6676f2b6304a784556fc4de07a78e24f7ace3fcb58caf661305a7b5b91dcb
+
+hashes after:
+9cae446a92fa544607039f49741ba2263346344bfff6d8407219deed2b758d40  mcp/signin.go
+64c6676f2b6304a784556fc4de07a78e24f7ace3fcb58caf661305a7b5b91dcb  mcp/manager.go
+0fa41a3b6e98581337796cab0a6d7f960dcc59173943631f6d2c2124e7de5add  mcp/oauthhandler.go

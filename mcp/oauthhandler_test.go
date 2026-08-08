@@ -29,7 +29,7 @@ func testStore(t *testing.T) TokenStore {
 // on a 401, rather than through refuseSignIn directly: the property is that an
 // ordinary connection is wired to a refusal, not merely that a refusal exists.
 func TestAnOrdinaryConnectionCannotOpenABrowser(t *testing.T) {
-	session, err := newOAuthSession("hosted", testStore(t), signInDisallowed, nil)
+	session, err := newOAuthSession("hosted", testStore(t), signInDisallowed, nil, "")
 	if err != nil {
 		t.Fatalf("newOAuthSession: %v", err)
 	}
@@ -60,7 +60,7 @@ func TestAnOrdinaryConnectionCannotOpenABrowser(t *testing.T) {
 // TestAnOrdinaryConnectionOpensNoListener proves the browser is not merely
 // unused but unreachable: no redirect port is bound at all.
 func TestAnOrdinaryConnectionOpensNoListener(t *testing.T) {
-	session, err := newOAuthSession("hosted", testStore(t), signInDisallowed, nil)
+	session, err := newOAuthSession("hosted", testStore(t), signInDisallowed, nil, "")
 	if err != nil {
 		t.Fatalf("newOAuthSession: %v", err)
 	}
@@ -84,7 +84,7 @@ func TestAnOrdinaryConnectionOpensNoListener(t *testing.T) {
 // when the user is already signed in at the authorization server and is
 // redirected straight back.
 func TestAnExplicitSignInOpensAListener(t *testing.T) {
-	session, err := newOAuthSession("hosted", testStore(t), signInAllowed, nil)
+	session, err := newOAuthSession("hosted", testStore(t), signInAllowed, nil, "")
 	if err != nil {
 		t.Fatalf("newOAuthSession: %v", err)
 	}
@@ -112,7 +112,7 @@ func TestAnExplicitSignInOpensAListener(t *testing.T) {
 // TestClosingASignInReleasesTheListener keeps a refused or abandoned sign-in
 // from leaving a port bound for the life of the process.
 func TestClosingASignInReleasesTheListener(t *testing.T) {
-	session, err := newOAuthSession("hosted", testStore(t), signInAllowed, nil)
+	session, err := newOAuthSession("hosted", testStore(t), signInAllowed, nil, "")
 	if err != nil {
 		t.Fatalf("newOAuthSession: %v", err)
 	}
@@ -127,7 +127,7 @@ func TestClosingASignInReleasesTheListener(t *testing.T) {
 }
 
 func TestOAuthNeedsSomewhereToKeepTokens(t *testing.T) {
-	if _, err := newOAuthSession("hosted", nil, signInDisallowed, nil); err == nil {
+	if _, err := newOAuthSession("hosted", nil, signInDisallowed, nil, ""); err == nil {
 		t.Fatal("a handler without a token store would sign the user in and then lose it")
 	}
 }
@@ -141,7 +141,7 @@ func TestOAuthUsesAStoredTokenWithoutAnySignIn(t *testing.T) {
 	// Disallowed mode: no listener, no browser. A stored token must still make
 	// a usable handler, which is the ordinary case for an already-signed-in
 	// server at start-up.
-	session, err := newOAuthSession("hosted", store, signInDisallowed, nil)
+	session, err := newOAuthSession("hosted", store, signInDisallowed, nil, "")
 	if err != nil {
 		t.Fatalf("newOAuthSession: %v", err)
 	}
@@ -164,7 +164,7 @@ func TestOAuthUsesAStoredTokenWithoutAnySignIn(t *testing.T) {
 }
 
 func TestOAuthReportsAnUnreadableStore(t *testing.T) {
-	if _, err := newOAuthSession("hosted", &brokenStore{}, signInDisallowed, nil); err == nil {
+	if _, err := newOAuthSession("hosted", &brokenStore{}, signInDisallowed, nil, ""); err == nil {
 		t.Fatal("a store that cannot be read must fail loudly rather than silently signing the user out")
 	}
 }
@@ -269,7 +269,7 @@ func (c *countingStore) Save(server string, record *SignInRecord) error {
 // construction, which is the same single write that stores every later refresh.
 func TestSavingTokenSourceStoresTheTokenItWasBuiltWith(t *testing.T) {
 	store := testStore(t)
-	build := savingTokenSource("hosted", store)
+	build := savingTokenSource("hosted", store, "")
 
 	source, err := build(t.Context(), &oauth2.Config{ClientID: "registered-client"}, &oauth2.Token{AccessToken: "handed-over", RefreshToken: "r"})
 	if err != nil {
@@ -299,7 +299,7 @@ func TestSavingTokenSourceStoresTheTokenItWasBuiltWith(t *testing.T) {
 
 func TestSavingTokenSourceIgnoresAnEmptyToken(t *testing.T) {
 	store := testStore(t)
-	build := savingTokenSource("hosted", store)
+	build := savingTokenSource("hosted", store, "")
 
 	source, err := build(t.Context(), &oauth2.Config{}, nil)
 	if err != nil {

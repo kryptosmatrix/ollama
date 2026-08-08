@@ -469,17 +469,27 @@ func (m *Manager) dial(ctx context.Context, spec *ServerSpec, mode signInMode, e
 		session.Close()
 		return errSuperseded
 	}
-	if previous := m.clients[spec.Name]; previous != nil {
-		previous.Close()
-	}
-	if previous := m.releases[spec.Name]; previous != nil {
-		previous()
-	}
+	// Whatever was here is taken out under the lock and shut down after it.
+	// Closing a session waits for the server process to exit, so doing it here
+	// would hold the write lock for as long as an unresponsive server takes to
+	// die — and every Call, States and Close for every *other* server would
+	// wait behind it. closeSession has always done this work outside the lock;
+	// this path did not.
+	previousSession := m.clients[spec.Name]
+	previousRelease := m.releases[spec.Name]
+
 	m.clients[spec.Name] = session
 	m.releases[spec.Name] = release
 	handedOver = true
 	m.states[spec.Name] = state
 	m.mu.Unlock()
+
+	if previousSession != nil {
+		previousSession.Close()
+	}
+	if previousRelease != nil {
+		previousRelease()
+	}
 	return nil
 }
 

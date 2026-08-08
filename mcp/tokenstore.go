@@ -40,6 +40,14 @@ type SignInRecord struct {
 	// registered with the authorization server. It may be empty for a server
 	// that issued a token without dynamic registration.
 	ClientID string
+	// Issuer is the authorization server that issued this token.
+	//
+	// A protected resource may name several. Revoking at the wrong one is worse
+	// than not revoking at all: RFC 7009 has a server answer 200 for a token it
+	// has never heard of, so the user is told they are signed out while the
+	// token stays live at the server that actually issued it. Empty for a
+	// record written before this was kept.
+	Issuer string
 }
 
 // TokenStore keeps the OAuth tokens for remote MCP servers.
@@ -141,6 +149,7 @@ type storedToken struct {
 	RefreshToken string    `json:"refreshToken,omitempty"`
 	Expiry       time.Time `json:"expiry,omitempty"`
 	ClientID     string    `json:"clientId,omitempty"`
+	Issuer       string    `json:"issuer,omitempty"`
 }
 
 type tokenFile struct {
@@ -205,6 +214,7 @@ func (s *FileTokenStore) Load(server string) (*SignInRecord, error) {
 			Expiry:       stored.Expiry,
 		},
 		ClientID: stored.ClientID,
+		Issuer:   stored.Issuer,
 	}, nil
 }
 
@@ -233,12 +243,19 @@ func (s *FileTokenStore) Save(server string, record *SignInRecord) error {
 	if clientID == "" {
 		clientID = file.Tokens[server].ClientID
 	}
+	// The issuer is learned at sign-in for the same reason and kept the same
+	// way: a refresh that arrives without one must not erase it.
+	issuer := record.Issuer
+	if issuer == "" {
+		issuer = file.Tokens[server].Issuer
+	}
 	file.Tokens[server] = storedToken{
 		AccessToken:  record.Token.AccessToken,
 		TokenType:    record.Token.TokenType,
 		RefreshToken: record.Token.RefreshToken,
 		Expiry:       record.Token.Expiry,
 		ClientID:     clientID,
+		Issuer:       issuer,
 	}
 	return s.write(file, path)
 }
