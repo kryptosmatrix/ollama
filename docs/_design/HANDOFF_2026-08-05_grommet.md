@@ -29,7 +29,7 @@ Head at handoff: `3f925cfc` — 49 commits ahead of `main`, 108 files, ~24,000 l
 | 4b — registry browse | **DONE** (`8317a273`, `07b06d8d`, `0c540dac`) |
 | 5 — docs and closeout | **DONE** — docs current, 24 proof artefacts, this handoff |
 | 5 — cross-substrate review | **DONE** (glm-5.2:cloud, 2026-08-07) — 7 confirmed defects |
-| 5 — repairs | **ALL 7 DONE** (`4d0e9120`, `0751d3c9`, `584d5aeb`) — 20 findings still unverified |
+| 5 — repairs | **ALL 7 confirmed DONE**; unverified list **8 of 20 worked down** (`0103a4d0`, `d3529e55`) |
 
 ### Verified at closeout (2026-08-07)
 
@@ -95,7 +95,15 @@ That repair required **deleting a pre-existing test that asserted the defective 
 
 The approval ledger *was* reviewed in the end, after its first shard returned an empty response, and it produced the one negative result worth having: **no path was found by which a server can be started without a current approval**, and the fingerprint holds against config tampering. That is the claim this branch rests on and it is no longer only mine.
 
-**What actually remains is the unverified list.** Twenty findings are recorded as UNVERIFIED with reasons — concurrency in the manager, the file store's read-modify-write across processes, revocation targeting, several schema-conversion gaps. Work them down; do not treat the list as conclusions.
+**What actually remains is the unverified list — twelve of the twenty.** Eight have been worked down in two batches, and every one of the eight turned out to be real. Records in `phase5-unverified-batch1.txt` and `batch2.txt`; the review file carries a per-finding status line.
+
+Batch 1 (`0103a4d0`) fixed a data race between `Call` and `Close` that the race detector finds instantly once the two overlap, a server that came back connected when a slow dial outlived the user switching it off, and a closed manager that still connected. The resurrection fix is a **per-server epoch** rather than a fourth patch to a fourth branch — that defect had already appeared twice before in different guises (a disabled server keeping its process, a removed server keeping everything), and patching branches one at a time is exactly why it kept coming back.
+
+Batch 2 (`d3529e55`) fixed a case-sensitive loopback comparison, an unsanitised description at the schema depth limit, an unreadable `type` that read to the model as no constraint at all, and a revocation endpoint that was never required to be https — the protocol library validates that endpoint's scheme but omits it from the https-or-loopback list it applies to the token and authorization endpoints.
+
+**Twelve remain**, in the review file: `A2-2` (the `unmarshalable` fingerprint constant), `A1-2` (unknown top-level fields round-tripped without a credential check), `A1-3` (`Args` neither checked nor env-expandable), `D-5` (a stdio subprocess that fails its handshake is not killed until the manager closes), `D-4` (`dial` closes the previous session while holding the lock), `C-3` (the file store's read-modify-write loses an update across processes), `B-5` (`persistingTokenSource.last` unsynchronised), `B-3` (revocation may target the wrong authorization server), `E-6` (`sanitiseText` allocates the whole input before truncating), `E-3` (`additionalProperties` as a schema dropped silently), `E-5` (env-reference name collisions), `C-2` (`Servers()` misses fallback-only entries).
+
+**A warning worth having before you start.** Three times in this branch a test of mine passed its first sabotage, and the fault was always the same: it asserted that a mechanism existed rather than that the path under test used it. Write the sabotage first and watch it fail before believing any of these.
 
 One finding was REFUTED, and why is worth reading: my shard boundaries cut a call site away from its callee, so the reviewer correctly reported dead code that is not dead. Give the next reviewer whole call paths.
 
