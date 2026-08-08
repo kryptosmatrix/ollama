@@ -59,7 +59,10 @@ func (m *Manager) SignIn(ctx context.Context, spec *ServerSpec) (ServerState, er
 	m.closeSession(spec.Name)
 	m.setState(&ServerState{Name: spec.Name, Spec: spec, Status: StatusConnecting})
 
-	if err := m.dial(ctx, spec, signInAllowed); err != nil {
+	// A sign-in is its own attempt, and the closeSession above has already moved
+	// the epoch on, so a connect that was dialling when the user pressed the
+	// button cannot land on top of the sign-in's result.
+	if err := m.dial(ctx, spec, signInAllowed, m.beginAttempt(spec.Name)); err != nil {
 		state := &ServerState{Name: spec.Name, Spec: spec, Status: StatusFailed, Err: err}
 		if SignInRequired(err) {
 			state.Status = StatusNeedsSignIn

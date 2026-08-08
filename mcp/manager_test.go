@@ -585,3 +585,109 @@ func TestARemovedServerStopsAndIsForgotten(t *testing.T) {
 		t.Errorf("released %d times, want 1: a removed server must give back what its transport held", released)
 	}
 }
+
+// TestACallDuringShutdownIsNotARace covers a data race a cross-substrate review
+// predicted and the race detector confirmed. Call took the *ServerState pointer
+// under the read lock and then read Status and Tools through it after releasing
+// the lock, while Close wrote both fields in place under the write lock.
+//
+// The whole suite passed under -race before this, because nothing drove a call
+// and a shutdown at the same time. Absence of a detected race means the tests
+// do not reach the interleaving, not that there is none.
+func TestACallDuringShutdownIsNotARace(t *testing.T) {
+	fake := newFakeServer(t, simpleTool("alpha"))
+	manager := fake.connect(t, stdioSpec("files"))
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		for range 200 {
+			manager.Call(t.Context(), QualifyName("files", "alpha"), map[string]any{})
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		time.Sleep(time.Millisecond)
+		manager.Close()
+	}()
+	wg.Wait()
+}
+
+// TestASwitchedOffServerIsNotResurrectedByASlowConnect is the third member of a
+// family. Connect returns when its dials finish, but a dial it started can
+// still be running when the next Connect arrives, and the second cannot cancel
+// the first — so the older attempt installed its session and its state over the
+// newer decision, and a server the user had just switched off came back
+// connected with its tools on offer.
+//
+// The other two members were a disabled server that kept its process, and a
+// removed server that kept everything. Each was found separately; the shape is
+// always an instruction from the user losing a race with work already in
+// flight.
+func TestASwitchedOffServerIsNotResurrectedByASlowConnect(t *testing.T) {
+	fake := newFakeServer(t, simpleTool("alpha"))
+	clientTransport, serverTransport := sdk.NewInMemoryTransports()
+	session, err := fake.server.Connect(t.Context(), serverTransport, nil)
+	if err != nil {
+		t.Fatalf("fake server connect: %v", err)
+	}
+	t.Cleanup(func() { session.Close() })
+
+	release := make(chan struct{})
+	manager := NewManager(Options{
+		ConnectTimeout: 10 * time.Second,
+		Approvals:      allowAll{},
+		newTransport: func(context.Context, *ServerSpec, transportOptions) (sdk.Transport, func(), error) {
+			<-release // hold the dial open until the test lets it finish
+			return clientTransport, func() {}, nil
+		},
+	})
+	t.Cleanup(func() { manager.Close() })
+
+	enabled := &Config{}
+	enabled.Set("files", stdioSpec("files"))
+
+	// A separate configuration object, as a reload from disk produces, so the
+	// test never writes a spec the manager is reading.
+	off := stdioSpec("files")
+	off.Disabled = true
+	disabled := &Config{}
+	disabled.Set("files", off)
+
+	done := make(chan struct{})
+	go func() { manager.Connect(t.Context(), enabled); close(done) }()
+	time.Sleep(50 * time.Millisecond)
+
+	manager.Connect(t.Context(), disabled)
+	if state, _ := manager.State("files"); state.Status != StatusDisabled {
+		t.Fatalf("setup: status = %q, want disabled", state.Status)
+	}
+
+	close(release)
+	<-done
+
+	if state, _ := manager.State("files"); state.Status != StatusDisabled {
+		t.Errorf("status = %q; a server the user switched off must stay off", state.Status)
+	}
+	if got := manager.Tools(); len(got) != 0 {
+		t.Errorf("a switched-off server is offering %d tools", len(got))
+	}
+}
+
+// TestAClosedManagerConnectsToNothing keeps a shut-down manager from setting
+// states and spawning goroutines that can only fail, leaving anyone who asks
+// with a list of failures rather than a manager that is simply closed.
+func TestAClosedManagerConnectsToNothing(t *testing.T) {
+	fake := newFakeServer(t, simpleTool("alpha"))
+	manager := fake.connect(t, stdioSpec("files"))
+	manager.Close()
+
+	cfg := &Config{}
+	cfg.Set("files", stdioSpec("files"))
+	manager.Connect(t.Context(), cfg)
+
+	if state, _ := manager.State("files"); state.Status == StatusFailed {
+		t.Errorf("a closed manager reported %q rather than declining to connect", state.Status)
+	}
+}

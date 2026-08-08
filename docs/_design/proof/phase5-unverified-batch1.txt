@@ -1,0 +1,222 @@
+Phase 5 — working down the unverified list, batch 1: the manager
+
+Three of the twenty confirmed by probe, all in mcp/manager.go, all fixed.
+
+D-2 — CALL AND CLOSE RACED ON A ServerState
+
+Call took the *ServerState pointer under the read lock and then read Status and
+Tools through it after releasing the lock, while Close wrote both fields in
+place under the write lock. The race detector finds it immediately once a call
+and a shutdown overlap:
+
+    WARNING: DATA RACE
+      manager.go:605  (Close writing)
+      manager.go:565  (Call reading)
+
+The whole suite had been passing under -race for the life of this branch. That
+proved only that no test drove the interleaving. Call now copies what it needs
+under the lock.
+
+D-3 — A SWITCHED-OFF SERVER CAME BACK
+
+Connect returns when its dials finish, but a dial it started can still be
+running when the next Connect arrives, and the second cannot cancel the first.
+The older attempt then installed its session and its state over the newer
+decision. Probe output before the fix:
+
+    CONFIRMED D-3: a disabled server came back as "connected"
+    CONFIRMED D-3: a disabled server is offering 1 tools
+
+This is the third member of one family. A disabled server that kept its process
+was found and fixed during the build; a removed server that kept everything was
+found by this review; this is the same shape again — an instruction from the
+user losing a race with work already in flight. Each was found separately and
+each was fixed in the branch it was found in, which is exactly how the first two
+survived.
+
+The fix is a per-server epoch rather than a fourth patch to a fourth branch.
+Every attempt records the epoch it began in; anything that supersedes it —
+closing a session, a later connect, a sign-in — moves the epoch on, and an
+attempt whose epoch has moved declines to install its session, its release and
+its state. That covers the branches nobody has thought of yet.
+
+D-6 — A CLOSED MANAGER STILL CONNECTED
+
+Connect set states and spawned goroutines that could only fail inside dial,
+leaving a shut-down manager reporting a list of failures. It now returns.
+
+A NOTE ON THE PROBE ITSELF. The first D-3 probe raced on its own shared
+ServerSpec: the test wrote Disabled while the manager read it. That was the
+test's defect, not the code's, and it was rewritten to use two configuration
+objects as a reload from disk would produce. A probe that reports a race in its
+own scaffolding proves nothing about the subject.
+
+FALSIFICATION
+
+hash before: d6055b0813da5ef9765e73cdc7bface059d3b223d0f944f4a7be01819873d071
+
+=== U1 Call reads the state through the pointer after releasing the lock ===
+--- /tmp/u-manager.go.orig	2026-08-08 16:43:50
++++ mcp/manager.go	2026-08-08 16:43:50
+@@ -607,6 +607,7 @@
+ 	state := m.states[server]
+ 	limit := m.opts.ResultLimit
+ 	timeout := m.opts.CallTimeout
++	m.mu.RUnlock()
+ 	var status Status
+ 	var stateErr error
+ 	var offersTool bool
+@@ -615,7 +616,6 @@
+ 		stateErr = state.Err
+ 		offersTool = slices.ContainsFunc(state.Tools, func(t Tool) bool { return t.Name == name })
+ 	}
+-	m.mu.RUnlock()
+ 
+ 	if state == nil {
+ 		return CallResult{}, fmt.Errorf("no MCP server named %q is configured", server)
+--- go test -race -run TestACallDuringShutdownIsNotARace ./mcp/ ---
+==================
+WARNING: DATA RACE
+Write at 0x00c0003f5738 by goroutine 20:
+  github.com/ollama/ollama/mcp.(*Manager).Close()
+      /Users/krypto/GitHub/ollama/mcp/manager.go:663 +0x390
+  github.com/ollama/ollama/mcp.TestACallDuringShutdownIsNotARace.func2()
+      /Users/krypto/GitHub/ollama/mcp/manager_test.go:612 +0x74
+
+Previous read at 0x00c0003f5738 by goroutine 19:
+  github.com/ollama/ollama/mcp.(*Manager).Call()
+      /Users/krypto/GitHub/ollama/mcp/manager.go:615 +0x16c
+  github.com/ollama/ollama/mcp.TestACallDuringShutdownIsNotARace.func1()
+      /Users/krypto/GitHub/ollama/mcp/manager_test.go:606 +0xf4
+
+Goroutine 20 (running) created at:
+  github.com/ollama/ollama/mcp.TestACallDuringShutdownIsNotARace()
+      /Users/krypto/GitHub/ollama/mcp/manager_test.go:609 +0x56c
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.26.5/libexec/src/testing/testing.go:2036 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.26.5/libexec/src/testing/testing.go:2101 +0x34
+
+Goroutine 19 (running) created at:
+  github.com/ollama/ollama/mcp.TestACallDuringShutdownIsNotARace()
+      /Users/krypto/GitHub/ollama/mcp/manager_test.go:603 +0x4d4
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.26.5/libexec/src/testing/testing.go:2036 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.26.5/libexec/src/testing/testing.go:2101 +0x34
+==================
+==================
+WARNING: DATA RACE
+Write at 0x00c0003f5758 by goroutine 20:
+  github.com/ollama/ollama/mcp.(*Manager).Close()
+      /Users/krypto/GitHub/ollama/mcp/manager.go:664 +0x3c8
+  github.com/ollama/ollama/mcp.TestACallDuringShutdownIsNotARace.func2()
+      /Users/krypto/GitHub/ollama/mcp/manager_test.go:612 +0x74
+
+Previous read at 0x00c0003f5758 by goroutine 19:
+  github.com/ollama/ollama/mcp.(*Manager).Call()
+      /Users/krypto/GitHub/ollama/mcp/manager.go:617 +0x19c
+  github.com/ollama/ollama/mcp.TestACallDuringShutdownIsNotARace.func1()
+      /Users/krypto/GitHub/ollama/mcp/manager_test.go:606 +0xf4
+
+Goroutine 20 (running) created at:
+  github.com/ollama/ollama/mcp.TestACallDuringShutdownIsNotARace()
+      /Users/krypto/GitHub/ollama/mcp/manager_test.go:609 +0x56c
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.26.5/libexec/src/testing/testing.go:2036 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.26.5/libexec/src/testing/testing.go:2101 +0x34
+
+Goroutine 19 (running) created at:
+  github.com/ollama/ollama/mcp.TestACallDuringShutdownIsNotARace()
+      /Users/krypto/GitHub/ollama/mcp/manager_test.go:603 +0x4d4
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.26.5/libexec/src/testing/testing.go:2036 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.26.5/libexec/src/testing/testing.go:2101 +0x34
+==================
+--- FAIL: TestACallDuringShutdownIsNotARace (0.01s)
+    testing.go:1712: race detected during execution of test
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.607s
+FAIL
+EXIT=1
+restored: d6055b0813da5ef9765e73cdc7bface059d3b223d0f944f4a7be01819873d071
+
+=== U2 a superseded dial installs its session over a newer decision ===
+--- /tmp/u-manager.go.orig	2026-08-08 16:43:50
++++ mcp/manager.go	2026-08-08 16:43:53
+@@ -464,11 +464,7 @@
+ 	// Something has happened to this server since the attempt began — it was
+ 	// switched off, removed, or another connect started. That decision is newer
+ 	// than this one, so the result is thrown away rather than installed.
+-	if m.epochs[spec.Name] != epoch {
+-		m.mu.Unlock()
+-		session.Close()
+-		return errSuperseded
+-	}
++
+ 	if previous := m.clients[spec.Name]; previous != nil {
+ 		previous.Close()
+ 	}
+--- go test  -run TestASwitchedOffServerIsNotResurrectedByASlowConnect ./mcp/ ---
+--- FAIL: TestASwitchedOffServerIsNotResurrectedByASlowConnect (0.05s)
+    manager_test.go:671: status = "connected"; a server the user switched off must stay off
+    manager_test.go:674: a switched-off server is offering 1 tools
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.616s
+FAIL
+EXIT=1
+restored: d6055b0813da5ef9765e73cdc7bface059d3b223d0f944f4a7be01819873d071
+
+=== U3 a closed manager still connects ===
+--- /tmp/u-manager.go.orig	2026-08-08 16:43:50
++++ mcp/manager.go	2026-08-08 16:43:56
+@@ -222,12 +222,7 @@
+ 	// A closed manager connects to nothing. Without this it would set states,
+ 	// spawn goroutines that all fail inside dial, and leave a shut-down manager
+ 	// reporting a list of failures to anyone who asked.
+-	m.mu.RLock()
+-	closed := m.closed
+-	m.mu.RUnlock()
+-	if closed {
+-		return
+-	}
++
+ 	problems := cfg.Problems()
+ 
+ 	// A server the configuration no longer mentions is not merely switched off
+--- go test  -run TestAClosedManagerConnectsToNothing ./mcp/ ---
+2026/08/08 16:43:59 WARN mcp server unavailable server=files error="connect: connection closed: calling \"initialize\": client is closing: EOF"
+--- FAIL: TestAClosedManagerConnectsToNothing (0.00s)
+    manager_test.go:691: a closed manager reported "failed" rather than declining to connect
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.568s
+FAIL
+EXIT=1
+restored: d6055b0813da5ef9765e73cdc7bface059d3b223d0f944f4a7be01819873d071
+
+=== U4 ending a session does not supersede an attempt already dialling ===
+--- /tmp/u-manager.go.orig	2026-08-08 16:43:50
++++ mcp/manager.go	2026-08-08 16:44:00
+@@ -322,9 +322,6 @@
+ // would be a switch that does not switch anything off.
+ func (m *Manager) closeSession(name string) {
+ 	m.mu.Lock()
+-	// Ending a session supersedes any attempt still dialling for this server:
+-	// whatever the user just did outranks a decision taken before they did it.
+-	m.epochs[name]++
+ 	session := m.clients[name]
+ 	delete(m.clients, name)
+ 	release := m.releases[name]
+--- go test  -run TestASwitchedOffServerIsNotResurrectedByASlowConnect ./mcp/ ---
+--- FAIL: TestASwitchedOffServerIsNotResurrectedByASlowConnect (0.05s)
+    manager_test.go:671: status = "connected"; a server the user switched off must stay off
+    manager_test.go:674: a switched-off server is offering 1 tools
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.610s
+FAIL
+EXIT=1
+restored: d6055b0813da5ef9765e73cdc7bface059d3b223d0f944f4a7be01819873d071
+
+hash after: d6055b0813da5ef9765e73cdc7bface059d3b223d0f944f4a7be01819873d071

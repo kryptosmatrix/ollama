@@ -21,6 +21,10 @@ import (
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
+// errSuperseded reports that a connection attempt finished after something
+// newer had already decided this server's fate.
+var errSuperseded = errors.New("this connection attempt has been superseded")
+
 // Status is where a configured server currently stands.
 type Status string
 
@@ -159,6 +163,13 @@ type Manager struct {
 	// running its release leaves a loopback port bound for the life of the
 	// process.
 	releases map[string]func()
+	// epochs supersede in-flight work. Connect returns as soon as its dials
+	// finish, but a dial it started can still be running when the next Connect
+	// arrives — and the second one cannot cancel the first. Without a marker
+	// the older attempt writes its session and its state over the newer
+	// decision, and a server the user has just switched off comes back
+	// connected with its tools on offer.
+	epochs map[string]uint64
 	// signingIn holds the servers with a sign-in in flight. A second sign-in
 	// for the same server would open a second browser window and a second
 	// redirect listener, and whichever callback arrived second would be
@@ -192,6 +203,7 @@ func NewManager(opts Options) *Manager {
 		states:    map[string]*ServerState{},
 		clients:   map[string]*sdk.ClientSession{},
 		releases:  map[string]func(){},
+		epochs:    map[string]uint64{},
 		signingIn: map[string]struct{}{},
 	}
 }
@@ -205,6 +217,15 @@ func NewManager(opts Options) *Manager {
 // server must not stop the others being usable.
 func (m *Manager) Connect(ctx context.Context, cfg *Config) {
 	if cfg == nil {
+		return
+	}
+	// A closed manager connects to nothing. Without this it would set states,
+	// spawn goroutines that all fail inside dial, and leave a shut-down manager
+	// reporting a list of failures to anyone who asked.
+	m.mu.RLock()
+	closed := m.closed
+	m.mu.RUnlock()
+	if closed {
 		return
 	}
 	problems := cfg.Problems()
@@ -250,7 +271,7 @@ func (m *Manager) Connect(ctx context.Context, cfg *Config) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			m.connectOne(ctx, j.spec, signInDisallowed)
+			m.connectOne(ctx, j.spec, signInDisallowed, m.beginAttempt(j.name))
 		}()
 	}
 	wg.Wait()
@@ -284,6 +305,16 @@ func (m *Manager) forgetServersOutside(configured []string) {
 	}
 }
 
+// beginAttempt marks the start of a connection attempt and returns the epoch it
+// belongs to. Anything that supersedes the attempt moves the epoch on, and the
+// attempt then declines to install its results.
+func (m *Manager) beginAttempt(name string) uint64 {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.epochs[name]++
+	return m.epochs[name]
+}
+
 // closeSession ends any live session for a server that should no longer be
 // running. Connect is called again whenever the configuration changes, so a
 // server the user has just switched off, invalidated or un-approved must lose
@@ -291,6 +322,9 @@ func (m *Manager) forgetServersOutside(configured []string) {
 // would be a switch that does not switch anything off.
 func (m *Manager) closeSession(name string) {
 	m.mu.Lock()
+	// Ending a session supersedes any attempt still dialling for this server:
+	// whatever the user just did outranks a decision taken before they did it.
+	m.epochs[name]++
 	session := m.clients[name]
 	delete(m.clients, name)
 	release := m.releases[name]
@@ -316,7 +350,7 @@ func (m *Manager) approves(spec *ServerSpec) bool {
 	return m.opts.Approvals.Allows(spec)
 }
 
-func (m *Manager) connectOne(ctx context.Context, spec *ServerSpec, mode signInMode) {
+func (m *Manager) connectOne(ctx context.Context, spec *ServerSpec, mode signInMode, epoch uint64) {
 	attempts := 1
 	if spec.transport() == TransportHTTP {
 		attempts = httpConnectAttempts
@@ -337,7 +371,10 @@ func (m *Manager) connectOne(ctx context.Context, spec *ServerSpec, mode signInM
 			}
 			m.opts.Logger.Debug("retrying mcp connection", "server", spec.Name, "attempt", attempt+1)
 		}
-		if err = m.dial(ctx, spec, mode); err == nil {
+		if err = m.dial(ctx, spec, mode, epoch); err == nil {
+			return
+		}
+		if errors.Is(err, errSuperseded) {
 			return
 		}
 		// A server asking to be signed in will ask again on every attempt.
@@ -349,15 +386,15 @@ func (m *Manager) connectOne(ctx context.Context, spec *ServerSpec, mode signInM
 	}
 
 	if SignInRequired(err) {
-		m.setState(&ServerState{Name: spec.Name, Spec: spec, Status: StatusNeedsSignIn, Err: err})
+		m.setStateIfCurrent(epoch, &ServerState{Name: spec.Name, Spec: spec, Status: StatusNeedsSignIn, Err: err})
 		m.opts.Logger.Info("mcp server needs a sign-in", "server", spec.Name)
 		return
 	}
-	m.setState(&ServerState{Name: spec.Name, Spec: spec, Status: StatusFailed, Err: err})
+	m.setStateIfCurrent(epoch, &ServerState{Name: spec.Name, Spec: spec, Status: StatusFailed, Err: err})
 	m.opts.Logger.Warn("mcp server unavailable", "server", spec.Name, "error", err)
 }
 
-func (m *Manager) dial(ctx context.Context, spec *ServerSpec, mode signInMode) error {
+func (m *Manager) dial(ctx context.Context, spec *ServerSpec, mode signInMode, epoch uint64) error {
 	// A sign-in is bounded by how long a person takes in a browser, not by how
 	// long a server takes to answer. Holding it to the connect timeout would
 	// cancel the exchange while the user was still reading the consent screen.
@@ -423,6 +460,14 @@ func (m *Manager) dial(ctx context.Context, spec *ServerSpec, mode signInMode) e
 		m.mu.Unlock()
 		session.Close()
 		return errors.New("manager is closed")
+	}
+	// Something has happened to this server since the attempt began — it was
+	// switched off, removed, or another connect started. That decision is newer
+	// than this one, so the result is thrown away rather than installed.
+	if m.epochs[spec.Name] != epoch {
+		m.mu.Unlock()
+		session.Close()
+		return errSuperseded
 	}
 	if previous := m.clients[spec.Name]; previous != nil {
 		previous.Close()
@@ -552,23 +597,36 @@ func (m *Manager) Call(ctx context.Context, qualified string, args map[string]an
 		return CallResult{}, fmt.Errorf("%q is not a namespaced MCP tool name", qualified)
 	}
 
+	// Copied under the lock, not read through the pointer afterwards. A
+	// ServerState is replaced wholesale by setState but its fields are also
+	// written in place by Close, so holding the pointer and reading Status and
+	// Tools after releasing the lock is a data race — one the race detector
+	// finds the moment a call and a shutdown overlap.
 	m.mu.RLock()
 	session := m.clients[server]
 	state := m.states[server]
 	limit := m.opts.ResultLimit
 	timeout := m.opts.CallTimeout
+	var status Status
+	var stateErr error
+	var offersTool bool
+	if state != nil {
+		status = state.Status
+		stateErr = state.Err
+		offersTool = slices.ContainsFunc(state.Tools, func(t Tool) bool { return t.Name == name })
+	}
 	m.mu.RUnlock()
 
 	if state == nil {
 		return CallResult{}, fmt.Errorf("no MCP server named %q is configured", server)
 	}
-	if session == nil || state.Status != StatusConnected {
-		if state.Err != nil {
-			return CallResult{}, fmt.Errorf("MCP server %q is %s: %w", server, state.Status, state.Err)
+	if session == nil || status != StatusConnected {
+		if stateErr != nil {
+			return CallResult{}, fmt.Errorf("MCP server %q is %s: %w", server, status, stateErr)
 		}
-		return CallResult{}, fmt.Errorf("MCP server %q is %s", server, state.Status)
+		return CallResult{}, fmt.Errorf("MCP server %q is %s", server, status)
 	}
-	if !slices.ContainsFunc(state.Tools, func(t Tool) bool { return t.Name == name }) {
+	if !offersTool {
 		return CallResult{}, fmt.Errorf("MCP server %q does not offer a tool named %q", server, name)
 	}
 
@@ -677,6 +735,17 @@ func (m *Manager) SigningIn(name string) bool {
 func (m *Manager) setState(state *ServerState) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	m.states[state.Name] = state
+}
+
+// setStateIfCurrent records a state only when the attempt that produced it has
+// not been superseded, so a slow failure cannot overwrite a newer decision.
+func (m *Manager) setStateIfCurrent(epoch uint64, state *ServerState) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.epochs[state.Name] != epoch {
+		return
+	}
 	m.states[state.Name] = state
 }
 
