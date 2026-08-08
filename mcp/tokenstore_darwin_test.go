@@ -355,3 +355,74 @@ func TestAnExplicitTokensPathIsHonoured(t *testing.T) {
 		t.Errorf("a token was written to the real keychain despite an explicit path: %v", err)
 	}
 }
+
+// failingDelete is a fallback store whose Delete fails a set number of times.
+type failingDelete struct {
+	TokenStore
+	failures int
+	deletes  int
+}
+
+func (f *failingDelete) Delete(server string) error {
+	f.deletes++
+	if f.failures > 0 {
+		f.failures--
+		return errors.New("the file is read-only")
+	}
+	return f.TokenStore.Delete(server)
+}
+
+// TestAMigrationThatCannotCleanUpKeepsTrying is a defect a cross-substrate
+// review found. Load saved the token into the keychain and then deleted the
+// file copy; if the save succeeded and the delete failed, the token existed in
+// both places — and every later Load found the keychain item first and returned,
+// so the cleartext copy was never retried and never removed. It also returned
+// the delete error, so a token that was perfectly usable failed to load at all.
+//
+// A cleanup that cannot run is not a reason to sign the user out, and it is not
+// a reason to stop trying.
+func TestAMigrationThatCannotCleanUpKeepsTrying(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "mcp-tokens.json")
+	file := &FileTokenStore{Path: path}
+	if err := file.Save("hosted", &SignInRecord{
+		Token:    &oauth2.Token{AccessToken: "access-abc123", RefreshToken: "refresh-def456"},
+		ClientID: "client-xyz789",
+	}); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+
+	fallback := &failingDelete{TokenStore: file, failures: 1}
+	store := keychainStore(t)
+	store.Fallback = fallback
+
+	// First load: the token migrates, and the cleanup fails.
+	record, err := store.Load("hosted")
+	if err != nil {
+		t.Fatalf("a usable token failed to load because its cleanup failed: %v", err)
+	}
+	if record.Token.AccessToken != "access-abc123" {
+		t.Errorf("AccessToken = %q", record.Token.AccessToken)
+	}
+	data, _ := os.ReadFile(path)
+	if !strings.Contains(string(data), "access-abc123") {
+		t.Fatal("setup: the delete was supposed to fail, so the file should still hold the token")
+	}
+
+	// Second load comes from the keychain — and must still take the cleartext
+	// copy away rather than leaving it there for ever.
+	if _, err := store.Load("hosted"); err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if fallback.deletes < 2 {
+		t.Errorf("the fallback was consulted %d times; a failed cleanup must be retried", fallback.deletes)
+	}
+	data, err = os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	for _, secret := range []string{"access-abc123", "refresh-def456"} {
+		if strings.Contains(string(data), secret) {
+			t.Errorf("%q is still in the file after a later load: %s", secret, data)
+		}
+	}
+}

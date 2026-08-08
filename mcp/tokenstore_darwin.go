@@ -92,6 +92,11 @@ func (s *KeychainStore) Load(server string) (*SignInRecord, error) {
 		if err := json.Unmarshal(data, &stored); err != nil {
 			return nil, fmt.Errorf("parse the keychain item for %s: %w", server, err)
 		}
+		// A file copy can survive a migration whose delete failed, and once the
+		// item is in the keychain this branch is the only one that ever runs
+		// again — so the cleanup is retried here rather than once. Without it a
+		// single failed delete leaves the credential in cleartext for ever.
+		s.removeFallbackCopy(server)
 		return stored.record(), nil
 	}
 	if !errors.Is(err, ErrNoToken) || s.Fallback == nil {
@@ -107,10 +112,21 @@ func (s *KeychainStore) Load(server string) (*SignInRecord, error) {
 	if saveErr := s.Save(server, record); saveErr != nil {
 		return nil, saveErr
 	}
-	if deleteErr := s.Fallback.Delete(server); deleteErr != nil {
-		return nil, deleteErr
-	}
+	// A cleanup that cannot run is not a reason to sign the user out: the token
+	// is in the keychain and works. It is retried on every later load instead,
+	// so the condition heals as soon as whatever blocked it clears.
+	s.removeFallbackCopy(server)
 	return record, nil
+}
+
+// removeFallbackCopy takes the cleartext copy away, if there is one and if it
+// can. Failure is deliberately not reported: the caller wanted a token and has
+// one, and this is retried on every load rather than abandoned.
+func (s *KeychainStore) removeFallbackCopy(server string) {
+	if s.Fallback == nil {
+		return
+	}
+	s.Fallback.Delete(server)
 }
 
 // Save stores a server's sign-in, replacing any previous one.

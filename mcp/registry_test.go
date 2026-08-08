@@ -290,3 +290,44 @@ func TestNewRegistryClientDefaultsToTheOfficialRegistry(t *testing.T) {
 		t.Errorf("BaseURL = %q, want the trailing slash trimmed", got)
 	}
 }
+
+// TestAPackageIdentifierMayNotBeAFlag closes a hole a cross-substrate review
+// found: the registry-supplied identifier went straight into the runner's
+// argument list with no check that it was a package name at all.
+//
+// An entry naming itself "--call=..." produces a command line npx reads as an
+// instruction rather than a package. The approval gate still stands in front of
+// it — the user is shown the exact command line — but "the user will read it"
+// is the mitigation this codebase refuses to rely on everywhere else, and a
+// resolver whose contract is that a command line is derived rather than guessed
+// must not derive one from a value it never checked.
+func TestAPackageIdentifierMayNotBeAFlag(t *testing.T) {
+	for _, ecosystem := range []string{"npm", "pypi", "oci"} {
+		t.Run(ecosystem, func(t *testing.T) {
+			entry := RegistryEntry{
+				Name: "example/evil",
+				Packages: []RegistryPackage{{
+					RegistryType: ecosystem,
+					Identifier:   "--call=rm -rf /tmp",
+				}},
+			}
+			spec, err := entry.Resolve()
+			if err == nil {
+				t.Fatalf("an identifier that is a flag was resolved into %q %v", spec.Command, spec.Args)
+			}
+			if !errors.Is(err, ErrUnresolvable) {
+				t.Errorf("err = %v, want ErrUnresolvable so the entry is offered without a command line", err)
+			}
+		})
+	}
+
+	t.Run("an ordinary identifier still resolves", func(t *testing.T) {
+		entry := RegistryEntry{
+			Name:     "example/files",
+			Packages: []RegistryPackage{{RegistryType: "npm", Identifier: "@example/mcp-files", Version: "1.2.3"}},
+		}
+		if _, err := entry.Resolve(); err != nil {
+			t.Errorf("a normal package was refused: %v", err)
+		}
+	})
+}

@@ -16,6 +16,9 @@ those are work, not conclusions.
 THE HEADLINE: two structural defects confirmed by execution, in code my own
 tests passed over completely.
 
+ALL SEVEN CONFIRMED FINDINGS ARE NOW REPAIRED. Twenty remain UNVERIFIED and are
+work, not conclusions.
+
 ================================================================================
 CONFIRMED BY EXECUTION
 ================================================================================
@@ -114,6 +117,8 @@ CONFIRMED BY READING
 B-1 — A SIGN-IN REFUSED BY THE SERVER LOSES THE REASON.  mcp/oauth.go,
 handleCallback.
 
+REPAIRED. See docs/_design/proof/phase5-remaining-falsification.txt.
+
 The error branch calls deliver() rather than deliverFailure(), so r.failure is
 never set and Fetch reports the generic "the sign-in was not completed". The
 authorization server's own error and error_description are shown on the browser
@@ -122,6 +127,8 @@ in the previous commit and did not route this older branch through it.
 
 C-1 — A FAILED MIGRATION LEAVES THE CREDENTIAL IN CLEARTEXT FOR EVER.
 mcp/tokenstore_darwin.go, KeychainStore.Load.
+
+REPAIRED. See docs/_design/proof/phase5-remaining-falsification.txt.
 
 Load saves the token into the keychain and then deletes the file copy. If the
 save succeeds and the delete fails, the token now exists in both places — and
@@ -132,6 +139,8 @@ says nothing further.
 
 E-2 — A REGISTRY IDENTIFIER IS NOT CHECKED FOR BEING A FLAG.  mcp/registry.go,
 resolvePackage.
+
+REPAIRED. See docs/_design/proof/phase5-remaining-falsification.txt.
 
 The registry-supplied identifier is placed straight into the runner's argument
 list with no check that it does not begin with "-" and no "--" separator, for

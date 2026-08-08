@@ -16,6 +16,10 @@ import (
 	sdkauth "github.com/modelcontextprotocol/go-sdk/auth"
 )
 
+// maxRefusalRunes bounds the reason an authorization server gives for refusing
+// a sign-in. It is somebody else's text arriving in an error a person reads.
+const maxRefusalRunes = 500
+
 // DefaultAuthorizationTimeout bounds how long Ollama waits for the user to
 // finish signing in. A sign-in nobody completes must not hold a listener open
 // on the user's machine for ever.
@@ -180,8 +184,15 @@ func (r *LoopbackRedirect) handleCallback(w http.ResponseWriter, req *http.Reque
 		if detail == "" {
 			detail = description
 		}
+		// Written by the authorization server, so bounded and stripped before
+		// it goes anywhere near a message a person reads.
+		detail = sanitiseText(detail, maxRefusalRunes)
+
 		writeSignInPage(w, "Sign-in was refused: "+detail)
-		r.deliver(sdkauth.AuthorizationResult{State: query.Get("state")})
+		// deliverFailure, not deliver: the reason the server gave is the only
+		// place a user can learn why they were refused, and an empty result
+		// would leave them with "the sign-in was not completed".
+		r.deliverFailure("the authorization server refused the sign-in: " + detail)
 		return
 	}
 

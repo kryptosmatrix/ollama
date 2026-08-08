@@ -229,6 +229,19 @@ func resolvePackage(pkg RegistryPackage) (string, []string, error) {
 	if identifier == "" {
 		return "", nil, fmt.Errorf("%w: package has no identifier", ErrUnresolvable)
 	}
+	// A package name never begins with a dash. One that does is read by the
+	// runner as an instruction rather than a package — "npx -y --call=..." runs
+	// the command it names. The user would be shown that command line before
+	// agreeing to it, but a resolver whose contract is that a command line is
+	// derived rather than guessed must not derive one from a value it never
+	// checked, and refusing costs a publisher nothing they can legitimately
+	// want.
+	if strings.HasPrefix(identifier, "-") {
+		return "", nil, fmt.Errorf("%w: package identifier %q begins with a dash, which a runner reads as an option rather than a package", ErrUnresolvable, identifier)
+	}
+	if version := strings.TrimSpace(pkg.Version); strings.HasPrefix(version, "-") {
+		return "", nil, fmt.Errorf("%w: package version %q begins with a dash", ErrUnresolvable, version)
+	}
 	versioned := identifier
 	if version := strings.TrimSpace(pkg.Version); version != "" {
 		versioned = identifier + "@" + version

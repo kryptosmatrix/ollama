@@ -1,0 +1,211 @@
+Phase 5 repairs — the last three confirmed findings
+
+All three now carry a test that fails without the change. Five protections
+falsified; hashes before and after every attempt are in this file and match.
+
+B-1 — A REFUSED SIGN-IN LOST THE SERVER'S REASON
+
+The error branch of handleCallback delivered an empty result rather than a
+failure with a reason, so Fetch fell back to the generic "the sign-in was not
+completed" and the authorization server's own error and error_description —
+access_denied, invalid_scope, a message naming a permission an administrator has
+not granted — were shown on the browser page and thrown away. That message is
+the only place a user can learn why they were refused.
+
+It now goes through deliverFailure, and the reason is sanitised and bounded on
+the way: it is a third party's text arriving in something a person reads.
+
+A PRE-EXISTING TEST HAD TO GO, and it is worth being explicit about why.
+TestARefusedSignInIsReported asserted that the error contained "not completed" —
+that is, it asserted the defective behaviour. It was written when the generic
+message was all there was, and it would have failed this repair. A test can
+encode a bug as firmly as the code does. It is superseded by
+TestARefusedSignInSaysWhy, which asserts everything it did and the reason as
+well; deleting it was a decision, not housekeeping, and this paragraph is here
+so that nobody has to guess which.
+
+C-1 — A FAILED MIGRATION LEFT THE CREDENTIAL IN CLEARTEXT FOR EVER
+
+Load saved the token into the keychain and then deleted the file copy. If the
+save succeeded and the delete failed, the token existed in both places, and
+every later Load found the keychain item first and returned — so the cleartext
+copy was never retried and never removed. It also returned the delete error,
+which meant a perfectly usable token failed to load at all.
+
+Both halves are wrong and both are fixed. The cleanup is retried on the
+keychain-hit path, so the condition heals as soon as whatever blocked it clears,
+and a cleanup that cannot run no longer signs the user out of a server whose
+token works. R4 and R5 are the two falsifiers, one for each half.
+
+E-2 — A PACKAGE IDENTIFIER WAS NEVER CHECKED FOR BEING A FLAG
+
+The registry-supplied identifier went straight into the runner's argument list.
+An entry naming itself "--call=..." produces a command line npx reads as an
+instruction rather than a package. Refused now, for all three ecosystems, along
+with a version that begins with a dash.
+
+The approval gate always stood in front of this — the user is shown the exact
+command line — but "the user will read it" is the mitigation this codebase
+refuses to rely on everywhere else, and a resolver whose contract is that a
+command line is derived rather than guessed must not derive one from a value it
+never checked. Refusing costs a publisher nothing they can legitimately want: a
+package name never begins with a dash.
+
+WHAT THIS DOES NOT COVER, and it is the same asymmetry as the query-string case
+
+Docker runtime arguments are publisher-supplied flags by design —
+"docker run --rm -i <publisher's flags> <image>" — so a registry entry can
+inject "-v /:/host". A blanket refusal would break legitimate entries that need
+an environment variable or a volume, which is exactly the shape of decision I
+declined to make alone for query-string credentials. The control there remains
+the approval gate showing the whole command line verbatim. Recorded for the
+operator rather than fixed quietly or ignored.
+
+FALSIFICATION
+
+hashes before:
+bb7c559760a609cc0aaedec93dd984113b09232c172772ffa7b54f8fdc531aa1  mcp/oauth.go
+bfb274056a0a40fa68cd898e46bb32031f93ddfb4137104ecd9063f199ad1e25  mcp/registry.go
+340922088f0eefe0c00db5c8cc5dc8cddcd7f72a29eec5cd74ef060bc9b35ee5  mcp/tokenstore_darwin.go
+
+=== R1 a refused sign-in reports only that it did not finish ===
+--- /tmp/r3-oauth.go.orig	2026-08-08 16:36:16
++++ mcp/oauth.go	2026-08-08 16:36:17
+@@ -192,7 +192,7 @@
+ 		// deliverFailure, not deliver: the reason the server gave is the only
+ 		// place a user can learn why they were refused, and an empty result
+ 		// would leave them with "the sign-in was not completed".
+-		r.deliverFailure("the authorization server refused the sign-in: " + detail)
++		r.deliver(sdkauth.AuthorizationResult{State: query.Get("state")})
+ 		return
+ 	}
+ 
+--- go test -run TestARefusedSignInSaysWhy ./mcp/ ---
+--- FAIL: TestARefusedSignInSaysWhy (0.00s)
+    oauth_test.go:358: err = the sign-in was not completed, want the server's own reason; it is the only place the user can learn why
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.453s
+FAIL
+EXIT=1
+restored: bb7c559760a609cc0aaedec93dd984113b09232c172772ffa7b54f8fdc531aa1
+
+=== R2 the authorization server's text reaches the user unbounded and unstripped ===
+--- /tmp/r3-oauth.go.orig	2026-08-08 16:36:16
++++ mcp/oauth.go	2026-08-08 16:36:19
+@@ -186,7 +186,7 @@
+ 		}
+ 		// Written by the authorization server, so bounded and stripped before
+ 		// it goes anywhere near a message a person reads.
+-		detail = sanitiseText(detail, maxRefusalRunes)
++
+ 
+ 		writeSignInPage(w, "Sign-in was refused: "+detail)
+ 		// deliverFailure, not deliver: the reason the server gave is the only
+--- go test -run TestARefusalReasonIsSanitised ./mcp/ ---
+--- FAIL: TestARefusalReasonIsSanitised (0.00s)
+    oauth_test.go:388: control characters from the authorization server reached the error message
+    oauth_test.go:391: the reason is 20073 bytes; a server's text must be bounded
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.452s
+FAIL
+EXIT=1
+restored: bb7c559760a609cc0aaedec93dd984113b09232c172772ffa7b54f8fdc531aa1
+
+=== R3 a package identifier that is a flag becomes a command line ===
+--- /tmp/r3-registry.go.orig	2026-08-08 16:36:16
++++ mcp/registry.go	2026-08-08 16:36:22
+@@ -236,9 +236,7 @@
+ 	// derived rather than guessed must not derive one from a value it never
+ 	// checked, and refusing costs a publisher nothing they can legitimately
+ 	// want.
+-	if strings.HasPrefix(identifier, "-") {
+-		return "", nil, fmt.Errorf("%w: package identifier %q begins with a dash, which a runner reads as an option rather than a package", ErrUnresolvable, identifier)
+-	}
++
+ 	if version := strings.TrimSpace(pkg.Version); strings.HasPrefix(version, "-") {
+ 		return "", nil, fmt.Errorf("%w: package version %q begins with a dash", ErrUnresolvable, version)
+ 	}
+--- go test -run TestAPackageIdentifierMayNotBeAFlag ./mcp/ ---
+--- FAIL: TestAPackageIdentifierMayNotBeAFlag (0.00s)
+    --- FAIL: TestAPackageIdentifierMayNotBeAFlag/npm (0.00s)
+        registry_test.go:316: an identifier that is a flag was resolved into "npx" [-y --call=rm -rf /tmp]
+    --- FAIL: TestAPackageIdentifierMayNotBeAFlag/pypi (0.00s)
+        registry_test.go:316: an identifier that is a flag was resolved into "uvx" [--call=rm -rf /tmp]
+    --- FAIL: TestAPackageIdentifierMayNotBeAFlag/oci (0.00s)
+        registry_test.go:316: an identifier that is a flag was resolved into "docker" [run --rm -i --call=rm -rf /tmp]
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.447s
+FAIL
+EXIT=1
+restored: bfb274056a0a40fa68cd898e46bb32031f93ddfb4137104ecd9063f199ad1e25
+
+=== R4 a failed cleanup is never retried, so the cleartext copy is permanent ===
+--- /tmp/r3-keychain.go.orig	2026-08-08 16:36:16
++++ mcp/tokenstore_darwin.go	2026-08-08 16:36:25
+@@ -96,7 +96,6 @@
+ 		// item is in the keychain this branch is the only one that ever runs
+ 		// again — so the cleanup is retried here rather than once. Without it a
+ 		// single failed delete leaves the credential in cleartext for ever.
+-		s.removeFallbackCopy(server)
+ 		return stored.record(), nil
+ 	}
+ 	if !errors.Is(err, ErrNoToken) || s.Fallback == nil {
+--- go test -run TestAMigrationThatCannotCleanUpKeepsTrying ./mcp/ ---
+--- FAIL: TestAMigrationThatCannotCleanUpKeepsTrying (0.13s)
+    tokenstore_darwin_test.go:417: the fallback was consulted 1 times; a failed cleanup must be retried
+    tokenstore_darwin_test.go:425: "access-abc123" is still in the file after a later load: {
+          "tokens": {
+            "hosted": {
+              "accessToken": "access-abc123",
+              "refreshToken": "refresh-def456",
+              "expiry": "0001-01-01T00:00:00Z",
+              "clientId": "client-xyz789"
+            }
+          }
+        }
+    tokenstore_darwin_test.go:425: "refresh-def456" is still in the file after a later load: {
+          "tokens": {
+            "hosted": {
+              "accessToken": "access-abc123",
+              "refreshToken": "refresh-def456",
+              "expiry": "0001-01-01T00:00:00Z",
+              "clientId": "client-xyz789"
+            }
+          }
+        }
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.562s
+FAIL
+EXIT=1
+restored: 340922088f0eefe0c00db5c8cc5dc8cddcd7f72a29eec5cd74ef060bc9b35ee5
+
+=== R5 a failed cleanup signs the user out of a server whose token works ===
+--- /tmp/r3-keychain.go.orig	2026-08-08 16:36:16
++++ mcp/tokenstore_darwin.go	2026-08-08 16:36:28
+@@ -112,10 +112,9 @@
+ 	if saveErr := s.Save(server, record); saveErr != nil {
+ 		return nil, saveErr
+ 	}
+-	// A cleanup that cannot run is not a reason to sign the user out: the token
+-	// is in the keychain and works. It is retried on every later load instead,
+-	// so the condition heals as soon as whatever blocked it clears.
+-	s.removeFallbackCopy(server)
++	if deleteErr := s.Fallback.Delete(server); deleteErr != nil {
++		return nil, deleteErr
++	}
+ 	return record, nil
+ }
+ 
+--- go test -run TestAMigrationThatCannotCleanUpKeepsTrying ./mcp/ ---
+--- FAIL: TestAMigrationThatCannotCleanUpKeepsTrying (0.08s)
+    tokenstore_darwin_test.go:401: a usable token failed to load because its cleanup failed: the file is read-only
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.512s
+FAIL
+EXIT=1
+restored: 340922088f0eefe0c00db5c8cc5dc8cddcd7f72a29eec5cd74ef060bc9b35ee5
+
+hashes after:
+bb7c559760a609cc0aaedec93dd984113b09232c172772ffa7b54f8fdc531aa1  mcp/oauth.go
+bfb274056a0a40fa68cd898e46bb32031f93ddfb4137104ecd9063f199ad1e25  mcp/registry.go
+340922088f0eefe0c00db5c8cc5dc8cddcd7f72a29eec5cd74ef060bc9b35ee5  mcp/tokenstore_darwin.go
