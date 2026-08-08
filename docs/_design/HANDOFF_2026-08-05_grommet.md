@@ -29,7 +29,7 @@ Head at handoff: `3f925cfc` — 49 commits ahead of `main`, 108 files, ~24,000 l
 | 4b — registry browse | **DONE** (`8317a273`, `07b06d8d`, `0c540dac`) |
 | 5 — docs and closeout | **DONE** — docs current, 24 proof artefacts, this handoff |
 | 5 — cross-substrate review | **DONE** (glm-5.2:cloud, 2026-08-07) — 7 confirmed defects |
-| 5 — repairs | **ALL 7 confirmed DONE**; unverified list **17 of 20 settled** — 3 left, all named below |
+| 5 — repairs | **ALL 7 confirmed DONE**; unverified list **19 of 20 settled** — 1 left, and it is a decision |
 
 ### Verified at closeout (2026-08-07)
 
@@ -99,13 +99,11 @@ The approval ledger *was* reviewed in the end, after its first shard returned an
 
 The ones worth knowing about: a data race between `Call` and `Close`; a server that came back connected when a slow dial outlived the user switching it off, fixed with a per-server **epoch** rather than a fourth patch to a fourth branch; concurrent saves that destroyed seven of eight tokens; a revocation endpoint never required to be https; a credential in a preserved configuration field; and the cannot-compute fingerprint marker, which the review thought unreachable and is not.
 
-**Three remain, and each is a decision rather than a gap in the work.**
+**One remains, and it is a decision rather than work.**
 
-`A1-3` — a credential in `Args`. This is the **third finding with one shape**, alongside query-string credentials and docker runtime arguments: any rule strict enough to catch the abuse also refuses legitimate configurations, and here there is no safe alternative to point at, since expanding `${env:NAME}` into argv puts the secret in the process list — the thing being avoided. **Rule on all three together.**
+`A1-3` — a credential in `Args`. This is the **third finding sharing one shape**, alongside credentials in a URL query string and docker runtime arguments supplied by a registry publisher. In all three, any rule strict enough to catch the abuse also refuses legitimate configurations: the pattern that catches `--api-key=sk-...` also catches `--token-file=/etc/foo`, and here there is no safe alternative to point at, because expanding `${env:NAME}` into argv puts the secret in the process list — the thing being avoided. The control that remains in all three is the approval gate showing the command line verbatim. **Rule on the three together.**
 
-`B-3` — revocation may target the wrong authorization server. Clean fix, specified in `batch5.txt`: store the issuer at sign-in beside the client identifier, threading it exactly where `ClientID` goes. Not done because the last reshape of that record needed care over migration and over a refresh arriving with nothing, and that is not tail-of-session work.
-
-`D-4` — `dial` closes the previous session while holding the write lock, where `closeSession` deliberately does it outside. Real, liveness only. No discriminating test is available from here: the transport seam controls the release function but not the protocol library's session.
+`B-3` and `D-4` are done (`b785ca01`). Revocation now goes to the server recorded as having issued the token — `SignInRecord` carries the issuer, learned at sign-in and preserved across refreshes exactly as `ClientID` is — because posting a token to a server that never issued it gets a 200 under RFC 7009, telling the user they are signed out while the token stays live, and handing the credential to a third party besides. And `dial` no longer shuts the previous server down while holding the write lock, which used to stall every other server behind one that would not die.
 
 **A warning worth having before you start.** Three times in this branch a test of mine passed its first sabotage, and the fault was always the same: it asserted that a mechanism existed rather than that the path under test used it. Write the sabotage first and watch it fail before believing any of these.
 
