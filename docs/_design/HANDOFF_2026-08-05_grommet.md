@@ -28,7 +28,8 @@ Head at handoff: `3f925cfc` — 49 commits ahead of `main`, 108 files, ~24,000 l
 | 4 — MCP Servers page | **DONE** (`273c19bd`) |
 | 4b — registry browse | **DONE** (`8317a273`, `07b06d8d`, `0c540dac`) |
 | 5 — docs and closeout | **DONE** — docs current, 24 proof artefacts, this handoff |
-| 5 — cross-substrate review | **DONE** (glm-5.2:cloud, 2026-08-07) — **found 5 confirmed defects; repairs NOT done** |
+| 5 — cross-substrate review | **DONE** (glm-5.2:cloud, 2026-08-07) — 7 confirmed defects |
+| 5 — repairs | **4 of 7 DONE** (`4d0e9120`, `0751d3c9`) — three remain |
 
 ### Verified at closeout (2026-08-07)
 
@@ -76,19 +77,17 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 **Do the repairs first. The branch is not ready for an upstream PR.**
 
-### 1. Repair what the cross-substrate review found — 2 of 7 DONE
+### 1. Repair what the cross-substrate review found — 4 of 7 DONE
 
 A blind review by `glm-5.2:cloud` over commit `3f925cfc` found seven confirmed defects, four of them by execution. Full record with per-finding verification status in `docs/_design/proof/phase5-cross-substrate-review.txt`; the reviewer's raw output is beside it under `glm-review-raw/`.
 
 **The two structural defects are repaired** (`4d0e9120`, proof in `phase5-repairs-falsification.txt`): a server removed from the configuration now stops and is forgotten, and two properties may share one `$ref`. Read that proof before touching the resolver — the obvious fix, making the reference chain local to one resolution, silently traded sibling sharing for the accurate cycle diagnosis, and only the pre-existing cyclic-schema test caught it. The chain is threaded down the nesting path for that reason.
 
-**Five confirmed defects remain, and the credential pair is the one to take next.**
+**The credential pair is repaired too** (`0751d3c9`, proof in `phase5-credential-falsification.txt`): a URL carrying userinfo is refused with a message naming the alternative, and the approval ledger stores a redacted summary while the approval *prompt* stays verbatim. That split is the point — redacting what the user is asked to agree to would hollow out the gate, and one falsifier exists solely to stop the two functions being merged later.
 
-**A password embedded in a server URL is accepted and written to `mcp.json` as a literal** (`mcp/config.go`, `validateURL` never looks at the userinfo). The one rule that file exists to enforce is that credentials appear only as `${env:NAME}`.
+**A ruling is owed on credentials in a query string.** Not fixed, deliberately. Refusing them needs a rule matching parameter names, there is no `${env:NAME}` mechanism for URLs, and `secretishEnvKey` matches "token" anywhere — so `pagination_token` would be refused and the user would have no way to proceed. Userinfo strands nobody because it is a credential or it is nothing; a query parameter might be either. The options are a tighter name list, a warning channel `Problems()` does not have, or leaving it. Ash's call.
 
-And then: a refused sign-in loses the server's reason (`mcp/oauth.go` error branch calls `deliver` rather than `deliverFailure`); a failed migration leaves the credential in cleartext for ever (`mcp/tokenstore_darwin.go`, `Load`); and a registry identifier is not checked for being a flag (`mcp/registry.go`, `resolvePackage`).
-
-**The same credential is copied into the approval ledger** (`mcp/approvals.go`, `Approve`, via `Summary()`), so a secret in a URL or in stdio args lands in `mcp-approvals.json` too — and a user who scrubs `mcp.json` has no reason to look there. Confirmed by probe. Fix these two together; they are one defect with two outlets.
+**Three confirmed defects remain:** a refused sign-in loses the server's reason (`mcp/oauth.go` error branch calls `deliver` rather than `deliverFailure`); a failed migration leaves the credential in cleartext for ever (`mcp/tokenstore_darwin.go`, `Load`); and a registry identifier is not checked for being a flag (`mcp/registry.go`, `resolvePackage`).
 
 The approval ledger *was* reviewed in the end, after its first shard returned an empty response, and it produced the one negative result worth having: **no path was found by which a server can be started without a current approval**, and the fingerprint holds against config tampering. That is the claim this branch rests on and it is no longer only mine.
 
