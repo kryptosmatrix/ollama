@@ -54,6 +54,8 @@ of them put the token in the URL.
 
 Probe output, verbatim — the file as written to disk:
 
+REPAIRED. See docs/_design/proof/phase5-credential-falsification.txt.
+
     {
       "mcpServers": {
         "hosted": {
@@ -75,6 +77,8 @@ its own: a user who notices the secret in mcp.json and removes it has no reason
 to think a second copy is sitting in the approvals file.
 
 Probe output, verbatim:
+
+REPAIRED. See docs/_design/proof/phase5-credential-falsification.txt.
 
     CONFIRMED A2-1: "s3cr3t" is in mcp-approvals.json in cleartext
     CONFIRMED A2-1: "sk-LEAKED" is in mcp-approvals.json in cleartext

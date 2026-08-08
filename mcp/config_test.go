@@ -480,3 +480,40 @@ func TestResolveDoesNotLeakSecretsIntoErrors(t *testing.T) {
 		t.Errorf("error message should name the variable, not echo the raw reference: %v", err)
 	}
 }
+
+// TestAURLMayNotCarryEmbeddedCredentials closes a channel a cross-substrate
+// review found and a probe confirmed: validateURL checked the scheme and the
+// host and never looked at the userinfo, so https://user:secret@host was
+// accepted and written to mcp.json as a literal.
+//
+// Userinfo is unambiguous — it is a credential or it is nothing — which is why
+// this is a refusal rather than a heuristic. Pasting a configuration from
+// another MCP client is how it arrives, since several put the token in the URL.
+func TestAURLMayNotCarryEmbeddedCredentials(t *testing.T) {
+	for name, raw := range map[string]string{
+		"password":      "https://alice:s3cr3t@api.example.com/mcp",
+		"bare username": "https://s3cr3t@api.example.com/mcp",
+	} {
+		t.Run(name, func(t *testing.T) {
+			cfg := &Config{}
+			cfg.Set("hosted", &ServerSpec{Type: TransportHTTP, URL: raw})
+
+			problem := cfg.Problems()["hosted"]
+			if problem == nil {
+				t.Fatalf("%q was accepted; a credential in a URL is a literal on disk", raw)
+			}
+			// The refusal has to say what to do instead, or it is just a wall.
+			if !strings.Contains(problem.Error(), "${env:") {
+				t.Errorf("the refusal does not point at the alternative: %v", problem)
+			}
+		})
+	}
+
+	t.Run("an ordinary url is untouched", func(t *testing.T) {
+		cfg := &Config{}
+		cfg.Set("hosted", &ServerSpec{Type: TransportHTTP, URL: "https://api.example.com/mcp?region=eu"})
+		if problem := cfg.Problems()["hosted"]; problem != nil {
+			t.Errorf("a url with no credential was refused: %v", problem)
+		}
+	})
+}

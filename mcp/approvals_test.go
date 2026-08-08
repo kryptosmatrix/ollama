@@ -310,3 +310,55 @@ func TestDisabledOutranksApprovalSoTheSwitchStillReads(t *testing.T) {
 		t.Errorf("status = %q, want disabled: a server the user switched off should read as off, not as awaiting approval", state.Status)
 	}
 }
+
+// TestTheLedgerDoesNotKeepASecondCopyOfASecret is the other half of the same
+// defect. Approve stored spec.Summary() so a user could later read what they
+// had agreed to, and Summary renders the URL verbatim and the stdio command
+// joined with its arguments — so a credential in either landed in
+// mcp-approvals.json as well as mcp.json.
+//
+// The fingerprint beside it is a SHA-256 and gives nothing away; the summary
+// undid that. Worse than the configuration leak alone: a user who notices the
+// secret in mcp.json and removes it has no reason to think a second copy is
+// sitting in the approvals file.
+func TestTheLedgerDoesNotKeepASecondCopyOfASecret(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "mcp-approvals.json")
+	approvals := &Approvals{}
+
+	stdio := &ServerSpec{Name: "local", Command: "srv", Args: []string{"--api-key=sk-LEAKED", "--token", "tok-LEAKED", "--verbose"}}
+	remote := &ServerSpec{Name: "hosted", Type: TransportHTTP, URL: "https://alice:s3cr3t@api.example.com/mcp"}
+	approvals.Approve(stdio, time.Now())
+	approvals.Approve(remote, time.Now())
+	if err := approvals.Save(path); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	for _, secret := range []string{"sk-LEAKED", "tok-LEAKED", "s3cr3t"} {
+		if strings.Contains(string(data), secret) {
+			t.Errorf("%q is in the approval ledger in cleartext:\n%s", secret, data)
+		}
+	}
+	// What is kept has to stay useful: the user must still recognise what they
+	// approved.
+	for _, keep := range []string{"srv", "--api-key", "--verbose", "api.example.com"} {
+		if !strings.Contains(string(data), keep) {
+			t.Errorf("the ledger no longer says enough to recognise the server: %q missing from\n%s", keep, data)
+		}
+	}
+}
+
+// TestApprovalStillShowsTheUserEverything guards the other side of that trade.
+// The ledger is a record; the approval prompt is a decision. A user agreeing to
+// run a command line must see it in full — redacting what they are asked to
+// approve would hollow out the gate this whole package is built around, and the
+// app's shown-value check compares against this same string.
+func TestApprovalStillShowsTheUserEverything(t *testing.T) {
+	spec := &ServerSpec{Name: "local", Command: "srv", Args: []string{"--api-key=sk-VISIBLE"}}
+	if got := spec.Summary(); !strings.Contains(got, "sk-VISIBLE") {
+		t.Errorf("Summary() = %q; the user must read exactly what will run before agreeing to it", got)
+	}
+}

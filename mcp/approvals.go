@@ -165,7 +165,7 @@ func (a *Approvals) Approve(spec *ServerSpec, at time.Time) {
 	a.Entries[spec.Name] = Approval{
 		Fingerprint: spec.Fingerprint(),
 		ApprovedAt:  at.UTC(),
-		Summary:     spec.Summary(),
+		Summary:     spec.redactedSummary(),
 	}
 }
 
@@ -228,6 +228,61 @@ func (s *ServerSpec) Fingerprint() string {
 	}
 	sum := sha256.Sum256(data)
 	return hex.EncodeToString(sum[:])
+}
+
+// redactedSummary is the form written to the approval ledger.
+//
+// The ledger is a record, not a decision. What the user is asked to approve
+// must be shown in full — that is Summary, and hollowing it out would hollow
+// out the gate this package is built around — but the copy kept on disk
+// afterwards has no need of the secret, and keeping one puts a second cleartext
+// copy in a second file that a user scrubbing mcp.json has no reason to look
+// in. Matching is done by the fingerprint, which is a hash; this string only
+// has to let a person recognise what they agreed to.
+//
+// Redaction here is deliberately eager. A value withheld that was not a secret
+// costs a little detail in a record; a value kept that was one costs the user
+// their credential.
+func (s *ServerSpec) redactedSummary() string {
+	switch s.transport() {
+	case TransportStdio:
+		parts := append([]string{s.Command}, redactArgs(s.Args)...)
+		return strings.Join(parts, " ")
+	case TransportHTTP:
+		return redactURL(s.URL)
+	default:
+		return ""
+	}
+}
+
+// redactArgs withholds the values of arguments whose names suggest a
+// credential, in both the "--api-key=value" and "--api-key value" forms.
+func redactArgs(args []string) []string {
+	if len(args) == 0 {
+		return nil
+	}
+	out := make([]string, 0, len(args))
+	redactNext := false
+	for _, arg := range args {
+		if redactNext {
+			redactNext = false
+			// A following flag is not the withheld value; the flag simply had
+			// none, and swallowing it would misrepresent the command line.
+			if !strings.HasPrefix(arg, "-") {
+				out = append(out, redactedMarker)
+				continue
+			}
+		}
+		if name, _, found := strings.Cut(arg, "="); found && secretishEnvKey.MatchString(name) {
+			out = append(out, name+"="+redactedMarker)
+			continue
+		}
+		if strings.HasPrefix(arg, "-") && secretishEnvKey.MatchString(arg) {
+			redactNext = true
+		}
+		out = append(out, arg)
+	}
+	return out
 }
 
 // Summary is the one-line description of what a server would do, for the user

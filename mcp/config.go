@@ -463,8 +463,38 @@ func validateURL(raw string) error {
 	if parsed.Hostname() == "" {
 		return fmt.Errorf("url %q has no host", value)
 	}
+	// Userinfo is unambiguous: it is a credential or it is nothing. Accepting
+	// it would put a literal secret in mcp.json, which is the one thing this
+	// file exists to prevent — and configurations pasted from other MCP clients
+	// arrive this way, because several of them put the token in the URL. The
+	// refusal names the alternative, because a rule with no way round it is a
+	// wall rather than a gate.
+	if parsed.User != nil {
+		return fmt.Errorf(`url %q carries a credential in the address; move it to a header, for example "Authorization": "${env:MY_TOKEN}"`, redactURL(value))
+	}
 	return nil
 }
+
+// redactURL renders a URL with any embedded password removed, for messages and
+// for anything written to disk. The username is kept: it is not the secret and
+// it is what lets a user recognise which entry is being talked about.
+func redactURL(raw string) string {
+	parsed, err := url.Parse(strings.TrimSpace(raw))
+	if err != nil || parsed.User == nil {
+		return raw
+	}
+	if _, hasPassword := parsed.User.Password(); hasPassword {
+		parsed.User = url.User(parsed.User.Username())
+	} else {
+		// A bare userinfo with no colon is a token often enough that keeping it
+		// is not worth the risk, and it names nothing useful.
+		parsed.User = url.User(redactedMarker)
+	}
+	return parsed.String()
+}
+
+// redactedMarker stands in for a value that has been withheld.
+const redactedMarker = "[redacted]"
 
 func isLoopbackHost(host string) bool {
 	if host == "localhost" {
