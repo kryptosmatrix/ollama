@@ -29,7 +29,7 @@ Head at handoff: `3f925cfc` — 49 commits ahead of `main`, 108 files, ~24,000 l
 | 4b — registry browse | **DONE** (`8317a273`, `07b06d8d`, `0c540dac`) |
 | 5 — docs and closeout | **DONE** — docs current, 24 proof artefacts, this handoff |
 | 5 — cross-substrate review | **DONE** (glm-5.2:cloud, 2026-08-07) — 7 confirmed defects |
-| 5 — repairs | **4 of 7 DONE** (`4d0e9120`, `0751d3c9`) — three remain |
+| 5 — repairs | **ALL 7 DONE** (`4d0e9120`, `0751d3c9`, `584d5aeb`) — 20 findings still unverified |
 
 ### Verified at closeout (2026-08-07)
 
@@ -77,7 +77,7 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 **Do the repairs first. The branch is not ready for an upstream PR.**
 
-### 1. Repair what the cross-substrate review found — 4 of 7 DONE
+### 1. Repair what the cross-substrate review found — ALL 7 DONE
 
 A blind review by `glm-5.2:cloud` over commit `3f925cfc` found seven confirmed defects, four of them by execution. Full record with per-finding verification status in `docs/_design/proof/phase5-cross-substrate-review.txt`; the reviewer's raw output is beside it under `glm-review-raw/`.
 
@@ -87,11 +87,15 @@ A blind review by `glm-5.2:cloud` over commit `3f925cfc` found seven confirmed d
 
 **A ruling is owed on credentials in a query string.** Not fixed, deliberately. Refusing them needs a rule matching parameter names, there is no `${env:NAME}` mechanism for URLs, and `secretishEnvKey` matches "token" anywhere — so `pagination_token` would be refused and the user would have no way to proceed. Userinfo strands nobody because it is a credential or it is nothing; a query parameter might be either. The options are a tighter name list, a warning channel `Problems()` does not have, or leaving it. Ash's call.
 
-**Three confirmed defects remain:** a refused sign-in loses the server's reason (`mcp/oauth.go` error branch calls `deliver` rather than `deliverFailure`); a failed migration leaves the credential in cleartext for ever (`mcp/tokenstore_darwin.go`, `Load`); and a registry identifier is not checked for being a flag (`mcp/registry.go`, `resolvePackage`).
+**The last three are repaired** (`584d5aeb`, proof in `phase5-remaining-falsification.txt`): a refused sign-in now reports the server's own reason, sanitised and bounded; a failed keychain migration retries its cleanup on every load and no longer signs the user out of a server whose token works; and a package identifier beginning with a dash is refused for all three ecosystems.
+
+That repair required **deleting a pre-existing test that asserted the defective behaviour** — it demanded the generic "not completed" message. A test can encode a bug as firmly as the code does, and the proof file names it so the deletion cannot be mistaken for tidying.
+
+**Two things are recorded rather than fixed, and both are the same shape:** credentials in a URL query string, and docker runtime arguments (`docker run --rm -i <publisher flags> <image>` — an entry can still inject `-v /:/host`). Refusing either needs a rule that would also refuse legitimate configurations, and in both cases the control that remains is the approval gate showing the command line verbatim. Ash's call.
 
 The approval ledger *was* reviewed in the end, after its first shard returned an empty response, and it produced the one negative result worth having: **no path was found by which a server can be started without a current approval**, and the fingerprint holds against config tampering. That is the claim this branch rests on and it is no longer only mine.
 
-Twenty further findings are recorded as UNVERIFIED with reasons — concurrency in the manager, the file store's read-modify-write across processes, revocation targeting, several schema-conversion gaps. Work them down; do not treat the list as conclusions.
+**What actually remains is the unverified list.** Twenty findings are recorded as UNVERIFIED with reasons — concurrency in the manager, the file store's read-modify-write across processes, revocation targeting, several schema-conversion gaps. Work them down; do not treat the list as conclusions.
 
 One finding was REFUTED, and why is worth reading: my shard boundaries cut a call site away from its callee, so the reviewer correctly reported dead code that is not dead. Give the next reviewer whole call paths.
 
