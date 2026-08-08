@@ -77,6 +77,8 @@ Ruled 2026-08-05, recorded in plan §5 and §8.4. Do not re-open without Ash.
 
 **Asked, not opened** (2026-08-08). Ollama's CONTRIBUTING requires an issue before a non-trivial PR, and one already exists: [#7865, "Model Context Protocol (MCP) support"](https://github.com/ollama/ollama/issues/7865), open with 59 comments. A proposal has been posted there: https://github.com/ollama/ollama/issues/7865#issuecomment-5226050792
 
+**Edited 2026-08-08** once the Windows store landed, rather than posting a second comment into a 59-comment thread: the original said Windows DPAPI was not written, and leaving a false statement standing in the record is worse than an edit. The Linux decision is argued there too, with an explicit invitation to disagree.
+
 It describes what the branch does, states what is unfinished, and asks three questions: whether they want it at all, how it relates to [#13554](https://github.com/ollama/ollama/pull/13554) and the earlier `Parth/agents` work, and how they would like it split — because 70 commits is far too large as one PR. The suggested sequence is the `mcp` package and config, then the CLI, then the app page, then OAuth, then registry browse; each is usable without the ones after it.
 
 **Do not open a PR before there is an answer.** A cold PR of this size contradicts their written process, ignores the thread where the feature is actually being discussed, and lands beside a maintainer's own branch. The branch merges cleanly against `upstream/main` (14 behind, 0 conflicts), so there is no urgency to rush it.
