@@ -46,7 +46,7 @@ VER_PARAM="${OLLAMA_VERSION:+?version=$OLLAMA_VERSION}"
 ###########################################
 
 if [ "$OS" = "Darwin" ]; then
-    NEEDS=$(require curl unzip)
+    NEEDS=$(require codesign curl spctl unzip)
     if [ -n "$NEEDS" ]; then
         status "ERROR: The following tools are required but missing:"
         for NEED in $NEEDS; do
@@ -63,17 +63,25 @@ if [ "$OS" = "Darwin" ]; then
         sleep 2
     fi
 
+    status "Downloading Ollama for macOS..."
+    curl --fail --show-error --location --progress-bar \
+        -o "$TEMP_DIR/Ollama-darwin.zip" "$DOWNLOAD_URL"
+
+    unzip -q "$TEMP_DIR/Ollama-darwin.zip" -d "$TEMP_DIR"
+
+    status "Verifying Ollama for macOS..."
+    [ -d "$TEMP_DIR/Ollama.app" ] || error "Downloaded archive does not contain Ollama.app"
+    codesign --verify --deep --strict --verbose=2 "$TEMP_DIR/Ollama.app" || \
+        error "Downloaded Ollama.app has an invalid code signature"
+    spctl --assess --type execute --verbose=2 "$TEMP_DIR/Ollama.app" || \
+        error "Downloaded Ollama.app is not trusted by macOS Gatekeeper"
+
     if [ -d "/Applications/Ollama.app" ]; then
         status "Removing existing Ollama installation..."
         rm -rf "/Applications/Ollama.app"
     fi
 
-    status "Downloading Ollama for macOS..."
-    curl --fail --show-error --location --progress-bar \
-        -o "$TEMP_DIR/Ollama-darwin.zip" "$DOWNLOAD_URL"
-
     status "Installing Ollama to /Applications..."
-    unzip -q "$TEMP_DIR/Ollama-darwin.zip" -d "$TEMP_DIR"
     mv "$TEMP_DIR/Ollama.app" "/Applications/"
 
     if [ ! -L "/usr/local/bin/ollama" ] || [ "$(readlink "/usr/local/bin/ollama")" != "/Applications/Ollama.app/Contents/Resources/ollama" ]; then
