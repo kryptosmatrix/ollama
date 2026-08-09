@@ -281,11 +281,12 @@ type MCPRegistryResponse struct {
 // carried beside the specification rather than derived from it in the browser.
 type MCPDiscoveredServer struct {
 	Name string `json:"name"`
-	// Source names where it came from in words: an application's name, or the
-	// process and port that answered.
-	Source string `json:"source"`
-	// Path is the file it was read from, when it came from one.
-	Path string `json:"path,omitempty"`
+	// Sources name where it came from in words: the applications configured
+	// with it, or the process and port that answered. A list, because one
+	// server registered in several applications is one server.
+	Sources []string `json:"sources"`
+	// Paths are the files it was read from, in the same order as Sources.
+	Paths []string `json:"paths,omitempty"`
 	// Runs is the command line or URL, verbatim.
 	Runs string `json:"runs"`
 	// Origin is "config" for something another application was told about, and

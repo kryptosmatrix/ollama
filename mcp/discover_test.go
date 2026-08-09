@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 
@@ -66,8 +67,11 @@ func TestDiscoverReadsAnotherClientsServers(t *testing.T) {
 	if files.Runs != "uvx mcp-server-files" {
 		t.Errorf("runs = %q", files.Runs)
 	}
-	if files.Source != "Claude Desktop" || files.Path != path {
-		t.Errorf("source = %q, path = %q", files.Source, files.Path)
+	if len(files.Sources) != 1 || files.Sources[0] != "Claude Desktop" {
+		t.Errorf("sources = %v", files.Sources)
+	}
+	if len(files.Paths) != 1 || files.Paths[0] != path {
+		t.Errorf("paths = %v", files.Paths)
 	}
 	if files.Origin != OriginConfig {
 		t.Errorf("origin = %q", files.Origin)
@@ -166,8 +170,8 @@ func TestDiscoverReadsTheVSCodeSpelling(t *testing.T) {
 	if docs.Spec == nil || docs.Spec.Command != "npx" {
 		t.Fatalf("spec = %+v (problem %q)", docs.Spec, docs.Problem)
 	}
-	if docs.Source != "VS Code" {
-		t.Errorf("source = %q", docs.Source)
+	if len(docs.Sources) != 1 || docs.Sources[0] != "VS Code" {
+		t.Errorf("sources = %v", docs.Sources)
 	}
 }
 
@@ -367,10 +371,57 @@ func TestProbeLoopbackFindsARunningServer(t *testing.T) {
 		if !strings.Contains(strings.Join(server.Notes, " "), "1 tools") {
 			t.Errorf("notes do not report what it offers: %v", server.Notes)
 		}
-		if !strings.Contains(server.Source, "listening on port") {
-			t.Errorf("source = %q", server.Source)
+		if len(server.Sources) != 1 || !strings.Contains(server.Sources[0], "listening on port") {
+			t.Errorf("sources = %v", server.Sources)
 		}
 		return
 	}
 	t.Fatalf("the running server at %s was not found; probe returned %+v", url, found)
+}
+
+// One server registered in several applications is one server. Listing it twice
+// invites adding it twice, and the second add collides with the first on its
+// name.
+func TestDiscoverMergesOneServerRegisteredTwice(t *testing.T) {
+	home := t.TempDir()
+	claude := writeClientConfig(t, home, "Claude Code", `{
+	  "mcpServers": {"agora-memory": {"command": "/Users/x/.local/bin/agora-memory-mcp"}}
+	}`)
+	cursor := writeClientConfig(t, home, "Cursor", `{
+	  "mcpServers": {"agora-memory": {"command": "/Users/x/.local/bin/agora-memory-mcp"}}
+	}`)
+
+	found, _ := DiscoverConfigured(home)
+	if len(found) != 1 {
+		t.Fatalf("got %d entries, want one merged: %+v", len(found), found)
+	}
+
+	// Both applications are named, and both files: which two is what tells a
+	// user they are looking at their own setup rather than a duplicate.
+	if len(found[0].Sources) != 2 {
+		t.Fatalf("sources = %v", found[0].Sources)
+	}
+	if !slices.Contains(found[0].Sources, "Claude Code") || !slices.Contains(found[0].Sources, "Cursor") {
+		t.Errorf("sources = %v", found[0].Sources)
+	}
+	if !slices.Contains(found[0].Paths, claude) || !slices.Contains(found[0].Paths, cursor) {
+		t.Errorf("paths = %v", found[0].Paths)
+	}
+}
+
+// Two registrations that would write different configurations are different
+// servers, however alike their names. Merging them would hide one of them.
+func TestDiscoverKeepsRegistrationsThatDiffer(t *testing.T) {
+	home := t.TempDir()
+	writeClientConfig(t, home, "Claude Code", `{
+	  "mcpServers": {"files": {"command": "uvx", "args": ["mcp-server-files", "--root", "/a"]}}
+	}`)
+	writeClientConfig(t, home, "Cursor", `{
+	  "mcpServers": {"files": {"command": "uvx", "args": ["mcp-server-files", "--root", "/b"]}}
+	}`)
+
+	found, _ := DiscoverConfigured(home)
+	if len(found) != 2 {
+		t.Fatalf("got %d entries, want both: %+v", len(found), found)
+	}
 }

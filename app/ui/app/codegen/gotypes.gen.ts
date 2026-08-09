@@ -792,8 +792,8 @@ export class MCPRegistryResponse {
 }
 export class MCPDiscoveredServer {
     name: string;
-    source: string;
-    path?: string;
+    sources: string[];
+    paths?: string[];
     runs: string;
     origin: string;
     notes?: string[];
@@ -808,8 +808,8 @@ export class MCPDiscoveredServer {
     constructor(source: any = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
         this.name = source["name"];
-        this.source = source["source"];
-        this.path = source["path"];
+        this.sources = source["sources"];
+        this.paths = source["paths"];
         this.runs = source["runs"];
         this.origin = source["origin"];
         this.notes = source["notes"];

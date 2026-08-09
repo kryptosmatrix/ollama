@@ -49,11 +49,14 @@ type DiscoveredServer struct {
 	// Spec is what would be added, after sanitising. It is nil when Problem
 	// is set.
 	Spec *ServerSpec
-	// Source names where this came from, in words a user can act on.
-	Source string
-	// Path is the file it was read from. Empty for something that answered on
-	// the network.
-	Path string
+	// Sources name where this came from, in words a user can act on: the
+	// applications configured with it, or the process and port that answered.
+	// It is a list because one server is commonly registered in several
+	// applications, and that is one server, not several.
+	Sources []string
+	// Paths are the files it was read from, in the same order as Sources.
+	// Empty for something that answered on the network.
+	Paths []string
 	// Runs is the command line or URL, for the user to read before agreeing.
 	Runs string
 	// Origin is "config" or "listening".
@@ -154,13 +157,60 @@ func DiscoverConfigured(home string) ([]DiscoveredServer, []string) {
 		found = append(found, readConfigSource(source)...)
 	}
 
+	found = mergeSameServer(found)
 	sort.SliceStable(found, func(i, j int) bool {
-		if found[i].Source != found[j].Source {
-			return found[i].Source < found[j].Source
+		if found[i].Name != found[j].Name {
+			return found[i].Name < found[j].Name
 		}
-		return found[i].Name < found[j].Name
+		return firstOf(found[i].Sources) < firstOf(found[j].Sources)
 	})
 	return found, searched
+}
+
+// mergeSameServer collapses one server registered in several applications into
+// one entry naming all of them.
+//
+// Registering the same server in Claude Code and in Cursor is the ordinary
+// thing to do, and it is still one server: listing it twice invites a user to
+// add it twice, where the second add collides with the first on its name. Two
+// entries are the same server when the specification Ollama would write is
+// identical, which is what Fingerprint answers — so two registrations that
+// differ in arguments or environment stay apart, because those really are
+// different servers.
+//
+// An entry that could not be read has no specification to compare, so it is
+// never merged with anything.
+func mergeSameServer(found []DiscoveredServer) []DiscoveredServer {
+	merged := make([]DiscoveredServer, 0, len(found))
+	at := map[string]int{}
+
+	for _, server := range found {
+		if server.Spec == nil {
+			merged = append(merged, server)
+			continue
+		}
+		key := server.Name + "\x00" + server.Spec.Fingerprint()
+		if index, seen := at[key]; seen {
+			merged[index].Sources = append(merged[index].Sources, server.Sources...)
+			merged[index].Paths = append(merged[index].Paths, server.Paths...)
+			for _, note := range server.Notes {
+				if !slices.Contains(merged[index].Notes, note) {
+					merged[index].Notes = append(merged[index].Notes, note)
+				}
+			}
+			continue
+		}
+		at[key] = len(merged)
+		merged = append(merged, server)
+	}
+	return merged
+}
+
+func firstOf(values []string) string {
+	if len(values) == 0 {
+		return ""
+	}
+	return values[0]
 }
 
 func readConfigSource(source configSource) []DiscoveredServer {
@@ -173,8 +223,8 @@ func readConfigSource(source configSource) []DiscoveredServer {
 			return nil
 		}
 		return []DiscoveredServer{{
-			Source:  source.Label,
-			Path:    source.Path,
+			Sources: []string{source.Label},
+			Paths:   []string{source.Path},
 			Origin:  OriginConfig,
 			Problem: fmt.Sprintf("could not be read: %v", err),
 		}}
@@ -183,8 +233,8 @@ func readConfigSource(source configSource) []DiscoveredServer {
 	var top map[string]json.RawMessage
 	if err := json.Unmarshal(data, &top); err != nil {
 		return []DiscoveredServer{{
-			Source:  source.Label,
-			Path:    source.Path,
+			Sources: []string{source.Label},
+			Paths:   []string{source.Path},
 			Origin:  OriginConfig,
 			Problem: fmt.Sprintf("is not valid JSON: %v", err),
 		}}
@@ -202,8 +252,8 @@ func readConfigSource(source configSource) []DiscoveredServer {
 		servers := map[string]*ServerSpec{}
 		if err := json.Unmarshal(raw, &servers); err != nil {
 			found = append(found, DiscoveredServer{
-				Source:  source.Label,
-				Path:    source.Path,
+				Sources: []string{source.Label},
+				Paths:   []string{source.Path},
 				Origin:  OriginConfig,
 				Problem: fmt.Sprintf("%s could not be read: %v", key, err),
 			})
@@ -226,7 +276,7 @@ func readConfigSource(source configSource) []DiscoveredServer {
 // describeDiscovered turns a foreign server into something Ollama could add,
 // or explains why it cannot.
 func describeDiscovered(name string, spec *ServerSpec, source, path, origin string) DiscoveredServer {
-	found := DiscoveredServer{Source: source, Path: path, Origin: origin}
+	found := DiscoveredServer{Sources: []string{source}, Paths: []string{path}, Origin: origin}
 
 	suggested, renamed := sanitiseName(name)
 	found.Name = suggested
@@ -378,11 +428,11 @@ func ProbeLoopback(ctx context.Context) ([]DiscoveredServer, error) {
 					continue
 				}
 				server := DiscoveredServer{
-					Name:   sanitiseNameOnly(fmt.Sprintf("%s-%d", listener.Process, listener.Port)),
-					Spec:   &ServerSpec{Type: TransportHTTP, URL: url},
-					Source: fmt.Sprintf("%s, listening on port %d", listener.Process, listener.Port),
-					Origin: OriginListening,
-					Runs:   url,
+					Name:    sanitiseNameOnly(fmt.Sprintf("%s-%d", listener.Process, listener.Port)),
+					Spec:    &ServerSpec{Type: TransportHTTP, URL: url},
+					Sources: []string{fmt.Sprintf("%s, listening on port %d", listener.Process, listener.Port)},
+					Origin:  OriginListening,
+					Runs:    url,
 				}
 				if tools > 0 {
 					server.Notes = append(server.Notes, fmt.Sprintf("it answered the handshake and offers %d tools", tools))
