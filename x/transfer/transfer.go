@@ -29,7 +29,9 @@ package transfer
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
+	"fmt"
 	"log/slog"
 	"math/rand/v2"
 	"net/http"
@@ -159,12 +161,32 @@ func (p *progressTracker) add(n int64) {
 
 // Download downloads blobs in parallel with streaming hash verification.
 func Download(ctx context.Context, opts DownloadOptions) error {
+	if err := validateBlobs(opts.Blobs); err != nil {
+		return err
+	}
 	return download(ctx, opts)
 }
 
 // Upload uploads blobs in parallel.
 func Upload(ctx context.Context, opts UploadOptions) error {
+	if err := validateBlobs(opts.Blobs); err != nil {
+		return err
+	}
 	return upload(ctx, opts)
+}
+
+func validateBlobs(blobs []Blob) error {
+	for _, blob := range blobs {
+		const prefix = "sha256:"
+		encoded := strings.TrimPrefix(blob.Digest, prefix)
+		if len(encoded) != 64 || len(encoded) == len(blob.Digest) {
+			return fmt.Errorf("invalid blob digest %q: expected sha256 followed by 64 hexadecimal characters", blob.Digest)
+		}
+		if _, err := hex.DecodeString(encoded); err != nil {
+			return fmt.Errorf("invalid blob digest %q: %w", blob.Digest, err)
+		}
+	}
+	return nil
 }
 
 // digestToPath converts sha256:abc123 to sha256-abc123
