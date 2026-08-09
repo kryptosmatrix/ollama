@@ -31,10 +31,15 @@ jobs:
         run: |
           set -euo pipefail
           VERSION="0.0.0-llamacpp-${GITHUB_SHA::7}"
+          llama_cpp_version=$(<LLAMA_CPP_VERSION)
+          if [[ ! "${llama_cpp_version}" =~ ^b[0-9]+$ ]]; then
+            echo "LLAMA_CPP_VERSION must contain a single llama.cpp build tag" >&2
+            exit 1
+          fi
           {
             echo "GOFLAGS='-ldflags=-w -s \"-X=github.com/ollama/ollama/version.Version=${VERSION}\" \"-X=github.com/ollama/ollama/server.mode=release\"'"
             echo "VERSION=${VERSION}"
-            echo "vendorsha=$(cat LLAMA_CPP_VERSION)-$(cat MLX_VERSION)-$(cat MLX_C_VERSION)"
+            echo "vendorsha=${llama_cpp_version}-$(cat MLX_VERSION)-$(cat MLX_C_VERSION)"
           } >>"${GITHUB_OUTPUT}"
 
   darwin-build:
