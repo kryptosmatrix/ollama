@@ -757,3 +757,79 @@ func TestReplacingAServerDoesNotHoldTheLockWhileShuttingTheOldOneDown(t *testing
 		t.Fatal("States() blocked behind a server that would not shut down")
 	}
 }
+
+// TestInstructionsReachTheCallerFromInitialize proves the field the protocol
+// provides for exactly this is read rather than discarded. A tool definition
+// says what one call does; instructions are the only place a server can say
+// what it is FOR, which is what decides whether a model reaches for it
+// unprompted instead of waiting to be told.
+func TestInstructionsReachTheCallerFromInitialize(t *testing.T) {
+	server := sdk.NewServer(
+		&sdk.Implementation{Name: "guided", Version: "1.0.0"},
+		&sdk.ServerOptions{Instructions: "This is your long-term memory. Search it before answering from memory alone."},
+	)
+	sdk.AddTool(server, &sdk.Tool{Name: "recall", Description: "recall"},
+		func(ctx context.Context, req *sdk.CallToolRequest, args map[string]any) (*sdk.CallToolResult, any, error) {
+			return &sdk.CallToolResult{Content: []sdk.Content{&sdk.TextContent{Text: "ok"}}}, nil, nil
+		})
+
+	manager := (&fakeServer{server: server, hang: make(chan struct{})}).connect(t, stdioSpec("guided"))
+
+	instructions := manager.Instructions()
+	if len(instructions) != 1 {
+		t.Fatalf("instructions = %+v", instructions)
+	}
+	if instructions[0].Server != "guided" {
+		t.Errorf("server = %q", instructions[0].Server)
+	}
+	if !strings.Contains(instructions[0].Text, "long-term memory") {
+		t.Errorf("text = %q", instructions[0].Text)
+	}
+}
+
+// A server with nothing to say adds nothing to the prompt.
+func TestNoInstructionsMeansNoBlock(t *testing.T) {
+	server := sdk.NewServer(&sdk.Implementation{Name: "silent", Version: "1.0.0"}, nil)
+	sdk.AddTool(server, &sdk.Tool{Name: "noop", Description: "noop"},
+		func(ctx context.Context, req *sdk.CallToolRequest, args map[string]any) (*sdk.CallToolResult, any, error) {
+			return &sdk.CallToolResult{Content: []sdk.Content{&sdk.TextContent{Text: "ok"}}}, nil, nil
+		})
+
+	manager := (&fakeServer{server: server, hang: make(chan struct{})}).connect(t, stdioSpec("silent"))
+	if got := manager.Instructions(); len(got) != 0 {
+		t.Errorf("instructions = %+v", got)
+	}
+}
+
+// Control characters and unbounded length are a server's cheapest way to take
+// over the system prompt, so instructions get the same treatment as a tool
+// description — and a tighter cap, because the system prompt is the position a
+// server has least claim on.
+func TestInstructionsAreSanitisedAndCapped(t *testing.T) {
+	server := sdk.NewServer(
+		&sdk.Implementation{Name: "noisy", Version: "1.0.0"},
+		&sdk.ServerOptions{Instructions: "useful\x00\x07 advice" + strings.Repeat(" padding", 5000)},
+	)
+	sdk.AddTool(server, &sdk.Tool{Name: "noop", Description: "noop"},
+		func(ctx context.Context, req *sdk.CallToolRequest, args map[string]any) (*sdk.CallToolResult, any, error) {
+			return &sdk.CallToolResult{Content: []sdk.Content{&sdk.TextContent{Text: "ok"}}}, nil, nil
+		})
+
+	manager := (&fakeServer{server: server, hang: make(chan struct{})}).connect(t, stdioSpec("noisy"))
+	instructions := manager.Instructions()
+	if len(instructions) != 1 {
+		t.Fatalf("instructions = %+v", instructions)
+	}
+	text := instructions[0].Text
+	if strings.ContainsAny(text, "\x00\x07") {
+		t.Error("control characters reached the system prompt")
+	}
+	// The cap plus the notice sanitiseText appends when it cuts; what must not
+	// happen is a server spending as much of the system prompt as it likes.
+	if len([]rune(text)) > maxInstructionRunes+len([]rune("… (truncated by Ollama)")) {
+		t.Errorf("length = %d runes, cap is %d", len([]rune(text)), maxInstructionRunes)
+	}
+	if !strings.Contains(text, "truncated by Ollama") {
+		t.Error("a capped instruction does not say it was cut")
+	}
+}

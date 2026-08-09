@@ -99,6 +99,15 @@ type ServerState struct {
 	ServerInfo string
 	// ProtocolVersion is the version negotiated with the peer.
 	ProtocolVersion string
+	// Instructions is the server's own description of how to use it, returned
+	// from initialize. The protocol intends it for the model's system prompt:
+	// tool definitions say what each call does, and nothing else says what the
+	// server is FOR or when to reach for it.
+	//
+	// It is third-party text bound for the system prompt, so it is sanitised
+	// and capped exactly as a tool description is, and the caller frames it as
+	// the server's own words rather than Ollama's.
+	Instructions string
 }
 
 // CallResult is the outcome of one tool call.
@@ -453,6 +462,7 @@ func (m *Manager) dial(ctx context.Context, spec *ServerSpec, mode signInMode, e
 			state.ServerInfo = strings.TrimSpace(info.ServerInfo.Name + " " + info.ServerInfo.Version)
 		}
 		state.ProtocolVersion = info.ProtocolVersion
+		state.Instructions = sanitiseText(info.Instructions, maxInstructionRunes)
 	}
 
 	m.mu.Lock()
@@ -584,6 +594,32 @@ func (m *Manager) Tools() []Tool {
 // whose schema fails to convert here has already been filtered at connect time,
 // so a failure at this point is a defect rather than a server's fault and is
 // reported instead of silently dropped.
+// ServerInstructions is one connected server's own account of how to use it.
+type ServerInstructions struct {
+	Server string
+	Text   string
+}
+
+// Instructions returns what each connected server says about itself.
+//
+// Only connected servers are included: instructions for a server whose tools
+// are not on offer would tell a model to use something it cannot call, which is
+// worse than silence.
+func (m *Manager) Instructions() []ServerInstructions {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	var instructions []ServerInstructions
+	for _, name := range slices.Sorted(maps.Keys(m.states)) {
+		state := m.states[name]
+		if state.Status != StatusConnected || strings.TrimSpace(state.Instructions) == "" {
+			continue
+		}
+		instructions = append(instructions, ServerInstructions{Server: name, Text: state.Instructions})
+	}
+	return instructions
+}
+
 func (m *Manager) Schemas() (api.Tools, error) {
 	var schemas api.Tools
 	var errs []error

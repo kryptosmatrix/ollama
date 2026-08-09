@@ -878,6 +878,9 @@ func (s *Server) chat(w http.ResponseWriter, r *http.Request) error {
 	// Check if agent or tools mode is enabled
 	// Note: Skip agent/tools mode if user has attachments, as the agent doesn't handle file attachments properly
 	registry := tools.NewRegistry()
+	// What the connected MCP servers say about themselves, for the system
+	// prompt. Empty unless a server both connected and had something to say.
+	var mcpInstructions string
 	var browser *tools.Browser
 	ctx = tools.WithAllowedDirectURLs(ctx, userMessageText(chat.Messages))
 
@@ -903,6 +906,7 @@ func (s *Server) chat(w http.ResponseWriter, r *http.Request) error {
 
 		if hasToolsCapability {
 			s.registerMCPTools(registry)
+			mcpInstructions = s.mcpInstructions()
 		}
 	}
 
@@ -945,7 +949,7 @@ func (s *Server) chat(w http.ResponseWriter, r *http.Request) error {
 				reqChat = &temp
 			}
 		}
-		chatReq, err := s.buildChatRequest(reqChat, req.Model, thinkValue, availableTools)
+		chatReq, err := s.buildChatRequest(reqChat, req.Model, thinkValue, availableTools, mcpInstructions)
 		if err != nil {
 			return err
 		}
@@ -1849,8 +1853,14 @@ func supportsBrowserTools(model string) bool {
 }
 
 // buildChatRequest converts store.Chat to api.ChatRequest
-func (s *Server) buildChatRequest(chat *store.Chat, model string, think any, availableTools api.Tools) (*api.ChatRequest, error) {
+func (s *Server) buildChatRequest(chat *store.Chat, model string, think any, availableTools api.Tools, mcpInstructions string) (*api.ChatRequest, error) {
 	var msgs []api.Message
+	// The servers' own words, ahead of the conversation. A tool definition says
+	// what one call does; this is the only place a server can say what it is
+	// for, which is what decides whether a model reaches for it unprompted.
+	if strings.TrimSpace(mcpInstructions) != "" {
+		msgs = append(msgs, api.Message{Role: "system", Content: mcpInstructions})
+	}
 	for _, m := range chat.Messages {
 		// Skip empty messages if present
 		if m.Content == "" && m.Thinking == "" && len(m.ToolCalls) == 0 && len(m.Attachments) == 0 {

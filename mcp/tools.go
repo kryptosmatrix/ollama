@@ -39,6 +39,12 @@ func (t Tool) QualifiedName() string {
 // context. A server that wants more space than this is padding the prompt.
 const maxDescriptionRunes = 4000
 
+// maxInstructionRunes caps a server's initialize instructions. They land in the
+// system prompt, which is the most expensive place in the context and the one a
+// server has the least claim on, so the cap is tighter than a tool
+// description's.
+const maxInstructionRunes = 1500
+
 // maxRefDepth bounds local $ref resolution.
 const maxRefDepth = 8
 
