@@ -46,7 +46,9 @@ openclaw tui
 
 CMD and PowerShell are not supported on Windows — WSL2 is required.
 
-<Note>Ollama must be installed and running before the installer runs. When running inside WSL2 or a container, ensure Ollama is reachable from the sandbox (e.g. `OLLAMA_HOST=0.0.0.0`).</Note>
+<Note>Ollama must be installed and running before the installer runs. When running inside WSL2 or a container, ensure Ollama is reachable from the sandbox.</Note>
+
+<Warning>Ollama's local API does not require authentication. Keep the default loopback binding and use host networking when possible. If you must set `OLLAMA_HOST=0.0.0.0`, restrict port `11434` to trusted clients with a firewall or an authenticated reverse proxy; otherwise, anyone who can reach the host can use the API.</Warning>
 
 ## System requirements
 
