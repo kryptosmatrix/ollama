@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BuildingStorefrontIcon } from "@heroicons/react/24/outline";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
@@ -22,6 +22,55 @@ import {
 } from "@/utils/mcpServers";
 import MCPRegistryBrowse from "./MCPRegistryBrowse";
 import MCPLocalDiscovery from "./MCPLocalDiscovery";
+import { nextPanel, type MCPPanel } from "@/utils/mcpPanels";
+
+/**
+ * The page, as a full-height column whose content scrolls.
+ *
+ * index.html sets overflow:hidden on the document, which is right for a desktop
+ * window and means a page that grows past the window is simply clipped — no
+ * scrollbar, no way to reach what is below. A page with a list in it has to
+ * carry its own scrolling region, which is what Settings does and what this
+ * page did not.
+ *
+ * The header and the three buttons stay put. Scrolling them away with a long
+ * list is how you end up unable to reach the control you are looking for.
+ */
+export function MCPPageLayout({
+  pinned,
+  scrollResetKey,
+  children,
+}: {
+  pinned: React.ReactNode;
+  /** Changing this returns the reader to the top of the content. */
+  scrollResetKey?: string | null;
+  children: React.ReactNode;
+}) {
+  const scroller = useRef<HTMLDivElement>(null);
+
+  // Opening a panel while scrolled down a long list would otherwise leave the
+  // reader somewhere in the middle of the new one — or past the end of it,
+  // looking at nothing.
+  useEffect(() => {
+    scroller.current?.scrollTo({ top: 0 });
+  }, [scrollResetKey]);
+
+  return (
+    <main className="flex h-screen w-full flex-col dark:bg-neutral-900">
+      <div className="mx-auto w-full max-w-3xl shrink-0 px-6 pt-6">
+        {pinned}
+      </div>
+      <div
+        ref={scroller}
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+      >
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-6 pt-4 pb-6">
+          {children}
+        </div>
+      </div>
+    </main>
+  );
+}
 
 /**
  * The page header, with the way back.
@@ -98,9 +147,11 @@ export default function MCPServers() {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [paste, setPaste] = useState("");
-  const [showPaste, setShowPaste] = useState(false);
-  const [showBrowse, setShowBrowse] = useState(false);
-  const [showLocal, setShowLocal] = useState(false);
+  // One panel at a time. Three independent toggles put the second panel below
+  // the first, off the bottom of the window, where its button read as dead.
+  const [panel, setPanel] = useState<MCPPanel>(null);
+  const open = (clicked: Exclude<MCPPanel, null>) =>
+    setPanel((current) => nextPanel(current, clicked));
 
   const servers = useQuery({
     queryKey: ["mcpServers"],
@@ -127,7 +178,7 @@ export default function MCPServers() {
     },
     onSuccess: () => {
       setPaste("");
-      setShowPaste(false);
+      setPanel(null);
       setError(null);
       refresh();
     },
@@ -136,9 +187,23 @@ export default function MCPServers() {
   });
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-6">
-      <MCPPageHeader onBack={() => navigate({ to: "/" })} />
-
+    <MCPPageLayout
+      scrollResetKey={panel}
+      pinned={
+        <>
+          <MCPPageHeader onBack={() => navigate({ to: "/" })} />
+          <div className="mt-4 flex gap-2">
+            <Button onClick={() => open("registry")}>
+              Browse the registry
+            </Button>
+            <Button onClick={() => open("paste")}>
+              Add from configuration
+            </Button>
+            <Button onClick={() => open("local")}>Find on this Mac</Button>
+          </div>
+        </>
+      }
+    >
       <Text>
         MCP servers give models extra tools. Ollama will not run a server until
         you have read what it launches and approved it.
@@ -150,45 +215,33 @@ export default function MCPServers() {
         </p>
       )}
 
-      <div className="flex gap-2">
-        <Button onClick={() => setShowBrowse((open) => !open)}>
-          Browse the registry
-        </Button>
-        <Button onClick={() => setShowPaste((open) => !open)}>
-          Add from configuration
-        </Button>
-        <Button onClick={() => setShowLocal((open) => !open)}>
-          Find on this Mac
-        </Button>
-      </div>
-
-      {showBrowse && (
+      {panel === "registry" && (
         <MCPRegistryBrowse
           onInstall={async (request: AddMCPServerInput) => {
             // The ordinary add path: it lands unapproved and the user then
             // approves it below, where the command line is checked against
             // what is on disk.
             await addMCPServer(request);
-            setShowBrowse(false);
+            setPanel(null);
             await refresh();
           }}
         />
       )}
 
-      {showLocal && (
+      {panel === "local" && (
         <MCPLocalDiscovery
           onAdd={async (request: AddMCPServerInput) => {
             // The ordinary add path, the same one a pasted or registry server
             // takes: it lands unapproved and is approved below, where the
             // command line is checked against what is on disk.
             await addMCPServer(request);
-            setShowLocal(false);
+            setPanel(null);
             await refresh();
           }}
         />
       )}
 
-      {showPaste && (
+      {panel === "paste" && (
         <PasteConfiguration
           value={paste}
           onChange={setPaste}
@@ -232,7 +285,7 @@ export default function MCPServers() {
           />
         ))}
       </ul>
-    </div>
+    </MCPPageLayout>
   );
 }
 

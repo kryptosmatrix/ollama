@@ -1,6 +1,11 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { MCPPageHeader, MCPServerRow, PasteConfiguration } from "./MCPServers";
+import {
+  MCPPageHeader,
+  MCPPageLayout,
+  MCPServerRow,
+  PasteConfiguration,
+} from "./MCPServers";
 import { MCPServer } from "@/gotypes";
 
 function server(overrides: Partial<MCPServer> = {}): MCPServer {
@@ -174,5 +179,37 @@ describe("the page chrome", () => {
     );
     expect(markup).toContain("Back to home");
     expect(went).toBe(false);
+  });
+});
+
+describe("the page layout", () => {
+  // index.html sets overflow:hidden on the document, so a page that grows past
+  // the window is clipped with no scrollbar. A page with lists in it has to
+  // carry its own scrolling region.
+  it("scrolls its content instead of clipping it", () => {
+    const markup = renderToStaticMarkup(
+      <MCPPageLayout pinned={<span>buttons</span>}>
+        <span>a very long list</span>
+      </MCPPageLayout>,
+    );
+    expect(markup).toContain("overflow-y-auto");
+    expect(markup).toContain("h-screen");
+    // Without min-h-0 a flex child refuses to shrink below its content, and
+    // the overflow container never scrolls.
+    expect(markup).toContain("min-h-0");
+  });
+
+  // The controls must stay reachable: scrolling them away behind a long list
+  // is how you end up unable to get back to the button you want.
+  it("keeps the pinned controls outside the scrolling region", () => {
+    const markup = renderToStaticMarkup(
+      <MCPPageLayout pinned={<span>controls</span>}>
+        <span>content</span>
+      </MCPPageLayout>,
+    );
+    const pinnedAt = markup.indexOf("controls");
+    const scrollAt = markup.indexOf("overflow-y-auto");
+    expect(pinnedAt).toBeGreaterThan(-1);
+    expect(pinnedAt).toBeLessThan(scrollAt);
   });
 });
