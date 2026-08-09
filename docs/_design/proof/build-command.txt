@@ -64,3 +64,201 @@ which is what build_darwin.sh itself warns about when signing is skipped.
 The version stamped into this particular run ends in "-dirty" because the
 script and the .gitignore entry were still uncommitted when it ran. A build made
 after this commit stamps a clean version.
+Triage of everything the failed run printed
+===========================================
+
+Source: /Users/krypto/Desktop/Ollama Build Failed.txt (849 lines), run of
+"Ollama BUILD.command" at version 0.32.5-94-gaea968b on branch mcp/server-support.
+
+THE FAILURE — ours, fixed
+-------------------------
+
+    /var/.../createdmg.tmp...:396:408: execution error: Finder got an error:
+    AppleEvent timed out. (-1712)
+    Failed running AppleScript
+    BUILD FAILED: create-dmg.sh failed.
+
+create-dmg lays out the disk-image window by driving Finder over Apple Events.
+Its template ends in an unbounded wait:
+
+    scripts/support/template.applescript:64-71
+        set waitTime to 0
+        set ejectMe to false
+        repeat while ejectMe is false
+            delay 1
+            ...
+            if (do shell script "[ -f " & dsStore & " ]; echo $?") = "0" then set ejectMe to true
+        end repeat
+
+There is no timeout and no give-up path: the loop spins until Finder writes a
+.DS_Store to the mounted volume. That needs a GUI session that is awake,
+unlocked and answering Apple Events. An eleven-minute unattended build does not
+reliably have one — the screen locks part-way through — and the enclosing
+Apple Event then dies with -1712, taking a build that had otherwise fully
+succeeded with it. create-dmg.sh:501-508 turns that into exit 64, and the
+wrapper turned exit 64 into a failed build.
+
+The app had been built. The only thing that failed was the window cosmetics.
+
+Fix: the cosmetics are no longer allowed to decide whether the build succeeds.
+The styled image is attempted under a deadline; if the screen is locked, or the
+Finder step fails or overruns, a plain image is built instead with create-dmg's
+own --skip-jenkins. The Applications symlink is made during the copy step
+(create-dmg.sh:453), not by the AppleScript, so a plain image is still a usable
+one — it just has no background picture and unpositioned icons.
+
+ALSO OURS, FIXED
+----------------
+
+The Go-cache line read:
+
+    ==> Using a temporary Go cache so yours is untouched: /Users/krypto/Library/Caches/go-build
+
+That prints the path being *preserved* immediately after saying "using a
+temporary Go cache", so it reads as though the developer's own cache is the
+temporary one. Now it prints both paths and says which is which.
+
+NOT OURS — investigated, benign
+-------------------------------
+
+1.  install_name_tool: no LC_RPATH load command with path
+    .../build/darwin-amd64/llama-server-local/bin found in
+    .../dist/darwin-amd64/lib/ollama/llama-quantize
+
+    CMake's install-time rpath fixup asking to delete an rpath that a previous
+    install had already deleted — the file was reported "Up-to-date" on the line
+    above. It prints as "error:" and continues. Verified rather than assumed:
+
+        $ otool -l Ollama.app/Contents/Resources/llama-quantize | grep -A2 LC_RPATH | grep path
+                 path @loader_path
+                 path @loader_path
+
+        (sweep of every Mach-O in the bundle for an rpath under /Users/krypto)
+        leaky binaries: 0
+
+    Nothing shipped carries a path into this build tree, so the image works on
+    another Mac. Appears only on incremental builds over an existing dist/.
+
+2.  CMake Warning ... UI: no assets available - building without an embedded UI
+
+    llama.cpp's own web UI. Ollama does not ship it or serve it; it has its own
+    frontend. Expected on every build.
+
+3.  ld: warning: ignoring duplicate libraries: '-lc++', '-ldl', '-lobjc'
+
+    Upstream cgo LDFLAGS naming the same system library twice. Cosmetic; the
+    linker says it is ignoring the duplicate.
+
+4.  webview.h:1589/1592/1595 -Wdeprecated-literal-operator
+
+    Vendored third-party header (app/webview). A C++ literal-operator spelling
+    deprecated in newer clang. Upstream's to fix; editing a vendored header in a
+    fork aimed at an upstream PR would be noise in the diff.
+
+5.  36 npm vulnerabilities (4 low, 10 moderate, 16 high, 6 critical)
+
+    Upstream's app/ui dependency tree, unchanged by this branch. Real, but
+    `npm audit fix` rewrites package-lock.json — a change that belongs to
+    ollama/ollama, not to a branch proposing MCP support. Flagged, not touched.
+
+6.  Browserslist: browsers data (caniuse-lite) is 15 months old
+
+    Same reasoning: `npx update-browserslist-db@latest` edits the lockfile.
+
+7.  (!) Some chunks are larger than 500 kB after minification
+
+    Upstream's vite build. Not a defect, a bundling note.
+
+8.  WARNING: Code signing disabled, this bundle will not work for upgrade testing
+
+    build_darwin.sh saying what it does without APPLE_IDENTITY. Expected, and
+    the wrapper repeats it in its own words at the end.
+
+WHAT THE FIRST FIX GOT WRONG
+----------------------------
+
+The first version of the fallback timed the Finder step out and killed it —
+but killed only the shell leading it. create-dmg's `hdiutil create` is a child,
+and it kept running: it was still copying the app into a volume that the
+cleanup had just detached, and it printed
+
+    could not access /Volumes/Ollama .../Squirrel - Input/output error
+    hdiutil: create failed - Input/output error
+
+into the middle of the fallback. The fallback happened to succeed anyway,
+which is the dangerous part — a run that passes while an orphaned process
+races it teaches you nothing.
+
+Caught by running the fallback for real rather than reasoning about it.
+Fixed by giving the attempt its own process group (`set -m`) and signalling the
+group, with a guard that refuses to signal the group if it turns out to be this
+script's own — and by detaching in a loop until none of our images remain
+instead of once.
+
+The kill now has a test with teeth: a stand-in that spawns a grandchild, killed
+through the same code path, asserting the grandchild is gone. Sabotaging
+kill_job back to the single-process form makes it fail with
+"grandchild 33266 survived the kill".
+
+PROOF THAT BOTH PATHS WORK
+--------------------------
+
+Falsification of the fallback, run with STYLED_DEADLINE temporarily set to 1 so
+the Finder step is certain to be killed (/tmp/ollama-build-fallback2.log):
+
+    ==> Creating the disk image
+    Creating disk image...
+    canceling...hdiutil: create failed - No child processes
+    ==> Falling back to a plain disk image
+    ...
+    Will skip running AppleScript to configure DMG aesthetics because of --skip-jenkins option.
+    ...
+    created: /Users/krypto/GitHub/ollama/dist/Ollama.dmg
+    ==> Built in 3m 2s
+
+    ok    the app bundle exists
+    ok    its executable is present and runnable
+    ok    Info.plist parses
+    ok    the app is universal
+    ok    the bundled ollama binary is universal
+    ok    the bundled ollama binary runs
+    ok    the version was stamped
+    ok    the embedded frontend is present
+    ok    the disk image exists
+    ok    the disk image is intact
+    ok    the disk image contains Ollama.app
+    ok    it offers the Applications folder
+
+"canceling... No child processes" is hdiutil being stopped deliberately; the
+grep for "Input/output error" over that whole log returns 0, which is the
+orphaned-writer defect being gone.
+
+The styled path, with the deadline back at 420 (/tmp/ollama-build-styled.log):
+
+    Running AppleScript to make Finder stuff pretty: ...
+    waited 1 seconds for .DS_STORE to be created.
+    Done running the AppleScript...
+    created: /Users/krypto/GitHub/ollama/dist/Ollama.dmg
+    ==> Built in 3m 2s
+
+    ...all twelve checks ok...
+
+Ollama.dmg is 175M. Both runs were made with the script exactly as committed
+apart from the one-line deadline change, which was restored before the styled
+run.
+
+THE KILL HAS ITS OWN TEST
+-------------------------
+
+kill_job and run_with_deadline were extracted verbatim from the script into a
+harness whose stand-in for create-dmg spawns a grandchild, exactly the shape
+that survived the old kill:
+
+    deadline status = 124 (want 124)
+    ok    the whole job died, not just its leader
+
+Sabotaged back to signalling the leader alone, the same harness says:
+
+    FAIL  grandchild 33266 survived the kill
+
+which is what a test that only asserted "the deadline fired" would have missed.
