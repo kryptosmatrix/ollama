@@ -16,3 +16,9 @@ llama/build
 llama/vendor
 /ollama
 integration/testdata/models/
+
+# Build outputs from scripts/Ollama BUILD.command, which places them at the
+# repository root on purpose so they are easy to find. They must not become
+# untracked noise in a tree that is being proposed upstream.
+/Ollama.app/
+/Ollama.dmg

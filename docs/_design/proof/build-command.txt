@@ -1,0 +1,66 @@
+Ollama BUILD.command — packaging this branch into an app and a disk image
+
+Run 2026-08-09 from a cold cache. Exit 0, eleven minutes eight seconds.
+
+WHAT IT WRAPS, AND THE TWO THINGS IT ADDS
+
+scripts/build_darwin.sh already builds everything. This calls it rather than
+reimplementing it, so the repository has one build and not two that drift.
+
+  1. It creates the .dmg unconditionally. In build_darwin.sh the disk image is
+     produced inside the code-signing branch, so a build without Apple
+     credentials yields Ollama.app and a zip and no image at all — which is
+     exactly what was asked for here.
+
+  2. It points GOCACHE at a temporary directory. build_darwin.sh runs
+     `go clean -cache`, which otherwise wipes the cache of whoever ran it and
+     makes the next ordinary `go test` in this repo rebuild the world.
+
+WHY IT IS A FULL UNIVERSAL BUILD
+
+build_darwin.sh accepts `-a arm64`, but _prepare_darwin_runtime lipos
+dist/darwin-amd64 and dist/darwin-arm64 together unconditionally when it
+assembles the runtime. A single-architecture build therefore fails at that step.
+Making it optional means changing their script, which is a larger decision than
+a packaging convenience should take, so the wrapper builds both and says so
+before it starts.
+
+VERIFICATION, from the run
+
+    ok    the app bundle exists
+    ok    its executable is present and runnable
+    ok    Info.plist parses
+    ok    the app is universal
+    ok    the bundled ollama binary is universal
+    ok    the bundled ollama binary runs
+    ok    the version was stamped
+    ok    the embedded frontend is present
+    ok    the disk image exists
+    ok    the disk image is intact
+    ok    the disk image contains Ollama.app
+
+The disk image is mounted and inspected rather than merely stat-ed, because a
+file existing says nothing about whether it carries the app.
+
+ACTIVATION EVIDENCE — that the build carries THIS branch, not a stale tree
+
+    $ strings Ollama.app/Contents/MacOS/Ollama | grep -c "api/v1/mcp"
+    18
+
+    $ ./Ollama.app/Contents/Resources/ollama mcp --help
+    Manage Model Context Protocol servers.
+    Servers are defined in mcp.json and must be approved before Ollama will run
+    them. An approval records the exact command line, so a server whose command
+    changes afterwards must be approved again.
+
+Ollama.app is 570M and Ollama.dmg is 175M.
+
+WHAT THIS BUILD IS NOT
+
+Unsigned and un-notarised. Gatekeeper refuses it on first open; the script says
+how to get past that. It is also unsuitable for testing the in-app updater,
+which is what build_darwin.sh itself warns about when signing is skipped.
+
+The version stamped into this particular run ends in "-dirty" because the
+script and the .gitignore entry were still uncommitted when it ran. A build made
+after this commit stamps a clean version.
