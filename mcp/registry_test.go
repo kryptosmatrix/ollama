@@ -24,6 +24,10 @@ func registryFixture(t *testing.T) (*RegistryClient, *[]string) {
 		switch r.URL.Query().Get("cursor") {
 		case "cursor-two":
 			name = "page2.json"
+		case "official":
+			name = "official.json"
+		case "withdrawn":
+			name = "withdrawn.json"
 		case "malformed":
 			name = "malformed.json"
 		case "missing":
@@ -369,5 +373,87 @@ func TestTwoHeaderNamesGetTwoEnvironmentReferences(t *testing.T) {
 		if !strings.HasPrefix(value, "${env:") {
 			t.Errorf("header %q carries %q rather than an environment reference", name, value)
 		}
+	}
+}
+
+// TestRegistrySearchReadsTheOfficialEnvelope pins the shape the live registry
+// actually serves, recorded from it rather than written from memory. Every
+// result is wrapped — {"server": {...}, "_meta": {...}} — and reading the
+// wrapper as though it were the entry yields a page of empty entries instead
+// of an error, which reaches the user as a list of blank rows that all say
+// they cannot be installed.
+func TestRegistrySearchReadsTheOfficialEnvelope(t *testing.T) {
+	client, _ := registryFixture(t)
+
+	page, err := client.Search(t.Context(), "weather", "official")
+	if err != nil {
+		t.Fatalf("Search: %v", err)
+	}
+	if len(page.Servers) != 3 {
+		t.Fatalf("got %d servers, want 3", len(page.Servers))
+	}
+
+	first := page.Servers[0]
+	if first.Name != "io.ausdata/au-weather-mcp" {
+		t.Errorf("name = %q; the wrapper was read instead of the entry", first.Name)
+	}
+	if first.Version != "0.4.9" {
+		t.Errorf("version = %q, want 0.4.9", first.Version)
+	}
+	if first.Repository == nil || first.Repository.URL != "https://github.com/Bigred97/au-weather-mcp" {
+		t.Errorf("repository = %+v", first.Repository)
+	}
+	if len(first.Packages) != 1 || first.Packages[0].Identifier != "au-weather-mcp" {
+		t.Errorf("packages = %+v", first.Packages)
+	}
+
+	// The point of reading the entry at all: it has to resolve into something
+	// Ollama can run, which is what the browse list offers to install.
+	spec, err := first.Resolve()
+	if err != nil {
+		t.Fatalf("Resolve: %v", err)
+	}
+	if spec.Command == "" {
+		t.Errorf("resolved to no command: %+v", spec)
+	}
+
+	remote := page.Servers[2]
+	if remote.Name != "ai.smithery/smithery-ai-national-weather-service" {
+		t.Errorf("third entry = %q", remote.Name)
+	}
+	if len(remote.Remotes) == 0 {
+		t.Fatalf("the hosted entry lost its remotes")
+	}
+}
+
+// A private mirror may still serve entries unwrapped, so the flat shape keeps
+// working — page1.json is that shape, and the tests above it read it.
+func TestRegistrySearchStillReadsAFlatEntry(t *testing.T) {
+	client, _ := registryFixture(t)
+
+	page, err := client.Search(t.Context(), "weather", "")
+	if err != nil {
+		t.Fatalf("Search: %v", err)
+	}
+	if len(page.Servers) == 0 || page.Servers[0].Name == "" {
+		t.Fatalf("flat entries no longer decode: %+v", page.Servers)
+	}
+}
+
+// A withdrawn listing is not offered. The registry keeps deleted and deprecated
+// servers in its index; installing one is installing something its publisher
+// has taken back.
+func TestRegistrySearchSkipsWithdrawnListings(t *testing.T) {
+	client, _ := registryFixture(t)
+
+	page, err := client.Search(t.Context(), "weather", "withdrawn")
+	if err != nil {
+		t.Fatalf("Search: %v", err)
+	}
+	if len(page.Servers) != 1 {
+		t.Fatalf("got %d servers, want only the active one", len(page.Servers))
+	}
+	if page.Servers[0].Name != "io.ausdata/au-weather-mcp" {
+		t.Errorf("kept the wrong entry: %q", page.Servers[0].Name)
 	}
 }

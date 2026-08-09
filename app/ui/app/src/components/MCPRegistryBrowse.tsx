@@ -5,7 +5,11 @@ import { Text } from "@/components/ui/text";
 import { browseMCPRegistry, resolveMCPRegistryEntry } from "@/api";
 import type { MCPRegistryEntry } from "@/gotypes";
 import type { AddMCPServerInput } from "@/utils/mcpServers";
-import { installRequest, presentRegistryEntry } from "@/utils/mcpRegistry";
+import {
+  installRequest,
+  installableEntries,
+  presentRegistryEntry,
+} from "@/utils/mcpRegistry";
 
 interface MCPRegistryBrowseProps {
   /** Called with the request that adds the entry, once the user has agreed. */
@@ -24,6 +28,10 @@ export default function MCPRegistryBrowse({
     queryKey: ["mcpRegistry", search],
     queryFn: () => browseMCPRegistry(search),
   });
+
+  // Only entries Ollama can actually install are offered. The rest are counted
+  // rather than discarded, and the count is shown below the list.
+  const { shown, hidden } = installableEntries(results.data?.entries ?? []);
 
   // Ask the server again at the moment of the decision. The list may be
   // minutes old, and what the user reads before agreeing must be current.
@@ -75,7 +83,14 @@ export default function MCPRegistryBrowse({
             : "Could not reach the registry."}
         </p>
       )}
-      {results.data?.entries.length === 0 && <Text>Nothing found.</Text>}
+      {results.data && results.data.entries.length === 0 && (
+        <Text>Nothing found.</Text>
+      )}
+      {results.data &&
+        results.data.entries.length > 0 &&
+        shown.length === 0 && (
+          <Text>Nothing here is something Ollama can install.</Text>
+        )}
 
       {pending && (
         <RegistryInstallConfirmation
@@ -86,7 +101,7 @@ export default function MCPRegistryBrowse({
       )}
 
       <ul className="flex flex-col gap-2">
-        {results.data?.entries.map((entry) => (
+        {shown.map((entry) => (
           <RegistryResult
             key={entry.name}
             entry={entry}
@@ -94,6 +109,16 @@ export default function MCPRegistryBrowse({
           />
         ))}
       </ul>
+
+      {/* Said rather than left implicit. A list that quietly drops results
+          misrepresents what the registry holds. */}
+      {hidden > 0 && (
+        <Text>
+          {hidden} further {hidden === 1 ? "listing was" : "listings were"} not
+          shown: Ollama cannot work out what {hidden === 1 ? "it" : "they"}{" "}
+          would run.
+        </Text>
+      )}
     </div>
   );
 }

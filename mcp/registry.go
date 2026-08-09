@@ -125,7 +125,7 @@ func (c *RegistryClient) Search(ctx context.Context, query, cursor string) (Regi
 	}
 
 	var body struct {
-		Servers  []RegistryEntry `json:"servers"`
+		Servers  []registryListItem `json:"servers"`
 		Metadata struct {
 			NextCursor string `json:"nextCursor"`
 		} `json:"metadata"`
@@ -133,7 +133,52 @@ func (c *RegistryClient) Search(ctx context.Context, query, cursor string) (Regi
 	if err := c.get(ctx, "/v0/servers?"+params.Encode(), &body); err != nil {
 		return RegistryPage{}, err
 	}
-	return RegistryPage{Servers: body.Servers, NextCursor: body.Metadata.NextCursor}, nil
+
+	entries := make([]RegistryEntry, 0, len(body.Servers))
+	for _, item := range body.Servers {
+		if !item.listed() {
+			continue
+		}
+		entries = append(entries, item.entry())
+	}
+	return RegistryPage{Servers: entries, NextCursor: body.Metadata.NextCursor}, nil
+}
+
+// registryListItem is one element of the registry's servers array.
+//
+// The official registry wraps each result: the server description sits under
+// "server", beside a "_meta" block carrying the registry's own bookkeeping. A
+// private mirror may serve the description at the top level instead, so both
+// are accepted — the wrapper wins when it is present. Reading only the top
+// level, as this did, yields a page of empty entries rather than an error,
+// which is a failure that looks like an empty registry.
+type registryListItem struct {
+	Server *RegistryEntry `json:"server"`
+	Meta   struct {
+		Official struct {
+			// Status is "active" for a live listing. Deleted and deprecated
+			// servers keep their entries, and offering one to a user as
+			// something to install would be offering something withdrawn.
+			Status string `json:"status"`
+		} `json:"io.modelcontextprotocol.registry/official"`
+	} `json:"_meta"`
+
+	RegistryEntry
+}
+
+func (i registryListItem) entry() RegistryEntry {
+	if i.Server != nil {
+		return *i.Server
+	}
+	return i.RegistryEntry
+}
+
+// listed reports whether the registry still stands behind this entry. An
+// absent status is treated as listed: a mirror that says nothing is not
+// claiming a withdrawal.
+func (i registryListItem) listed() bool {
+	status := strings.TrimSpace(i.Meta.Official.Status)
+	return status == "" || strings.EqualFold(status, "active")
 }
 
 func (c *RegistryClient) get(ctx context.Context, path string, into any) error {

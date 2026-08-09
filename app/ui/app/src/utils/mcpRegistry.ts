@@ -84,3 +84,19 @@ export function installRequest(
     env: entry.env ?? undefined,
   };
 }
+
+/**
+ * What the browse list shows, and what it is leaving out.
+ *
+ * Only entries Ollama can actually build a command line for are offered: a row
+ * with an "Add" button that cannot add anything is noise. The count of the rest
+ * is returned rather than discarded, because a list that quietly drops results
+ * is a list that misrepresents the registry.
+ */
+export function installableEntries(entries: MCPRegistryEntry[]): {
+  shown: MCPRegistryEntry[];
+  hidden: number;
+} {
+  const shown = entries.filter((entry) => entry.installable);
+  return { shown, hidden: entries.length - shown.length };
+}

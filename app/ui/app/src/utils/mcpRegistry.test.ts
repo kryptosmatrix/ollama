@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { MCPRegistryEntry } from "@/gotypes";
-import { installRequest, presentRegistryEntry } from "./mcpRegistry";
+import {
+  installRequest,
+  installableEntries,
+  presentRegistryEntry,
+} from "./mcpRegistry";
 
 function entry(overrides: Partial<MCPRegistryEntry> = {}): MCPRegistryEntry {
   return new MCPRegistryEntry({
@@ -117,5 +121,34 @@ describe("installRequest", () => {
     for (const value of Object.values(request.env ?? {})) {
       expect(value).toMatch(/^\$\{env:[A-Z0-9_]+\}$/);
     }
+  });
+});
+
+describe("installableEntries", () => {
+  const listing = (name: string, installable: boolean) =>
+    new MCPRegistryEntry({ name, publisher: "io.example", installable });
+
+  it("offers only what Ollama can install", () => {
+    const { shown } = installableEntries([
+      listing("io.example/a", true),
+      listing("io.example/b", false),
+    ]);
+    expect(shown.map((e) => e.name)).toEqual(["io.example/a"]);
+  });
+
+  // Silently dropping results would misrepresent the registry, so the count
+  // survives for the page to say out loud.
+  it("counts what it left out", () => {
+    expect(
+      installableEntries([
+        listing("io.example/a", true),
+        listing("io.example/b", false),
+        listing("io.example/c", false),
+      ]).hidden,
+    ).toBe(2);
+  });
+
+  it("hides nothing when everything is installable", () => {
+    expect(installableEntries([listing("io.example/a", true)]).hidden).toBe(0);
   });
 });
