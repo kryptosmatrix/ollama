@@ -90,6 +90,18 @@ export function presentMCPServer(server: MCPServer): MCPServerPresentation {
       needsSignIn: false,
     };
   }
+  // Approved, and nothing is holding a connection for it. Saying "Connecting"
+  // here was a contradiction: nothing was, and nothing would until the app was
+  // restarted.
+  if (server.status === "not-connected") {
+    return {
+      label: "Not connected",
+      detail: server.error ?? "Ollama has no connection for this server.",
+      needsApproval: false,
+      attention: true,
+      needsSignIn: false,
+    };
+  }
   if (server.status === "connected") {
     const count = server.tools?.length ?? 0;
     return {

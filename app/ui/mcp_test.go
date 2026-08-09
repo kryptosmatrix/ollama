@@ -467,3 +467,51 @@ func TestMCPAPIListDoesNotStartAnything(t *testing.T) {
 		t.Error("listing started a server")
 	}
 }
+
+// TestApprovedServerWithNoManagerIsNotCalledUnapproved is the state that was
+// reported: an approved server, no manager holding a connection for it, drawn
+// by the page as "Connecting" above a line saying to restart. It was reported
+// as needs-approval, which is not true and is what confused the page.
+func TestApprovedServerWithNoManagerIsNotCalledUnapproved(t *testing.T) {
+	configPath, approvalsPath := mcpFiles(t)
+
+	cfg, err := mcp.Load(configPath)
+	if err != nil {
+		t.Fatalf("load: %v", err)
+	}
+	cfg.Set("files", &mcp.ServerSpec{Command: "uvx", Args: []string{"mcp-server-files"}})
+	if err := cfg.Save(configPath); err != nil {
+		t.Fatalf("save: %v", err)
+	}
+	stored, _ := cfg.Get("files")
+
+	approvals, err := mcp.LoadApprovals(approvalsPath)
+	if err != nil {
+		t.Fatalf("approvals: %v", err)
+	}
+	approvals.Approve(stored, time.Now())
+	if err := approvals.Save(approvalsPath); err != nil {
+		t.Fatalf("save approvals: %v", err)
+	}
+
+	// A server with no manager at all: exactly what the app had when it started
+	// with nothing configured.
+	server := &Server{Approvals: tools.NewApprovals()}
+	listed := listServers(t, server)
+	if len(listed) != 1 {
+		t.Fatalf("servers = %+v", listed)
+	}
+
+	if !listed[0].Approved {
+		t.Error("an approved server is reported as unapproved")
+	}
+	if listed[0].Status == string(mcp.StatusNeedsApproval) {
+		t.Error("an approved server is reported with the status of one awaiting approval")
+	}
+	if listed[0].Status != StatusNotConnected {
+		t.Errorf("status = %q, want %q", listed[0].Status, StatusNotConnected)
+	}
+	if listed[0].Error == "" {
+		t.Error("nothing tells the user what to do about it")
+	}
+}

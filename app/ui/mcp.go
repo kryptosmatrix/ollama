@@ -73,6 +73,12 @@ func (s *Server) listMCPServers(w http.ResponseWriter, _ *http.Request) error {
 // describeMCPServer merges the three things a user needs to see about a server:
 // what the configuration says, whether it has been approved, and what the live
 // connection is doing.
+// StatusNotConnected is reported for a server that is configured, enabled and
+// approved, but that this process holds no connection for. It is not one of the
+// manager's states because the manager is not the thing that knows: it is what
+// the interface observes when there is no manager to ask.
+const StatusNotConnected = "not-connected"
+
 func describeMCPServer(name string, spec *mcp.ServerSpec, problem error, approvals *mcp.Approvals, state mcp.ServerState) responses.MCPServer {
 	return describeMCPServerWithSignIn(name, spec, problem, approvals, state, nil, false)
 }
@@ -134,8 +140,14 @@ func describeMCPServerCore(name string, spec *mcp.ServerSpec, problem error, app
 		}
 	default:
 		// Configured, enabled and approved, but this process has no connection
-		// for it — it was added since the app started.
-		server.Status = string(mcp.StatusNeedsApproval)
+		// for it: MCP is switched off, or the manager could not be built.
+		//
+		// This used to report StatusNeedsApproval, which was not true — the
+		// server is approved — and the page, seeing an approved server in a
+		// status it did not recognise, drew it as "Connecting". Nothing was
+		// connecting and nothing would change without a restart, so the label
+		// contradicted the very sentence underneath it.
+		server.Status = StatusNotConnected
 		server.Error = "restart Ollama to connect this server"
 	}
 

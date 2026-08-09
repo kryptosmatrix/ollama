@@ -537,9 +537,14 @@ func startMCPManager(ctx context.Context) *mcp.Manager {
 		slog.Warn("could not read mcp config", "error", err)
 		return nil
 	}
-	if len(cfg.Names()) == 0 {
-		return nil
-	}
+
+	// An empty configuration is not a reason to skip building the manager. It
+	// used to be, and the cost was that a server added from the MCP Servers
+	// page could never connect: with no manager, approving it reached nothing,
+	// the page had no state to report, and it sat reading "restart Ollama to
+	// connect this server" — for an app whose whole purpose on that page is
+	// adding servers while it runs. Connecting an empty configuration does
+	// nothing, so there is nothing to save by refusing to.
 
 	approvalsPath, err := mcp.ApprovalsPath()
 	if err != nil {

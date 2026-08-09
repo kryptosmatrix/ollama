@@ -185,3 +185,31 @@ describe("parsePastedServers", () => {
     expect(parsed.args).toEqual(["ok"]);
   });
 });
+
+describe("a server with nothing holding a connection for it", () => {
+  // Reported from a running build: an approved server sat reading "Connecting"
+  // above a line telling the user to restart. Nothing was connecting.
+  it("does not claim to be connecting", () => {
+    const shown = presentMCPServer(
+      server({
+        status: "not-connected",
+        approved: true,
+        enabled: true,
+        error: "restart Ollama to connect this server",
+      }),
+    );
+    expect(shown.label).toBe("Not connected");
+    expect(shown.label).not.toBe("Connecting");
+    expect(shown.detail).toContain("restart Ollama");
+    // It needs the user to do something, so it is not a quiet in-between state.
+    expect(shown.attention).toBe(true);
+    expect(shown.needsApproval).toBe(false);
+  });
+
+  it("still reads as connected once a session is live", () => {
+    const shown = presentMCPServer(
+      server({ status: "connected", approved: true, enabled: true }),
+    );
+    expect(shown.label).toBe("Connected");
+  });
+});
