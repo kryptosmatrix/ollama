@@ -10,6 +10,7 @@ import {
   ErrorEvent,
   InferenceComputeResponse,
   MCPServer,
+  MCPDiscoveredServer,
   MCPRegistryEntry,
   ModelCapabilitiesResponse,
   Model,
@@ -447,6 +448,65 @@ export async function resolveMCPRegistryEntry(
     );
   }
   return new MCPRegistryEntry(await response.json());
+}
+
+export interface MCPDiscovery {
+  servers: MCPDiscoveredServer[];
+  /** Every path that was looked at, existing or not. */
+  searched: string[];
+  /** A failure that did not stop the rest of the search. */
+  error?: string;
+}
+
+function readDiscovery(data: unknown): MCPDiscovery {
+  const body = (data ?? {}) as {
+    servers?: unknown[];
+    searched?: string[];
+    error?: string;
+  };
+  return {
+    servers: (body.servers ?? []).map(
+      (server: unknown) => new MCPDiscoveredServer(server),
+    ),
+    searched: body.searched ?? [],
+    error: body.error,
+  };
+}
+
+/**
+ * Lists MCP servers other applications on this machine are configured with.
+ *
+ * This reads named files and contacts nothing, which is why it is a plain
+ * read while the probe below is not.
+ */
+export async function discoverMCPServers(): Promise<MCPDiscovery> {
+  const response = await fetch(`${API_BASE}/api/v1/mcp-discover`);
+  if (!response.ok) {
+    const detail = (await response.text().catch(() => "")).trim();
+    throw new Error(
+      detail || `Could not search this machine: ${response.status}`,
+    );
+  }
+  return readDiscovery(await response.json());
+}
+
+/**
+ * Looks for MCP servers answering on this machine right now.
+ *
+ * A POST because it is an act: it contacts every listening loopback port with
+ * the MCP handshake. Nothing calls it except a user asking for it.
+ */
+export async function probeMCPServers(): Promise<MCPDiscovery> {
+  const response = await fetch(`${API_BASE}/api/v1/mcp-probe`, {
+    method: "POST",
+  });
+  if (!response.ok) {
+    const detail = (await response.text().catch(() => "")).trim();
+    throw new Error(
+      detail || `Could not check this machine: ${response.status}`,
+    );
+  }
+  return readDiscovery(await response.json());
 }
 
 export async function getSettings(): Promise<{

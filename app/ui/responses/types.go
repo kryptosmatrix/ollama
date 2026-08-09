@@ -272,3 +272,49 @@ type MCPRegistryResponse struct {
 	// quietly stop saying it.
 	NotVetted bool `json:"notVetted"`
 }
+
+// MCPDiscoveredServer is one MCP server found on this machine: either
+// configured in another MCP client, or answering on the loopback interface.
+//
+// It is only ever an offer. Nothing here has been added, enabled or approved,
+// and the fields a user must read before agreeing — Runs, Notes, Problem — are
+// carried beside the specification rather than derived from it in the browser.
+type MCPDiscoveredServer struct {
+	Name string `json:"name"`
+	// Source names where it came from in words: an application's name, or the
+	// process and port that answered.
+	Source string `json:"source"`
+	// Path is the file it was read from, when it came from one.
+	Path string `json:"path,omitempty"`
+	// Runs is the command line or URL, verbatim.
+	Runs string `json:"runs"`
+	// Origin is "config" for something another application was told about, and
+	// "listening" for something that answered an MCP handshake just now.
+	Origin string `json:"origin"`
+	// Notes record what discovery changed or noticed — a credential left
+	// behind, a name it had to alter.
+	Notes []string `json:"notes,omitempty"`
+	// Problem is why it cannot be added as it stands. Such an entry is listed
+	// rather than hidden: one that vanishes reads as a discovery that missed it.
+	Problem string `json:"problem,omitempty"`
+
+	// The specification, carried structurally so that adding it does not mean
+	// taking apart the string the user read.
+	Command  string            `json:"command,omitempty"`
+	Args     []string          `json:"args,omitempty"`
+	Env      map[string]string `json:"env,omitempty"`
+	URL      string            `json:"url,omitempty"`
+	Headers  map[string]string `json:"headers,omitempty"`
+	Disabled bool              `json:"disabled,omitempty"`
+}
+
+// MCPDiscoveryResponse is what a search of this machine found.
+type MCPDiscoveryResponse struct {
+	Servers []MCPDiscoveredServer `json:"servers"`
+	// Searched is every path that was looked at, existing or not, so the
+	// coverage of the search is visible rather than implied.
+	Searched []string `json:"searched,omitempty"`
+	// Error is a failure that did not stop the rest of the search, such as the
+	// loopback probe being unavailable.
+	Error string `json:"error,omitempty"`
+}

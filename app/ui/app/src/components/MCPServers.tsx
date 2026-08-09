@@ -21,6 +21,7 @@ import {
   type AddMCPServerInput,
 } from "@/utils/mcpServers";
 import MCPRegistryBrowse from "./MCPRegistryBrowse";
+import MCPLocalDiscovery from "./MCPLocalDiscovery";
 
 /**
  * The page header, with the way back.
@@ -99,6 +100,7 @@ export default function MCPServers() {
   const [paste, setPaste] = useState("");
   const [showPaste, setShowPaste] = useState(false);
   const [showBrowse, setShowBrowse] = useState(false);
+  const [showLocal, setShowLocal] = useState(false);
 
   const servers = useQuery({
     queryKey: ["mcpServers"],
@@ -155,6 +157,9 @@ export default function MCPServers() {
         <Button onClick={() => setShowPaste((open) => !open)}>
           Add from configuration
         </Button>
+        <Button onClick={() => setShowLocal((open) => !open)}>
+          Find on this Mac
+        </Button>
       </div>
 
       {showBrowse && (
@@ -165,6 +170,19 @@ export default function MCPServers() {
             // what is on disk.
             await addMCPServer(request);
             setShowBrowse(false);
+            await refresh();
+          }}
+        />
+      )}
+
+      {showLocal && (
+        <MCPLocalDiscovery
+          onAdd={async (request: AddMCPServerInput) => {
+            // The ordinary add path, the same one a pasted or registry server
+            // takes: it lands unapproved and is approved below, where the
+            // command line is checked against what is on disk.
+            await addMCPServer(request);
+            setShowLocal(false);
             await refresh();
           }}
         />

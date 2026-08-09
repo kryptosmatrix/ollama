@@ -790,3 +790,65 @@ export class MCPRegistryResponse {
 	    return a;
 	}
 }
+export class MCPDiscoveredServer {
+    name: string;
+    source: string;
+    path?: string;
+    runs: string;
+    origin: string;
+    notes?: string[];
+    problem?: string;
+    command?: string;
+    args?: string[];
+    env?: {[key: string]: string};
+    url?: string;
+    headers?: {[key: string]: string};
+    disabled?: boolean;
+
+    constructor(source: any = {}) {
+        if ('string' === typeof source) source = JSON.parse(source);
+        this.name = source["name"];
+        this.source = source["source"];
+        this.path = source["path"];
+        this.runs = source["runs"];
+        this.origin = source["origin"];
+        this.notes = source["notes"];
+        this.problem = source["problem"];
+        this.command = source["command"];
+        this.args = source["args"];
+        this.env = source["env"];
+        this.url = source["url"];
+        this.headers = source["headers"];
+        this.disabled = source["disabled"];
+    }
+}
+export class MCPDiscoveryResponse {
+    servers: MCPDiscoveredServer[];
+    searched?: string[];
+    error?: string;
+
+    constructor(source: any = {}) {
+        if ('string' === typeof source) source = JSON.parse(source);
+        this.servers = this.convertValues(source["servers"], MCPDiscoveredServer);
+        this.searched = source["searched"];
+        this.error = source["error"];
+    }
+
+	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	    if (!a) {
+	        return a;
+	    }
+	    if (Array.isArray(a)) {
+	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	    } else if ("object" === typeof a) {
+	        if (asMap) {
+	            for (const key of Object.keys(a)) {
+	                a[key] = new classs(a[key]);
+	            }
+	            return a;
+	        }
+	        return new classs(a);
+	    }
+	    return a;
+	}
+}

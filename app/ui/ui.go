@@ -111,6 +111,11 @@ type Server struct {
 	// separate request that carries the user's answer.
 	Approvals     *tools.Approvals
 	approvalsOnce sync.Once
+	// discoveryHome overrides the home directory searched for other MCP
+	// clients' configuration. It exists so a test can search a directory it
+	// created rather than the developer's own home, where it would read — and
+	// report — their real credentials.
+	discoveryHome string
 	Tools         bool   // if true, the server will use single-turn tools to fulfill the user's request
 	WebSearch     bool   // if true, the server will use single-turn browser tool to fulfill the user's request
 	Agent         bool   // if true, the server will use multi-turn tools to fulfill the user's request
@@ -302,6 +307,8 @@ func (s *Server) Handler() http.Handler {
 	mux.Handle("POST /api/v1/mcp/{name}/approve", handle(s.approveMCPServer))
 	mux.Handle("POST /api/v1/mcp/{name}/signin", handle(s.signInMCPServer))
 	mux.Handle("POST /api/v1/mcp/{name}/signout", handle(s.signOutMCPServer))
+	mux.Handle("GET /api/v1/mcp-discover", handle(s.discoverMCPServers))
+	mux.Handle("POST /api/v1/mcp-probe", handle(s.probeMCPServers))
 	mux.Handle("GET /api/v1/mcp-registry", handle(s.browseMCPRegistry))
 	mux.Handle("POST /api/v1/mcp-registry/resolve", handle(s.resolveMCPRegistryEntry))
 	mux.Handle("POST /api/v1/create-chat", handle(s.createChat))
