@@ -2101,8 +2101,8 @@ func TestIntegration_AutoInstallable(t *testing.T) {
 	}{
 		{"openclaw", true},
 		{"pi", true},
-		{"hermes", true},
-		{"hermes-desktop", true},
+		{"hermes", false},
+		{"hermes-desktop", false},
 		{"cline", true},
 		{"qwen", true},
 		{"claude", false},
