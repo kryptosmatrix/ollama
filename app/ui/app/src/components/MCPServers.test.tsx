@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { MCPServerRow } from "./MCPServers";
+import { MCPPageHeader, MCPServerRow, PasteConfiguration } from "./MCPServers";
 import { MCPServer } from "@/gotypes";
 
 function server(overrides: Partial<MCPServer> = {}): MCPServer {
@@ -143,5 +143,36 @@ describe("MCPServerRow", () => {
     expect(markup).toContain("process list");
     // A note, not a refusal: the approve button is still there.
     expect(markup).toContain("Approve and run");
+  });
+});
+
+describe("the page chrome", () => {
+  // Dark mode gives these fields a dark background. Without an explicit text
+  // colour the value inherits black and cannot be read — which is what this
+  // page shipped with.
+  it("gives the configuration field a colour that follows the theme", () => {
+    const markup = renderToStaticMarkup(
+      <PasteConfiguration
+        value=""
+        onChange={() => {}}
+        onAdd={() => {}}
+        pending={false}
+      />,
+    );
+    expect(markup).toContain("dark:text-neutral-100");
+    expect(markup).toContain("dark:placeholder:text-neutral-500");
+  });
+
+  it("offers a way back to home", () => {
+    let went = false;
+    const markup = renderToStaticMarkup(
+      <MCPPageHeader
+        onBack={() => {
+          went = true;
+        }}
+      />,
+    );
+    expect(markup).toContain("Back to home");
+    expect(went).toBe(false);
   });
 });

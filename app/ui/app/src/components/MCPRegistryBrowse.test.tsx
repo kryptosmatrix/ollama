@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   RegistryInstallConfirmation,
   RegistryResult,
+  RegistrySearchForm,
 } from "./MCPRegistryBrowse";
 import { MCPRegistryEntry } from "@/gotypes";
 
@@ -89,5 +90,19 @@ describe("RegistryInstallConfirmation", () => {
 
   it("names the server it would be added as", () => {
     expect(render()).toContain("weather");
+  });
+});
+
+describe("RegistrySearchForm", () => {
+  it("gives the search field a colour that follows the theme", () => {
+    const markup = renderToStaticMarkup(
+      <RegistrySearchForm
+        query=""
+        onQueryChange={() => {}}
+        onSubmit={() => {}}
+      />,
+    );
+    expect(markup).toContain("dark:text-neutral-100");
+    expect(markup).toContain("dark:placeholder:text-neutral-500");
   });
 });

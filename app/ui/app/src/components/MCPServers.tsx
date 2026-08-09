@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BuildingStorefrontIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon } from "@heroicons/react/20/solid";
+import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import {
@@ -20,7 +22,78 @@ import {
 } from "@/utils/mcpServers";
 import MCPRegistryBrowse from "./MCPRegistryBrowse";
 
+/**
+ * The page header, with the way back.
+ *
+ * The arrow goes to "/", not to a chat id: the index route already resolves
+ * which home the user last had open. Working that out again here would be a
+ * second implementation of it, and the two would drift.
+ */
+export function MCPPageHeader({ onBack }: { onBack: () => void }) {
+  return (
+    <header className="flex items-center gap-3">
+      <button
+        type="button"
+        onClick={onBack}
+        aria-label="Back to home"
+        title="Back"
+        className="-ml-1.5 rounded-full p-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+      >
+        <ArrowLeftIcon className="h-5 w-5 text-neutral-700 dark:text-white" />
+      </button>
+      <BuildingStorefrontIcon className="h-6 w-6 stroke-current text-neutral-500" />
+      <h1 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
+        MCP Servers
+      </h1>
+    </header>
+  );
+}
+
+/**
+ * The paste-a-configuration block.
+ *
+ * Its own component so the field can be rendered — and its colours asserted —
+ * without standing up a router and a query client for the whole page.
+ */
+export function PasteConfiguration({
+  value,
+  onChange,
+  onAdd,
+  pending,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onAdd: () => void;
+  pending: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <Text>
+        Paste a configuration block. Servers are added switched on but not
+        approved — you will be asked to read each command line first.
+      </Text>
+      {/* The text colour is not decoration: without it the field inherits
+          black and what you typed is unreadable against the dark field. */}
+      <textarea
+        className="h-40 w-full rounded-lg border border-neutral-300 bg-white p-2 font-mono text-xs text-neutral-900 placeholder:text-neutral-400 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        aria-label="MCP server configuration"
+        placeholder={
+          '{\n  "mcpServers": {\n    "files": {\n      "command": "uvx",\n      "args": ["mcp-server-files"]\n    }\n  }\n}'
+        }
+      />
+      <div>
+        <Button disabled={value.trim() === "" || pending} onClick={onAdd}>
+          Add
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function MCPServers() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [paste, setPaste] = useState("");
@@ -62,12 +135,7 @@ export default function MCPServers() {
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-6">
-      <header className="flex items-center gap-3">
-        <BuildingStorefrontIcon className="h-6 w-6 stroke-current text-neutral-500" />
-        <h1 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
-          MCP Servers
-        </h1>
-      </header>
+      <MCPPageHeader onBack={() => navigate({ to: "/" })} />
 
       <Text>
         MCP servers give models extra tools. Ollama will not run a server until
@@ -103,28 +171,12 @@ export default function MCPServers() {
       )}
 
       {showPaste && (
-        <div className="flex flex-col gap-2">
-          <Text>
-            Paste a configuration block. Servers are added switched on but not
-            approved — you will be asked to read each command line first.
-          </Text>
-          <textarea
-            className="h-40 w-full rounded-lg border border-neutral-300 bg-white p-2 font-mono text-xs dark:border-neutral-700 dark:bg-neutral-900"
-            value={paste}
-            onChange={(event) => setPaste(event.target.value)}
-            placeholder={
-              '{\n  "mcpServers": {\n    "files": {\n      "command": "uvx",\n      "args": ["mcp-server-files"]\n    }\n  }\n}'
-            }
-          />
-          <div>
-            <Button
-              disabled={paste.trim() === "" || addPasted.isPending}
-              onClick={() => addPasted.mutate(paste)}
-            >
-              Add
-            </Button>
-          </div>
-        </div>
+        <PasteConfiguration
+          value={paste}
+          onChange={setPaste}
+          onAdd={() => addPasted.mutate(paste)}
+          pending={addPasted.isPending}
+        />
       )}
 
       {servers.isLoading && <Text>Loading…</Text>}

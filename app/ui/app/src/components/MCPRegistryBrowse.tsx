@@ -49,22 +49,11 @@ export default function MCPRegistryBrowse({
 
   return (
     <div className="flex flex-col gap-3">
-      <form
-        className="flex gap-2"
-        onSubmit={(event) => {
-          event.preventDefault();
-          setSearch(query);
-        }}
-      >
-        <input
-          className="flex-1 rounded-lg border border-neutral-300 px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search the MCP registry"
-          aria-label="Search the MCP registry"
-        />
-        <Button type="submit">Search</Button>
-      </form>
+      <RegistrySearchForm
+        query={query}
+        onQueryChange={setQuery}
+        onSubmit={() => setSearch(query)}
+      />
 
       {/* Not decoration. The registry is open-publish and this must be said. */}
       <Text>
@@ -106,6 +95,41 @@ export default function MCPRegistryBrowse({
         ))}
       </ul>
     </div>
+  );
+}
+
+/**
+ * The search field. Its own component so its colours can be asserted without
+ * standing up a query client for the whole browse pane.
+ */
+export function RegistrySearchForm({
+  query,
+  onQueryChange,
+  onSubmit,
+}: {
+  query: string;
+  onQueryChange: (value: string) => void;
+  onSubmit: () => void;
+}) {
+  return (
+    <form
+      className="flex gap-2"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit();
+      }}
+    >
+      {/* The text colour is not decoration: without it the field inherits
+          black and what you typed is unreadable against the dark field. */}
+      <input
+        className="flex-1 rounded-lg border border-neutral-300 bg-white px-2 py-1 text-sm text-neutral-900 placeholder:text-neutral-400 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+        value={query}
+        onChange={(event) => onQueryChange(event.target.value)}
+        placeholder="Search the MCP registry"
+        aria-label="Search the MCP registry"
+      />
+      <Button type="submit">Search</Button>
+    </form>
   );
 }
 
