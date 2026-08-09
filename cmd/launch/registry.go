@@ -234,9 +234,6 @@ var integrationSpecs = []*IntegrationSpec{
 			CheckInstalled: func() bool {
 				return (&Hermes{}).installed()
 			},
-			EnsureInstalled: func() error {
-				return (&Hermes{}).ensureInstalled()
-			},
 			URL: "https://hermes-agent.nousresearch.com/docs/getting-started/installation/",
 		},
 	},
@@ -247,9 +244,6 @@ var integrationSpecs = []*IntegrationSpec{
 		Install: IntegrationInstallSpec{
 			CheckInstalled: func() bool {
 				return (&Hermes{}).installed()
-			},
-			EnsureInstalled: func() error {
-				return (&Hermes{}).ensureInstalledFor("hermes-desktop")
 			},
 			URL: "https://hermes-agent.nousresearch.com/docs/getting-started/installation/",
 		},
