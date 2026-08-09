@@ -425,3 +425,33 @@ func TestDiscoverKeepsRegistrationsThatDiffer(t *testing.T) {
 		t.Fatalf("got %d entries, want both: %+v", len(found), found)
 	}
 }
+
+// TestDiscoverMergesRegistrationsWrittenDifferently is the case that was
+// actually reported, in the shapes those two applications actually write:
+// Claude Code states the transport and leaves empty args and env behind,
+// Cursor writes the command alone. They start the same process. Fingerprinting
+// them as written puts them in two rows, which is the complaint.
+func TestDiscoverMergesRegistrationsWrittenDifferently(t *testing.T) {
+	home := t.TempDir()
+	writeClientConfig(t, home, "Claude Code", `{
+	  "mcpServers": {
+	    "agora-memory": {
+	      "type": "stdio",
+	      "command": "/Users/x/.local/bin/agora-memory-mcp",
+	      "args": [],
+	      "env": {}
+	    }
+	  }
+	}`)
+	writeClientConfig(t, home, "Cursor", `{
+	  "mcpServers": {"agora-memory": {"command": "/Users/x/.local/bin/agora-memory-mcp"}}
+	}`)
+
+	found, _ := DiscoverConfigured(home)
+	if len(found) != 1 {
+		t.Fatalf("got %d entries, want one merged: %+v", len(found), found)
+	}
+	if len(found[0].Sources) != 2 {
+		t.Errorf("sources = %v", found[0].Sources)
+	}
+}

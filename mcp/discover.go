@@ -189,7 +189,7 @@ func mergeSameServer(found []DiscoveredServer) []DiscoveredServer {
 			merged = append(merged, server)
 			continue
 		}
-		key := server.Name + "\x00" + server.Spec.Fingerprint()
+		key := server.Name + "\x00" + mergeKey(server.Spec)
 		if index, seen := at[key]; seen {
 			merged[index].Sources = append(merged[index].Sources, server.Sources...)
 			merged[index].Paths = append(merged[index].Paths, server.Paths...)
@@ -204,6 +204,30 @@ func mergeSameServer(found []DiscoveredServer) []DiscoveredServer {
 		merged = append(merged, server)
 	}
 	return merged
+}
+
+// mergeKey identifies a server by what it would actually launch, not by how
+// its JSON happened to be written.
+//
+// This is the difference between the merge working and not working on a real
+// machine: Claude Code writes an explicit "type": "stdio" with empty args and
+// env, and Cursor writes the command alone. Both start the same process, and
+// fingerprinting them as written puts them in two rows — which was the whole
+// complaint. So the transport is resolved to the value that would be used, and
+// empty collections are cleared, before the specification is fingerprinted.
+func mergeKey(spec *ServerSpec) string {
+	normalised := *spec
+	normalised.Type = spec.transport()
+	if len(normalised.Args) == 0 {
+		normalised.Args = nil
+	}
+	if len(normalised.Env) == 0 {
+		normalised.Env = nil
+	}
+	if len(normalised.Headers) == 0 {
+		normalised.Headers = nil
+	}
+	return normalised.Fingerprint()
 }
 
 func firstOf(values []string) string {
