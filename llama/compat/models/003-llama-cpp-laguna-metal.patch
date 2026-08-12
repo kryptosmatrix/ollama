@@ -17,8 +17,8 @@ index 1d705440e..7e708b144 100644
 +                // Laguna's routed SwiGLU activations can overflow those tiles.
 +                // Generation uses one token and does not need this workaround.
 +                constexpr float down_input_scale = 1.0f / 256.0f;
-+                up_scale = ggml_fill(ctx0,
-+                        model.layers[il].ffn_exp_probs_b, down_input_scale);
++                ggml_tensor * up_scale_shape = ggml_new_tensor_1d(ctx0, GGML_TYPE_F32, n_expert);
++                up_scale = ggml_fill(ctx0, up_scale_shape, down_input_scale);
 +                expert_weights_scale /= down_input_scale;
 +            }
 +#endif
