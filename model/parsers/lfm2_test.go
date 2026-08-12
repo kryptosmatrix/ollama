@@ -1168,6 +1168,35 @@ func TestLFM2Parser_EdgeCases(t *testing.T) {
 	}
 }
 
+func TestLFM2Parser_DiscardsWhitespaceWhileLookingForThinking(t *testing.T) {
+	parser := &LFM2Parser{hasThinkingSupport: true}
+	parser.Init(nil, nil, &api.ThinkValue{Value: true})
+
+	for range 100 {
+		content, thinking, calls, err := parser.Add(" \n\t", false)
+		if err != nil {
+			t.Fatalf("Add() error = %v", err)
+		}
+		if content != "" || thinking != "" || len(calls) != 0 {
+			t.Fatalf("Add() = (%q, %q, %v), want no output", content, thinking, calls)
+		}
+		if parser.buffer.Len() != 0 {
+			t.Fatalf("buffer length = %d, want 0", parser.buffer.Len())
+		}
+	}
+
+	content, thinking, _, err := parser.Add("<thi", false)
+	if err != nil {
+		t.Fatalf("Add() error = %v", err)
+	}
+	if content != "" || thinking != "" {
+		t.Fatalf("Add() = (%q, %q), want no output for partial tag", content, thinking)
+	}
+	if got := parser.buffer.String(); got != "<thi" {
+		t.Fatalf("buffer = %q, want %q", got, "<thi")
+	}
+}
+
 func TestLFM2Parser_BareToolCallFallback(t *testing.T) {
 	parser := &LFM2Parser{}
 	tools := []api.Tool{

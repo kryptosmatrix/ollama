@@ -203,6 +203,10 @@ func (p *LFM2Parser) eat() ([]lfm2Event, bool) {
 		// Decide whether this turn is a reasoning turn (begins with <think>) or a
 		// direct answer (no tag). Leading whitespace is ignored either way.
 		trimmed := strings.TrimLeftFunc(bufStr, unicode.IsSpace)
+		if trimmed != bufStr {
+			p.buffer.Reset()
+			p.buffer.WriteString(trimmed)
+		}
 		if strings.HasPrefix(trimmed, lfm2ThinkingOpenTag) {
 			after := trimmed[len(lfm2ThinkingOpenTag):]
 			p.buffer.Reset()
