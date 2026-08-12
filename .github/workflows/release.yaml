@@ -389,18 +389,38 @@ jobs:
       KEY_CONTAINER: ${{ vars.KEY_CONTAINER }}
     steps:
       - uses: actions/checkout@v4
+      - name: Install signing dependencies
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          function Assert-AuthenticodePublisher($Path, $Publisher) {
+            $signature = Get-AuthenticodeSignature -FilePath $Path
+            if ($signature.Status -ne "Valid" -or $signature.SignerCertificate.Subject -notmatch $Publisher) {
+              throw "Invalid Authenticode signature for $Path (status: $($signature.Status), signer: $($signature.SignerCertificate.Subject))"
+            }
+          }
+
+          $sdkSetup = "${{ runner.temp }}\sdksetup.exe"
+          Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=323507" -OutFile $sdkSetup
+          Assert-AuthenticodePublisher $sdkSetup '(^|, )O=Microsoft Corporation(,|$)'
+          Start-Process $sdkSetup -ArgumentList @("/q") -NoNewWindow -Wait
+
+          Invoke-WebRequest -Uri "https://github.com/GoogleCloudPlatform/kms-integrations/releases/download/cng-v1.0/kmscng-1.0-windows-amd64.zip" -OutFile "${{ runner.temp }}\plugin.zip"
+          Expand-Archive -Path "${{ runner.temp }}\plugin.zip" -DestinationPath "${{ runner.temp }}\plugin\"
+          $pluginInstallers = @(Get-ChildItem "${{ runner.temp }}\plugin" -Recurse -File -Filter "kmscng.msi")
+          if ($pluginInstallers.Count -ne 1) {
+            throw "Expected exactly one kmscng.msi, found $($pluginInstallers.Count)"
+          }
+          Assert-AuthenticodePublisher $pluginInstallers[0].FullName '(^|, )O=Google LLC(,|$)'
+          Start-Process msiexec.exe -ArgumentList @("/i", $pluginInstallers[0].FullName, "/quiet") -NoNewWindow -Wait
+
+      # Authenticate only after all downloaded executables have passed signature verification.
       - uses: google-github-actions/auth@v2
         with:
           project_id: ollama
           credentials_json: ${{ secrets.GOOGLE_SIGNING_CREDENTIALS }}
       - run: |
           $ErrorActionPreference = "Stop"
-          Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=323507" -OutFile "${{ runner.temp }}\sdksetup.exe"
-          Start-Process "${{ runner.temp }}\sdksetup.exe" -ArgumentList @("/q") -NoNewWindow -Wait
-
-          Invoke-WebRequest -Uri "https://github.com/GoogleCloudPlatform/kms-integrations/releases/download/cng-v1.0/kmscng-1.0-windows-amd64.zip" -OutFile "${{ runner.temp }}\plugin.zip"
-          Expand-Archive -Path "${{ runner.temp }}\plugin.zip" -DestinationPath "${{ runner.temp }}\plugin\"
-          & "${{ runner.temp }}\plugin\*\kmscng.msi" /quiet
 
           echo "${{ vars.OLLAMA_CERT }}" >ollama_inc.crt
       - uses: actions/setup-go@v5
