@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/ollama/ollama/internal/modelref"
+	modeltypes "github.com/ollama/ollama/types/model"
 )
 
 var deprecatedLaunchModels = map[string]struct{}{
@@ -79,6 +80,9 @@ func launchReplacementCommand(commandName, model string) string {
 	commandName = strings.TrimSpace(commandName)
 	model = strings.TrimSpace(model)
 	if commandName == "" || model == "" {
+		return ""
+	}
+	if !modeltypes.ParseName(model).IsValid() {
 		return ""
 	}
 	return fmt.Sprintf("ollama launch %s --model %s", commandName, model)
