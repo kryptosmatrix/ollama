@@ -195,11 +195,26 @@ jobs:
       - if: matrix.preset == 'CPU'
         name: Install Windows ARM64 cross compiler
         run: |
+          $ErrorActionPreference = "Stop"
           Invoke-WebRequest -Uri "https://github.com/mstorsjo/llvm-mingw/releases/download/20240619/llvm-mingw-20240619-ucrt-x86_64.zip" -OutFile "${{ runner.temp }}\llvm-mingw-ucrt.zip"
-          Expand-Archive -Path ${{ runner.temp }}\llvm-mingw-ucrt.zip -DestinationPath "C:\Program Files\"
-          $installPath=(Resolve-Path -Path "C:\Program Files\llvm-mingw-*-ucrt-x86_64").path
+          Expand-Archive -Path ${{ runner.temp }}\llvm-mingw-ucrt.zip -DestinationPath "${{ runner.temp }}\llvm-mingw"
+          $installPath=(Resolve-Path -Path "${{ runner.temp }}\llvm-mingw\llvm-mingw-*-ucrt-x86_64").path
           if (!(Test-Path "$installPath\bin\aarch64-w64-mingw32-gcc.exe")) {
             throw "llvm-mingw x86_64 package is missing the aarch64 cross compiler"
+          }
+          echo "OLLAMA_WINDOWS_ARM64_TOOLCHAIN=$installPath\bin" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "C:\msys64\clang64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - if: matrix.preset == 'CPU'
+        name: Verify Windows CPU compiler
+        run: |
+          $compiler=(Get-Command gcc -ErrorAction Stop).Path
+          if ($compiler -notlike 'C:\msys64\clang64\bin\*') {
+            throw "GCC must come from the runner-provided MSYS2 toolchain, not the downloaded cross compiler"
+          }
+          $version=(& gcc -v 2>&1) -join "`n"
+          echo "gcc is $version"
+          if ($version -notmatch 'clang') {
+            throw "GCC must be clang for proper utf16 handling"
           }
       - if: startsWith(matrix.preset, 'CUDA ') || startsWith(matrix.preset, 'ROCm ') || startsWith(matrix.preset, 'Vulkan') || startsWith(matrix.preset, 'MLX ')
         id: cache-install
@@ -328,11 +343,12 @@ jobs:
           $ErrorActionPreference = "Stop"
           Set-ExecutionPolicy Bypass -Scope Process -Force
           Invoke-WebRequest -Uri "https://github.com/mstorsjo/llvm-mingw/releases/download/20240619/llvm-mingw-20240619-ucrt-x86_64.zip" -OutFile "${{ runner.temp }}\llvm-mingw-ucrt.zip"
-          Expand-Archive -Path ${{ runner.temp }}\llvm-mingw-ucrt.zip -DestinationPath "C:\Program Files\"
-          $installPath=(Resolve-Path -Path "C:\Program Files\llvm-mingw-*-ucrt-x86_64").path
+          Expand-Archive -Path ${{ runner.temp }}\llvm-mingw-ucrt.zip -DestinationPath "${{ runner.temp }}\llvm-mingw"
+          $installPath=(Resolve-Path -Path "${{ runner.temp }}\llvm-mingw\llvm-mingw-*-ucrt-x86_64").path
           if (!(Test-Path "$installPath\bin\aarch64-w64-mingw32-gcc.exe")) {
             throw "llvm-mingw x86_64 package is missing the aarch64 cross compiler"
           }
+          echo "OLLAMA_WINDOWS_ARM64_TOOLCHAIN=$installPath\bin" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           echo "C:\msys64\clang64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
