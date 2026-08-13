@@ -346,6 +346,21 @@ func TestSafetensorWriteToFP8E4M3UsesConfiguredBlockSize(t *testing.T) {
 	}
 }
 
+func TestSafetensorDecodeFP8E4M3RejectsShapeOverflow(t *testing.T) {
+	st := safetensor{
+		fp8Block: safetensorFP8BlockSize{rows: 1, cols: 1, ok: true},
+		scale:    &safetensorScale{},
+		tensorBase: &tensorBase{
+			name:  "linear.weight",
+			shape: []uint64{1 << 32, 1 << 32},
+		},
+	}
+
+	if _, err := st.decodeFP8E4M3(nil); err == nil {
+		t.Fatal("decodeFP8E4M3() unexpectedly accepted an overflowing tensor shape")
+	}
+}
+
 func TestParseSafetensorsConsumesFP8ScaleCompanion(t *testing.T) {
 	tempDir := t.TempDir()
 	generateSafetensorTestData(t, tempDir, map[string]*tensorData{

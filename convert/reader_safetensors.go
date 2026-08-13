@@ -478,8 +478,8 @@ func (st safetensor) decodeFP8E4M3(data []byte) ([]float32, error) {
 		return nil, fmt.Errorf("expected 2D fp8 tensor %q, got shape %v", st.name, st.shape)
 	}
 
-	rows, cols := int(st.shape[0]), int(st.shape[1])
-	if rows < 0 || cols < 0 || rows*cols != len(data) {
+	rows, cols, ok := safetensorShapeSize(st.shape)
+	if !ok || rows*cols != len(data) {
 		return nil, fmt.Errorf("fp8 tensor %q shape %v does not match %d bytes", st.name, st.shape, len(data))
 	}
 
@@ -494,14 +494,20 @@ func (st safetensor) decodeFP8E4M3(data []byte) ([]float32, error) {
 
 	blockRows := st.fp8Block.rows
 	blockCols := st.fp8Block.cols
-	scaleRows, scaleCols := int(st.scale.shape[0]), int(st.scale.shape[1])
-	expectedRows := (rows + blockRows - 1) / blockRows
-	expectedCols := (cols + blockCols - 1) / blockCols
+	scaleRows, scaleCols, ok := safetensorShapeSize(st.scale.shape)
+	if !ok || scaleRows*scaleCols != len(scale) {
+		return nil, fmt.Errorf("fp8 scale tensor %q shape %v does not match decoded length %d", st.scale.name, st.scale.shape, len(scale))
+	}
+	expectedRows := rows / blockRows
+	if rows%blockRows != 0 {
+		expectedRows++
+	}
+	expectedCols := cols / blockCols
+	if cols%blockCols != 0 {
+		expectedCols++
+	}
 	if scaleRows != expectedRows || scaleCols != expectedCols {
 		return nil, fmt.Errorf("unexpected fp8 scale shape %v for tensor %q shape %v; want [%d %d]", st.scale.shape, st.name, st.shape, expectedRows, expectedCols)
-	}
-	if len(scale) != scaleRows*scaleCols {
-		return nil, fmt.Errorf("fp8 scale tensor %q shape %v does not match decoded length %d", st.scale.name, st.scale.shape, len(scale))
 	}
 
 	f32s := make([]float32, len(data))
@@ -514,6 +520,19 @@ func (st safetensor) decodeFP8E4M3(data []byte) ([]float32, error) {
 	}
 
 	return f32s, nil
+}
+
+func safetensorShapeSize(shape []uint64) (int, int, bool) {
+	maxInt := uint64(^uint(0) >> 1)
+	if shape[0] > maxInt || shape[1] > maxInt {
+		return 0, 0, false
+	}
+
+	rows, cols := int(shape[0]), int(shape[1])
+	if rows != 0 && cols > int(maxInt)/rows {
+		return 0, 0, false
+	}
+	return rows, cols, true
 }
 
 func (st safetensor) readScale() ([]float32, error) {
