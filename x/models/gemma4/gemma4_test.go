@@ -24,6 +24,16 @@ func TestParseSuppressTokens(t *testing.T) {
 	}
 }
 
+func TestSuppressTokenLogitsRejectsMismatchedBias(t *testing.T) {
+	skipIfNoMLX(t)
+
+	logits := mlx.Zeros(mlx.DTypeFloat32, 1, 1, 4)
+	bias := mlx.Zeros(mlx.DTypeFloat32, 1, 1, 3)
+	if got := suppressTokenLogits(logits, bias); got != logits {
+		t.Fatal("suppressTokenLogits applied a bias with a mismatched vocabulary dimension")
+	}
+}
+
 func TestParseTextConfigE2B(t *testing.T) {
 	skipIfNoMLX(t)
 	data := []byte(`{
