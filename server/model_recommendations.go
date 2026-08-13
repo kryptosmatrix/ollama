@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -21,6 +22,14 @@ import (
 )
 
 const modelRecommendationsURL = "https://ollama.com/api/experimental/model-recommendations"
+
+const (
+	modelRecommendationsMaxPayloadSize       = 1 << 20
+	modelRecommendationsMaxCount             = 100
+	modelRecommendationMaxModelLength        = 256
+	modelRecommendationMaxDescriptionLength  = 4096
+	modelRecommendationMaxRequiredPlanLength = 128
+)
 
 var (
 	modelRecommendationsRefreshInterval     = 4 * time.Hour
@@ -212,7 +221,7 @@ func (c *modelRecommendationsCache) refresh(ctx context.Context) error {
 	}
 
 	var payload api.ModelRecommendationsResponse
-	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+	if err := decodeModelRecommendations(resp.Body, &payload); err != nil {
 		return err
 	}
 
@@ -236,7 +245,7 @@ func (c *modelRecommendationsCache) loadSnapshot() {
 		return
 	}
 
-	data, err := os.ReadFile(path)
+	f, err := os.Open(path)
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
 			slog.Warn("failed to read model recommendations snapshot", "path", path, "error", err)
@@ -245,9 +254,10 @@ func (c *modelRecommendationsCache) loadSnapshot() {
 		}
 		return
 	}
+	defer f.Close()
 
 	var snap api.ModelRecommendationsResponse
-	if err := json.Unmarshal(data, &snap); err != nil {
+	if err := decodeModelRecommendations(f, &snap); err != nil {
 		slog.Warn("failed to parse model recommendations snapshot", "path", path, "error", err)
 		return
 	}
@@ -275,6 +285,9 @@ func (c *modelRecommendationsCache) persistSnapshot(recs []api.ModelRecommendati
 	data, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
 		return err
+	}
+	if len(data) > modelRecommendationsMaxPayloadSize {
+		return fmt.Errorf("model recommendations snapshot exceeds %d bytes", modelRecommendationsMaxPayloadSize)
 	}
 
 	tmp, err := os.CreateTemp(filepath.Dir(path), ".model-recommendations-*.tmp")
@@ -315,6 +328,9 @@ func validateModelRecommendations(recs []api.ModelRecommendation) ([]api.ModelRe
 	if len(recs) == 0 {
 		return nil, errors.New("empty recommendations")
 	}
+	if len(recs) > modelRecommendationsMaxCount {
+		return nil, fmt.Errorf("too many recommendations: %d (maximum %d)", len(recs), modelRecommendationsMaxCount)
+	}
 
 	seen := make(map[string]struct{}, len(recs))
 	valid := make([]api.ModelRecommendation, 0, len(recs))
@@ -322,6 +338,15 @@ func validateModelRecommendations(recs []api.ModelRecommendation) ([]api.ModelRe
 		rec.Model = strings.TrimSpace(rec.Model)
 		rec.Description = strings.TrimSpace(rec.Description)
 		rec.RequiredPlan = strings.TrimSpace(rec.RequiredPlan)
+		if len(rec.Model) > modelRecommendationMaxModelLength {
+			return nil, fmt.Errorf("recommendation model exceeds %d bytes", modelRecommendationMaxModelLength)
+		}
+		if len(rec.Description) > modelRecommendationMaxDescriptionLength {
+			return nil, fmt.Errorf("recommendation description exceeds %d bytes", modelRecommendationMaxDescriptionLength)
+		}
+		if len(rec.RequiredPlan) > modelRecommendationMaxRequiredPlanLength {
+			return nil, fmt.Errorf("recommendation required plan exceeds %d bytes", modelRecommendationMaxRequiredPlanLength)
+		}
 
 		if rec.Model == "" {
 			return nil, errors.New("recommendation missing model")
@@ -343,6 +368,17 @@ func validateModelRecommendations(recs []api.ModelRecommendation) ([]api.ModelRe
 	}
 
 	return valid, nil
+}
+
+func decodeModelRecommendations(r io.Reader, dst *api.ModelRecommendationsResponse) error {
+	data, err := io.ReadAll(io.LimitReader(r, modelRecommendationsMaxPayloadSize+1))
+	if err != nil {
+		return err
+	}
+	if len(data) > modelRecommendationsMaxPayloadSize {
+		return fmt.Errorf("model recommendations payload exceeds %d bytes", modelRecommendationsMaxPayloadSize)
+	}
+	return json.NewDecoder(bytes.NewReader(data)).Decode(dst)
 }
 
 func isCloudRecommendation(modelName string) bool {
