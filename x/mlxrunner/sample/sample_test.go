@@ -142,6 +142,17 @@ func TestSampleSingleSlotOptions(t *testing.T) {
 	}
 }
 
+func TestOptionsNormalizeCapsRepeatLastNToContext(t *testing.T) {
+	const numCtx = 128
+
+	for _, repeatLastN := range []int{numCtx + 1, 1 << 40} {
+		opts := (Options{RepeatLastN: repeatLastN, RepeatPenalty: 1.1}).normalize(numCtx)
+		if opts.RepeatLastN != numCtx {
+			t.Errorf("normalize RepeatLastN = %d, want %d", opts.RepeatLastN, numCtx)
+		}
+	}
+}
+
 func TestDistributionAppliesTopKBeforeTopP(t *testing.T) {
 	skipIfNoMLX(t)
 
