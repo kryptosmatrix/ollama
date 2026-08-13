@@ -2847,7 +2847,7 @@ void register_mistral3_vision_qk_permute(gguf_context * meta, ggml_context * ctx
     if (!t || t->type != GGML_TYPE_F16) return;
 
     const int total_out = (int) t->ne[1];
-    if (total_out % n_head != 0) return;
+    if (n_head <= 0 || total_out % n_head != 0) return;
     const size_t row_bytes = ggml_row_size(t->type, t->ne[0]);
     const size_t total_bytes = ggml_nbytes(t);
     const size_t src_offset = tensor_file_offset(meta, tensor_name);
