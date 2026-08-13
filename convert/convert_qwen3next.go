@@ -110,6 +110,11 @@ type qwen3NextModel struct {
 	VisionEndTokenID   uint32 `json:"vision_end_token_id"`
 }
 
+// MTP models currently use only a small number of prediction layers. Keep a
+// generous upper bound so untrusted configuration and tensor names cannot
+// drive unbounded merge-table allocations.
+const maxQwen3NextPredictLayers = 1024
+
 var (
 	_ ModelConverter      = (*qwen3NextModel)(nil)
 	_ MultimodalConverter = (*qwen3NextModel)(nil)
@@ -128,6 +133,9 @@ func (q *qwen3NextModel) parseMore(fsys fs.FS) error {
 			return err
 		}
 		q.NumNextNPredictLayers = nextn
+	}
+	if q.NumNextNPredictLayers > maxQwen3NextPredictLayers {
+		return fmt.Errorf("qwen3next nextn prediction layer count %d exceeds maximum %d", q.NumNextNPredictLayers, maxQwen3NextPredictLayers)
 	}
 
 	if q.RopeTheta == 0 {
@@ -252,8 +260,13 @@ func qwen3NextInferNextNPredictLayers(fsys fs.FS) (uint32, error) {
 				continue
 			}
 			n, err := strconv.Atoi(layer)
-			if err == nil && n > maxLayer && suffix != "" {
-				maxLayer = n
+			if err == nil && suffix != "" {
+				if n >= maxQwen3NextPredictLayers {
+					return 0, fmt.Errorf("qwen3next MTP layer index %d exceeds maximum %d", n, maxQwen3NextPredictLayers-1)
+				}
+				if n > maxLayer {
+					maxLayer = n
+				}
 			}
 		}
 	}

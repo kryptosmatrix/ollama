@@ -3,6 +3,7 @@ package convert
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"slices"
@@ -15,6 +16,41 @@ import (
 
 func boolPtr(v bool) *bool {
 	return &v
+}
+
+func TestQwen3NextRejectsExcessiveNextNPredictLayers(t *testing.T) {
+	t.Run("config", func(t *testing.T) {
+		m := &qwen3NextModel{qwen3NextTextConfig: qwen3NextTextConfig{
+			NumNextNPredictLayers: maxQwen3NextPredictLayers + 1,
+		}}
+		if err := m.parseMore(os.DirFS(t.TempDir())); err == nil {
+			t.Fatal("expected excessive configured nextn layer count to be rejected")
+		}
+	})
+
+	t.Run("tensor name", func(t *testing.T) {
+		dir := t.TempDir()
+		header, err := json.Marshal(map[string]safetensorMetadata{
+			"mtp.layers.1431655764.fake.weight": {Type: "F32"},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var data bytes.Buffer
+		if err := binary.Write(&data, binary.LittleEndian, int64(len(header))); err != nil {
+			t.Fatal(err)
+		}
+		data.Write(header)
+		if err := os.WriteFile(filepath.Join(dir, "model.safetensors"), data.Bytes(), 0o600); err != nil {
+			t.Fatal(err)
+		}
+
+		m := &qwen3NextModel{}
+		if err := m.parseMore(os.DirFS(dir)); err == nil {
+			t.Fatal("expected excessive inferred nextn layer count to be rejected")
+		}
+	})
 }
 
 func readTensorData(t *testing.T, tensor *ggml.Tensor) []float32 {
