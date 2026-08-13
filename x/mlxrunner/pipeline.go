@@ -23,14 +23,23 @@ func prefillChunkSize() int {
 }
 
 // Prepare tokenizes the prompt and validates it against the model's
-// context length. It is safe to call from any goroutine. On success it
-// populates request.Tokens and adjusts request.Options.NumPredict.
-func (r *Runner) Prepare(request *Request) error {
+// context length. Tokenization is limited to one request at a time. On
+// success it populates request.Tokens and adjusts request.Options.NumPredict.
+func (r *Runner) Prepare(ctx context.Context, request *Request) error {
 	if r.Model == nil {
 		return errors.New("model not loaded")
 	}
 
-	tokens := r.Tokenizer.Encode(request.Prompt, r.Tokenizer.AddBOS())
+	if err := r.acquireTokenizer(ctx); err != nil {
+		return err
+	}
+	tokens := func() []int32 {
+		defer r.releaseTokenizer()
+		return r.Tokenizer.Encode(request.Prompt, r.Tokenizer.AddBOS())
+	}()
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	if len(tokens) == 0 {
 		return errors.New("empty prompt")
 	}

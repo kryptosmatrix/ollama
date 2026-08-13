@@ -34,16 +34,33 @@ type Request struct {
 }
 
 type Runner struct {
-	Model         base.Model
-	Tokenizer     *tokenizer.Tokenizer
-	Requests      chan Request
-	Sampler       *sample.Sampler
-	cache         *prefixCache
-	contextLength int
-	mlxThread     *mlxthread.Thread
+	Model             base.Model
+	Tokenizer         *tokenizer.Tokenizer
+	Requests          chan Request
+	Sampler           *sample.Sampler
+	cache             *prefixCache
+	contextLength     int
+	mlxThread         *mlxthread.Thread
+	tokenizeSemaphore chan struct{}
 	// spec is the speculative-decoding subsystem. Nil when the model ships no
 	// draft head.
 	spec *speculation
+}
+
+func (r *Runner) acquireTokenizer(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	select {
+	case r.tokenizeSemaphore <- struct{}{}:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+func (r *Runner) releaseTokenizer() {
+	<-r.tokenizeSemaphore
 }
 
 func (r *Runner) Load(modelName string) error {
