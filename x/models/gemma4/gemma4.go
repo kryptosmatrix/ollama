@@ -439,6 +439,19 @@ func parseTextConfig(configData []byte) (TextConfig, error) {
 		cfg.MaxPositionEmbeddings = 131072
 	}
 
+	if cfg.HeadDim < 0 {
+		return TextConfig{}, fmt.Errorf("head_dim must be positive, got %d", cfg.HeadDim)
+	}
+	if cfg.GlobalHeadDim < 0 {
+		return TextConfig{}, fmt.Errorf("global_head_dim must be positive, got %d", cfg.GlobalHeadDim)
+	}
+	if cfg.NumKVSharedLayers < 0 || cfg.NumKVSharedLayers > cfg.NumHiddenLayers {
+		return TextConfig{}, fmt.Errorf("num_kv_shared_layers must be between 0 and num_hidden_layers (%d), got %d", cfg.NumHiddenLayers, cfg.NumKVSharedLayers)
+	}
+	if cfg.NumKVSharedLayers > 0 && int64(len(cfg.LayerTypes)) < int64(cfg.NumHiddenLayers) {
+		return TextConfig{}, fmt.Errorf("layer_types has %d entries, need at least num_hidden_layers (%d) for KV sharing", len(cfg.LayerTypes), cfg.NumHiddenLayers)
+	}
+
 	// Gemma 4 uses scaling=1.0 (no 1/sqrt(head_dim) scaling); the Q/K norms
 	// handle magnitude control. This differs from Gemma 3 which uses
 	// query_pre_attn_scalar^(-0.5).
@@ -460,6 +473,9 @@ func parseTextConfig(configData []byte) (TextConfig, error) {
 				cfg.FullRopeBase = fp.RopeTheta
 			}
 			if fp.PartialRotaryFactor > 0 {
+				if fp.PartialRotaryFactor > 1 {
+					return TextConfig{}, fmt.Errorf("partial_rotary_factor must be between 0 and 1, got %g", fp.PartialRotaryFactor)
+				}
 				// Proportional RoPE: the reference computes inv_freq with divisor
 				// global_head_dim, then applies rotate_half which splits at head_dim/2.
 				// MLX fast_rope splits at dims/2, so we use dims=global_head_dim
