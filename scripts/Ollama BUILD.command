@@ -140,9 +140,53 @@ say "Repository: $REPO"
 [ -f scripts/build_darwin.sh ] || die "scripts/build_darwin.sh is missing; is this the ollama repository?"
 [ -f scripts/create-dmg.sh ] || die "scripts/create-dmg.sh is missing."
 
-for tool in cmake npm node go lipo hdiutil plutil ditto; do
+for tool in cmake npm node go lipo hdiutil plutil ditto xcodebuild xcrun; do
     command -v "$tool" >/dev/null 2>&1 || die "$tool is not installed."
 done
+
+# Xcode can report the optional Metal toolchain as installed and let xcrun
+# locate its compiler while still refusing to execute it through the default
+# selection. This has occurred after an Xcode update leaves the downloaded
+# component registered under its own toolchain identifier. Select that exact
+# installed component for this build instead of either disabling MLX or asking
+# the user to download a component they already have.
+metal_works() {
+    printf "__METAL_VERSION__\n" \
+        | xcrun -sdk macosx metal -E -x metal -P - 2>/dev/null \
+        | tail -1 \
+        | tr -d '\n' \
+        | grep -Eq '^[0-9]+$'
+}
+
+select_installed_metal_toolchain() {
+    local component identifier status original_toolchains
+    if metal_works; then
+        return
+    fi
+
+    component="$(xcodebuild -showComponent MetalToolchain -json 2>/dev/null || true)"
+    identifier="$(printf '%s' "$component" | plutil -extract toolchainIdentifier raw - 2>/dev/null || true)"
+    status="$(printf '%s' "$component" | plutil -extract status raw - 2>/dev/null || true)"
+    [ "$status" = installed ] && [ -n "$identifier" ] || die \
+        "Xcode's Metal toolchain is unavailable. Install it with: xcodebuild -downloadComponent MetalToolchain"
+
+    original_toolchains="${TOOLCHAINS-}"
+    export TOOLCHAINS="$identifier"
+    if ! metal_works; then
+        if [ -n "$original_toolchains" ]; then
+            export TOOLCHAINS="$original_toolchains"
+        else
+            unset TOOLCHAINS
+        fi
+        die "Xcode reports Metal installed, but its compiler still cannot run. Reinstall it from Xcode > Settings > Components."
+    fi
+
+    note "Xcode's default selection missed the installed Metal toolchain."
+    note "using  $identifier"
+}
+
+say "Metal toolchain"
+select_installed_metal_toolchain
 
 VERSION="$(git describe --tags --first-parent --abbrev=7 --long --dirty --always 2>/dev/null | sed -e 's/^v//g')"
 BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
