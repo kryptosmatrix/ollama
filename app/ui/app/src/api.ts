@@ -732,3 +732,147 @@ export async function getCloudStatus(): Promise<CloudStatusResponse | null> {
     source: (data.source as CloudStatusSource) || "none",
   };
 }
+
+export type TTSStatus = {
+  has_api_key: boolean;
+  voice_id: string;
+  model_id: string;
+  speed: number;
+  cache_enabled: boolean;
+  cache_clear_pending: boolean;
+  secret_store: string;
+};
+
+export type TTSVoice = {
+  voice_id: string;
+  name: string;
+  category?: string;
+};
+
+async function ttsError(response: Response): Promise<Error> {
+  let message = `Speech request failed: ${response.status}`;
+  try {
+    const body = (await response.json()) as { error?: string };
+    if (body.error) {
+      message = body.error;
+    }
+  } catch {
+    // keep the status message
+  }
+  const error = new Error(message) as Error & { status: number };
+  error.status = response.status;
+  return error;
+}
+
+export async function getTTSStatus(): Promise<TTSStatus> {
+  const response = await fetch(`${API_BASE}/api/v1/tts/status`);
+  if (!response.ok) {
+    throw await ttsError(response);
+  }
+  return response.json();
+}
+
+export async function putTTSKey(apiKey: string): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/v1/tts/key`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ api_key: apiKey }),
+  });
+  if (!response.ok) {
+    throw await ttsError(response);
+  }
+}
+
+export async function deleteTTSKey(): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/v1/tts/key`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw await ttsError(response);
+  }
+}
+
+export async function updateTTSSettings(patch: {
+  voice_id?: string;
+  model_id?: string;
+  speed?: number;
+  cache_enabled?: boolean;
+}): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/v1/tts/settings`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+  if (!response.ok) {
+    throw await ttsError(response);
+  }
+}
+
+export async function getTTSVoices(): Promise<TTSVoice[]> {
+  const response = await fetch(`${API_BASE}/api/v1/tts/voices`);
+  if (!response.ok) {
+    throw await ttsError(response);
+  }
+  const data = (await response.json()) as { voices?: TTSVoice[] };
+  return data.voices ?? [];
+}
+
+export async function clearTTSCache(): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/v1/tts/cache/clear`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: "{}",
+  });
+  if (!response.ok) {
+    throw await ttsError(response);
+  }
+}
+
+export async function commitTTSCache(fingerprint: string): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/v1/tts/cache/commit`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fingerprint }),
+  });
+  if (!response.ok) {
+    throw await ttsError(response);
+  }
+}
+
+export async function speakMessageChunk(
+  text: string,
+  chunkIndex: number,
+  signal?: AbortSignal,
+): Promise<{
+  blob: Blob;
+  contentType: string;
+  chunkIndex: number;
+  chunkCount: number;
+  fingerprint: string;
+}> {
+  const response = await fetch(`${API_BASE}/api/v1/tts/speak`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, chunk_index: chunkIndex }),
+    signal,
+  });
+  if (!response.ok) {
+    throw await ttsError(response);
+  }
+  const contentType = response.headers.get("Content-Type") || "";
+  const mime = contentType.split(";")[0].trim().toLowerCase();
+  if (
+    mime !== "audio/mpeg" &&
+    mime !== "audio/mp3" &&
+    mime !== "application/octet-stream"
+  ) {
+    throw new Error("ElevenLabs returned data that was not audio.");
+  }
+  return {
+    blob: await response.blob(),
+    contentType,
+    chunkIndex: Number(response.headers.get("X-Ollama-TTS-Chunk-Index") || chunkIndex),
+    chunkCount: Number(response.headers.get("X-Ollama-TTS-Chunk-Count") || 1),
+    fingerprint: response.headers.get("X-Ollama-TTS-Fingerprint") || "",
+  };
+}

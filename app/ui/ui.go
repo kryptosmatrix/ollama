@@ -26,6 +26,7 @@ import (
 	"github.com/ollama/ollama/app/server"
 	"github.com/ollama/ollama/app/store"
 	"github.com/ollama/ollama/app/tools"
+	"github.com/ollama/ollama/app/tts"
 	"github.com/ollama/ollama/app/types/not"
 	"github.com/ollama/ollama/app/ui/responses"
 	"github.com/ollama/ollama/app/updater"
@@ -120,6 +121,12 @@ type Server struct {
 	WebSearch     bool   // if true, the server will use single-turn browser tool to fulfill the user's request
 	Agent         bool   // if true, the server will use multi-turn tools to fulfill the user's request
 	WorkingDir    string // Working directory for all agent operations
+
+	// TTS is the desktop speak stack. Nil means construct the production
+	// default on first use. Tests set this so they cannot touch the
+	// developer's Keychain.
+	TTS     *tts.Service
+	ttsOnce sync.Once
 
 	// Dev is true if the server is running in development mode
 	Dev bool
@@ -321,6 +328,15 @@ func (s *Server) Handler() http.Handler {
 	mux.Handle("GET /api/v1/cloud", handle(s.getCloudSetting))
 	mux.Handle("POST /api/v1/cloud", handle(s.cloudSetting))
 
+	mux.Handle("POST /api/v1/tts/speak", handle(s.ttsSpeak))
+	mux.Handle("GET /api/v1/tts/voices", handle(s.ttsVoices))
+	mux.Handle("GET /api/v1/tts/status", handle(s.ttsStatus))
+	mux.Handle("PUT /api/v1/tts/key", handle(s.ttsPutKey))
+	mux.Handle("DELETE /api/v1/tts/key", handle(s.ttsDeleteKey))
+	mux.Handle("POST /api/v1/tts/settings", handle(s.ttsSettings))
+	mux.Handle("POST /api/v1/tts/cache/clear", handle(s.ttsCacheClear))
+	mux.Handle("POST /api/v1/tts/cache/commit", handle(s.ttsCacheCommit))
+
 	// Ollama proxy endpoints
 	ollamaProxy := s.ollamaProxy()
 	mux.Handle("GET /api/tags", ollamaProxy)
@@ -353,7 +369,12 @@ func (s *Server) handleError(w http.ResponseWriter, e error) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusInternalServerError)
+	status := http.StatusInternalServerError
+	var he *tts.HTTPError
+	if errors.As(e, &he) {
+		status = he.HTTPStatus()
+	}
+	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(map[string]string{"error": e.Error()})
 }
 

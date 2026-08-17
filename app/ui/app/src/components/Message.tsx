@@ -4,6 +4,8 @@ import StreamingMarkdownContent from "./StreamingMarkdownContent";
 import { ImageThumbnail } from "./ImageThumbnail";
 import { isImageFile } from "@/utils/imageUtils";
 import CopyButton from "./CopyButton";
+import SpeakButton from "./SpeakButton";
+import { showAssistantMessageToolbar } from "@/utils/messageToolbar";
 import React, { useState, useMemo, useRef } from "react";
 
 const Message = React.memo(
@@ -967,24 +969,20 @@ function OtherRoleMessage({
         />
       )}
 
-      {!isStreaming &&
-        message.role === "assistant" &&
-        message.content &&
-        message.content.trim() &&
-        (!message.tool_calls || message.tool_calls.length === 0) &&
-        !message.tool_call && (
-          <div className="-ml-1">
-            <CopyButton
-              content={message.content || ""}
-              copyRef={messageRef as React.RefObject<HTMLElement>}
-              removeClasses={["copy-button"]}
-              size="md"
-              showLabels={false}
-              className="copy-button z-10 text-neutral-500 dark:text-neutral-400"
-              title="Copy"
-            />
-          </div>
-        )}
+      {showAssistantMessageToolbar(message, isStreaming) && (
+        <div className="-ml-1 flex items-center">
+          <CopyButton
+            content={message.content || ""}
+            copyRef={messageRef as React.RefObject<HTMLElement>}
+            removeClasses={["copy-button"]}
+            size="md"
+            showLabels={false}
+            className="copy-button z-10 text-neutral-500 dark:text-neutral-400"
+            title="Copy"
+          />
+          <SpeakButton content={message.content || ""} />
+        </div>
+      )}
     </div>
   );
 }

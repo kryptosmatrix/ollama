@@ -29,6 +29,7 @@ import {
   updateSettings,
   getInferenceCompute,
 } from "@/api";
+import SpeechSettings from "@/components/SpeechSettings";
 
 function AnimatedDots() {
   return (
@@ -415,6 +416,7 @@ export default function Settings() {
               )}
             </div>
           </div>
+          <SpeechSettings />
           {/* Local Configuration */}
           <div className="relative overflow-hidden rounded-xl bg-white dark:bg-neutral-800">
             <div className="space-y-4 p-4">
