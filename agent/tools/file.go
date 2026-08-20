@@ -57,6 +57,20 @@ func (r *Read) RequiresApproval(map[string]any) bool {
 	return true
 }
 
+// ApprovalScope limits persistent approval to the exact path requested. This
+// prevents approval for one file from authorizing reads of every file that is
+// accessible to the process.
+func (r *Read) ApprovalScope(args map[string]any) string {
+	name := r.Name()
+	if path, ok := args["path"].(string); ok {
+		path = strings.TrimSpace(path)
+		if path != "" {
+			return name + "\x00" + path
+		}
+	}
+	return name
+}
+
 func (r *Read) Execute(ctx context.Context, toolCtx agent.ToolContext, args map[string]any) (agent.ToolResult, error) {
 	// TODO: use shared agent.RequiredStringArg / agent.OptionalIntArg for args (see agent package cleanup plan).
 	path, ok := args["path"].(string)
