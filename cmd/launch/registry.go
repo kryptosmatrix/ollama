@@ -45,10 +45,6 @@ var integrationSpecs = []*IntegrationSpec{
 				_, err := (&Claude{}).findPath()
 				return err == nil
 			},
-			EnsureInstalled: func() error {
-				_, err := ensureClaudeInstalled()
-				return err
-			},
 			URL: "https://code.claude.com/docs/en/quickstart",
 		},
 	},
@@ -157,10 +153,6 @@ var integrationSpecs = []*IntegrationSpec{
 				_, ok := findOpenCode()
 				return ok
 			},
-			EnsureInstalled: func() error {
-				_, err := ensureOpenCodeInstalled()
-				return err
-			},
 			URL: "https://opencode.ai",
 		},
 	},
@@ -234,9 +226,6 @@ var integrationSpecs = []*IntegrationSpec{
 			CheckInstalled: func() bool {
 				return (&Hermes{}).installed()
 			},
-			EnsureInstalled: func() error {
-				return (&Hermes{}).ensureInstalled()
-			},
 			URL: "https://hermes-agent.nousresearch.com/docs/getting-started/installation/",
 		},
 	},
@@ -247,9 +236,6 @@ var integrationSpecs = []*IntegrationSpec{
 		Install: IntegrationInstallSpec{
 			CheckInstalled: func() bool {
 				return (&Hermes{}).installed()
-			},
-			EnsureInstalled: func() error {
-				return (&Hermes{}).ensureInstalledFor("hermes-desktop")
 			},
 			URL: "https://hermes-agent.nousresearch.com/docs/getting-started/installation/",
 		},

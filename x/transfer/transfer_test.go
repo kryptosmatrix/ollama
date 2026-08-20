@@ -800,6 +800,36 @@ func TestDigestToPath(t *testing.T) {
 	}
 }
 
+func TestTransferRejectsInvalidBlobDigests(t *testing.T) {
+	tests := []struct {
+		name string
+		run  func(Blob) error
+	}{
+		{
+			name: "download",
+			run: func(blob Blob) error {
+				return Download(context.Background(), DownloadOptions{Blobs: []Blob{blob}, DestDir: t.TempDir()})
+			},
+		},
+		{
+			name: "upload",
+			run: func(blob Blob) error {
+				return Upload(context.Background(), UploadOptions{Blobs: []Blob{blob}, SrcDir: t.TempDir()})
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, digest := range []string{"../../id_ed25519", "sha256:abc", "sha256:" + strings.Repeat("z", 64)} {
+				if err := tt.run(Blob{Digest: digest}); err == nil || !strings.Contains(err.Error(), "invalid blob digest") {
+					t.Errorf("digest %q: got error %v, want invalid blob digest error", digest, err)
+				}
+			}
+		})
+	}
+}
+
 func TestParseAuthChallenge(t *testing.T) {
 	tests := []struct {
 		input string

@@ -26,9 +26,6 @@ import (
 const (
 	// https://github.com/NousResearch/hermes-agent/releases/tag/v2026.6.5
 	hermesDesktopMinVersion = "v0.16.0"
-	hermesInstallScript     = "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup"
-	hermesWindowsInstallURL = "https://hermes-agent.nousresearch.com/install.ps1"
-	hermesWindowsInstallCmd = "& ([scriptblock]::Create((irm " + hermesWindowsInstallURL + "))) -SkipSetup"
 	hermesProviderName      = "Ollama"
 	hermesProviderKey       = "ollama-launch"
 	hermesLegacyKey         = "ollama"
@@ -356,55 +353,6 @@ func (h *Hermes) RefreshRuntimeAfterConfigure() error {
 func (h *Hermes) installed() bool {
 	_, err := h.binary()
 	return err == nil
-}
-
-func (h *Hermes) ensureInstalled() error {
-	return h.ensureInstalledFor("hermes")
-}
-
-func (h *Hermes) ensureInstalledFor(command string) error {
-	if h.installed() {
-		return nil
-	}
-
-	var missing []string
-	if hermesGOOS != "windows" {
-		for _, dep := range []string{"bash", "curl", "git"} {
-			if _, err := hermesLookPath(dep); err != nil {
-				missing = append(missing, dep)
-			}
-		}
-	}
-	if len(missing) > 0 {
-		return fmt.Errorf("Hermes is not installed and required dependencies are missing\n\nInstall the following first:\n  %s\n\nThen re-run:\n  ollama launch %s", strings.Join(missing, "\n  "), command)
-	}
-
-	ok, err := ConfirmPrompt("Hermes is not installed. Install now?")
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return fmt.Errorf("hermes installation cancelled")
-	}
-
-	fmt.Fprintf(os.Stderr, "\nInstalling Hermes...\n")
-	if err := h.runInstallScript(); err != nil {
-		return fmt.Errorf("failed to install hermes: %w", err)
-	}
-
-	if !h.installed() {
-		return fmt.Errorf("hermes was installed but the binary was not found on PATH\n\nYou may need to restart your shell")
-	}
-
-	fmt.Fprintf(os.Stderr, "%sHermes installed successfully%s\n\n", ansiGreen, ansiReset)
-	return nil
-}
-
-func (h *Hermes) runInstallScript() error {
-	if hermesGOOS == "windows" {
-		return hermesAttachedCommand("powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", hermesWindowsInstallCmd).Run()
-	}
-	return hermesAttachedCommand("bash", "-lc", hermesInstallScript).Run()
 }
 
 func (h *Hermes) listModels(defaultModel string) []string {

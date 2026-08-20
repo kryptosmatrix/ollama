@@ -250,8 +250,16 @@ function checkEnv {
         Write-Output "No CUDA versions detected"
     }
 
-    $arm64CCPath = (Get-Command -Name "aarch64-w64-mingw32-gcc.exe" -ErrorAction SilentlyContinue | Select-Object -First 1).Path
-    $arm64CXXPath = (Get-Command -Name "aarch64-w64-mingw32-g++.exe" -ErrorAction SilentlyContinue | Select-Object -First 1).Path
+    $arm64CCPath = $null
+    $arm64CXXPath = $null
+    if ($env:OLLAMA_WINDOWS_ARM64_TOOLCHAIN) {
+        $arm64CCPath = (Get-Item (Join-Path $env:OLLAMA_WINDOWS_ARM64_TOOLCHAIN "aarch64-w64-mingw32-gcc.exe") -ErrorAction SilentlyContinue).FullName
+        $arm64CXXPath = (Get-Item (Join-Path $env:OLLAMA_WINDOWS_ARM64_TOOLCHAIN "aarch64-w64-mingw32-g++.exe") -ErrorAction SilentlyContinue).FullName
+    }
+    if (-not $arm64CCPath -or -not $arm64CXXPath) {
+        $arm64CCPath = (Get-Command -Name "aarch64-w64-mingw32-gcc.exe" -ErrorAction SilentlyContinue | Select-Object -First 1).Path
+        $arm64CXXPath = (Get-Command -Name "aarch64-w64-mingw32-g++.exe" -ErrorAction SilentlyContinue | Select-Object -First 1).Path
+    }
     if (-not $arm64CCPath -or -not $arm64CXXPath) {
         $arm64Toolchain = Resolve-Path "C:\Program Files\llvm-mingw-*-x86_64*\bin" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($arm64Toolchain) {

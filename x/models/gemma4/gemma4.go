@@ -393,6 +393,7 @@ type Model struct {
 	*TextConfig
 
 	SuppressLogitBias *mlx.Array
+	suppressTokens    []int32
 	weightPrefix      string
 }
 
@@ -663,10 +664,10 @@ func newModel(root *model.Root) (base.Model, error) {
 	}
 
 	m := &Model{
-		Layers:            make([]*DecoderLayer, cfg.NumHiddenLayers),
-		TextConfig:        &cfg,
-		tok:               tok,
-		SuppressLogitBias: makeSuppressLogitBias(suppressTokens, cfg.VocabSize),
+		Layers:         make([]*DecoderLayer, cfg.NumHiddenLayers),
+		TextConfig:     &cfg,
+		tok:            tok,
+		suppressTokens: suppressTokens,
 	}
 
 	for i := range m.Layers {
@@ -707,14 +708,18 @@ func (m *Model) LoadWeights(tensors map[string]*mlx.Array) error {
 	m.Norm = nn.NewRMSNorm(normWeight, m.RMSNormEps)
 
 	// LM head.
+	outputVocabSize := tensors[prefix+"embed_tokens.weight"].Dim(0)
 	if lmHead := linears.Make(prefix + "lm_head"); lmHead != nil {
 		m.LMHead = lmHead
+		outputVocabSize = tensors[prefix+"lm_head.weight"].Dim(0)
 	} else if lmHead := linears.Make("lm_head"); lmHead != nil {
 		m.LMHead = lmHead
+		outputVocabSize = tensors["lm_head.weight"].Dim(0)
 	} else {
 		// Gemma 4 ties output projection to embeddings.
 		m.LMHead = m.EmbedTokens.AsLinear()
 	}
+	m.SuppressLogitBias = makeSuppressLogitBias(m.suppressTokens, outputVocabSize)
 
 	// PLE model-level weights.
 	if m.HiddenSizePerLayer > 0 {
@@ -1063,15 +1068,15 @@ func (m *Model) Unembed(x *mlx.Array) *mlx.Array {
 	return suppressTokenLogits(logits, m.SuppressLogitBias)
 }
 
-func makeSuppressLogitBias(tokenIDs []int32, vocabSize int32) *mlx.Array {
+func makeSuppressLogitBias(tokenIDs []int32, vocabSize int) *mlx.Array {
 	if len(tokenIDs) == 0 || vocabSize <= 0 {
 		return nil
 	}
 
-	bias := make([]float32, int(vocabSize))
+	bias := make([]float32, vocabSize)
 	any := false
 	for _, tokenID := range tokenIDs {
-		if tokenID >= 0 && tokenID < vocabSize {
+		if tokenID >= 0 && int(tokenID) < vocabSize {
 			bias[tokenID] = float32(math.Inf(-1))
 			any = true
 		}
@@ -1080,7 +1085,7 @@ func makeSuppressLogitBias(tokenIDs []int32, vocabSize int32) *mlx.Array {
 		return nil
 	}
 
-	return mlx.FromValues(bias, 1, 1, int(vocabSize))
+	return mlx.FromValues(bias, 1, 1, vocabSize)
 }
 
 func suppressTokenLogits(logits, bias *mlx.Array) *mlx.Array {
@@ -1089,7 +1094,9 @@ func suppressTokenLogits(logits, bias *mlx.Array) *mlx.Array {
 	}
 
 	dims := logits.Dims()
-	if len(dims) != 3 {
+	biasDims := bias.Dims()
+	if len(dims) != 3 || len(biasDims) != 3 ||
+		biasDims[0] != 1 || biasDims[1] != 1 || biasDims[2] != dims[2] {
 		return logits
 	}
 

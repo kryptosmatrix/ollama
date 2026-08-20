@@ -15,6 +15,7 @@ import { parseJsonlFromResponse } from "./util/jsonl-parsing";
 import { ollamaClient as ollama } from "./lib/ollama-client";
 import type { ModelResponse } from "ollama/browser";
 import { API_BASE, OLLAMA_DOT_COM } from "./lib/config";
+import { isCloudModel } from "./utils/model";
 
 // Extend Model class with utility methods
 declare module "@/gotypes" {
@@ -24,7 +25,7 @@ declare module "@/gotypes" {
 }
 
 Model.prototype.isCloud = function (): boolean {
-  return this.model.endsWith("cloud");
+  return isCloudModel(this.model);
 };
 
 export type CloudStatusSource = "env" | "config" | "both" | "none";

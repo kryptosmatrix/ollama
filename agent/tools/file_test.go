@@ -170,6 +170,16 @@ func TestReadRequiresApproval(t *testing.T) {
 	}
 }
 
+func TestReadApprovalScopeIncludesPath(t *testing.T) {
+	read := &Read{}
+	if got, want := read.ApprovalScope(map[string]any{"path": " note.txt "}), "read\x00note.txt"; got != want {
+		t.Fatalf("ApprovalScope() = %q, want %q", got, want)
+	}
+	if first, second := read.ApprovalScope(map[string]any{"path": "README.md"}), read.ApprovalScope(map[string]any{"path": "/home/user/.ssh/id_ed25519"}); first == second {
+		t.Fatalf("approval scopes for different paths must differ: %q", first)
+	}
+}
+
 func TestReadDefaultsToEntireFile(t *testing.T) {
 	dir := t.TempDir()
 	content := "one\ntwo\nthree\n"

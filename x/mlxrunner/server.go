@@ -59,8 +59,9 @@ func Execute(args []string) error {
 	defer cancelRunner()
 
 	runner := Runner{
-		Requests:  make(chan Request),
-		mlxThread: worker,
+		Requests:          make(chan Request),
+		mlxThread:         worker,
+		tokenizeSemaphore: make(chan struct{}, 1),
 	}
 
 	if err := worker.Do(context.Background(), func() error {
@@ -125,6 +126,9 @@ func Execute(args []string) error {
 			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
+		var cancel context.CancelFunc
+		request.Ctx, cancel = context.WithCancel(r.Context())
+		defer cancel()
 
 		request.Pipeline = runner.TextGenerationPipeline
 		request.SamplerOpts = sample.Options{
@@ -142,14 +146,13 @@ func Execute(args []string) error {
 			TopLogprobs:      request.TopLogprobs,
 		}
 
-		if err := runner.Prepare(&request); err != nil {
+		if err := runner.Prepare(request.Ctx, &request); err != nil {
+			if r.Context().Err() != nil {
+				return
+			}
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-
-		var cancel context.CancelFunc
-		request.Ctx, cancel = context.WithCancel(r.Context())
-		defer cancel()
 
 		select {
 		case <-r.Context().Done():
@@ -189,7 +192,16 @@ func Execute(args []string) error {
 			return
 		}
 
-		tokens := runner.Tokenizer.Encode(b.String(), runner.Tokenizer.AddBOS())
+		if err := runner.acquireTokenizer(r.Context()); err != nil {
+			return
+		}
+		tokens := func() []int32 {
+			defer runner.releaseTokenizer()
+			return runner.Tokenizer.Encode(b.String(), runner.Tokenizer.AddBOS())
+		}()
+		if r.Context().Err() != nil {
+			return
+		}
 
 		if err := json.NewEncoder(w).Encode(tokens); err != nil {
 			slog.Error("Failed to encode response", "error", err)

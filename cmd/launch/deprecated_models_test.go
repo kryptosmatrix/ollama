@@ -66,3 +66,15 @@ func TestDeprecatedLaunchModelErrorMentionsRecommendedModels(t *testing.T) {
 		}
 	}
 }
+
+func TestLaunchReplacementCommandRejectsInvalidModelName(t *testing.T) {
+	model := "safe; touch /tmp/ollama-launch-injection"
+	if command := launchReplacementCommand("codex", model); command != "" {
+		t.Fatalf("launchReplacementCommand() = %q, want no command", command)
+	}
+
+	prompt := deprecatedLaunchModelPrompt("qwen2.5", "Codex", "codex", model, "")
+	if strings.Contains(prompt, "ollama launch codex --model") {
+		t.Fatalf("deprecatedLaunchModelPrompt() included a command with an invalid model name: %q", prompt)
+	}
+}

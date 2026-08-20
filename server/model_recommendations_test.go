@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -250,6 +251,67 @@ func TestModelRecommendationsLoadSnapshotInvalidDoesNotOverwrite(t *testing.T) {
 
 	if got := cache.Get(); !slices.Equal(got, existing) {
 		t.Fatalf("recommendations overwritten by invalid snapshot: got %#v, want %#v", got, existing)
+	}
+}
+
+func TestModelRecommendationsRejectsOversizedPayloads(t *testing.T) {
+	setupModelRecommendationsTestEnv(t, "")
+
+	cache := newModelRecommendationsCache()
+	existing := []api.ModelRecommendation{{Model: "existing", Description: "existing description"}}
+	cache.set(existing)
+	cache.client = &http.Client{Transport: roundTripFunc(func(*http.Request) (*http.Response, error) {
+		return jsonHTTPResponse(http.StatusOK, strings.Repeat(" ", modelRecommendationsMaxPayloadSize+1)), nil
+	})}
+
+	if err := cache.refresh(context.Background()); err == nil || !strings.Contains(err.Error(), "payload exceeds") {
+		t.Fatalf("refresh error = %v, want oversized payload error", err)
+	}
+	if got := cache.Get(); !slices.Equal(got, existing) {
+		t.Fatalf("recommendations overwritten by oversized response: got %#v, want %#v", got, existing)
+	}
+
+	path, err := modelRecommendationsSnapshotPath()
+	if err != nil {
+		t.Fatalf("snapshot path failed: %v", err)
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("mkdir failed: %v", err)
+	}
+	if err := os.WriteFile(path, []byte(strings.Repeat(" ", modelRecommendationsMaxPayloadSize+1)), 0o644); err != nil {
+		t.Fatalf("write oversized snapshot failed: %v", err)
+	}
+	cache.loadSnapshot()
+	if got := cache.Get(); !slices.Equal(got, existing) {
+		t.Fatalf("recommendations overwritten by oversized snapshot: got %#v, want %#v", got, existing)
+	}
+}
+
+func TestValidateModelRecommendationsLimits(t *testing.T) {
+	t.Run("count", func(t *testing.T) {
+		recs := make([]api.ModelRecommendation, modelRecommendationsMaxCount+1)
+		for i := range recs {
+			recs[i].Model = fmt.Sprintf("model-%d", i)
+		}
+		if _, err := validateModelRecommendations(recs); err == nil || !strings.Contains(err.Error(), "too many recommendations") {
+			t.Fatalf("error = %v, want recommendation count error", err)
+		}
+	})
+
+	tests := []struct {
+		name string
+		rec  api.ModelRecommendation
+	}{
+		{"model", api.ModelRecommendation{Model: strings.Repeat("m", modelRecommendationMaxModelLength+1)}},
+		{"description", api.ModelRecommendation{Model: "model", Description: strings.Repeat("d", modelRecommendationMaxDescriptionLength+1)}},
+		{"required plan", api.ModelRecommendation{Model: "model", RequiredPlan: strings.Repeat("p", modelRecommendationMaxRequiredPlanLength+1)}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if _, err := validateModelRecommendations([]api.ModelRecommendation{tt.rec}); err == nil || !strings.Contains(err.Error(), "exceeds") {
+				t.Fatalf("error = %v, want field length error", err)
+			}
+		})
 	}
 }
 

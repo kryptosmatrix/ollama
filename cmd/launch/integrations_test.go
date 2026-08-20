@@ -2101,14 +2101,14 @@ func TestIntegration_AutoInstallable(t *testing.T) {
 	}{
 		{"openclaw", true},
 		{"pi", true},
-		{"hermes", true},
-		{"hermes-desktop", true},
+		{"hermes", false},
+		{"hermes-desktop", false},
 		{"cline", true},
 		{"qwen", true},
-		{"claude", true},
+		{"claude", false},
 		{"claude-desktop", false},
 		{"codex", false},
-		{"opencode", true},
+		{"opencode", false},
 		{"omp", false},
 	}
 	for _, tt := range tests {

@@ -6,7 +6,6 @@ ARG ROCMVERSION=7.2.1
 ARG JETPACK5VERSION=r35.4.1
 ARG JETPACK6VERSION=r36.4.0
 ARG CMAKEVERSION=3.31.2
-ARG NINJAVERSION=1.12.1
 ARG VULKANVERSION=1.4.321.1
 
 # Default empty stages for local MLX source overrides.
@@ -28,12 +27,8 @@ ENV CC=clang CXX=clang++
 
 FROM base-${TARGETARCH} AS base
 ARG CMAKEVERSION
-ARG NINJAVERSION
 RUN curl -fsSL https://github.com/Kitware/CMake/releases/download/v${CMAKEVERSION}/cmake-${CMAKEVERSION}-linux-$(uname -m).tar.gz | tar xz -C /usr/local --strip-components 1
-RUN dnf install -y unzip \
-    && curl -fsSL -o /tmp/ninja.zip https://github.com/ninja-build/ninja/releases/download/v${NINJAVERSION}/ninja-linux$([ "$(uname -m)" = "aarch64" ] && echo "-aarch64").zip \
-    && unzip /tmp/ninja.zip -d /usr/local/bin \
-    && rm /tmp/ninja.zip
+RUN dnf install -y ninja-build
 ENV CMAKE_GENERATOR=Ninja
 ENV LDFLAGS=-s
 
@@ -155,12 +150,8 @@ COPY --from=llama-server-vulkan dist/lib/ollama /lib/ollama/
 
 FROM --platform=linux/arm64 nvcr.io/nvidia/l4t-jetpack:${JETPACK5VERSION} AS jetpack-5
 ARG CMAKEVERSION
-ARG NINJAVERSION
-RUN apt-get update && apt-get install -y curl ccache git unzip \
-    && curl -fsSL https://github.com/Kitware/CMake/releases/download/v${CMAKEVERSION}/cmake-${CMAKEVERSION}-linux-$(uname -m).tar.gz | tar xz -C /usr/local --strip-components 1 \
-    && curl -fsSL -o /tmp/ninja.zip https://github.com/ninja-build/ninja/releases/download/v${NINJAVERSION}/ninja-linux-aarch64.zip \
-    && unzip /tmp/ninja.zip -d /usr/local/bin \
-    && rm /tmp/ninja.zip
+RUN apt-get update && apt-get install -y curl ccache git ninja-build \
+    && curl -fsSL https://github.com/Kitware/CMake/releases/download/v${CMAKEVERSION}/cmake-${CMAKEVERSION}-linux-$(uname -m).tar.gz | tar xz -C /usr/local --strip-components 1
 ENV CMAKE_GENERATOR=Ninja
 COPY LLAMA_CPP_VERSION .
 COPY llama/server llama/server
@@ -175,12 +166,8 @@ COPY --from=jetpack-5 dist/lib/ollama /lib/ollama/
 
 FROM --platform=linux/arm64 nvcr.io/nvidia/l4t-jetpack:${JETPACK6VERSION} AS jetpack-6
 ARG CMAKEVERSION
-ARG NINJAVERSION
-RUN apt-get update && apt-get install -y curl ccache git unzip \
-    && curl -fsSL https://github.com/Kitware/CMake/releases/download/v${CMAKEVERSION}/cmake-${CMAKEVERSION}-linux-$(uname -m).tar.gz | tar xz -C /usr/local --strip-components 1 \
-    && curl -fsSL -o /tmp/ninja.zip https://github.com/ninja-build/ninja/releases/download/v${NINJAVERSION}/ninja-linux-aarch64.zip \
-    && unzip /tmp/ninja.zip -d /usr/local/bin \
-    && rm /tmp/ninja.zip
+RUN apt-get update && apt-get install -y curl ccache git ninja-build \
+    && curl -fsSL https://github.com/Kitware/CMake/releases/download/v${CMAKEVERSION}/cmake-${CMAKEVERSION}-linux-$(uname -m).tar.gz | tar xz -C /usr/local --strip-components 1
 ENV CMAKE_GENERATOR=Ninja
 COPY LLAMA_CPP_VERSION .
 COPY llama/server llama/server

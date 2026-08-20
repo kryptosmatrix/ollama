@@ -353,6 +353,26 @@ func TestModelShowCacheCloudColdMissFallsBackToProxy(t *testing.T) {
 	}
 }
 
+func TestModelShowCacheCloudResponseSizeLimit(t *testing.T) {
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		if flusher, ok := w.(http.Flusher); ok {
+			flusher.Flush() // Force chunked encoding so Content-Length is unknown.
+		}
+		_, _ = io.Copy(w, strings.NewReader(strings.Repeat("x", modelShowCloudResponseMaxBytes+1)))
+	}))
+	defer upstream.Close()
+	withCloudProxyBaseURL(t, upstream.URL)
+
+	cache := newModelShowCache()
+	cache.client = upstream.Client()
+	var response api.ShowResponse
+	err := cache.doCloudJSON(t.Context(), http.MethodGet, "/api/show", nil, &response)
+	if !errors.Is(err, errModelShowCloudResponseTooLarge) {
+		t.Fatalf("doCloudJSON error = %v, want %v", err, errModelShowCloudResponseTooLarge)
+	}
+}
+
 func TestModelShowCacheCloudHydrationUsesTagsAndShow(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	setTestHome(t, t.TempDir())

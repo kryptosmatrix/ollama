@@ -450,9 +450,9 @@ func TestChatInputAcceptsSpace(t *testing.T) {
 	}
 }
 
-func TestChatCloudModelDefaultToolRoundsAreUnlimited(t *testing.T) {
-	const formerDefaultLimit = 100
-	client := &chatToolLoopClient{toolRounds: formerDefaultLimit + 1}
+func TestChatCloudModelDefaultToolRoundsStopAtLimit(t *testing.T) {
+	const defaultLimit = 100
+	client := &chatToolLoopClient{toolRounds: defaultLimit + 1}
 	registry := &coreagent.Registry{}
 	registry.Register(chatTestTool{})
 	m := chatModel{
@@ -471,11 +471,11 @@ func TestChatCloudModelDefaultToolRoundsAreUnlimited(t *testing.T) {
 		t.Fatal("startRun should start a cloud model run")
 	}
 	done := waitForRunDone(t, m.events)
-	if done.err != nil {
-		t.Fatalf("cloud run returned error: %v", done.err)
+	if done.err == nil || !strings.Contains(done.err.Error(), "tool round limit reached after 100 rounds") {
+		t.Fatalf("error = %v, want default tool round limit", done.err)
 	}
-	if client.calls != formerDefaultLimit+2 {
-		t.Fatalf("client calls = %d, want %d", client.calls, formerDefaultLimit+2)
+	if client.calls != defaultLimit+1 {
+		t.Fatalf("client calls = %d, want %d", client.calls, defaultLimit+1)
 	}
 }
 
