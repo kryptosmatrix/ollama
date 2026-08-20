@@ -24,6 +24,34 @@ func TestParseSuppressTokens(t *testing.T) {
 	}
 }
 
+func TestParseTextConfigRejectsInvalidBounds(t *testing.T) {
+	tests := []struct {
+		name   string
+		config string
+	}{
+		{
+			name:   "partial rotary factor",
+			config: `{"global_head_dim":4,"rope_parameters":{"full_attention":{"partial_rotary_factor":2}}}`,
+		},
+		{
+			name:   "too many shared layers",
+			config: `{"num_hidden_layers":2,"num_kv_shared_layers":3,"layer_types":["full_attention","full_attention"]}`,
+		},
+		{
+			name:   "too few layer types",
+			config: `{"num_hidden_layers":2,"num_kv_shared_layers":1,"layer_types":["full_attention"]}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if _, err := parseTextConfig([]byte(tt.config)); err == nil {
+				t.Fatal("parseTextConfig succeeded, want validation error")
+			}
+		})
+	}
+}
+
 func TestSuppressTokenLogitsRejectsMismatchedBias(t *testing.T) {
 	skipIfNoMLX(t)
 
