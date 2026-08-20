@@ -184,13 +184,23 @@ type QuantizedEmbedding struct {
 }
 
 func (qe *QuantizedEmbedding) Forward(indices *mlx.Array) *mlx.Array {
+	globalScale := qe.GlobalScale
+	if globalScale != nil && globalScale.Size() > 1 {
+		if globalScale.NumDims() != 1 || globalScale.Dim(0) != qe.Weight.Dim(0) {
+			panic("quantized embedding global scale must be scalar or have one value per embedding row")
+		}
+		// Dequantize only receives the selected weight rows, so select the
+		// corresponding row scales as well. Passing the full vector could
+		// broadcast a small lookup into a vocabulary-sized result.
+		globalScale = globalScale.TakeAxis(indices, 0)
+	}
 	weight := qe.Weight.TakeAxis(indices, 0)
 	scales := qe.Scales.TakeAxis(indices, 0)
 	var qbiases *mlx.Array
 	if qe.QBiases != nil && qe.QBiases.Valid() {
 		qbiases = qe.QBiases.TakeAxis(indices, 0)
 	}
-	return mlx.Dequantize(weight, scales, qbiases, qe.GroupSize, qe.Bits, qe.Mode, qe.GlobalScale)
+	return mlx.Dequantize(weight, scales, qbiases, qe.GroupSize, qe.Bits, qe.Mode, globalScale)
 }
 
 func (qe *QuantizedEmbedding) AsLinear() LinearLayer {

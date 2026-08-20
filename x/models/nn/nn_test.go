@@ -222,3 +222,25 @@ func TestQuantizedEmbeddingAsLinearPreservesGlobalScale(t *testing.T) {
 		t.Fatalf("AsLinear quant params = (%d, %d, %q), want (16, 4, %q)", linear.GroupSize, linear.Bits, linear.Mode, "nvfp4")
 	}
 }
+
+func TestQuantizedEmbeddingSelectsPerRowGlobalScale(t *testing.T) {
+	skipIfNoMLX(t)
+
+	weight := mlx.FromValues(make([]float32, 4*32), 4, 32)
+	qw, scales, qbiases := mlx.Quantize(weight, 32, 4, "mxfp4")
+	embedding := &QuantizedEmbedding{
+		Weight:      qw,
+		Scales:      scales,
+		QBiases:     qbiases,
+		GlobalScale: mlx.FromValues([]float32{1, 2, 3, 4}, 4),
+		GroupSize:   32,
+		Bits:        4,
+		Mode:        "mxfp4",
+	}
+
+	out := embedding.Forward(mlx.FromValues([]int32{2}, 1))
+	mlx.Eval(out)
+	if dims := out.Dims(); len(dims) != 2 || dims[0] != 1 || dims[1] != 32 {
+		t.Fatalf("embedding output dims = %v, want [1 32]", dims)
+	}
+}
