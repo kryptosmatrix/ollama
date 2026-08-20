@@ -239,6 +239,11 @@ func (o Options) normalize(numCtx int) Options {
 	if o.RepeatLastN < 0 {
 		o.RepeatLastN = numCtx
 	}
+	// A repetition window cannot contain more tokens than the context. Besides
+	// being semantically redundant, allowing a larger caller-controlled value
+	// would make the pooled history tensor allocate beyond the runner's context
+	// limit.
+	o.RepeatLastN = min(o.RepeatLastN, numCtx)
 	if !o.usesHistory() {
 		// Zero the ring capacity so slots that differ only in a spurious
 		// RepeatLastN still batch together and don't inflate pool width.
