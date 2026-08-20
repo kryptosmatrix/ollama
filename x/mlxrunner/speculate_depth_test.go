@@ -164,6 +164,25 @@ func TestDepthControllerClimbsOutwardWithinFrontier(t *testing.T) {
 	}
 }
 
+func TestDepthControllerCapsDraftDepth(t *testing.T) {
+	c := newDepthController()
+	for step := range 2000 {
+		d := c.next()
+		if d > maxSpeculativeDraftDepth {
+			t.Fatalf("step %d drafted depth %d, want <= safety cap %d", step, d, maxSpeculativeDraftDepth)
+		}
+		c.cost.observe(d, time.Millisecond)
+		c.acc.observe(d, d)
+	}
+
+	if got := c.selected(); got != maxSpeculativeDraftDepth {
+		t.Fatalf("selected depth %d, want safety cap %d in the deep-favoring regime", got, maxSpeculativeDraftDepth)
+	}
+	if got := c.scheduled; got != maxSpeculativeDraftDepth {
+		t.Fatalf("persisted depth %d, want safety cap %d", got, maxSpeculativeDraftDepth)
+	}
+}
+
 func TestCostModelBoundsSingleSampleInfluence(t *testing.T) {
 	m := newCostModel()
 	for range 20 {

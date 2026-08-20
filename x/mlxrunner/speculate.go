@@ -136,7 +136,7 @@ func (s *speculation) open(request Request, caches []cache.Cache) *speculationSe
 
 	spec := &speculationSession{spec: s, drafter: d, enabled: enabled, prevDrafts: -1, roundDrafts: -1}
 	if enabled {
-		spec.limit = s.depth.scheduled
+		spec.limit = min(s.depth.scheduled, maxSpeculativeDraftDepth)
 		spec.stats.maxDraft = spec.limit
 	}
 	return spec

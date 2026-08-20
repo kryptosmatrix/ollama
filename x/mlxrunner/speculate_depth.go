@@ -17,6 +17,11 @@ const depthProbeInterval = 4
 // plain decode speed, never below — for fewer probes.
 const depthProbeIntervalMax = 512
 
+// maxSpeculativeDraftDepth bounds the amount of work and cache snapshot state a
+// single speculative round can create. The controller persists learning across
+// requests, so its exploration limit must remain independent of request length.
+const maxSpeculativeDraftDepth = 16
+
 // depthController drafts argmax_N EV(N) where EV(N) = committed(N) / cost(N), over
 // depths from 0 (plain decode) up to one past the frontier. The depth-0 floor lets
 // it stop speculating when no draft pays; the frontier ceiling keeps it from scoring
@@ -50,11 +55,12 @@ func newDepthController() *depthController {
 func (c *depthController) frontier() int { return c.acc.frontier() }
 
 // next returns the draft depth for the upcoming step: the EV-optimal depth (capped
-// at frontier+1), except periodically it probes one past the selection to refresh
-// the next position up. The probe stays within the frontier window. The cadence
-// doubles toward its cap while probes change nothing and resets on any selection
-// change, giving the new selection a full interval to settle. The chosen depth is
-// recorded in c.scheduled for the next request's open to consume.
+// at the acceptance frontier and safety limit), except periodically it probes one
+// past the selection to refresh the next position up. The probe stays within the
+// allowed window. The cadence doubles toward its cap while probes change nothing
+// and resets on any selection change, giving the new selection a full interval to
+// settle. The chosen depth is recorded in c.scheduled for the next request's open
+// to consume.
 func (c *depthController) next() (depth int) {
 	defer func() { c.scheduled = depth }()
 	sel := c.selected()
@@ -70,7 +76,7 @@ func (c *depthController) next() (depth int) {
 	c.probeSince++
 	if c.probeSince >= c.probeInterval {
 		c.probeSince = 0
-		if probe := min(sel+1, c.frontier()+1); probe != sel {
+		if probe := min(sel+1, c.depthLimit()); probe != sel {
 			c.probed = true
 			return probe
 		}
@@ -87,11 +93,15 @@ func (c *depthController) next() (depth int) {
 	return sel
 }
 
-// costSeedDepth is the shallowest depth in [0, frontier+1] with no clean
-// cost sample, or -1 if all are sampled; bounding to frontier+1 keeps cost-seeding
-// from outrunning the acceptance frontier.
+func (c *depthController) depthLimit() int {
+	return min(c.frontier()+1, maxSpeculativeDraftDepth)
+}
+
+// costSeedDepth is the shallowest allowed depth with no clean cost sample, or -1
+// if all are sampled. The limit keeps cost-seeding from outrunning the acceptance
+// frontier or the per-round safety bound.
 func (c *depthController) costSeedDepth() int {
-	limit := c.frontier() + 1
+	limit := c.depthLimit()
 	for n := 0; n <= limit; n++ {
 		if !c.cost.sampled(n) {
 			return n
@@ -101,14 +111,15 @@ func (c *depthController) costSeedDepth() int {
 }
 
 // selected returns the EV-optimal draft depth without mutating probe state, the
-// argmax over [0, frontier+1]. The frontier bound keeps the inherited optimistic
-// rate from making ever-deeper depths look best; the depth-0 floor lets it stop
-// speculating. Returns 0 until the cost model can compare depths.
+// argmax over the depths allowed by depthLimit. The frontier bound keeps the
+// inherited optimistic rate from making ever-deeper depths look best; the safety
+// bound limits per-round resources, and the depth-0 floor lets it stop speculating.
+// Returns 0 until the cost model can compare depths.
 func (c *depthController) selected() int {
 	if !c.cost.ready() {
 		return 0
 	}
-	limit := c.frontier() + 1
+	limit := c.depthLimit()
 	best, bestEV := 0, c.acc.expectedCommitted(0)/c.cost.cost(0)
 	for n := 1; n <= limit; n++ {
 		if ev := c.acc.expectedCommitted(n) / c.cost.cost(n); ev > bestEV {
