@@ -7,6 +7,7 @@ import { Model } from "@/gotypes";
 import { getTotalVRAM } from "@/utils/vram.ts";
 import { getInferenceCompute } from "@/api";
 import { useCloudStatus } from "./useCloudStatus";
+import { isCloudModel } from "@/utils/model";
 
 export function recommendDefaultModel(totalVRAM: number): string {
   const vram = Math.max(0, Number(totalVRAM) || 0);
@@ -49,8 +50,8 @@ export function useSelectedModel(currentChatId?: string, searchQuery?: string) {
   const restoredChatRef = useRef<string | null>(null);
 
   const selectedModel: Model | null = useMemo(() => {
-    // If cloud is disabled and selected model ends with cloud, switch to a local default.
-    if (cloudDisabled && settings.selectedModel?.endsWith("cloud")) {
+    // If cloud is disabled and a cloud model is selected, switch to a local default.
+    if (cloudDisabled && isCloudModel(settings.selectedModel || "")) {
       return (
         models.find((m) => m.model === recommendedModel) ||
         models.find((m) => !m.isCloud()) ||
@@ -75,7 +76,7 @@ export function useSelectedModel(currentChatId?: string, searchQuery?: string) {
       baseModelsToMigrate.includes(settings.selectedModel);
 
     if (shouldMigrate) {
-      const cloudModel = `${settings.selectedModel}cloud`;
+      const cloudModel = `${settings.selectedModel}-cloud`;
       return (
         models.find((m) => m.model === cloudModel) ||
         new Model({
@@ -91,7 +92,7 @@ export function useSelectedModel(currentChatId?: string, searchQuery?: string) {
       (settings.selectedModel &&
         new Model({
           model: settings.selectedModel,
-          cloud: settings.selectedModel.endsWith("cloud"),
+          cloud: isCloudModel(settings.selectedModel),
           ollama_host: false,
         })) ||
       null
@@ -108,7 +109,7 @@ export function useSelectedModel(currentChatId?: string, searchQuery?: string) {
 
     if (
       cloudDisabled &&
-      settings.selectedModel?.endsWith("cloud") &&
+      isCloudModel(settings.selectedModel || "") &&
       selectedModel.model !== settings.selectedModel
     ) {
       setSettings({ SelectedModel: selectedModel.model });
