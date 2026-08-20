@@ -53,11 +53,15 @@ invalidation cases for this iteration.
 
 const (
 	modelShowCloudFetchTimeout         = 3 * time.Second
+	modelShowCloudResponseMaxBytes     = 16 << 20
 	modelShowCloudReadRefreshCooldown  = 5 * time.Second
 	modelShowCloudHydrationConcurrency = 4
 )
 
-var errModelShowNoCloud = errors.New("cloud disabled")
+var (
+	errModelShowNoCloud               = errors.New("cloud disabled")
+	errModelShowCloudResponseTooLarge = errors.New("cloud response exceeds size limit")
+)
 
 // modelShowCache owns process-local show response caches for local and cloud
 // models. All cached responses are cloned at read/write boundaries so
@@ -482,9 +486,16 @@ func (c *modelShowCache) doCloudJSON(ctx context.Context, method, path string, p
 	}
 	defer resp.Body.Close()
 
-	data, err := io.ReadAll(resp.Body)
+	if resp.ContentLength > modelShowCloudResponseMaxBytes {
+		return errModelShowCloudResponseTooLarge
+	}
+
+	data, err := io.ReadAll(io.LimitReader(resp.Body, modelShowCloudResponseMaxBytes+1))
 	if err != nil {
 		return err
+	}
+	if len(data) > modelShowCloudResponseMaxBytes {
+		return errModelShowCloudResponseTooLarge
 	}
 	if resp.StatusCode >= http.StatusBadRequest {
 		return modelShowStatusError(resp, data)
