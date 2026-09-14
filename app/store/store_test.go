@@ -56,13 +56,14 @@ func TestStore(t *testing.T) {
 
 	t.Run("settings", func(t *testing.T) {
 		sc := Settings{
-			Expose:     true,
-			Browser:    true,
-			Survey:     true,
-			Models:     "/tmp/models",
-			Agent:      true,
-			Tools:      false,
-			WorkingDir: "/tmp/work",
+			Expose:           true,
+			Browser:          true,
+			Survey:           true,
+			Models:           "/tmp/models",
+			Agent:            true,
+			Tools:            false,
+			WorkingDir:       "/tmp/work",
+			AutoApproveTools: true,
 		}
 
 		if err := s.SetSettings(sc); err != nil {
@@ -76,8 +77,46 @@ func TestStore(t *testing.T) {
 		// Compare fields individually since Models might get a default
 		if loaded.Expose != sc.Expose || loaded.Browser != sc.Browser ||
 			loaded.Agent != sc.Agent || loaded.Survey != sc.Survey ||
-			loaded.Tools != sc.Tools || loaded.WorkingDir != sc.WorkingDir {
+			loaded.Tools != sc.Tools || loaded.WorkingDir != sc.WorkingDir ||
+			loaded.AutoApproveTools != sc.AutoApproveTools {
 			t.Errorf("expected %v, got %v", sc, loaded)
+		}
+	})
+
+	t.Run("auto-approve tools is off until switched on, and off again when switched off", func(t *testing.T) {
+		fresh := &Store{DBPath: filepath.Join(t.TempDir(), "db.sqlite")}
+		t.Cleanup(func() { fresh.Close() })
+
+		loaded, err := fresh.Settings()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if loaded.AutoApproveTools {
+			t.Fatal("a new database must not auto-approve tool calls")
+		}
+
+		loaded.AutoApproveTools = true
+		if err := fresh.SetSettings(loaded); err != nil {
+			t.Fatal(err)
+		}
+		loaded, err = fresh.Settings()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !loaded.AutoApproveTools {
+			t.Fatal("switching auto-approve on did not persist")
+		}
+
+		loaded.AutoApproveTools = false
+		if err := fresh.SetSettings(loaded); err != nil {
+			t.Fatal(err)
+		}
+		loaded, err = fresh.Settings()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if loaded.AutoApproveTools {
+			t.Fatal("switching auto-approve off did not persist")
 		}
 	})
 

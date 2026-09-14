@@ -287,4 +287,14 @@ func TestMigrationFromEpoc(t *testing.T) {
 	if version != currentSchemaVersion {
 		t.Fatalf("expected: %d\n got: %d", currentSchemaVersion, version)
 	}
+
+	// A database from before the auto-approve switch existed must come
+	// through the migrations readable, with the switch present and off.
+	settings, err := s.db.getSettings()
+	if err != nil {
+		t.Fatalf("settings after migration: %v", err)
+	}
+	if settings.AutoApproveTools {
+		t.Fatal("auto-approve must be off after migrating an old database")
+	}
 }

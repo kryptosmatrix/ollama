@@ -172,6 +172,12 @@ type Settings struct {
 
 	// AutoUpdateEnabled indicates if automatic updates should be downloaded
 	AutoUpdateEnabled bool
+
+	// AutoApproveTools lets every tool call that would otherwise wait for the
+	// user's approval run at once, without asking. It is one global switch,
+	// off by default. The gate that honours it re-reads it on every call, so
+	// switching it off takes effect on the very next tool call.
+	AutoApproveTools bool
 }
 
 type Store struct {
