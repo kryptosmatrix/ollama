@@ -26,6 +26,7 @@ import (
 	"github.com/ollama/ollama/app/server"
 	"github.com/ollama/ollama/app/store"
 	"github.com/ollama/ollama/app/tools"
+	"github.com/ollama/ollama/app/tts"
 	"github.com/ollama/ollama/app/types/not"
 	"github.com/ollama/ollama/app/ui/responses"
 	"github.com/ollama/ollama/app/updater"
@@ -33,6 +34,7 @@ import (
 	ollamaAuth "github.com/ollama/ollama/auth"
 	"github.com/ollama/ollama/envconfig"
 	"github.com/ollama/ollama/manifest"
+	"github.com/ollama/ollama/mcp"
 	"github.com/ollama/ollama/types/model"
 	_ "github.com/tkrajina/typescriptify-golang-structs/typescriptify"
 )
@@ -101,10 +103,30 @@ type Server struct {
 	Token        string
 	Store        *store.Store
 	ToolRegistry *tools.Registry
-	Tools        bool   // if true, the server will use single-turn tools to fulfill the user's request
-	WebSearch    bool   // if true, the server will use single-turn browser tool to fulfill the user's request
-	Agent        bool   // if true, the server will use multi-turn tools to fulfill the user's request
-	WorkingDir   string // Working directory for all agent operations
+	// MCP holds the connections to configured MCP servers. It is built once for
+	// the life of the process, not per chat request: the tool registry is
+	// rebuilt for every message, and connecting there would restart every
+	// server's subprocess on each one.
+	MCP *mcp.Manager
+	// Approvals is the rendezvous between a chat waiting on a tool call and the
+	// separate request that carries the user's answer.
+	Approvals     *tools.Approvals
+	approvalsOnce sync.Once
+	// discoveryHome overrides the home directory searched for other MCP
+	// clients' configuration. It exists so a test can search a directory it
+	// created rather than the developer's own home, where it would read — and
+	// report — their real credentials.
+	discoveryHome string
+	Tools         bool   // if true, the server will use single-turn tools to fulfill the user's request
+	WebSearch     bool   // if true, the server will use single-turn browser tool to fulfill the user's request
+	Agent         bool   // if true, the server will use multi-turn tools to fulfill the user's request
+	WorkingDir    string // Working directory for all agent operations
+
+	// TTS is the desktop speak stack. Nil means construct the production
+	// default on first use. Tests set this so they cannot touch the
+	// developer's Keychain.
+	TTS     *tts.Service
+	ttsOnce sync.Once
 
 	// Dev is true if the server is running in development mode
 	Dev bool
@@ -283,6 +305,19 @@ func (s *Server) Handler() http.Handler {
 	mux.Handle("GET /api/v1/chat/{id}", handle(s.getChat))
 	mux.Handle("POST /api/v1/chat/{id}", handle(s.chat))
 	mux.Handle("DELETE /api/v1/chat/{id}", handle(s.deleteChat))
+	mux.Handle("POST /api/v1/chat/{id}/approval", handle(s.chatApproval))
+
+	mux.Handle("GET /api/v1/mcp", handle(s.listMCPServers))
+	mux.Handle("POST /api/v1/mcp", handle(s.addMCPServer))
+	mux.Handle("PUT /api/v1/mcp/{name}", handle(s.updateMCPServer))
+	mux.Handle("DELETE /api/v1/mcp/{name}", handle(s.deleteMCPServer))
+	mux.Handle("POST /api/v1/mcp/{name}/approve", handle(s.approveMCPServer))
+	mux.Handle("POST /api/v1/mcp/{name}/signin", handle(s.signInMCPServer))
+	mux.Handle("POST /api/v1/mcp/{name}/signout", handle(s.signOutMCPServer))
+	mux.Handle("GET /api/v1/mcp-discover", handle(s.discoverMCPServers))
+	mux.Handle("POST /api/v1/mcp-probe", handle(s.probeMCPServers))
+	mux.Handle("GET /api/v1/mcp-registry", handle(s.browseMCPRegistry))
+	mux.Handle("POST /api/v1/mcp-registry/resolve", handle(s.resolveMCPRegistryEntry))
 	mux.Handle("POST /api/v1/create-chat", handle(s.createChat))
 	mux.Handle("PUT /api/v1/chat/{id}/rename", handle(s.renameChat))
 
@@ -292,6 +327,15 @@ func (s *Server) Handler() http.Handler {
 	mux.Handle("POST /api/v1/settings", handle(s.settings))
 	mux.Handle("GET /api/v1/cloud", handle(s.getCloudSetting))
 	mux.Handle("POST /api/v1/cloud", handle(s.cloudSetting))
+
+	mux.Handle("POST /api/v1/tts/speak", handle(s.ttsSpeak))
+	mux.Handle("GET /api/v1/tts/voices", handle(s.ttsVoices))
+	mux.Handle("GET /api/v1/tts/status", handle(s.ttsStatus))
+	mux.Handle("PUT /api/v1/tts/key", handle(s.ttsPutKey))
+	mux.Handle("DELETE /api/v1/tts/key", handle(s.ttsDeleteKey))
+	mux.Handle("POST /api/v1/tts/settings", handle(s.ttsSettings))
+	mux.Handle("POST /api/v1/tts/cache/clear", handle(s.ttsCacheClear))
+	mux.Handle("POST /api/v1/tts/cache/commit", handle(s.ttsCacheCommit))
 
 	// Ollama proxy endpoints
 	ollamaProxy := s.ollamaProxy()
@@ -325,7 +369,12 @@ func (s *Server) handleError(w http.ResponseWriter, e error) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusInternalServerError)
+	status := http.StatusInternalServerError
+	var he *tts.HTTPError
+	if errors.As(e, &he) {
+		status = he.HTTPStatus()
+	}
+	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(map[string]string{"error": e.Error()})
 }
 
@@ -850,6 +899,9 @@ func (s *Server) chat(w http.ResponseWriter, r *http.Request) error {
 	// Check if agent or tools mode is enabled
 	// Note: Skip agent/tools mode if user has attachments, as the agent doesn't handle file attachments properly
 	registry := tools.NewRegistry()
+	// What the connected MCP servers say about themselves, for the system
+	// prompt. Empty unless a server both connected and had something to say.
+	var mcpInstructions string
 	var browser *tools.Browser
 	ctx = tools.WithAllowedDirectURLs(ctx, userMessageText(chat.Messages))
 
@@ -872,6 +924,11 @@ func (s *Server) chat(w http.ResponseWriter, r *http.Request) error {
 				registry.Register(&tools.WebFetch{})
 			}
 		}
+
+		if hasToolsCapability {
+			s.registerMCPTools(registry)
+			mcpInstructions = s.mcpInstructions()
+		}
 	}
 
 	var thinkingTimeStart *time.Time = nil
@@ -886,7 +943,7 @@ func (s *Server) chat(w http.ResponseWriter, r *http.Request) error {
 	for {
 		var toolsExecuted bool
 
-		availableTools := registry.AvailableTools()
+		availableTools := registry.OllamaTools()
 
 		// If we have pending assistant tool_calls and no assistant yet,
 		// build the request against a temporary chat that includes a
@@ -913,7 +970,7 @@ func (s *Server) chat(w http.ResponseWriter, r *http.Request) error {
 				reqChat = &temp
 			}
 		}
-		chatReq, err := s.buildChatRequest(reqChat, req.Model, thinkValue, availableTools)
+		chatReq, err := s.buildChatRequest(reqChat, req.Model, thinkValue, availableTools, mcpInstructions)
 		if err != nil {
 			return err
 		}
@@ -1027,7 +1084,38 @@ func (s *Server) chat(w http.ResponseWriter, r *http.Request) error {
 				for _, toolCall := range res.Message.ToolCalls {
 					// continues loop as tools were executed
 					toolsExecuted = true
-					result, content, err := registry.Execute(ctx, toolCall.Function.Name, toolCall.Function.Arguments.ToMap())
+					args := toolCall.Function.Arguments.ToMap()
+
+					// Ask before running anything that requires it. This blocks
+					// the streaming response until the answer arrives on a
+					// separate request, so a refusal is the only outcome that
+					// costs nothing.
+					if err := s.awaitToolApproval(ctx, w, flusher, chat.ID, registry, toolCall.Function.Name, args); err != nil {
+						errContent := fmt.Sprintf("Error: %v", err)
+						toolErrMsg := store.NewMessage("tool", errContent, nil)
+						toolErrMsg.ToolName = toolCall.Function.Name
+						chat.Messages = append(chat.Messages, toolErrMsg)
+						if appendErr := s.Store.AppendMessage(chat.ID, toolErrMsg); appendErr != nil {
+							return appendErr
+						}
+						toolResult := true
+						json.NewEncoder(w).Encode(responses.ChatEvent{
+							EventName: "tool",
+							Content:   &errContent,
+							ToolName:  &toolCall.Function.Name,
+						})
+						flusher.Flush()
+						json.NewEncoder(w).Encode(responses.ChatEvent{
+							EventName:  "tool_result",
+							Content:    &errContent,
+							ToolName:   &toolCall.Function.Name,
+							ToolResult: &toolResult,
+						})
+						flusher.Flush()
+						continue
+					}
+
+					result, content, err := registry.Execute(ctx, toolCall.Function.Name, args)
 					if err != nil {
 						errContent := fmt.Sprintf("Error: %v", err)
 						toolErrMsg := store.NewMessage("tool", errContent, nil)
@@ -1332,11 +1420,173 @@ func (s *Server) renameChat(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// registerMCPTools adds the tools of every connected MCP server to this
+// request's registry. It is a no-op when no manager was built, which is the
+// ordinary case for a user who has configured no servers.
+//
+// A tool that cannot be adapted is reported and skipped rather than costing the
+// user every other tool from that server.
+func (s *Server) registerMCPTools(registry *tools.Registry) {
+	if s.MCP == nil {
+		return
+	}
+	if _, err := tools.RegisterMCP(registry, s.MCP); err != nil {
+		s.log().Warn("could not offer some MCP tools", "error", err)
+	}
+}
+
+// awaitToolApproval returns nil when the call may proceed. It returns an error
+// when the user declined, when nobody answered, or when the chat ended — and in
+// every one of those cases the tool must not run.
+//
+// A tool that does not require approval, a scope the chat has already
+// granted, or any call made while the settings switch approves every tool
+// call, returns immediately without asking.
+func (s *Server) awaitToolApproval(ctx context.Context, w http.ResponseWriter, flusher http.Flusher, chatID string, registry *tools.Registry, toolName string, args map[string]any) error {
+	tool, ok := registry.Get(toolName)
+	if !ok {
+		// An unknown tool is refused by Execute with a clearer message; there
+		// is nothing to approve.
+		return nil
+	}
+	if !tools.ToolRequiresApproval(tool, args) {
+		return nil
+	}
+
+	approvals := s.approvals()
+	scope := tools.ToolApprovalScope(tool, args)
+	if approvals.State(chatID).Allows(scope) {
+		return nil
+	}
+	if s.autoApprovesTools(chatID, toolName, scope) {
+		return nil
+	}
+
+	request := tools.ApprovalRequest{
+		ID:       tools.NewRequestID(chatID),
+		ChatID:   chatID,
+		ToolName: toolName,
+		Scope:    scope,
+		Args:     args,
+	}
+
+	decision, err := approvals.Await(ctx, request, func(req tools.ApprovalRequest) error {
+		if encodeErr := json.NewEncoder(w).Encode(responses.ChatEvent{
+			EventName:     "tool_approval",
+			ToolName:      &req.ToolName,
+			ApprovalID:    &req.ID,
+			ApprovalScope: &req.Scope,
+			ApprovalArgs:  req.Args,
+		}); encodeErr != nil {
+			return encodeErr
+		}
+		flusher.Flush()
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("%s was not run: %w", toolName, err)
+	}
+	if !decision.Allow {
+		return fmt.Errorf("%s was not run because you declined it", toolName)
+	}
+	return nil
+}
+
+// approvals returns the approval rendezvous, creating it on first use so a
+// Server built without one still refuses tools that need approval rather than
+// running them.
+func (s *Server) approvals() *tools.Approvals {
+	s.approvalsOnce.Do(func() {
+		if s.Approvals == nil {
+			s.Approvals = tools.NewApprovals()
+		}
+	})
+	return s.Approvals
+}
+
+// autoApprovesTools reports whether the user has switched off approval prompts
+// for every tool call, and records the call it is letting through.
+//
+// The switch is read from the store on every call rather than held in memory,
+// for the same reason the MCP approval ledger is re-read on every question:
+// the user changes it while the app is running and expects the next call to
+// obey it. A call already waiting for an answer is not released by switching
+// it on — that question was put to the user and stays theirs to answer.
+//
+// Without a store there is no switch, and a store that cannot be read leaves
+// the question to the user, which is where it was before the switch existed;
+// neither failure runs a tool that nobody agreed to.
+func (s *Server) autoApprovesTools(chatID, toolName, scope string) bool {
+	if s.Store == nil {
+		return false
+	}
+	settings, err := s.Store.Settings()
+	if err != nil {
+		s.log().Warn("could not read settings; asking for tool approval instead", "chat", chatID, "tool", toolName, "error", err)
+		return false
+	}
+	if !settings.AutoApproveTools {
+		return false
+	}
+	s.log().Info("tool call approved automatically by the settings switch", "chat", chatID, "tool", toolName, "scope", scope)
+	return true
+}
+
+// chatApproval carries the user's answer back to the tool call that is waiting
+// for it. The waiting call is inside a different, still-open HTTP response, so
+// the two meet through the approvals registry rather than through this request.
+func (s *Server) chatApproval(w http.ResponseWriter, r *http.Request) error {
+	cid := r.PathValue("id")
+	if cid == "" {
+		return fmt.Errorf("chat ID is required")
+	}
+
+	var body struct {
+		ApprovalID  string `json:"approvalId"`
+		Allow       bool   `json:"allow"`
+		Remember    bool   `json:"remember"`
+		RememberAll bool   `json:"rememberAll"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return fmt.Errorf("invalid request body: %w", err)
+	}
+	if body.ApprovalID == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return fmt.Errorf("approvalId is required")
+	}
+	// An approval belongs to the chat it was raised in. Without this check one
+	// chat could answer another chat's question.
+	if !strings.HasPrefix(body.ApprovalID, cid+":") {
+		w.WriteHeader(http.StatusBadRequest)
+		return fmt.Errorf("approval does not belong to this chat")
+	}
+
+	err := s.approvals().Resolve(body.ApprovalID, tools.ApprovalDecision{
+		Allow:       body.Allow,
+		Remember:    body.Remember,
+		RememberAll: body.RememberAll,
+	})
+	if errors.Is(err, tools.ErrNotPending) {
+		w.WriteHeader(http.StatusConflict)
+		return err
+	}
+	if err != nil {
+		return err
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	return json.NewEncoder(w).Encode(map[string]bool{"ok": true})
+}
+
 func (s *Server) deleteChat(w http.ResponseWriter, r *http.Request) error {
 	cid := r.PathValue("id")
 	if cid == "" {
 		return fmt.Errorf("chat ID is required")
 	}
+
+	// Nothing may be left waiting on an answer that can no longer be given.
+	s.approvals().CancelChat(cid)
 
 	// Check if the chat exists (no need to load attachments)
 	_, err := s.Store.ChatWithOptions(cid, false)
@@ -1633,53 +1883,6 @@ func userAgent() string {
 	)
 }
 
-// convertToOllamaTool converts a tool schema from our tools package format to Ollama API format
-func convertToOllamaTool(toolSchema map[string]any) api.Tool {
-	tool := api.Tool{
-		Type: "function",
-		Function: api.ToolFunction{
-			Name:        getStringFromMap(toolSchema, "name", ""),
-			Description: getStringFromMap(toolSchema, "description", ""),
-		},
-	}
-
-	tool.Function.Parameters.Type = "object"
-	tool.Function.Parameters.Required = []string{}
-	tool.Function.Parameters.Properties = api.NewToolPropertiesMap()
-
-	if schemaProps, ok := toolSchema["schema"].(map[string]any); ok {
-		tool.Function.Parameters.Type = getStringFromMap(schemaProps, "type", "object")
-
-		if props, ok := schemaProps["properties"].(map[string]any); ok {
-			tool.Function.Parameters.Properties = api.NewToolPropertiesMap()
-
-			for propName, propDef := range props {
-				if propMap, ok := propDef.(map[string]any); ok {
-					prop := api.ToolProperty{
-						Type:        api.PropertyType{getStringFromMap(propMap, "type", "string")},
-						Description: getStringFromMap(propMap, "description", ""),
-					}
-					tool.Function.Parameters.Properties.Set(propName, prop)
-				}
-			}
-		}
-
-		if required, ok := schemaProps["required"].([]string); ok {
-			tool.Function.Parameters.Required = required
-		} else if requiredAny, ok := schemaProps["required"].([]any); ok {
-			required := make([]string, len(requiredAny))
-			for i, r := range requiredAny {
-				if s, ok := r.(string); ok {
-					required[i] = s
-				}
-			}
-			tool.Function.Parameters.Required = required
-		}
-	}
-
-	return tool
-}
-
 // getStringFromMap safely gets a string from a map
 func getStringFromMap(m map[string]any, key, defaultValue string) string {
 	if val, ok := m[key].(string); ok {
@@ -1703,8 +1906,14 @@ func supportsBrowserTools(model string) bool {
 }
 
 // buildChatRequest converts store.Chat to api.ChatRequest
-func (s *Server) buildChatRequest(chat *store.Chat, model string, think any, availableTools []map[string]any) (*api.ChatRequest, error) {
+func (s *Server) buildChatRequest(chat *store.Chat, model string, think any, availableTools api.Tools, mcpInstructions string) (*api.ChatRequest, error) {
 	var msgs []api.Message
+	// The servers' own words, ahead of the conversation. A tool definition says
+	// what one call does; this is the only place a server can say what it is
+	// for, which is what decides whether a model reaches for it unprompted.
+	if strings.TrimSpace(mcpInstructions) != "" {
+		msgs = append(msgs, api.Message{Role: "system", Content: mcpInstructions})
+	}
 	for _, m := range chat.Messages {
 		// Skip empty messages if present
 		if m.Content == "" && m.Thinking == "" && len(m.ToolCalls) == 0 && len(m.Attachments) == 0 {
@@ -1788,11 +1997,7 @@ func (s *Server) buildChatRequest(chat *store.Chat, model string, think any, ava
 	}
 
 	if len(availableTools) > 0 {
-		tools := make(api.Tools, len(availableTools))
-		for i, toolSchema := range availableTools {
-			tools[i] = convertToOllamaTool(toolSchema)
-		}
-		req.Tools = tools
+		req.Tools = availableTools
 	}
 
 	return req, nil

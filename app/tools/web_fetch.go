@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ollama/ollama/api"
 	"github.com/ollama/ollama/auth"
 )
 
@@ -28,30 +29,37 @@ type FetchResponse struct {
 	Links   []string `json:"links"`
 }
 
+// webFetchTool is the definition the model receives. See webSearchTool for why
+// it is declared here rather than as a JSON schema string.
+var webFetchTool = api.ToolFunction{
+	Name:        "web_fetch",
+	Description: "Crawl and extract text content from web pages",
+	Parameters: api.ToolFunctionParameters{
+		Type:     "object",
+		Required: []string{"url"},
+		Properties: toolProperties([]namedProperty{
+			{"url", api.ToolProperty{
+				Type:        api.PropertyType{"string"},
+				Description: "URL to crawl and extract content from",
+			}},
+		}),
+	},
+}
+
 func (w *WebFetch) Name() string {
-	return "web_fetch"
+	return webFetchTool.Name
 }
 
 func (w *WebFetch) Description() string {
-	return "Crawl and extract text content from web pages"
+	return webFetchTool.Description
 }
 
-func (g *WebFetch) Schema() map[string]any {
-	schemaBytes := []byte(`{
-		"type": "object",
-		"properties": {
-			"url": {
-				"type": "string",
-				"description": "URL to crawl and extract content from"
-            }
-		},
-		"required": ["url"]
-	}`)
-	var schema map[string]any
-	if err := json.Unmarshal(schemaBytes, &schema); err != nil {
-		return nil
-	}
-	return schema
+func (w *WebFetch) ToolFunction() api.ToolFunction {
+	return webFetchTool
+}
+
+func (w *WebFetch) Schema() map[string]any {
+	return schemaOf(webFetchTool)
 }
 
 func (w *WebFetch) Prompt() string {

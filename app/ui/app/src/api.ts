@@ -1,10 +1,17 @@
 import {
+  approvalRequestBody,
+  type ApprovalDecision,
+} from "@/utils/toolApproval";
+import {
   ChatResponse,
   ChatsResponse,
   ChatEvent,
   DownloadEvent,
   ErrorEvent,
   InferenceComputeResponse,
+  MCPServer,
+  MCPDiscoveredServer,
+  MCPRegistryEntry,
   ModelCapabilitiesResponse,
   Model,
   ChatRequest,
@@ -258,6 +265,251 @@ export async function* sendMessage(
   }
 }
 
+/**
+ * Answers a tool call that is waiting for approval.
+ *
+ * The waiting call is inside a different, still-open response, so this request
+ * is the only way it ever resumes. A 409 means it is no longer waiting — it was
+ * already answered, it timed out, or the chat ended — which is reported rather
+ * than swallowed, because a button that silently did nothing would leave the
+ * user believing they had answered.
+ */
+export async function respondToToolApproval(
+  chatId: string,
+  approvalId: string,
+  decision: ApprovalDecision,
+): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/v1/chat/${chatId}/approval`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(approvalRequestBody(approvalId, decision)),
+  });
+  if (response.status === 409) {
+    throw new Error("That tool call is no longer waiting for an answer.");
+  }
+  if (!response.ok) {
+    throw new Error(`Failed to answer the approval: ${response.status}`);
+  }
+}
+
+export interface AddMCPServerRequest {
+  name: string;
+  command?: string;
+  args?: string[];
+  env?: Record<string, string>;
+  url?: string;
+  headers?: Record<string, string>;
+}
+
+async function mcpRequest(
+  path: string,
+  init: RequestInit = {},
+): Promise<Response> {
+  const response = await fetch(`${API_BASE}/api/v1/mcp${path}`, init);
+  if (!response.ok) {
+    let detail = "";
+    try {
+      detail = (await response.text()).trim();
+    } catch {
+      detail = "";
+    }
+    throw new Error(detail || `Request failed: ${response.status}`);
+  }
+  return response;
+}
+
+export async function listMCPServers(): Promise<MCPServer[]> {
+  const response = await mcpRequest("");
+  const data = await response.json();
+  return (data.servers ?? []).map((server: unknown) => new MCPServer(server));
+}
+
+export async function addMCPServer(
+  request: AddMCPServerRequest,
+): Promise<void> {
+  await mcpRequest("", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+  });
+}
+
+export async function setMCPServerEnabled(
+  name: string,
+  enabled: boolean,
+): Promise<void> {
+  await mcpRequest(`/${encodeURIComponent(name)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ enabled }),
+  });
+}
+
+/**
+ * Approves a server to run.
+ *
+ * `runs` is the command line the page displayed. The server checks it against
+ * what is on disk and refuses if they differ, so a stale page or a
+ * configuration edited underneath cannot approve something the user never
+ * read.
+ */
+export async function approveMCPServer(
+  name: string,
+  runs: string,
+): Promise<void> {
+  await mcpRequest(`/${encodeURIComponent(name)}/approve`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ runs }),
+  });
+}
+
+export async function removeMCPServer(name: string): Promise<void> {
+  await mcpRequest(`/${encodeURIComponent(name)}`, { method: "DELETE" });
+}
+
+/**
+ * Starts a browser sign-in for a remote server.
+ *
+ * This returns as soon as the sign-in has started, not when it finishes: the
+ * user is in a browser at that point, and how long they take there is not a
+ * request timeout. The outcome shows up in the server's status.
+ */
+export async function signInMCPServer(name: string): Promise<void> {
+  await mcpRequest(`/${encodeURIComponent(name)}/signin`, { method: "POST" });
+}
+
+/**
+ * Revokes a server's token and deletes it from this machine.
+ *
+ * Resolves with the server as it now stands. When the token could not be
+ * revoked at the server it was still deleted here, and `error` says so — the
+ * caller must show it rather than treat the call as a clean sign-out.
+ */
+export async function signOutMCPServer(name: string): Promise<MCPServer> {
+  const response = await mcpRequest(`/${encodeURIComponent(name)}/signout`, {
+    method: "POST",
+  });
+  return new MCPServer(await response.json());
+}
+
+export interface MCPRegistryPage {
+  entries: MCPRegistryEntry[];
+  nextCursor?: string;
+  notVetted: boolean;
+}
+
+/** Searches the official MCP Registry. An empty query lists everything. */
+export async function browseMCPRegistry(
+  search: string,
+  cursor?: string,
+): Promise<MCPRegistryPage> {
+  const params = new URLSearchParams();
+  if (search.trim() !== "") params.set("search", search.trim());
+  if (cursor) params.set("cursor", cursor);
+
+  const response = await fetch(
+    `${API_BASE}/api/v1/mcp-registry?${params.toString()}`,
+  );
+  if (!response.ok) {
+    const detail = (await response.text().catch(() => "")).trim();
+    throw new Error(
+      detail || `Could not reach the registry: ${response.status}`,
+    );
+  }
+  const data = await response.json();
+  return {
+    entries: (data.entries ?? []).map(
+      (entry: unknown) => new MCPRegistryEntry(entry),
+    ),
+    nextCursor: data.nextCursor,
+    notVetted: Boolean(data.notVetted),
+  };
+}
+
+/**
+ * Asks what installing one entry would write, at the moment of the decision.
+ *
+ * The browse list may be minutes old by the time the user clicks, and what
+ * they are shown before agreeing must be current — so this asks again rather
+ * than trusting the row.
+ */
+export async function resolveMCPRegistryEntry(
+  name: string,
+): Promise<MCPRegistryEntry> {
+  const response = await fetch(`${API_BASE}/api/v1/mcp-registry/resolve`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+  if (!response.ok) {
+    const detail = (await response.text().catch(() => "")).trim();
+    throw new Error(
+      detail || `Could not resolve the entry: ${response.status}`,
+    );
+  }
+  return new MCPRegistryEntry(await response.json());
+}
+
+export interface MCPDiscovery {
+  servers: MCPDiscoveredServer[];
+  /** Every path that was looked at, existing or not. */
+  searched: string[];
+  /** A failure that did not stop the rest of the search. */
+  error?: string;
+}
+
+function readDiscovery(data: unknown): MCPDiscovery {
+  const body = (data ?? {}) as {
+    servers?: unknown[];
+    searched?: string[];
+    error?: string;
+  };
+  return {
+    servers: (body.servers ?? []).map(
+      (server: unknown) => new MCPDiscoveredServer(server),
+    ),
+    searched: body.searched ?? [],
+    error: body.error,
+  };
+}
+
+/**
+ * Lists MCP servers other applications on this machine are configured with.
+ *
+ * This reads named files and contacts nothing, which is why it is a plain
+ * read while the probe below is not.
+ */
+export async function discoverMCPServers(): Promise<MCPDiscovery> {
+  const response = await fetch(`${API_BASE}/api/v1/mcp-discover`);
+  if (!response.ok) {
+    const detail = (await response.text().catch(() => "")).trim();
+    throw new Error(
+      detail || `Could not search this machine: ${response.status}`,
+    );
+  }
+  return readDiscovery(await response.json());
+}
+
+/**
+ * Looks for MCP servers answering on this machine right now.
+ *
+ * A POST because it is an act: it contacts every listening loopback port with
+ * the MCP handshake. Nothing calls it except a user asking for it.
+ */
+export async function probeMCPServers(): Promise<MCPDiscovery> {
+  const response = await fetch(`${API_BASE}/api/v1/mcp-probe`, {
+    method: "POST",
+  });
+  if (!response.ok) {
+    const detail = (await response.text().catch(() => "")).trim();
+    throw new Error(
+      detail || `Could not check this machine: ${response.status}`,
+    );
+  }
+  return readDiscovery(await response.json());
+}
+
 export async function getSettings(): Promise<{
   settings: Settings;
 }> {
@@ -419,7 +671,9 @@ export interface ModelRecommendationsResponse {
   recommendations: ModelRecommendation[];
 }
 
-export async function getModelRecommendations(): Promise<ModelRecommendation[]> {
+export async function getModelRecommendations(): Promise<
+  ModelRecommendation[]
+> {
   const response = await fetch(
     `${API_BASE}/api/experimental/model-recommendations`,
   );
@@ -477,5 +731,149 @@ export async function getCloudStatus(): Promise<CloudStatusResponse | null> {
   return {
     disabled: Boolean(data.disabled),
     source: (data.source as CloudStatusSource) || "none",
+  };
+}
+
+export type TTSStatus = {
+  has_api_key: boolean;
+  voice_id: string;
+  model_id: string;
+  speed: number;
+  cache_enabled: boolean;
+  cache_clear_pending: boolean;
+  secret_store: string;
+};
+
+export type TTSVoice = {
+  voice_id: string;
+  name: string;
+  category?: string;
+};
+
+async function ttsError(response: Response): Promise<Error> {
+  let message = `Speech request failed: ${response.status}`;
+  try {
+    const body = (await response.json()) as { error?: string };
+    if (body.error) {
+      message = body.error;
+    }
+  } catch {
+    // keep the status message
+  }
+  const error = new Error(message) as Error & { status: number };
+  error.status = response.status;
+  return error;
+}
+
+export async function getTTSStatus(): Promise<TTSStatus> {
+  const response = await fetch(`${API_BASE}/api/v1/tts/status`);
+  if (!response.ok) {
+    throw await ttsError(response);
+  }
+  return response.json();
+}
+
+export async function putTTSKey(apiKey: string): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/v1/tts/key`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ api_key: apiKey }),
+  });
+  if (!response.ok) {
+    throw await ttsError(response);
+  }
+}
+
+export async function deleteTTSKey(): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/v1/tts/key`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw await ttsError(response);
+  }
+}
+
+export async function updateTTSSettings(patch: {
+  voice_id?: string;
+  model_id?: string;
+  speed?: number;
+  cache_enabled?: boolean;
+}): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/v1/tts/settings`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+  if (!response.ok) {
+    throw await ttsError(response);
+  }
+}
+
+export async function getTTSVoices(): Promise<TTSVoice[]> {
+  const response = await fetch(`${API_BASE}/api/v1/tts/voices`);
+  if (!response.ok) {
+    throw await ttsError(response);
+  }
+  const data = (await response.json()) as { voices?: TTSVoice[] };
+  return data.voices ?? [];
+}
+
+export async function clearTTSCache(): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/v1/tts/cache/clear`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: "{}",
+  });
+  if (!response.ok) {
+    throw await ttsError(response);
+  }
+}
+
+export async function commitTTSCache(fingerprint: string): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/v1/tts/cache/commit`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fingerprint }),
+  });
+  if (!response.ok) {
+    throw await ttsError(response);
+  }
+}
+
+export async function speakMessageChunk(
+  text: string,
+  chunkIndex: number,
+  signal?: AbortSignal,
+): Promise<{
+  blob: Blob;
+  contentType: string;
+  chunkIndex: number;
+  chunkCount: number;
+  fingerprint: string;
+}> {
+  const response = await fetch(`${API_BASE}/api/v1/tts/speak`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, chunk_index: chunkIndex }),
+    signal,
+  });
+  if (!response.ok) {
+    throw await ttsError(response);
+  }
+  const contentType = response.headers.get("Content-Type") || "";
+  const mime = contentType.split(";")[0].trim().toLowerCase();
+  if (
+    mime !== "audio/mpeg" &&
+    mime !== "audio/mp3" &&
+    mime !== "application/octet-stream"
+  ) {
+    throw new Error("ElevenLabs returned data that was not audio.");
+  }
+  return {
+    blob: await response.blob(),
+    contentType,
+    chunkIndex: Number(response.headers.get("X-Ollama-TTS-Chunk-Index") || chunkIndex),
+    chunkCount: Number(response.headers.get("X-Ollama-TTS-Chunk-Count") || 1),
+    fingerprint: response.headers.get("X-Ollama-TTS-Fingerprint") || "",
   };
 }

@@ -14,6 +14,7 @@ import (
 	coreagent "github.com/ollama/ollama/agent"
 	"github.com/ollama/ollama/api"
 	"github.com/ollama/ollama/cmd/internal/filedata"
+	"github.com/ollama/ollama/mcp"
 )
 
 var chatSpinnerFrames = []string{".", "..", "..."}
@@ -48,16 +49,23 @@ type ModelOption struct {
 }
 
 type Options struct {
-	Model                       string
-	OpenModelPicker             bool
-	ChatID                      string
-	Messages                    []api.Message
-	Client                      coreagent.ChatClient
-	Tools                       *coreagent.Registry
-	Skills                      *coreagent.SkillCatalog
-	ImportSkills                func(string) (coreagent.SkillImportResult, error)
-	ReloadSkills                func() (*coreagent.SkillCatalog, error)
-	ToolRegistryForModel        func(context.Context, string) *coreagent.Registry
+	Model                string
+	OpenModelPicker      bool
+	ChatID               string
+	Messages             []api.Message
+	Client               coreagent.ChatClient
+	Tools                *coreagent.Registry
+	Skills               *coreagent.SkillCatalog
+	ImportSkills         func(string) (coreagent.SkillImportResult, error)
+	ReloadSkills         func() (*coreagent.SkillCatalog, error)
+	ToolRegistryForModel func(context.Context, string) *coreagent.Registry
+	// MCPServers reports the current state of every configured MCP server.
+	// It is a closure rather than the manager itself so this package cannot
+	// close a manager it does not own.
+	MCPServers func() []mcp.ServerState
+	// SetMCPEnabled switches a server on or off and applies the change, which
+	// includes stopping a server that was switched off.
+	SetMCPEnabled               func(context.Context, string, bool) error
 	ToolsDisabled               bool
 	MultiModalForModel          func(context.Context, string) bool
 	ModelOptions                func(context.Context) ([]ModelOption, error)

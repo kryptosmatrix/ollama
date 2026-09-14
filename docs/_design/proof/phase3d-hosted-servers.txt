@@ -1,0 +1,124 @@
+Phase 3d — against real hosted MCP servers
+Activation evidence
+
+Everything else in mcp/ runs against a server this repository controls. That is
+what makes those tests deterministic, and it is also their ceiling: a server
+written to satisfy this client agrees with whatever this client does. These runs
+are against services that have never heard of Ollama.
+
+The harness is mcp/hosted_test.go. It is skipped unless OLLAMA_MCP_TEST_URL
+names an endpoint, so the committed suite never depends on somebody else's
+uptime, and it uses a token store in a temporary directory rather than the
+platform default, so nothing a run obtains lands beside a real sign-in.
+
+WHAT THESE RUNS PROVE
+
+1. A real hosted MCP server connects, over real TLS and a real streamable HTTP
+   session, and its tools convert. DeepWiki 2.14.3 speaking protocol
+   2025-11-25, three tools offered and none refused, schemas converted and
+   marshalled. This is the first time the transport and the schema conversion
+   have met a tool list nobody here designed.
+
+2. A real tool call round-trips. read_wiki_structure against ollama/ollama
+   returned 1747 bytes of content with isError=false.
+
+3. Three real OAuth-protected services report a needed sign-in rather than
+   failing obscurely: Linear, Sentry and Notion. Each returns
+   ErrSignInRequired, wrapped through the transport and recovered by
+   errors.Is at the manager — which is the part that could not be proven by
+   reasoning, because the error crosses the protocol library's own wrapping on
+   the way.
+
+WHAT THESE RUNS DO NOT PROVE, and why the record says so rather than implying
+otherwise.
+
+  a. No complete sign-in has been performed against a real service. Discovery,
+     registration, PKCE, the exchange and refresh are proven against the fake
+     authorization server in mcp/oauthflow_test.go. What is unproven is
+     whatever real services do differently: consent screens needing more than
+     one round trip, scope names, an authorization server on a different host
+     from the MCP endpoint. TestAHostedSignIn exists and is skipped; running it
+     needs an operator with an account, at a keyboard, and their decision.
+
+  b. The zero-registration property is NOT directly observed here. Against the
+     fake server it is asserted exactly — an ordinary connection produces no
+     registrations and no authorization requests. Against a real service it
+     cannot be observed from outside, and proving it by removing
+     signInRequiredTransport would create a junk client registration at a
+     third party's authorization server, which is not a thing to do to
+     somebody else's service to make a point. The indirect signal is in the
+     timings below: 0.05s, 0.07s and 0.07s. Discovery followed by dynamic
+     client registration is several round trips to two hosts and cannot happen
+     in that time. Recorded as an indication, not as a measurement.
+
+WHAT WAS CONTACTED, so the network these runs used is on the record:
+mcp.deepwiki.com, mcp.linear.app, mcp.sentry.dev and mcp.notion.com. Every
+request was anonymous; no credential was sent to any of them and none was
+obtained. The DeepWiki tool call is a read of public documentation.
+
+===== 2026-08-07T11:15:43Z — public server, connect + tool call
+$ OLLAMA_MCP_TEST_URL=https://mcp.deepwiki.com/mcp OLLAMA_MCP_TEST_TOOL=read_wiki_structure OLLAMA_MCP_TEST_ARGS='{"repoName":"ollama/ollama"}' go test -count=1 -run TestAHostedServerConnects -v ./mcp/
+=== RUN   TestAHostedServerConnects
+    hosted_test.go:86: endpoint: https://mcp.deepwiki.com/mcp
+    hosted_test.go:87: status: connected
+    hosted_test.go:89: server: DeepWiki 2.14.3 (protocol 2025-11-25)
+    hosted_test.go:110: 3 tools offered, 0 refused
+    hosted_test.go:110:   tool hosted__ask_question
+    hosted_test.go:110:   tool hosted__read_wiki_contents
+    hosted_test.go:110:   tool hosted__read_wiki_structure
+    hosted_test.go:129: called hosted__read_wiki_structure (isError=false), 1747 bytes of content
+    hosted_test.go:129: result: Available pages for ollama/ollama:
+        
+        - 1 Overview
+          - 1.1 Key Concepts
+          - 1.2 System Requirements
+          - 1.3 Command Line Interface
+        - 2 Architecture
+          - 2.1 HTTP Server and API Layer
+          - 2.2 Request Scheduling and Runner Management
+          - 2.3 Model Execution Pipeline
+          - 2.4 Storage and Blob Transfer
+        - 3 API Reference
+          - 3.1 Model Management API
+          - 3.2 Generation and Chat API
+          - 3.3 Embedding API
+          -… (truncated)
+--- PASS: TestAHostedServerConnects (16.86s)
+PASS
+ok  	github.com/ollama/ollama/mcp	17.111s
+
+===== 2026-08-07T11:16:01Z — authorization-protected server, contacted anonymously
+$ OLLAMA_MCP_TEST_URL=https://mcp.linear.app/mcp go test -count=1 -run TestAHostedServerConnects -v ./mcp/
+=== RUN   TestAHostedServerConnects
+2026/08/07 21:16:02 INFO mcp server needs a sign-in server=hosted
+    hosted_test.go:86: endpoint: https://mcp.linear.app/mcp
+    hosted_test.go:87: status: needs-sign-in
+    hosted_test.go:92: error: connect: calling "initialize": sending "initialize": rejected by transport: Post "https://mcp.linear.app/mcp": this MCP server needs you to sign in: hosted
+    hosted_test.go:104: this server requires an authorization; run with OLLAMA_MCP_TEST_SIGNIN=1 to sign in
+--- PASS: TestAHostedServerConnects (0.05s)
+PASS
+ok  	github.com/ollama/ollama/mcp	0.308s
+
+===== 2026-08-07T11:16:02Z — authorization-protected server, contacted anonymously
+$ OLLAMA_MCP_TEST_URL=https://mcp.sentry.dev/mcp go test -count=1 -run TestAHostedServerConnects -v ./mcp/
+=== RUN   TestAHostedServerConnects
+2026/08/07 21:16:03 INFO mcp server needs a sign-in server=hosted
+    hosted_test.go:86: endpoint: https://mcp.sentry.dev/mcp
+    hosted_test.go:87: status: needs-sign-in
+    hosted_test.go:92: error: connect: calling "initialize": sending "initialize": rejected by transport: Post "https://mcp.sentry.dev/mcp": this MCP server needs you to sign in: hosted
+    hosted_test.go:104: this server requires an authorization; run with OLLAMA_MCP_TEST_SIGNIN=1 to sign in
+--- PASS: TestAHostedServerConnects (0.07s)
+PASS
+ok  	github.com/ollama/ollama/mcp	0.317s
+
+===== 2026-08-07T11:16:03Z — authorization-protected server, contacted anonymously
+$ OLLAMA_MCP_TEST_URL=https://mcp.notion.com/mcp go test -count=1 -run TestAHostedServerConnects -v ./mcp/
+=== RUN   TestAHostedServerConnects
+2026/08/07 21:16:04 INFO mcp server needs a sign-in server=hosted
+    hosted_test.go:86: endpoint: https://mcp.notion.com/mcp
+    hosted_test.go:87: status: needs-sign-in
+    hosted_test.go:92: error: connect: calling "initialize": sending "initialize": rejected by transport: Post "https://mcp.notion.com/mcp": this MCP server needs you to sign in: hosted
+    hosted_test.go:104: this server requires an authorization; run with OLLAMA_MCP_TEST_SIGNIN=1 to sign in
+--- PASS: TestAHostedServerConnects (0.07s)
+PASS
+ok  	github.com/ollama/ollama/mcp	0.331s

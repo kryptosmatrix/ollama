@@ -1,0 +1,193 @@
+Phase 5 — working down the unverified list, batch 4
+
+Four more settled: three confirmed and fixed, one real but with no production
+consumer, fixed anyway because it was four lines.
+
+E-3 — additionalProperties GIVEN AS A SCHEMA WAS DROPPED IN SILENCE
+
+Only the literal false was reported. A server saying "anything extra must look
+like this" had its constraint discarded, and silence in that position reads to
+the model as "anything extra is fine" — the opposite of what the server said.
+All three cases are now distinguished: false is reported, a schema is reported
+as unrepresentable, and true says nothing because it constrains nothing.
+
+E-5 — TWO HEADER NAMES SHARED ONE ENVIRONMENT VARIABLE
+
+    headers: map[X-Custom-Auth:${env:X_CUSTOM_AUTH}
+              X_Custom_Auth:${env:X_CUSTOM_AUTH}]
+
+Both reduce to X_CUSTOM_AUTH, so the user sets one value and both headers
+receive it. If they were meant to carry different credentials, one of them is
+silently wrong. Each name now gets its own reference, and the second becomes
+X_CUSTOM_AUTH_2.
+
+A2-2 — THE CANNOT-COMPUTE MARKER WAS A COLLISION CLASS
+
+Fingerprint returns a constant when a spec cannot be marshalled, and the comment
+beside it claimed the value matched nothing. It matched every other spec that
+also failed to marshal. The review called this unreachable with the current
+struct; it is not. An unknown field preserved from the configuration file is
+carried as raw JSON, and raw JSON that cannot be re-marshalled makes the whole
+spec unmarshalable — which is how the test reaches it.
+
+Approve now refuses to store the marker and Allows refuses to accept it.
+
+THE SECOND GUARD LOOKED REDUNDANT AND IS NOT. With Approve refusing to store,
+Allows can never meet the marker in a ledger this build wrote, and the first
+sabotage of the Allows guard passed for exactly that reason. But earlier commits
+*on this branch* did store it, so a ledger written by one of them contains the
+marker — and reading one back must not admit anything either. The test now
+covers that, and the sabotage fails. A guard that is unreachable today can be
+reachable in a file written yesterday.
+
+C-2 — Servers() MISSED A SERVER STILL IN THE FALLBACK
+
+Real, and with no production caller today: Servers() is not part of the
+TokenStore interface. Fixed anyway because it is four lines, and a list of
+sign-ins that omits one is the kind of thing a future surface would trust.
+
+FALSIFICATION
+
+X3 appears three times. The first run passed because the test used a spec that
+marshals cleanly, so the marker was never reached. The second passed because
+Approve's guard already prevented the ledger from holding the marker. Only the
+third — against a ledger of the kind an older build wrote — discriminates. Both
+earlier runs are kept, because a falsifier that passes is a statement about the
+test, and this one took two attempts to become a statement about the code.
+
+hashes before:
+f4a95f9bb112149f174292d0016f3ad2662e00efd425f4b1d4db2bfc7d61fe8b  mcp/tools.go
+b4eaccce4f94a4f288fadfdb08a05bc889699d02e46acaa67d66faee6376f9be  mcp/registry.go
+8fa0480f660da457d70b8b84bc9dacfa95c309745ea885ee2f394b1d79349d04  mcp/approvals.go
+
+=== X1 additionalProperties as a schema is dropped again ===
+--- /tmp/b4-t.go.orig	2026-08-08 17:09:17
++++ mcp/tools.go	2026-08-08 17:09:17
+@@ -434,7 +434,6 @@
+ 	case "false":
+ 		details = append(details, "no properties beyond those listed")
+ 	default:
+-		details = append(details, "extra properties are allowed but must match a shape this tool definition cannot express")
+ 	}
+ 
+ 	if len(details) > 0 {
+--- go test -run TestAdditionalPropertiesAsASchemaIsReported ./mcp/ ---
+--- FAIL: TestAdditionalPropertiesAsASchemaIsReported (0.00s)
+    tools_test.go:592: the constraint was dropped: "d"
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.437s
+FAIL
+EXIT=1
+restored: f4a95f9bb112149f174292d0016f3ad2662e00efd425f4b1d4db2bfc7d61fe8b
+
+=== X2 two header names share one environment reference ===
+--- /tmp/b4-r.go.orig	2026-08-08 17:09:17
++++ mcp/registry.go	2026-08-08 17:09:20
+@@ -313,15 +313,7 @@
+ 			continue
+ 		}
+ 		reference := envReferenceName(name)
+-		if taken[reference] {
+-			for suffix := 2; ; suffix++ {
+-				candidate := reference + "_" + strconv.Itoa(suffix)
+-				if !taken[candidate] {
+-					reference = candidate
+-					break
+-				}
+-			}
+-		}
++
+ 		taken[reference] = true
+ 		values[name] = "${env:" + reference + "}"
+ 	}
+--- go test -run TestTwoHeaderNamesGetTwoEnvironmentReferences ./mcp/ ---
+# github.com/ollama/ollama/mcp [github.com/ollama/ollama/mcp.test]
+mcp/registry.go:10:2: "strconv" imported and not used
+FAIL	github.com/ollama/ollama/mcp [build failed]
+FAIL
+EXIT=1
+restored: b4eaccce4f94a4f288fadfdb08a05bc889699d02e46acaa67d66faee6376f9be
+
+=== X3 the cannot-compute marker is treated as a fingerprint ===
+--- /tmp/b4-a.go.orig	2026-08-08 17:09:17
++++ mcp/approvals.go	2026-08-08 17:09:21
+@@ -195,12 +195,7 @@
+ 		return false
+ 	}
+ 	fingerprint := spec.Fingerprint()
+-	if fingerprint == unmarshalableFingerprint {
+-		// Not a fingerprint: a marker that one could not be computed. Two specs
+-		// bearing it are not the same spec, and treating them as equal would
+-		// approve one server on the strength of another.
+-		return false
+-	}
++
+ 	return entry.Fingerprint == fingerprint
+ }
+ 
+--- go test -run TestASpecWhoseFingerprintCannotBeComputedIsNeverApproved ./mcp/ ---
+ok  	github.com/ollama/ollama/mcp	0.440s
+EXIT=0
+restored: 8fa0480f660da457d70b8b84bc9dacfa95c309745ea885ee2f394b1d79349d04
+
+hashes after:
+f4a95f9bb112149f174292d0016f3ad2662e00efd425f4b1d4db2bfc7d61fe8b  mcp/tools.go
+b4eaccce4f94a4f288fadfdb08a05bc889699d02e46acaa67d66faee6376f9be  mcp/registry.go
+8fa0480f660da457d70b8b84bc9dacfa95c309745ea885ee2f394b1d79349d04  mcp/approvals.go
+
+=== X3 re-run against a test that reaches the marker ===
+--- /tmp/b4b-a.go.orig	2026-08-08 17:10:07
++++ mcp/approvals.go	2026-08-08 17:10:08
+@@ -195,12 +195,7 @@
+ 		return false
+ 	}
+ 	fingerprint := spec.Fingerprint()
+-	if fingerprint == unmarshalableFingerprint {
+-		// Not a fingerprint: a marker that one could not be computed. Two specs
+-		// bearing it are not the same spec, and treating them as equal would
+-		// approve one server on the strength of another.
+-		return false
+-	}
++
+ 	return entry.Fingerprint == fingerprint
+ }
+ 
+--- go test -run TestASpecWhoseFingerprintCannotBeComputedIsNeverApproved ./mcp/ ---
+ok  	github.com/ollama/ollama/mcp	0.442s
+EXIT=0
+restored: 8fa0480f660da457d70b8b84bc9dacfa95c309745ea885ee2f394b1d79349d04
+
+=== X4 the ledger stores the cannot-compute marker ===
+--- /tmp/b4b-a.go.orig	2026-08-08 17:10:07
++++ mcp/approvals.go	2026-08-08 17:10:11
+@@ -160,12 +160,6 @@
+ // Approve records agreement to run the spec exactly as it currently stands.
+ func (a *Approvals) Approve(spec *ServerSpec, at time.Time) {
+ 	fingerprint := spec.Fingerprint()
+-	if fingerprint == unmarshalableFingerprint {
+-		// Storing it would put a value in the ledger that every other
+-		// unmarshalable spec also produces. Nothing is recorded, so nothing is
+-		// approved, and the server simply stays unapproved.
+-		return
+-	}
+ 	if a.Entries == nil {
+ 		a.Entries = map[string]Approval{}
+ 	}
+--- go test -run TestASpecWhoseFingerprintCannotBeComputedIsNeverApproved ./mcp/ ---
+--- FAIL: TestASpecWhoseFingerprintCannotBeComputedIsNeverApproved (0.00s)
+    approvals_test.go:398: a spec whose fingerprint could not be computed was written to the ledger
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.434s
+FAIL
+EXIT=1
+restored: 8fa0480f660da457d70b8b84bc9dacfa95c309745ea885ee2f394b1d79349d04
+
+=== X3 re-run again, now that the test covers a ledger written by an older build ===
+--- go test -run TestASpecWhoseFingerprintCannotBeComputedIsNeverApproved ./mcp/ ---
+--- FAIL: TestASpecWhoseFingerprintCannotBeComputedIsNeverApproved (0.00s)
+    approvals_test.go:417: a ledger carrying the marker from an older build approved a server on it
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.445s
+FAIL
+EXIT=1
+restored: 8fa0480f660da457d70b8b84bc9dacfa95c309745ea885ee2f394b1d79349d04

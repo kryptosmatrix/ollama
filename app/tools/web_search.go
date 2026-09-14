@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ollama/ollama/api"
 	"github.com/ollama/ollama/auth"
 )
 
@@ -33,39 +34,55 @@ type SearchResponse struct {
 	Results []SearchResult `json:"results"`
 }
 
+// defaultWebSearchResults is what Execute asks for when max_results is omitted,
+// and what the definition tells the model to expect. One constant serves both:
+// the hand-written schema this replaces advertised a default of 3 while Execute
+// had always used 5, and nothing could have caught that.
+const defaultWebSearchResults = 5
+
+// webSearchTool is the definition the model receives.
+//
+// Declaring it as an api.ToolFunction rather than as a JSON schema string means
+// the form that is written down is the form that is sent. A JSON Schema
+// "default" has no representation in api.ToolFunction, so the default is stated
+// in prose, which is the only way the model can see it at all.
+var webSearchTool = api.ToolFunction{
+	Name:        "web_search",
+	Description: "Search the web for real-time information using ollama.com web search API.",
+	Parameters: api.ToolFunctionParameters{
+		Type:     "object",
+		Required: []string{"query"},
+		Properties: toolProperties([]namedProperty{
+			{"query", api.ToolProperty{
+				Type:        api.PropertyType{"string"},
+				Description: "The search query to execute",
+			}},
+			{"max_results", api.ToolProperty{
+				Type:        api.PropertyType{"integer"},
+				Description: fmt.Sprintf("Maximum number of search results to return. Defaults to %d when omitted.", defaultWebSearchResults),
+			}},
+		}),
+	},
+}
+
 func (w *WebSearch) Name() string {
-	return "web_search"
+	return webSearchTool.Name
 }
 
 func (w *WebSearch) Description() string {
-	return "Search the web for real-time information using ollama.com web search API."
+	return webSearchTool.Description
 }
 
 func (w *WebSearch) Prompt() string {
 	return ""
 }
 
-func (g *WebSearch) Schema() map[string]any {
-	schemaBytes := []byte(`{
-		"type": "object",
-		"properties": {
-			"query": {
-				"type": "string",
-				"description": "The search query to execute"
-			},
-			"max_results": {
-				"type": "integer",
-				"description": "Maximum number of search results to return",
-				"default": 3
-			}
-		},
-		"required": ["query"]
-	}`)
-	var schema map[string]any
-	if err := json.Unmarshal(schemaBytes, &schema); err != nil {
-		return nil
-	}
-	return schema
+func (w *WebSearch) ToolFunction() api.ToolFunction {
+	return webSearchTool
+}
+
+func (w *WebSearch) Schema() map[string]any {
+	return schemaOf(webSearchTool)
 }
 
 func (w *WebSearch) Execute(ctx context.Context, args map[string]any) (any, string, error) {
@@ -79,7 +96,7 @@ func (w *WebSearch) Execute(ctx context.Context, args map[string]any) (any, stri
 		return nil, "", fmt.Errorf("query must be a non-empty string")
 	}
 
-	maxResults := 5
+	maxResults := defaultWebSearchResults
 	if v, ok := args["max_results"].(float64); ok && int(v) > 0 {
 		maxResults = int(v)
 	}

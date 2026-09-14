@@ -1,0 +1,89 @@
+=== PHASE 3a COMMANDS FALSIFICATION EVIDENCE (ollama mcp) ===
+captured: 2026-08-05T13:35:12Z
+Tests drive the real cobra command tree with isolated config and approval files.
+
+--- baseline ---
+ok  	github.com/ollama/ollama/cmd	0.590s
+BASELINE_TEST_EXIT=0
+
+--- F24: add writes the config without validating it ---
+203:			// FALSIFICATION: validation skipped
+--- FAIL: TestMCPAddRefusesWhatCouldNeverRun (0.04s)
+    --- FAIL: TestMCPAddRefusesWhatCouldNeverRun/plain_http_to_a_remote_host (0.01s)
+        mcp_test.go:116: expected an error, got output:
+            Added insecure
+              runs: http://remote.example.com
+              approved to run
+    --- FAIL: TestMCPAddRefusesWhatCouldNeverRun/a_literal_credential_in_a_header (0.01s)
+        mcp_test.go:116: expected an error, got output:
+            Added leaky
+              runs: https://example.com
+              approved to run
+    --- FAIL: TestMCPAddRefusesWhatCouldNeverRun/a_name_that_breaks_tool_namespacing (0.01s)
+        mcp_test.go:116: expected an error, got output:
+            Added bad__name
+              runs: uvx
+              approved to run
+    mcp_test.go:129: a refused server must not be written to the config, found [bad__name insecure leaky]
+FAIL
+FAIL	github.com/ollama/ollama/cmd	0.644s
+FAIL
+F24_TEST_EXIT=1 (expect non-zero)
+
+--- F25: approve no longer shows what will run ---
+345:			fmt.Fprintf(out, "Approving %s\n", name) // FALSIFICATION: command line hidden
+--- FAIL: TestMCPApproveShowsTheCommandAndAsksFirst (0.02s)
+    --- FAIL: TestMCPApproveShowsTheCommandAndAsksFirst/with_--yes_it_shows_the_command_line_and_approves (0.01s)
+        mcp_test.go:176: approve must show what will run, got:
+            Approving files
+            Approved files
+--- FAIL: TestMCPApproveWarnsWhenTheCommandChanged (0.02s)
+    mcp_test.go:212: approve must show the new command line verbatim, got:
+        Approving files
+        
+        This server was previously approved to run:
+          uvx mcp-server-files
+        It has changed since. Approve only if you made that change.
+        Approved files
+FAIL
+FAIL	github.com/ollama/ollama/cmd	0.696s
+FAIL
+F25_TEST_EXIT=1 (expect non-zero)
+
+--- F26: approval assumes yes when there is nobody to ask ---
+415:		return true, nil // FALSIFICATION: unattended approval
+--- FAIL: TestMCPApproveShowsTheCommandAndAsksFirst (0.03s)
+    --- FAIL: TestMCPApproveShowsTheCommandAndAsksFirst/declining_leaves_it_unapproved (0.01s)
+        mcp_test.go:158: expected a refusal to ask without a terminal, got:
+            Approving files will let Ollama run:
+            
+              uvx mcp-server-files
+            Approved files
+FAIL
+FAIL	github.com/ollama/ollama/cmd	0.632s
+FAIL
+F26_TEST_EXIT=1 (expect non-zero)
+
+--- F27: remove leaves the approval behind ---
+271:			// FALSIFICATION: stale approval kept
+--- FAIL: TestMCPRemoveDropsTheApprovalToo (0.04s)
+    mcp_test.go:300: a stale approval would silently re-approve a future server that reused the name and command
+    mcp_test.go:310: a re-added server inherited an approval it should not have
+FAIL
+FAIL	github.com/ollama/ollama/cmd	0.656s
+FAIL
+F27_TEST_EXIT=1 (expect non-zero)
+
+--- F28: the command group is not registered on the root command ---
+2551:		// FALSIFICATION: mcp unreachable
+--- FAIL: TestMCPCommandIsRegisteredOnTheRootCommand (0.00s)
+    mcp_test.go:388: ollama mcp is not registered on the root command
+FAIL
+FAIL	github.com/ollama/ollama/cmd	0.605s
+FAIL
+F28_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/cmd	2.451s
+RESTORED_TEST_EXIT=0

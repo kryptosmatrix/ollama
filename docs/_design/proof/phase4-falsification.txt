@@ -1,0 +1,90 @@
+=== PHASE 4 FALSIFICATION EVIDENCE (MCP Servers page) ===
+captured: 2026-08-05T23:56:39Z
+Go handler tests run against the real rawserver subprocess. Frontend tests run in a node
+environment with static rendering, so no click is exercised; the logic they call is tested
+directly and each handler is a single call.
+
+--- baseline ---
+ok  	github.com/ollama/ollama/app/ui	5.034s
+BASELINE_GO_TEST_EXIT=0
+
+--- F48: adding a server over HTTP also approves it ---
+186:	approvals.Approve(stored, time.Now()) // FALSIFICATION: silent approval
+ok  	github.com/ollama/ollama/app/ui	0.592s
+F48_TEST_EXIT=0 (expect non-zero)
+
+--- F49: approve accepts a command line the user was not shown ---
+267:	if false { // FALSIFICATION: shown-value check removed
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0curl: (6) Could not resolve host: evil.example.com
+2026/08/06 09:56:50 WARN mcp server unavailable server=files error="connect: connection closed: calling \"initialize\": client is closing: EOF"
+--- FAIL: TestMCPAPIApproveRefusesWhatTheUserDidNotSee (0.15s)
+    mcp_test.go:276: approving what the user was not shown must be refused
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	0.711s
+FAIL
+F49_TEST_EXIT=1 (expect non-zero)
+
+--- F50: listing the page starts servers ---
+58:	s.applyMCPConfig(r, cfg) // FALSIFICATION: a page load starts servers
+ok  	github.com/ollama/ollama/app/ui	1.035s
+F50_TEST_EXIT=0 (expect non-zero — note: an unapproved server is refused by the policy, so this asserts the gate, not the absence of the call)
+
+--- F51: the approval policy snapshots the ledger instead of reading it ---
+70:	return false // FALSIFICATION: stale policy
+--- FAIL: TestMCPAPIApproveConnectsTheServer (0.48s)
+    mcp_test.go:227: Status = "needs-approval", err = "raw has not been approved to run: /var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/TestMCPAPIApproveConnectsTheServer3784365844/002/rawserver" — approving must also connect it
+--- FAIL: TestMCPAPIEnableAndDisable (0.48s)
+    mcp_test.go:334: precondition: status = "needs-approval"
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	1.519s
+FAIL
+F51_TEST_EXIT=1 (expect non-zero)
+
+--- F52: a switched-off server reads as awaiting approval ---
+32:  if (false) { // FALSIFICATION: switch ignored
+F52_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/app/ui	4.493s
+ok  	github.com/ollama/ollama/mcp	10.406s
+RESTORED_GO_TEST_EXIT=0
+RESTORED_WEB_TEST_EXIT=0
+
+=== F48 AND F50 RE-RUN ===
+F48 failed to falsify because the SABOTAGE was wrong, not the test: it approved in memory and
+never saved the ledger, so nothing changed on disk. Redone below with the save.
+F50 failed to falsify because the TEST did not discriminate: it used an unapproved server, which
+the policy refuses whatever the handler does, so it asserted the gate rather than the absence of
+a connect. The test now writes an approved, enabled server straight to the config and ledger —
+the state after an ollama mcp add in a terminal while the app runs — which is the only state in
+which a listing could start something.
+
+--- F48b: adding over HTTP approves and persists it ---
+186:	// FALSIFICATION: silent approval
+--- FAIL: TestMCPAPIAddDoesNotApprove (0.01s)
+    mcp_test.go:139: a server added over HTTP must not be approved by that act; the command line did not come from the user's keyboard
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	0.581s
+FAIL
+F48b_TEST_EXIT=1 (expect non-zero)
+
+--- F50b: a page load connects approved servers ---
+58:	s.applyMCPConfig(r, cfg) // FALSIFICATION: a page load starts servers
+--- FAIL: TestMCPAPIListDoesNotStartAnything (0.66s)
+    mcp_test.go:452: listing connected a server; a page load must never launch one
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	1.222s
+FAIL
+F50b_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/app/ui	4.268s
+RESTORED_TEST_EXIT=0
+
+=== SCALE ===
+app/ui go tests: 35
+frontend suite: 9 files, 75 tests

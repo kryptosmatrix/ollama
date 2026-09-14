@@ -1,0 +1,68 @@
+{
+  "servers": [
+    {
+      "name": "io.github.example/weather",
+      "title": "Weather",
+      "description": "Current conditions and forecasts",
+      "version": "1.2.0",
+      "repository": { "url": "https://github.com/example/weather", "source": "github" },
+      "packages": [
+        {
+          "registryType": "npm",
+          "identifier": "@example/weather-mcp",
+          "version": "1.2.0",
+          "environmentVariables": [
+            { "name": "WEATHER_API_KEY", "isSecret": true, "isRequired": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ac.inference.sh/mcp",
+      "title": "Inference",
+      "description": "A hosted server",
+      "version": "1.0.1",
+      "remotes": [
+        {
+          "type": "streamable-http",
+          "url": "https://mcp.inference.sh/v1",
+          "headers": [{ "name": "Authorization", "isSecret": true }]
+        }
+      ]
+    },
+    {
+      "name": "io.github.example/pythonic",
+      "description": "A python server",
+      "version": "0.3.0",
+      "packages": [
+        {
+          "registryType": "pypi",
+          "identifier": "example-mcp",
+          "version": "0.3.0",
+          "packageArguments": [{ "type": "positional", "value": "--read-only" }]
+        }
+      ]
+    },
+    {
+      "name": "io.github.example/containerised",
+      "description": "A docker server",
+      "packages": [
+        {
+          "registryType": "oci",
+          "identifier": "ghcr.io/example/mcp:latest",
+          "runtimeArguments": [{ "type": "named", "name": "--network", "value": "none" }]
+        }
+      ]
+    },
+    {
+      "name": "io.github.example/exotic",
+      "description": "An ecosystem Ollama does not know",
+      "packages": [{ "registryType": "cargo", "identifier": "exotic-mcp" }]
+    },
+    {
+      "name": "io.github.example/empty",
+      "description": "Neither a package nor a remote"
+    }
+  ],
+  "metadata": { "count": 6, "nextCursor": "cursor-two" }
+}

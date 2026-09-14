@@ -1,0 +1,106 @@
+=== PHASE 3b FALSIFICATION EVIDENCE (desktop app approval path) ===
+captured: 2026-08-05T21:09:28Z
+
+PRE-EXISTING FLAKY TEST, NOT OURS: app/updater TestAutoUpdateDisabledSkipsDownload
+failed once at the start of this phase and then passed on three consecutive runs over
+identical bytes, including a full ./app/... run. Recorded so a future red is not
+attributed to MCP work. Every 'suite green' below means green on that run.
+
+--- baseline ---
+ok  	github.com/ollama/ollama/app/tools	0.612s
+ok  	github.com/ollama/ollama/app/ui	0.895s
+BASELINE_TEST_EXIT=0
+
+--- F34: the gate lets an unapproved tool run ---
+1384:	if true { // FALSIFICATION: gate removed
+--- FAIL: TestApprovalRoundTrip (5.00s)
+    approval_test.go:144: the client was never told an approval was needed
+--- FAIL: TestDeclinedApprovalStopsTheCall (5.01s)
+    approval_test.go:166: the client was never told an approval was needed
+--- FAIL: TestRememberedApprovalIsNotAskedAgain (5.01s)
+    approval_test.go:188: the client was never told an approval was needed
+--- FAIL: TestApprovalFromAnotherChatIsRefused (5.00s)
+    approval_test.go:222: the client was never told an approval was needed
+--- FAIL: TestApprovalTimeoutRefusesRatherThanHanging (0.00s)
+    approval_test.go:262: an unanswered approval must eventually refuse rather than hold the chat open
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	20.684s
+FAIL
+F34_TEST_EXIT=1 (expect non-zero)
+
+--- F35: a refusal is treated as permission ---
+1418:	// FALSIFICATION: refusal ignored
+# github.com/ollama/ollama/app/ui [github.com/ollama/ollama/app/ui.test]
+app/ui/ui.go:1402:2: declared and not used: decision
+FAIL	github.com/ollama/ollama/app/ui [build failed]
+FAIL
+F35_TEST_EXIT=1 (expect non-zero)
+
+--- F36: any chat may answer any chat's question ---
+1461:	if false { // FALSIFICATION: cross-chat answers accepted
+--- FAIL: TestApprovalFromAnotherChatIsRefused (0.01s)
+    approval_test.go:226: status = 200, want 400: one chat must not answer another chat's question
+    approval_test.go:231: the waiting call was released by another chat's answer: <nil>
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	0.692s
+FAIL
+F36_TEST_EXIT=1 (expect non-zero)
+
+--- F37: a timeout allows the call instead of refusing it ---
+220:		return ApprovalDecision{Allow: true}, nil // FALSIFICATION: timeout allows
+# github.com/ollama/ollama/app/tools [github.com/ollama/ollama/app/tools.test]
+app/tools/approval.go:8:2: "fmt" imported and not used
+FAIL	github.com/ollama/ollama/app/tools [build failed]
+FAIL
+F37a_TEST_EXIT=1 (expect non-zero)
+# github.com/ollama/ollama/app/tools
+app/tools/approval.go:8:2: "fmt" imported and not used
+FAIL	github.com/ollama/ollama/app/ui [build failed]
+FAIL
+F37b_TEST_EXIT=1 (expect non-zero)
+
+--- F38: a refusal still remembers the scope ---
+208:		if true { // FALSIFICATION: refusal grants
+--- FAIL: TestDecliningNeverGrantsAnything (0.00s)
+    approval_test.go:262: declining must never grant the scope
+    approval_test.go:265: declining must never grant everything
+FAIL
+FAIL	github.com/ollama/ollama/app/tools	0.552s
+FAIL
+F38_TEST_EXIT=1 (expect non-zero)
+
+--- F39: pending requests are never cleaned up ---
+191:	// FALSIFICATION: pending entry leaked
+--- FAIL: TestAwaitStopsWhenTheChatIsCancelled (2.01s)
+    approval_test.go:179: pending = 1 after cancellation; a later answer could resolve a request nobody is waiting on
+--- FAIL: TestAwaitTimesOutAndRefuses (0.15s)
+    approval_test.go:194: pending = 1 after a timeout
+--- FAIL: TestAwaitReturnsANotifyFailure (0.00s)
+    approval_test.go:207: pending = 1 after a failed notify
+FAIL
+FAIL	github.com/ollama/ollama/app/tools	2.721s
+FAIL
+F39_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/app/tools	0.618s
+ok  	github.com/ollama/ollama/app/ui	0.879s
+RESTORED_TEST_EXIT=0
+
+=== FLAKE ATTRIBUTION ===
+TestAutoUpdateDisabledSkipsDownload in app/updater is FLAKY and PRE-EXISTING.
+Evidence: with this phase's changes STASHED (clean tree), three consecutive full ./app/...
+runs gave exit 0, exit 1 (one failure), exit 0 — the same test. Solo runs of ./app/updater/
+pass every time. The failure therefore belongs to the updater package under a full-tree run,
+not to MCP work, which touches no file in it.
+
+=== FINAL STATE ===
+# github.com/ollama/ollama/app/cmd/app
+ld: warning: ignoring duplicate libraries: '-lobjc'
+TREE_BUILD_EXIT=0
+ok  	github.com/ollama/ollama/app/tools	0.797s
+ok  	github.com/ollama/ollama/app/ui	1.081s
+PHASE_TEST_EXIT=0
+app/tools tests: 24
+app/ui tests: 21

@@ -1,0 +1,120 @@
+The MCP Servers page: four repairs
+==================================
+
+Reported from a running build: unreadable text in dark mode, no way back to
+home, a registry list of blank rows, and a request for a third way to add a
+server — the ones already on this machine.
+
+1. DARK MODE — the fields set a background and no text colour
+------------------------------------------------------------
+
+The search field and the configuration field both set dark backgrounds and left
+the text colour to inherit, so what you typed was black on near-black. Both now
+carry a colour and a placeholder colour that follow the theme.
+
+Falsified: removing the class from the configuration field fails the test with
+
+    AssertionError: expected '<div class="flex flex-col gap-2"><p d…' to contain
+    'dark:text-neutral-100'
+
+The first version of that test passed under a sabotage that had not actually
+applied — the sed pattern never matched. Verifying the sabotage landed before
+trusting the result is the whole point of doing it.
+
+2. NO WAY BACK
+--------------
+
+A back arrow sits left of the title and navigates to "/", not to a chat id. The
+index route already resolves which home was last open; working that out again
+on this page would be a second implementation of it.
+
+3. THE REGISTRY LIST WAS BLANK — a real defect, not a display problem
+---------------------------------------------------------------------
+
+Every row showed an empty name and "this entry cannot be installed by Ollama:"
+with nothing after the colon. The official registry wraps every result:
+
+    {"servers": [{"server": {...}, "_meta": {...}}], "metadata": {...}}
+
+and mcp/registry.go decoded the outer object into RegistryEntry. Every field
+arrived empty. An empty entry resolves to nothing, and the message that prints
+the entry's name printed an empty name. Reading the wrong level of a JSON
+document yields zero values rather than an error, so nothing failed — it went
+quiet.
+
+The tests did not catch it because the fixtures were written from memory rather
+than recorded from the service. testdata/registry/official.json is now a real
+response. The flat shape still decodes, for private mirrors, and has its own
+test.
+
+Against the live registry, before and after:
+
+    before   entries=30 blank-names=30 installable=0
+    after    entries=30 blank-names=0  installable=30
+             ac.inference.sh/mcp — https://api.inference.sh/mcp
+             ac.tandem/docs-mcp — https://tandem.ac/mcp
+             ag.hood/name-service — https://www.hood.ag/api/mcp
+
+Withdrawn listings are skipped: the registry keeps deleted and deprecated
+servers in its index, and offering one is offering something taken back. An
+absent status counts as listed — a mirror that says nothing is not claiming a
+withdrawal.
+
+The list then shows only what Ollama can install, as asked. What was left out is
+counted and said below the list rather than dropped silently.
+
+Falsified: reverting the decode fails the new test with name = "", which is
+exactly what the page displayed.
+
+4. SERVERS ALREADY ON THIS MACHINE
+----------------------------------
+
+Ruled by Ash: both configured servers and a live probe, in separate groups.
+
+Configured — named files only, never a trawl of the home directory:
+Claude Desktop, Claude Code, Cursor, Windsurf, VS Code. Read with the same
+ServerSpec type Ollama's own configuration uses. VS Code calls the object
+"servers" rather than "mcpServers"; both are read. Every path looked at is
+reported, so coverage is visible rather than implied.
+
+What does not travel: a literal credential is rewritten as ${env:NAME} and the
+user is told beside the Add button. mcp.json is readable by anything running as
+this user, and Ollama's own validation refuses a literal secret there — so
+without this those servers could not be imported at all. A server switched off
+elsewhere arrives switched off. A name Ollama cannot accept is changed and the
+change is stated. An entry that cannot be added is listed with its reason.
+
+Answering — lsof enumerates listening sockets (Go has no portable way, and lsof
+names the process), addresses are filtered to those reachable over loopback, and
+each is contacted with the real MCP handshake through the SDK. A port being open
+proves nothing; answering initialize does. It is a POST because it is an act.
+
+    ProbeLoopback: found a real MCP server started for the test, by
+    enumerating this machine's sockets — origin "listening", 1 tool.
+
+Timing, measured rather than assumed:
+
+    non-MCP local port   3.3ms
+    closed port          0.4ms
+    lsof                 65ms
+    whole sweep          24.1s  → 12.1s → 6.1s
+
+The first figure is the point. A context deadline of two seconds did not bound
+the handshake: a local service that accepts a connection and never answers held
+it open for twenty-four seconds. The bound that held was a timeout on the HTTP
+client, which is why the probe builds its own transport rather than going
+through newTransport — an ordinary session must not have one, because a
+long-lived stream is the point of it.
+
+Falsified both ways: dropping the credential rewrite fails the sanitising test;
+accepting a failed connection makes a plain web service register as an MCP
+server.
+
+Discovery only offers. A test asserts that listing servers writes nothing to
+mcp.json and adds nothing to the configured list.
+
+TESTS
+-----
+
+    go test ./mcp/... ./app/ui/...     ok (51.8s, 11.9s)
+    npx vitest run                     13 files, 116 tests

@@ -1,0 +1,187 @@
+Phase 5 — working down the unverified list, batch 2
+
+Five more settled. Four confirmed and fixed with a test that fails without the
+change; one fixed defensively and recorded as such because it cannot be driven.
+
+A1-4 — A LOOPBACK HOST WAS COMPARED CASE-SENSITIVELY
+
+    CONFIRMED A1-4: url "http://Localhost:8080/mcp" must use https;
+    plain http is allowed only for loopback addresses
+
+Host names are case-insensitive (RFC 4343). Fixed with EqualFold; a real host
+still has to use https, and the test asserts both halves.
+
+E-4 — A DESCRIPTION AT THE DEPTH LIMIT WAS NEVER SANITISED
+
+The depth-limit branch returned the server's raw text while the branch beside it
+sanitised. It was the one place a careless or hostile server could put control
+characters and unbounded length into a model's prompt.
+
+E-7 — AN UNREADABLE TYPE WAS TREATED AS NO TYPE AT ALL
+
+    {"name":"hosted__odd", ... "properties":{"n":{}}}
+
+A "type" that is neither a string nor an array of strings was indistinguishable
+from an absent one, so the model was told there was no constraint — the opposite
+of the truth, since the server had said something Ollama could not read. It is
+now recorded as a lost constraint and the model hears it.
+
+B-4 — A TOKEN COULD BE POSTED OVER PLAIN HTTP
+
+The protocol library validates the *scheme* of a revocation endpoint but leaves
+it out of the https-or-loopback list it applies to the token, authorization,
+registration and introspection endpoints. That was read in its source rather
+than assumed, which is what the finding asked for. A revocation request carries
+the refresh token in its body, so an authorization server naming an http
+endpoint would have put a live credential on the wire in cleartext. Refused now,
+loopback excepted.
+
+C-4 — goString RETURNING EMPTY
+
+Servers() now skips an item whose account cannot be read back rather than
+appending an empty name that no caller can act on. There is no way to force
+CFStringGetCString to fail from a test, so this carries no falsifier and is
+recorded as defensive rather than counted — the same treatment as the PKCE
+assertions and the slices.Clone.
+
+TWO OF MY OWN TESTS DID NOT DISCRIMINATE, AND BOTH PASSED THE FIRST SABOTAGE
+
+Recorded because it is the third time in this branch and the pattern is worth
+naming.
+
+  B2  The depth test nested a description twelve levels down. The depth-limit
+      branch returns the schema it is handed at the moment the limit is
+      crossed, and the intermediate objects had no description of their own, so
+      the branch was never reached with anything to return. The test passed
+      against the defect. It now carries a description at every level.
+
+  B4  The endpoint test called requireSecureEndpoint directly. A predicate
+      nothing consults is not a protection, and removing the call from
+      revokeSignIn left the test passing. It now drives a real sign-out against
+      an authorization server whose metadata advertises an http endpoint on a
+      non-loopback host.
+
+Both faults are the same one: asserting that a mechanism exists rather than that
+the path uses it.
+
+FALSIFICATION
+
+B2 and B4 below are the first, non-discriminating runs, kept deliberately. Their
+re-runs against the corrected tests both fail, which is what makes E-4 and B-4
+confirmed rather than assumed:
+
+    === B2 re-run: --- FAIL: TestADeepPropertyDescriptionIsSanitised
+    === B4 re-run: --- FAIL: TestSigningOutRefusesToPostATokenOverPlainHTTP
+
+hashes before:
+755cc27d10e2b5d70864eadf68dc79b9f0fd9896822bd30bf696f07944f6d7b6  mcp/config.go
+b127e7dab14498c4c8a95903d28fb584bc36aed285fc5770592ff4ffe50971bf  mcp/tools.go
+74d54678b89ef5a21851799cf389d2f186a90ac694a5164ad513c9e5795c738a  mcp/signin.go
+
+=== B1 a loopback host is compared case-sensitively ===
+--- /tmp/b2-config.go.orig	2026-08-08 16:48:32
++++ mcp/config.go	2026-08-08 16:48:32
+@@ -499,7 +499,7 @@
+ func isLoopbackHost(host string) bool {
+ 	// Host names are case-insensitive (RFC 4343), so "Localhost" is the same
+ 	// address as "localhost" and must not be told to use https instead.
+-	if strings.EqualFold(host, "localhost") {
++	if host == "localhost" {
+ 		return true
+ 	}
+ 	if ip := net.ParseIP(host); ip != nil {
+--- go test -run TestALoopbackHostIsRecognisedWhateverItsCase ./mcp/ ---
+--- FAIL: TestALoopbackHostIsRecognisedWhateverItsCase (0.00s)
+    config_test.go:530: http://Localhost was refused: url "http://Localhost:8080/mcp" must use https; plain http is allowed only for loopback addresses
+    config_test.go:530: http://LOCALHOST was refused: url "http://LOCALHOST:8080/mcp" must use https; plain http is allowed only for loopback addresses
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.567s
+FAIL
+EXIT=1
+restored: 755cc27d10e2b5d70864eadf68dc79b9f0fd9896822bd30bf696f07944f6d7b6
+
+=== B2 the depth-limit branch returns the server's raw description ===
+--- /tmp/b2-tools.go.orig	2026-08-08 16:48:32
++++ mcp/tools.go	2026-08-08 16:48:35
+@@ -183,7 +183,7 @@
+ 		// branch returned the server's raw text, which is the one place a
+ 		// hostile or careless server could put control characters and
+ 		// unbounded length into a prompt.
+-		return api.ToolProperty{Description: sanitiseText(schema.Description, maxDescriptionRunes)}, nil
++		return api.ToolProperty{Description: schema.Description}, nil
+ 	}
+ 
+ 	resolved, chain, err := resolver.resolve(schema, depth, ancestors)
+--- go test -run TestADeepPropertyDescriptionIsSanitised ./mcp/ ---
+ok  	github.com/ollama/ollama/mcp	0.572s
+EXIT=0
+restored: b127e7dab14498c4c8a95903d28fb584bc36aed285fc5770592ff4ffe50971bf
+
+=== B3 an unreadable type is treated as no type and nothing is said ===
+--- /tmp/b2-tools.go.orig	2026-08-08 16:48:32
++++ mcp/tools.go	2026-08-08 16:48:38
+@@ -200,9 +200,7 @@
+ 		Enum:        resolved.Enum,
+ 		Required:    resolved.Required,
+ 	}
+-	if schemaTypeUnreadable(resolved.Type) {
+-		lost.add(path, "the server declared a type this tool definition could not read, so no type is stated here")
+-	}
++
+ 
+ 	recordLost(resolved, path, lost)
+ 
+--- go test -run TestATypeTheServerDeclaredButOllamaCannotReadIsSaidSoFar ./mcp/ ---
+--- FAIL: TestATypeTheServerDeclaredButOllamaCannotReadIsSaidSoFar (0.00s)
+    tools_test.go:541: the model was not told the type was unreadable: "d"
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.565s
+FAIL
+EXIT=1
+restored: b127e7dab14498c4c8a95903d28fb584bc36aed285fc5770592ff4ffe50971bf
+
+=== B4 a token is posted to whatever endpoint the metadata names ===
+--- /tmp/b2-signin.go.orig	2026-08-08 16:48:32
++++ mcp/signin.go	2026-08-08 16:48:41
+@@ -147,9 +147,7 @@
+ 	// authorization endpoints. A revocation request carries the refresh token
+ 	// in its body, so a metadata document naming an http endpoint would put a
+ 	// live credential on the wire in cleartext.
+-	if err := requireSecureEndpoint(endpoint); err != nil {
+-		return err
+-	}
++
+ 
+ 	token, hint := record.Token.RefreshToken, "refresh_token"
+ 	if token == "" {
+--- go test -run TestATokenIsNeverSentOverPlainHTTP ./mcp/ ---
+ok  	github.com/ollama/ollama/mcp	0.567s
+EXIT=0
+restored: 74d54678b89ef5a21851799cf389d2f186a90ac694a5164ad513c9e5795c738a
+
+=== B5 plain http is accepted for any host, not only loopback ===
+--- /tmp/b2-signin.go.orig	2026-08-08 16:48:32
++++ mcp/signin.go	2026-08-08 16:48:44
+@@ -203,7 +203,7 @@
+ 	if parsed.Scheme == "https" {
+ 		return nil
+ 	}
+-	if parsed.Scheme == "http" && isLoopbackHost(parsed.Hostname()) {
++	if parsed.Scheme == "http" {
+ 		return nil
+ 	}
+ 	return fmt.Errorf("refusing to send a token to %q: a revocation endpoint must use https", endpoint)
+--- go test -run TestATokenIsNeverSentOverPlainHTTP ./mcp/ ---
+--- FAIL: TestATokenIsNeverSentOverPlainHTTP (0.00s)
+    signin_test.go:397: http://auth.example.com/revoke was accepted; a token must not be sent where a network can read it
+    signin_test.go:397: http://10.0.0.5/revoke was accepted; a token must not be sent where a network can read it
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.577s
+FAIL
+EXIT=1
+restored: 74d54678b89ef5a21851799cf389d2f186a90ac694a5164ad513c9e5795c738a
+
+hashes after:
+755cc27d10e2b5d70864eadf68dc79b9f0fd9896822bd30bf696f07944f6d7b6  mcp/config.go
+b127e7dab14498c4c8a95903d28fb584bc36aed285fc5770592ff4ffe50971bf  mcp/tools.go
+74d54678b89ef5a21851799cf389d2f186a90ac694a5164ad513c9e5795c738a  mcp/signin.go

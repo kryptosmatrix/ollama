@@ -1,0 +1,141 @@
+Phase 5 — working down the unverified list, batch 3
+
+Two confirmed and fixed, one refuted and kept as a standing test.
+
+C-3 — CONCURRENT SAVES LOST TOKENS, AND FAR MORE THAN EXPECTED
+
+Save and Delete read the whole file, change one entry and write it back. The
+review said two interleaved saves for different servers could lose one. The
+measurement was worse:
+
+    CONFIRMED C-3: 1 of 8 tokens survived concurrent saves: [two]
+
+Eight goroutines saving eight different servers left one token on disk. Every
+other sign-in was silently destroyed.
+
+Serialised now, keyed by resolved path in a package-level map rather than held
+on the store — several places build a fresh FileTokenStore for the same file,
+and a lock on one of those values would not see another.
+
+WHAT THIS DOES NOT FIX, and the store's own comment says so: the window between
+*processes*. The desktop app and a terminal saving at the same instant can still
+lose one. Closing that needs a lock file, which brings staleness after a crash
+and a steal-timeout to go with it — a design decision rather than a patch, and
+not one to make at the tail of a long session. Recorded as owed.
+
+B-5 — THE TOKEN SOURCE'S LAST-WRITTEN VALUE WAS UNGUARDED
+
+Confirmed by the race detector. A token source is consulted from whatever
+goroutine is making a request; this one remembers the last access token it wrote
+so it does not rewrite the store on every call, and that field was read and
+written with no lock. Guarded now.
+
+D-5 — REFUTED
+
+The review expected a stdio subprocess that starts and then fails the MCP
+handshake to survive until the manager closes, since the stdio release function
+is a no-op. It does not: the protocol library kills it.
+
+    status after a failed handshake: failed (connect: connection closed:
+    calling "initialize": invalid character 'o' in literal null)
+    --- PASS: TestProbeD5StdioLeak
+
+This is the same guarantee that led to deleting a per-server reaping mechanism
+in Phase 2, after three separate attempts to falsify it all passed. It now
+carries a standing test — TestAStdioServerThatFailsItsHandshakeIsNotLeft —
+because the next reader will have exactly the same suspicion, and a refutation
+that leaves no trace gets re-litigated.
+
+FALSIFICATION
+
+hashes before:
+6feea81ac19a7a0e911730a29000598b23e600fafa72fda2094e97a352d67ee2  mcp/tokenstore.go
+9e79875b1422ec20d709d26a57f6d1f7b21423ca8c5f9e81c53dd82a4307668c  mcp/oauthhandler.go
+
+=== C1 the file store's read-modify-write is not serialised ===
+--- /tmp/b3-ts.go.orig	2026-08-08 17:05:05
++++ mcp/tokenstore.go	2026-08-08 17:05:05
+@@ -215,13 +215,7 @@
+ 	}
+ 	if record == nil || record.Token == nil || record.Token.AccessToken == "" {
+ 		return errors.New("refusing to store an empty token")
+-	}
+-
+-	resolved, err := s.path()
+-	if err != nil {
+-		return err
+ 	}
+-	defer lockTokenFile(resolved)()
+ 
+ 	file, path, err := s.read()
+ 	if err != nil {
+--- go test  -run TestConcurrentSavesDoNotLoseATokenInThisProcess ./mcp/ ---
+--- FAIL: TestConcurrentSavesDoNotLoseATokenInThisProcess (0.03s)
+    tokenstore_test.go:406: 1 of 8 tokens survived concurrent saves: [three]
+    tokenstore_test.go:411: Load one: no stored token for that MCP server: one
+    tokenstore_test.go:411: Load two: no stored token for that MCP server: two
+    tokenstore_test.go:411: Load four: no stored token for that MCP server: four
+    tokenstore_test.go:411: Load five: no stored token for that MCP server: five
+    tokenstore_test.go:411: Load six: no stored token for that MCP server: six
+    tokenstore_test.go:411: Load seven: no stored token for that MCP server: seven
+    tokenstore_test.go:411: Load eight: no stored token for that MCP server: eight
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.480s
+FAIL
+EXIT=1
+restored: 6feea81ac19a7a0e911730a29000598b23e600fafa72fda2094e97a352d67ee2
+
+=== C2 the token source's last-written value is unguarded ===
+--- /tmp/b3-oh.go.orig	2026-08-08 17:05:05
++++ mcp/oauthhandler.go	2026-08-08 17:05:08
+@@ -183,8 +183,6 @@
+ 		return nil, err
+ 	}
+ 
+-	p.mu.Lock()
+-	defer p.mu.Unlock()
+ 	// Only write when it has actually changed. A token source is consulted on
+ 	// every request, and rewriting the file each time would be a great deal of
+ 	// disk for no change.
+--- go test -race -run TestAConcurrentlyUsedTokenSourceIsNotARace ./mcp/ ---
+==================
+WARNING: DATA RACE
+Write at 0x00c00013e2e8 by goroutine 14:
+  github.com/ollama/ollama/mcp.(*persistingTokenSource).Token()
+      /Users/krypto/GitHub/ollama/mcp/oauthhandler.go:193 +0x1c4
+  github.com/ollama/ollama/mcp.TestAConcurrentlyUsedTokenSourceIsNotARace.func1()
+      /Users/krypto/GitHub/ollama/mcp/tokenstore_test.go:436 +0xa4
+
+Previous read at 0x00c00013e2e8 by goroutine 11:
+  github.com/ollama/ollama/mcp.(*persistingTokenSource).Token()
+      /Users/krypto/GitHub/ollama/mcp/oauthhandler.go:189 +0x94
+  github.com/ollama/ollama/mcp.TestAConcurrentlyUsedTokenSourceIsNotARace.func1()
+      /Users/krypto/GitHub/ollama/mcp/tokenstore_test.go:436 +0xa4
+
+Goroutine 14 (running) created at:
+  github.com/ollama/ollama/mcp.TestAConcurrentlyUsedTokenSourceIsNotARace()
+      /Users/krypto/GitHub/ollama/mcp/tokenstore_test.go:433 +0x2c8
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.26.5/libexec/src/testing/testing.go:2036 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.26.5/libexec/src/testing/testing.go:2101 +0x34
+
+Goroutine 11 (running) created at:
+  github.com/ollama/ollama/mcp.TestAConcurrentlyUsedTokenSourceIsNotARace()
+      /Users/krypto/GitHub/ollama/mcp/tokenstore_test.go:433 +0x2c8
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.26.5/libexec/src/testing/testing.go:2036 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.26.5/libexec/src/testing/testing.go:2101 +0x34
+==================
+--- FAIL: TestAConcurrentlyUsedTokenSourceIsNotARace (0.05s)
+    testing.go:1712: race detected during execution of test
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.526s
+FAIL
+EXIT=1
+restored: 9e79875b1422ec20d709d26a57f6d1f7b21423ca8c5f9e81c53dd82a4307668c
+
+hashes after:
+6feea81ac19a7a0e911730a29000598b23e600fafa72fda2094e97a352d67ee2  mcp/tokenstore.go
+9e79875b1422ec20d709d26a57f6d1f7b21423ca8c5f9e81c53dd82a4307668c  mcp/oauthhandler.go

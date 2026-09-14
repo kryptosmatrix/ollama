@@ -1,0 +1,51 @@
+=== PHASE 3b REACT FALSIFICATION EVIDENCE ===
+captured: 2026-08-05T21:27:04Z
+Note on what can and cannot be tested here: the frontend suite runs in a node
+environment and renders with renderToStaticMarkup, the pattern this repo already uses.
+There is no DOM event simulation available, so a button CLICK is not exercised; the
+click handlers are one call each and the logic they call is covered directly.
+
+--- baseline ---
+
+ Test Files  7 passed (7)
+      Tests  53 passed (53)
+   Start at  07:27:06
+   Duration  807ms (transform 251ms, setup 0ms, collect 1.07s, tests 40ms, environment 1ms, prepare 983ms)
+
+BASELINE_RECORDED
+
+--- F40: a refusal is sent as an agreement ---
+115:  if (false) { // FALSIFICATION: refusal sent with remember flags
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 16 passed (18)
+   Start at  07:27:08
+   Duration  308ms (transform 63ms, setup 0ms, collect 102ms, tests 18ms, environment 0ms, prepare 78ms)
+
+F40_TEST_EXIT=1 (expect non-zero)
+
+--- F41: an approval with no identifier is shown anyway ---
+32:  // FALSIFICATION: unanswerable prompt shown
+F41_TEST_EXIT=1 (expect non-zero)
+
+--- F42: control characters and enormous values reach the screen ---
+2
+F42_TEST_EXIT=1 (expect non-zero)
+
+--- F43: every event is treated as an approval ---
+29:  // FALSIFICATION: every event becomes a prompt
+F43_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ Test Files  7 passed (7)
+      Tests  53 passed (53)
+   Start at  07:27:17
+   Duration  551ms (transform 179ms, setup 0ms, collect 784ms, tests 39ms, environment 1ms, prepare 314ms)
+
+RESTORED_TEST_EXIT=0
+
+=== FINAL STATE ===
+frontend suite: 7 files, 53 tests
+eslint total: 123 problems — baseline was 122 problems; the one added error is in the GENERATED codegen/gotypes.gen.ts, whose regenerated approvalArgs field is another 'any' in a file that already has a hundred. No hand-written file adds a problem.
+FRONTEND_BUILD_EXIT=0

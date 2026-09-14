@@ -1,0 +1,279 @@
+Phase 3d — the transport wiring, SignIn and SignOut
+Falsification record
+
+Method: each protection was broken in mcp/signin.go, the test that exists to
+catch it was observed to fail, and the file was restored byte-identical. The
+restored hash after every attempt equals the hash taken before the first
+sabotage: 604253c59d4687d7ce7e67d630b7fa0e7053656c85000a378521b94fa0c01fa2
+
+Ten protections, all falsified. S1 appears twice: its first attempt did not
+apply because of a quoting fault in the harness, not a fault in the code, and
+the re-run is at the end of this file. A sabotage that fails to apply is
+recorded rather than removed, because a silently skipped falsifier reads
+exactly like a passed one.
+
+The four that carry the most weight:
+
+  S1  Sign-out that only deletes the token locally. This is the default
+      mistake — it is one line shorter and looks finished — and it leaves a
+      valid credential at the service that the user believes they withdrew.
+  S4  A token that could not be revoked being left on the machine. Failing to
+      revoke is not a reason to keep using it.
+  S5  A failed revocation reported as a clean sign-out. The user is told,
+      because the remedy is theirs: withdraw Ollama's access in the service's
+      own account settings.
+  S9  An explicit sign-in connecting with signInDisallowed, which would mean
+      no path in the program could ever open a browser and OAuth could never
+      complete. The mirror of F1 in the handler's own record: one test proves
+      the ordinary path cannot sign in, this one proves the explicit path can.
+
+The revocation tests run against a fake authorization server built in
+signin_test.go, which serves RFC 9728 resource metadata and RFC 8414
+authorization-server metadata and records every revocation request. Asserting
+what reached that endpoint — the refresh token in preference to the access
+token, the type hint, the client identifier — is the only way to tell a real
+revocation from a local delete wearing its name.
+
+=== S1 sign-out only forgets the token locally ===
+SABOTAGE DID NOT APPLY
+=== S2 the access token is revoked instead of the refresh token ===
+--- sabotage diff ---
+--- /tmp/signin.go.orig	2026-08-06 20:49:22
++++ mcp/signin.go	2026-08-06 20:49:22
+@@ -132,9 +132,9 @@
+ 		return fmt.Errorf("%s offers no revocation endpoint", spec.Name)
+ 	}
+ 
+-	token, hint := record.Token.RefreshToken, "refresh_token"
++	token, hint := record.Token.AccessToken, "access_token"
+ 	if token == "" {
+-		token, hint = record.Token.AccessToken, "access_token"
++		token, hint = record.Token.RefreshToken, "refresh_token"
+ 	}
+ 	if token == "" {
+ 		return errors.New("no token to revoke")
+--- go test -run TestSignOutRevokesAtTheServer ./mcp/ ---
+--- FAIL: TestSignOutRevokesAtTheServer (0.02s)
+    signin_test.go:130: revoked token = "access-1", want the refresh token
+    signin_test.go:133: token_type_hint = "access_token", want refresh_token
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.518s
+FAIL
+EXIT=1
+restored: 604253c59d4687d7ce7e67d630b7fa0e7053656c85000a378521b94fa0c01fa2
+
+=== S3 the client identifier is not sent ===
+--- sabotage diff ---
+--- /tmp/signin.go.orig	2026-08-06 20:49:22
++++ mcp/signin.go	2026-08-06 20:49:24
+@@ -148,10 +148,8 @@
+ 	// the request body with the identifier it was issued at registration.
+ 	// Without that identifier a server that requires one refuses, which is why
+ 	// it is stored alongside the token.
+-	if record.ClientID != "" {
+-		form.Set("client_id", record.ClientID)
+-	}
+ 
++
+ 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, strings.NewReader(form.Encode()))
+ 	if err != nil {
+ 		return err
+--- go test -run TestSignOutRevokesAtTheServer ./mcp/ ---
+--- FAIL: TestSignOutRevokesAtTheServer (0.02s)
+    signin_test.go:136: client_id = ""; a public client identifies itself in the body, and a server that requires one refuses without it
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.474s
+FAIL
+EXIT=1
+restored: 604253c59d4687d7ce7e67d630b7fa0e7053656c85000a378521b94fa0c01fa2
+
+=== S4 a token that could not be revoked is left on the machine ===
+--- sabotage diff ---
+--- /tmp/signin.go.orig	2026-08-06 20:49:22
++++ mcp/signin.go	2026-08-06 20:49:25
+@@ -100,8 +100,10 @@
+ 	}
+ 
+ 	revokeErr := revokeSignIn(ctx, spec, record)
+-	if err := m.opts.Tokens.Delete(spec.Name); err != nil {
+-		return err
++	if revokeErr == nil {
++		if err := m.opts.Tokens.Delete(spec.Name); err != nil {
++			return err
++		}
+ 	}
+ 
+ 	if revokeErr != nil {
+--- go test -run TestSignOutForgetsTheTokenEvenWhenRevocationFails ./mcp/ ---
+2026/08/06 20:49:26 WARN mcp token could not be revoked at the server server=hosted error="revocation refused with 500 Internal Server Error"
+--- FAIL: TestSignOutForgetsTheTokenEvenWhenRevocationFails (0.01s)
+    signin_test.go:188: the token survived a sign-out; it must stop being used from this machine either way: <nil>
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.448s
+FAIL
+EXIT=1
+restored: 604253c59d4687d7ce7e67d630b7fa0e7053656c85000a378521b94fa0c01fa2
+
+=== S5 a failed revocation is reported as a clean sign-out ===
+--- sabotage diff ---
+--- /tmp/signin.go.orig	2026-08-06 20:49:22
++++ mcp/signin.go	2026-08-06 20:49:26
+@@ -106,7 +106,6 @@
+ 
+ 	if revokeErr != nil {
+ 		m.opts.Logger.Warn("mcp token could not be revoked at the server", "server", spec.Name, "error", revokeErr)
+-		return fmt.Errorf("%w: %w", ErrSignedOutLocallyOnly, revokeErr)
+ 	}
+ 	return nil
+ }
+--- go test -run TestSignOutForgetsTheTokenEvenWhenRevocationFails ./mcp/ ---
+2026/08/06 20:49:27 WARN mcp token could not be revoked at the server server=hosted error="revocation refused with 500 Internal Server Error"
+--- FAIL: TestSignOutForgetsTheTokenEvenWhenRevocationFails (0.02s)
+    signin_test.go:182: a failed revocation must be reported; the user believes the credential is withdrawn
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.453s
+FAIL
+EXIT=1
+restored: 604253c59d4687d7ce7e67d630b7fa0e7053656c85000a378521b94fa0c01fa2
+
+=== S6 a server with no revocation endpoint reads as signed out ===
+--- sabotage diff ---
+--- /tmp/signin.go.orig	2026-08-06 20:49:22
++++ mcp/signin.go	2026-08-06 20:49:27
+@@ -129,7 +129,7 @@
+ 		return err
+ 	}
+ 	if endpoint == "" {
+-		return fmt.Errorf("%s offers no revocation endpoint", spec.Name)
++		return nil
+ 	}
+ 
+ 	token, hint := record.Token.RefreshToken, "refresh_token"
+--- go test -run TestSignOutOfAServerThatOffersNoRevocation ./mcp/ ---
+--- FAIL: TestSignOutOfAServerThatOffersNoRevocation (0.02s)
+    signin_test.go:202: err = <nil>, want ErrSignedOutLocallyOnly: a server with no revocation endpoint cannot be signed out of, and saying otherwise is a lie
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.459s
+FAIL
+EXIT=1
+restored: 604253c59d4687d7ce7e67d630b7fa0e7053656c85000a378521b94fa0c01fa2
+
+=== S7 signing out leaves the session and its tools up ===
+--- sabotage diff ---
+--- /tmp/signin.go.orig	2026-08-06 20:49:22
++++ mcp/signin.go	2026-08-06 20:49:29
+@@ -88,9 +88,6 @@
+ 	// on using it after it had been deleted from disk. The state goes with it:
+ 	// a session ended while its state still said connected would leave the
+ 	// server's tools on offer with nothing behind them.
+-	m.closeSession(spec.Name)
+-	m.setState(&ServerState{Name: spec.Name, Spec: spec, Status: StatusNeedsSignIn})
+-
+ 	record, err := m.opts.Tokens.Load(spec.Name)
+ 	if errors.Is(err, ErrNoToken) {
+ 		return nil
+--- go test -run TestSignOutEndsTheSessionAndTheState ./mcp/ ---
+--- FAIL: TestSignOutEndsTheSessionAndTheState (0.00s)
+    signin_test.go:268: status = "connected", want needs-sign-in
+    signin_test.go:271: 1 tools are still on offer after signing out
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.447s
+FAIL
+EXIT=1
+restored: 604253c59d4687d7ce7e67d630b7fa0e7053656c85000a378521b94fa0c01fa2
+
+=== S8 the sign-in button bypasses the approval gate ===
+--- sabotage diff ---
+--- /tmp/signin.go.orig	2026-08-06 20:49:22
++++ mcp/signin.go	2026-08-06 20:49:30
+@@ -42,10 +42,8 @@
+ 	}
+ 	// Signing in still runs through the approval gate. Approval is what says
+ 	// this server may be contacted at all, and a sign-in contacts it.
+-	if !m.approves(spec) {
+-		return ServerState{}, fmt.Errorf("%s has not been approved to run: %s", spec.Name, spec.Summary())
+-	}
+ 
++
+ 	// Any live session holds a handler built without a browser. Ending it first
+ 	// means the sign-in replaces the connection rather than sitting beside it.
+ 	m.closeSession(spec.Name)
+--- go test -run TestSignInStillNeedsApproval ./mcp/ ---
+--- FAIL: TestSignInStillNeedsApproval (0.00s)
+    signin_test.go:318: an unapproved server was contacted by the sign-in path
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.445s
+FAIL
+EXIT=1
+restored: 604253c59d4687d7ce7e67d630b7fa0e7053656c85000a378521b94fa0c01fa2
+
+=== S9 an explicit sign-in cannot open a browser either ===
+--- sabotage diff ---
+--- /tmp/signin.go.orig	2026-08-06 20:49:22
++++ mcp/signin.go	2026-08-06 20:49:31
+@@ -51,7 +51,7 @@
+ 	m.closeSession(spec.Name)
+ 	m.setState(&ServerState{Name: spec.Name, Spec: spec, Status: StatusConnecting})
+ 
+-	if err := m.dial(ctx, spec, signInAllowed); err != nil {
++	if err := m.dial(ctx, spec, signInDisallowed); err != nil {
+ 		state := &ServerState{Name: spec.Name, Spec: spec, Status: StatusFailed, Err: err}
+ 		if SignInRequired(err) {
+ 			state.Status = StatusNeedsSignIn
+--- go test -run TestSignInIsTheOnlyPathThatMayOpenABrowser ./mcp/ ---
+2026/08/06 20:49:34 WARN mcp server unavailable server=hosted error="no transport in this test"
+--- FAIL: TestSignInIsTheOnlyPathThatMayOpenABrowser (1.51s)
+    signin_test.go:370: an explicit sign-in connected with mode 0, so it could never open a browser
+FAIL
+FAIL	github.com/ollama/ollama/mcp	1.955s
+FAIL
+EXIT=1
+restored: 604253c59d4687d7ce7e67d630b7fa0e7053656c85000a378521b94fa0c01fa2
+
+=== S10 a local server is offered a sign-in ===
+--- sabotage diff ---
+--- /tmp/signin.go.orig	2026-08-06 20:49:22
++++ mcp/signin.go	2026-08-06 20:49:34
+@@ -34,9 +34,7 @@
+ 	if spec == nil {
+ 		return ServerState{}, errors.New("no server to sign in to")
+ 	}
+-	if spec.transport() != TransportHTTP {
+-		return ServerState{}, fmt.Errorf("%s runs on this machine and has nothing to sign in to", spec.Name)
+-	}
++
+ 	if m.opts.Tokens == nil {
+ 		return ServerState{}, errors.New("there is nowhere to keep a token, so signing in would be lost immediately")
+ 	}
+--- go test -run TestSignInRefusesWhatItCannotSignIntoTo ./mcp/ ---
+--- FAIL: TestSignInRefusesWhatItCannotSignIntoTo (0.67s)
+    --- FAIL: TestSignInRefusesWhatItCannotSignIntoTo/a_local_server (0.67s)
+        signin_test.go:285: err = connect: connection closed: calling "initialize": client is closing: invalid character 'P' looking for beginning of value, want it to name the server
+FAIL
+FAIL	github.com/ollama/ollama/mcp	1.116s
+FAIL
+EXIT=1
+restored: 604253c59d4687d7ce7e67d630b7fa0e7053656c85000a378521b94fa0c01fa2
+
+=== S1 sign-out only forgets the token locally (re-run) ===
+--- sabotage diff ---
+--- /tmp/signin.go.orig	2026-08-06 20:49:22
++++ mcp/signin.go	2026-08-06 20:49:45
+@@ -99,7 +99,8 @@
+ 		return err
+ 	}
+ 
+-	revokeErr := revokeSignIn(ctx, spec, record)
++	var revokeErr error
++	_ = record
+ 	if err := m.opts.Tokens.Delete(spec.Name); err != nil {
+ 		return err
+ 	}
+--- go test -run TestSignOutRevokesAtTheServer ./mcp/ ---
+--- FAIL: TestSignOutRevokesAtTheServer (0.02s)
+    signin_test.go:124: the server received 0 revocations, want 1; a sign-out that does not reach the server is only a local delete
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.458s
+FAIL
+EXIT=1
+restored: 604253c59d4687d7ce7e67d630b7fa0e7053656c85000a378521b94fa0c01fa2

@@ -29,6 +29,8 @@ import {
   updateSettings,
   getInferenceCompute,
 } from "@/api";
+import SpeechSettings from "@/components/SpeechSettings";
+import { ToolApprovalSetting } from "@/components/ToolApprovalSetting";
 
 function AnimatedDots() {
   return (
@@ -215,6 +217,7 @@ export default function Settings() {
         Tools: false,
         ContextLength: 0,
         AutoUpdateEnabled: true,
+        AutoApproveTools: false,
       });
       updateSettingsMutation.mutate(defaultSettings);
     }
@@ -415,6 +418,7 @@ export default function Settings() {
               )}
             </div>
           </div>
+          <SpeechSettings />
           {/* Local Configuration */}
           <div className="relative overflow-hidden rounded-xl bg-white dark:bg-neutral-800">
             <div className="space-y-4 p-4">
@@ -565,6 +569,12 @@ export default function Settings() {
               </Field>
             </div>
           </div>
+
+          {/* Tool approvals */}
+          <ToolApprovalSetting
+            checked={settings.AutoApproveTools}
+            onChange={(checked) => handleChange("AutoApproveTools", checked)}
+          />
 
           {/* Agent Mode */}
           {window.OLLAMA_TOOLS && (

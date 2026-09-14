@@ -1,0 +1,459 @@
+package mcp
+
+import (
+	"errors"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+// registryFixture serves the recorded registry responses. The tests never touch
+// the live registry: a suite that depends on a third party's uptime and current
+// contents is a suite that fails for reasons unrelated to this code.
+func registryFixture(t *testing.T) (*RegistryClient, *[]string) {
+	t.Helper()
+
+	var requested []string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requested = append(requested, r.URL.String())
+
+		name := "page1.json"
+		switch r.URL.Query().Get("cursor") {
+		case "cursor-two":
+			name = "page2.json"
+		case "official":
+			name = "official.json"
+		case "withdrawn":
+			name = "withdrawn.json"
+		case "malformed":
+			name = "malformed.json"
+		case "missing":
+			http.Error(w, "gone", http.StatusNotFound)
+			return
+		}
+
+		data, err := os.ReadFile(filepath.Join("testdata", "registry", name))
+		if err != nil {
+			t.Errorf("read fixture: %v", err)
+			http.Error(w, "fixture", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(data)
+	}))
+	t.Cleanup(server.Close)
+
+	client := NewRegistryClient(server.URL)
+	client.HTTP = server.Client()
+	return client, &requested
+}
+
+func TestRegistrySearchReadsAPage(t *testing.T) {
+	client, requested := registryFixture(t)
+
+	page, err := client.Search(t.Context(), "weather", "")
+	if err != nil {
+		t.Fatalf("Search: %v", err)
+	}
+	if len(page.Servers) != 6 {
+		t.Fatalf("got %d servers", len(page.Servers))
+	}
+	if page.NextCursor != "cursor-two" {
+		t.Errorf("NextCursor = %q", page.NextCursor)
+	}
+
+	first := page.Servers[0]
+	if first.Name != "io.github.example/weather" || first.Title != "Weather" {
+		t.Errorf("first entry = %+v", first)
+	}
+	if first.Repository == nil || first.Repository.URL == "" {
+		t.Error("the repository must survive, it is the only provenance on offer")
+	}
+
+	if len(*requested) != 1 {
+		t.Fatalf("requests = %v", *requested)
+	}
+	query := (*requested)[0]
+	for _, want := range []string{"/v0/servers?", "search=weather", "limit=30", "version=latest"} {
+		if !strings.Contains(query, want) {
+			t.Errorf("request %q should contain %q", query, want)
+		}
+	}
+}
+
+func TestRegistrySearchPaginates(t *testing.T) {
+	client, requested := registryFixture(t)
+
+	page, err := client.Search(t.Context(), "", "cursor-two")
+	if err != nil {
+		t.Fatalf("Search: %v", err)
+	}
+	if len(page.Servers) != 1 || page.Servers[0].Name != "io.github.example/last" {
+		t.Fatalf("page = %+v", page.Servers)
+	}
+	if page.NextCursor != "" {
+		t.Errorf("the last page must report no cursor, got %q", page.NextCursor)
+	}
+	if !strings.Contains((*requested)[0], "cursor=cursor-two") {
+		t.Errorf("the cursor was not sent: %q", (*requested)[0])
+	}
+	if strings.Contains((*requested)[0], "search=") {
+		t.Errorf("an empty query should not be sent: %q", (*requested)[0])
+	}
+}
+
+func TestRegistrySearchReportsFailures(t *testing.T) {
+	client, _ := registryFixture(t)
+
+	t.Run("a malformed response", func(t *testing.T) {
+		if _, err := client.Search(t.Context(), "", "malformed"); err == nil {
+			t.Fatal("expected an error")
+		}
+	})
+
+	t.Run("an error status", func(t *testing.T) {
+		_, err := client.Search(t.Context(), "", "missing")
+		if err == nil {
+			t.Fatal("expected an error")
+		}
+		if !strings.Contains(err.Error(), "404") {
+			t.Errorf("error = %v, want it to name the status", err)
+		}
+	})
+
+	t.Run("an unreachable registry", func(t *testing.T) {
+		offline := NewRegistryClient("http://127.0.0.1:1")
+		if _, err := offline.Search(t.Context(), "", ""); err == nil {
+			t.Fatal("expected an error")
+		}
+	})
+}
+
+func TestPublisher(t *testing.T) {
+	cases := map[string]string{
+		"io.github.example/weather": "io.github.example",
+		"ac.inference.sh/mcp":       "ac.inference.sh",
+		"bare":                      "bare",
+	}
+	for name, want := range cases {
+		if got := (RegistryEntry{Name: name}).Publisher(); got != want {
+			t.Errorf("Publisher(%q) = %q, want %q", name, got, want)
+		}
+	}
+}
+
+// TestResolveProducesTheExactCommandLine is the heart of the install gate. The
+// user approves what Summary() renders, so what Resolve builds is what they are
+// agreeing to run.
+func TestResolveProducesTheExactCommandLine(t *testing.T) {
+	client, _ := registryFixture(t)
+	page, err := client.Search(t.Context(), "", "")
+	if err != nil {
+		t.Fatalf("Search: %v", err)
+	}
+
+	byName := map[string]RegistryEntry{}
+	for _, entry := range page.Servers {
+		byName[entry.Name] = entry
+	}
+
+	cases := []struct {
+		entry   string
+		summary string
+	}{
+		{"io.github.example/weather", "npx -y @example/weather-mcp@1.2.0"},
+		{"io.github.example/pythonic", "uvx example-mcp==0.3.0 --read-only"},
+		{"io.github.example/containerised", "docker run --rm -i --network none ghcr.io/example/mcp:latest"},
+		{"ac.inference.sh/mcp", "https://mcp.inference.sh/v1"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.entry, func(t *testing.T) {
+			spec, err := byName[tc.entry].Resolve()
+			if err != nil {
+				t.Fatalf("Resolve: %v", err)
+			}
+			if got := spec.Summary(); got != tc.summary {
+				t.Errorf("Summary() = %q, want %q", got, tc.summary)
+			}
+		})
+	}
+}
+
+func TestResolvePrefersAHostedEndpoint(t *testing.T) {
+	// Running nothing on the user's machine is safer than running something,
+	// so a publisher offering both gets the remote.
+	entry := RegistryEntry{
+		Name:     "io.github.example/both",
+		Remotes:  []RegistryRemote{{Type: "streamable-http", URL: "https://mcp.example.com/v1"}},
+		Packages: []RegistryPackage{{RegistryType: "npm", Identifier: "@example/thing"}},
+	}
+	spec, err := entry.Resolve()
+	if err != nil {
+		t.Fatalf("Resolve: %v", err)
+	}
+	if spec.transport() != TransportHTTP {
+		t.Errorf("transport = %q, want http", spec.transport())
+	}
+}
+
+func TestResolveRefusesWhatItCannotBuild(t *testing.T) {
+	client, _ := registryFixture(t)
+	page, _ := client.Search(t.Context(), "", "")
+	byName := map[string]RegistryEntry{}
+	for _, entry := range page.Servers {
+		byName[entry.Name] = entry
+	}
+
+	for _, name := range []string{"io.github.example/exotic", "io.github.example/empty"} {
+		t.Run(name, func(t *testing.T) {
+			spec, err := byName[name].Resolve()
+			if err == nil {
+				t.Fatalf("expected a refusal, got %+v", spec)
+			}
+			if !errors.Is(err, ErrUnresolvable) {
+				t.Errorf("error = %v, want ErrUnresolvable", err)
+			}
+		})
+	}
+}
+
+// TestResolveNeverWritesASecret is the rule that keeps a registry entry from
+// putting a credential into the configuration file. The registry says what a
+// server needs; the value comes from the user's environment at connect time.
+func TestResolveNeverWritesASecret(t *testing.T) {
+	client, _ := registryFixture(t)
+	page, _ := client.Search(t.Context(), "", "")
+
+	for _, entry := range page.Servers {
+		spec, err := entry.Resolve()
+		if err != nil {
+			continue
+		}
+		for name, value := range spec.Env {
+			if !isEnvRef(value) {
+				t.Errorf("%s: env %q = %q, want an ${env:NAME} reference", entry.Name, name, value)
+			}
+		}
+		for name, value := range spec.Headers {
+			if !isEnvRef(value) {
+				t.Errorf("%s: header %q = %q, want an ${env:NAME} reference", entry.Name, name, value)
+			}
+		}
+	}
+}
+
+// TestResolvedSpecsPassTheSameValidationAsTypedOnes proves a registry entry
+// cannot smuggle in something the configuration layer would refuse from a
+// human. Whatever the registry says, the result has to survive the same checks.
+func TestResolvedSpecsPassTheSameValidationAsTypedOnes(t *testing.T) {
+	client, _ := registryFixture(t)
+	page, _ := client.Search(t.Context(), "", "")
+
+	cfg := &Config{}
+	var added int
+	for _, entry := range page.Servers {
+		spec, err := entry.Resolve()
+		if err != nil {
+			continue
+		}
+		name := strings.ReplaceAll(entry.Publisher(), ".", "-")
+		cfg.Set(name, spec)
+		added++
+	}
+	if added == 0 {
+		t.Fatal("nothing resolved, so nothing was validated")
+	}
+	if problems := cfg.Problems(); len(problems) != 0 {
+		t.Errorf("resolved specs failed validation: %v", problems)
+	}
+}
+
+func TestEnvReferenceNameIsUsable(t *testing.T) {
+	cases := map[string]string{
+		"WEATHER_API_KEY": "WEATHER_API_KEY",
+		"Authorization":   "AUTHORIZATION",
+		"x-api-key":       "X_API_KEY",
+		"1password":       "MCP_1PASSWORD",
+		"":                "MCP_",
+	}
+	for input, want := range cases {
+		if got := envReferenceName(input); got != want {
+			t.Errorf("envReferenceName(%q) = %q, want %q", input, got, want)
+		}
+	}
+}
+
+func TestNewRegistryClientDefaultsToTheOfficialRegistry(t *testing.T) {
+	if got := NewRegistryClient("").BaseURL; got != DefaultRegistryURL {
+		t.Errorf("BaseURL = %q, want %q", got, DefaultRegistryURL)
+	}
+	if got := NewRegistryClient("https://mirror.example.com/").BaseURL; got != "https://mirror.example.com" {
+		t.Errorf("BaseURL = %q, want the trailing slash trimmed", got)
+	}
+}
+
+// TestAPackageIdentifierMayNotBeAFlag closes a hole a cross-substrate review
+// found: the registry-supplied identifier went straight into the runner's
+// argument list with no check that it was a package name at all.
+//
+// An entry naming itself "--call=..." produces a command line npx reads as an
+// instruction rather than a package. The approval gate still stands in front of
+// it — the user is shown the exact command line — but "the user will read it"
+// is the mitigation this codebase refuses to rely on everywhere else, and a
+// resolver whose contract is that a command line is derived rather than guessed
+// must not derive one from a value it never checked.
+func TestAPackageIdentifierMayNotBeAFlag(t *testing.T) {
+	for _, ecosystem := range []string{"npm", "pypi", "oci"} {
+		t.Run(ecosystem, func(t *testing.T) {
+			entry := RegistryEntry{
+				Name: "example/evil",
+				Packages: []RegistryPackage{{
+					RegistryType: ecosystem,
+					Identifier:   "--call=rm -rf /tmp",
+				}},
+			}
+			spec, err := entry.Resolve()
+			if err == nil {
+				t.Fatalf("an identifier that is a flag was resolved into %q %v", spec.Command, spec.Args)
+			}
+			if !errors.Is(err, ErrUnresolvable) {
+				t.Errorf("err = %v, want ErrUnresolvable so the entry is offered without a command line", err)
+			}
+		})
+	}
+
+	t.Run("an ordinary identifier still resolves", func(t *testing.T) {
+		entry := RegistryEntry{
+			Name:     "example/files",
+			Packages: []RegistryPackage{{RegistryType: "npm", Identifier: "@example/mcp-files", Version: "1.2.3"}},
+		}
+		if _, err := entry.Resolve(); err != nil {
+			t.Errorf("a normal package was refused: %v", err)
+		}
+	})
+}
+
+// TestTwoHeaderNamesGetTwoEnvironmentReferences. Names that differ only in
+// punctuation reduce to the same environment variable — "X-Custom-Auth" and
+// "X_Custom_Auth" both become X_CUSTOM_AUTH. Sharing one variable means the
+// user sets a value and both headers receive it, and if they were meant to
+// carry different credentials one of them is silently wrong.
+func TestTwoHeaderNamesGetTwoEnvironmentReferences(t *testing.T) {
+	entry := RegistryEntry{
+		Name: "example/remote",
+		Remotes: []RegistryRemote{{
+			Type: "streamable-http",
+			URL:  "https://mcp.example.com/v1",
+			Headers: []RegistryVariable{
+				{Name: "X-Custom-Auth", IsSecret: true},
+				{Name: "X_Custom_Auth", IsSecret: true},
+			},
+		}},
+	}
+	spec, err := entry.Resolve()
+	if err != nil {
+		t.Fatalf("Resolve: %v", err)
+	}
+
+	seen := map[string]string{}
+	for name, value := range spec.Headers {
+		if other, duplicate := seen[value]; duplicate {
+			t.Errorf("%q and %q share %s; one of them would receive the other's credential", other, name, value)
+		}
+		seen[value] = name
+	}
+	if len(spec.Headers) != 2 {
+		t.Errorf("headers = %v, want both", spec.Headers)
+	}
+	// Still references, never literals.
+	for name, value := range spec.Headers {
+		if !strings.HasPrefix(value, "${env:") {
+			t.Errorf("header %q carries %q rather than an environment reference", name, value)
+		}
+	}
+}
+
+// TestRegistrySearchReadsTheOfficialEnvelope pins the shape the live registry
+// actually serves, recorded from it rather than written from memory. Every
+// result is wrapped — {"server": {...}, "_meta": {...}} — and reading the
+// wrapper as though it were the entry yields a page of empty entries instead
+// of an error, which reaches the user as a list of blank rows that all say
+// they cannot be installed.
+func TestRegistrySearchReadsTheOfficialEnvelope(t *testing.T) {
+	client, _ := registryFixture(t)
+
+	page, err := client.Search(t.Context(), "weather", "official")
+	if err != nil {
+		t.Fatalf("Search: %v", err)
+	}
+	if len(page.Servers) != 3 {
+		t.Fatalf("got %d servers, want 3", len(page.Servers))
+	}
+
+	first := page.Servers[0]
+	if first.Name != "io.ausdata/au-weather-mcp" {
+		t.Errorf("name = %q; the wrapper was read instead of the entry", first.Name)
+	}
+	if first.Version != "0.4.9" {
+		t.Errorf("version = %q, want 0.4.9", first.Version)
+	}
+	if first.Repository == nil || first.Repository.URL != "https://github.com/Bigred97/au-weather-mcp" {
+		t.Errorf("repository = %+v", first.Repository)
+	}
+	if len(first.Packages) != 1 || first.Packages[0].Identifier != "au-weather-mcp" {
+		t.Errorf("packages = %+v", first.Packages)
+	}
+
+	// The point of reading the entry at all: it has to resolve into something
+	// Ollama can run, which is what the browse list offers to install.
+	spec, err := first.Resolve()
+	if err != nil {
+		t.Fatalf("Resolve: %v", err)
+	}
+	if spec.Command == "" {
+		t.Errorf("resolved to no command: %+v", spec)
+	}
+
+	remote := page.Servers[2]
+	if remote.Name != "ai.smithery/smithery-ai-national-weather-service" {
+		t.Errorf("third entry = %q", remote.Name)
+	}
+	if len(remote.Remotes) == 0 {
+		t.Fatalf("the hosted entry lost its remotes")
+	}
+}
+
+// A private mirror may still serve entries unwrapped, so the flat shape keeps
+// working — page1.json is that shape, and the tests above it read it.
+func TestRegistrySearchStillReadsAFlatEntry(t *testing.T) {
+	client, _ := registryFixture(t)
+
+	page, err := client.Search(t.Context(), "weather", "")
+	if err != nil {
+		t.Fatalf("Search: %v", err)
+	}
+	if len(page.Servers) == 0 || page.Servers[0].Name == "" {
+		t.Fatalf("flat entries no longer decode: %+v", page.Servers)
+	}
+}
+
+// A withdrawn listing is not offered. The registry keeps deleted and deprecated
+// servers in its index; installing one is installing something its publisher
+// has taken back.
+func TestRegistrySearchSkipsWithdrawnListings(t *testing.T) {
+	client, _ := registryFixture(t)
+
+	page, err := client.Search(t.Context(), "weather", "withdrawn")
+	if err != nil {
+		t.Fatalf("Search: %v", err)
+	}
+	if len(page.Servers) != 1 {
+		t.Fatalf("got %d servers, want only the active one", len(page.Servers))
+	}
+	if page.Servers[0].Name != "io.ausdata/au-weather-mcp" {
+		t.Errorf("kept the wrong entry: %q", page.Servers[0].Name)
+	}
+}

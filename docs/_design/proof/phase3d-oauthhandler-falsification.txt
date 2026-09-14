@@ -1,0 +1,302 @@
+Phase 3d — the OAuth handler
+Falsification record
+
+Method: each protection was broken in mcp/oauthhandler.go, the test that exists
+to catch it was observed to fail, and the file was restored byte-identical.
+Restored hash is printed after every attempt and equals the hash taken before
+the first sabotage: 09a2ac4060d1a1115670627b59e0e3173f082fe3ef4e063264cf2ed0f5de8c05
+
+Ten protections, all falsified on the first attempt.
+
+The one that matters most is F1. An MCP server connects at start-up, on a
+configuration change and on every reconnect, and none of those may summon a
+browser window the user did not ask for. A server that answers 401 would
+otherwise be able to open a sign-in page on a machine nobody is sitting at.
+F1 wires the real loopback fetcher into the ordinary path — which is exactly
+the mistake a later refactor would make, since it is one branch shorter — and
+the test fails.
+
+Two tests were rewritten before this pass because they did not discriminate,
+and are recorded here rather than quietly fixed:
+
+  - TestAnOrdinaryConnectionCannotOpenABrowser called refuseSignIn directly.
+    That proves a refusal exists, not that an ordinary connection is wired to
+    one; F1 would have passed. It now goes through session.fetch, which is what
+    the handler itself calls.
+  - TestAnOrdinaryConnectionOpensNoListener probed 127.0.0.1 port 80. A real
+    listener binds an ephemeral port, so nothing would have answered there
+    either and F2 would have passed. It now asserts the declared redirect is
+    the unusable placeholder, and probes that address.
+
+Both changes required the session to carry its redirectURL and fetch, which is
+why those fields exist: the properties were not observable without them.
+
+Note on F7. Removing the nil-store guard makes newOAuthSession panic on
+store.Load rather than return an error, so the test fails on a segfault. The
+protection is real — a handler with nowhere to keep tokens would sign the user
+in and lose it — but what the guard buys is a message instead of a crash. The
+falsifier discriminates; it just does so noisily.
+
+Not falsified, and stated rather than implied: RequestRefreshToken is set true,
+and nothing here proves it. Without a refresh token the user is sent back to
+the browser each time the access token expires, but the field is consumed
+inside the protocol library and observing it needs a fake authorization server,
+which this package does not yet have. It is owed with the sign-in flow tests.
+
+=== F1 an ordinary connection is wired to a real browser fetcher ===
+--- sabotage diff ---
+--- /tmp/oauthhandler.go.orig	2026-08-06 20:33:45
++++ mcp/oauthhandler.go	2026-08-06 20:34:10
+@@ -98,11 +98,13 @@
+ 		session.redirectURL = redirect.RedirectURL()
+ 		session.fetch = redirect.Fetch
+ 	default:
+-		// No listener is started and no browser can be opened. The redirect
+-		// address is still required by the configuration, so it is declared
+-		// and never used: the fetcher refuses before anything reaches it.
+-		session.redirectURL = unusableRedirect
+-		session.fetch = refuseSignIn(server)
++		redirect, err := StartLoopbackRedirect()
++		if err != nil {
++			return nil, err
++		}
++		session.close = func() { redirect.Close() }
++		session.redirectURL = redirect.RedirectURL()
++		session.fetch = redirect.Fetch
+ 	}
+ 	config.RedirectURL = session.redirectURL
+ 	config.AuthorizationCodeFetcher = session.fetch
+--- go test -run TestAnOrdinaryConnectionCannotOpenABrowser ./mcp/ ---
+--- FAIL: TestAnOrdinaryConnectionCannotOpenABrowser (300.01s)
+    oauthhandler_test.go:48: err = no sign-in within 5m0s, want it to report that a sign-in is needed
+    oauthhandler_test.go:51: err = no sign-in within 5m0s, want ErrSignInRequired
+    oauthhandler_test.go:54: err = "no sign-in within 5m0s", want it to name the server so the user knows which one
+FAIL
+FAIL	github.com/ollama/ollama/mcp	300.704s
+FAIL
+EXIT=1
+restored: 09a2ac4060d1a1115670627b59e0e3173f082fe3ef4e063264cf2ed0f5de8c05
+
+=== F2 a listener is started during an ordinary connection ===
+--- sabotage diff ---
+--- /tmp/oauthhandler.go.orig	2026-08-06 20:33:45
++++ mcp/oauthhandler.go	2026-08-06 20:39:12
+@@ -101,7 +101,12 @@
+ 		// No listener is started and no browser can be opened. The redirect
+ 		// address is still required by the configuration, so it is declared
+ 		// and never used: the fetcher refuses before anything reaches it.
+-		session.redirectURL = unusableRedirect
++		redirect, err := StartLoopbackRedirect()
++		if err != nil {
++			return nil, err
++		}
++		session.close = func() { redirect.Close() }
++		session.redirectURL = redirect.RedirectURL()
+ 		session.fetch = refuseSignIn(server)
+ 	}
+ 	config.RedirectURL = session.redirectURL
+--- go test -run TestAnOrdinaryConnectionOpensNoListener ./mcp/ ---
+--- FAIL: TestAnOrdinaryConnectionOpensNoListener (0.00s)
+    oauthhandler_test.go:68: redirectURL = "http://127.0.0.1:50178/callback", want the unusable placeholder "http://127.0.0.1/callback"; a real one means a listener was started
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.757s
+FAIL
+EXIT=1
+restored: 09a2ac4060d1a1115670627b59e0e3173f082fe3ef4e063264cf2ed0f5de8c05
+
+=== F3 an explicit sign-in declares a redirect nothing is bound to ===
+--- sabotage diff ---
+--- /tmp/oauthhandler.go.orig	2026-08-06 20:33:45
++++ mcp/oauthhandler.go	2026-08-06 20:39:14
+@@ -95,7 +95,7 @@
+ 			return nil, err
+ 		}
+ 		session.close = func() { redirect.Close() }
+-		session.redirectURL = redirect.RedirectURL()
++		session.redirectURL = unusableRedirect
+ 		session.fetch = redirect.Fetch
+ 	default:
+ 		// No listener is started and no browser can be opened. The redirect
+--- go test -run TestAnExplicitSignInOpensAListener ./mcp/ ---
+--- FAIL: TestAnExplicitSignInOpensAListener (0.00s)
+    oauthhandler_test.go:95: redirectURL = "http://127.0.0.1/callback", want a real loopback address the server can redirect to
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.578s
+FAIL
+EXIT=1
+restored: 09a2ac4060d1a1115670627b59e0e3173f082fe3ef4e063264cf2ed0f5de8c05
+
+=== F4 closing a sign-in leaves the port bound ===
+--- sabotage diff ---
+--- /tmp/oauthhandler.go.orig	2026-08-06 20:33:45
++++ mcp/oauthhandler.go	2026-08-06 20:39:16
+@@ -94,7 +94,7 @@
+ 		if err != nil {
+ 			return nil, err
+ 		}
+-		session.close = func() { redirect.Close() }
++		session.close = func() {}
+ 		session.redirectURL = redirect.RedirectURL()
+ 		session.fetch = redirect.Fetch
+ 	default:
+--- go test -run TestClosingASignInReleasesTheListener ./mcp/ ---
+--- FAIL: TestClosingASignInReleasesTheListener (0.01s)
+    oauthhandler_test.go:123: the redirect listener is still bound after close
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.612s
+FAIL
+EXIT=1
+restored: 09a2ac4060d1a1115670627b59e0e3173f082fe3ef4e063264cf2ed0f5de8c05
+
+=== F5 a refreshed token is not written down ===
+--- sabotage diff ---
+--- /tmp/oauthhandler.go.orig	2026-08-06 20:33:45
++++ mcp/oauthhandler.go	2026-08-06 20:39:18
+@@ -163,9 +163,6 @@
+ 	// every request, and rewriting the file each time would be a great deal of
+ 	// disk for no change.
+ 	if token != nil && token.AccessToken != "" && token.AccessToken != p.last {
+-		if err := p.store.Save(p.server, token); err != nil {
+-			return nil, err
+-		}
+ 		p.last = token.AccessToken
+ 	}
+ 	return token, nil
+--- go test -run TestARefreshedTokenIsWrittenDown ./mcp/ ---
+--- FAIL: TestARefreshedTokenIsWrittenDown (0.00s)
+    oauthhandler_test.go:209: Load: no stored token for that MCP server: hosted
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.592s
+FAIL
+EXIT=1
+restored: 09a2ac4060d1a1115670627b59e0e3173f082fe3ef4e063264cf2ed0f5de8c05
+
+=== F6 an unchanged token is rewritten on every request ===
+--- sabotage diff ---
+--- /tmp/oauthhandler.go.orig	2026-08-06 20:33:45
++++ mcp/oauthhandler.go	2026-08-06 20:39:21
+@@ -162,7 +162,7 @@
+ 	// Only write when it has actually changed. A token source is consulted on
+ 	// every request, and rewriting the file each time would be a great deal of
+ 	// disk for no change.
+-	if token != nil && token.AccessToken != "" && token.AccessToken != p.last {
++	if token != nil && token.AccessToken != "" {
+ 		if err := p.store.Save(p.server, token); err != nil {
+ 			return nil, err
+ 		}
+--- go test -run TestAnUnchangedTokenIsNotRewritten ./mcp/ ---
+--- FAIL: TestAnUnchangedTokenIsNotRewritten (0.02s)
+    oauthhandler_test.go:248: saves = 3, want 1; an unchanged token must not be rewritten on every request
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.581s
+FAIL
+EXIT=1
+restored: 09a2ac4060d1a1115670627b59e0e3173f082fe3ef4e063264cf2ed0f5de8c05
+
+=== F7 a handler is built with nowhere to keep tokens ===
+--- sabotage diff ---
+--- /tmp/oauthhandler.go.orig	2026-08-06 20:33:45
++++ mcp/oauthhandler.go	2026-08-06 20:39:22
+@@ -57,10 +57,8 @@
+ // which tokens it starts from, where refreshed tokens are written, and whether
+ // a browser may be opened at all.
+ func newOAuthSession(server string, store TokenStore, mode signInMode) (*oauthSession, error) {
+-	if store == nil {
+-		return nil, errors.New("oauth needs somewhere to keep tokens")
+-	}
+ 
++
+ 	session := &oauthSession{close: func() {}}
+ 
+ 	config := &sdkauth.AuthorizationCodeHandlerConfig{
+--- go test -run TestOAuthNeedsSomewhereToKeepTokens ./mcp/ ---
+--- FAIL: TestOAuthNeedsSomewhereToKeepTokens (0.00s)
+panic: runtime error: invalid memory address or nil pointer dereference [recovered, repanicked]
+[signal SIGSEGV: segmentation violation code=0x2 addr=0x28 pc=0x10088bdfc]
+
+goroutine 5 [running]:
+testing.tRunner.func1.2({0x100e47ae0, 0x100f84b60})
+	/opt/homebrew/Cellar/go/1.26.5/libexec/src/testing/testing.go:1974 +0x1a0
+testing.tRunner.func1()
+	/opt/homebrew/Cellar/go/1.26.5/libexec/src/testing/testing.go:1977 +0x318
+panic({0x100e47ae0?, 0x100f84b60?})
+	/opt/homebrew/Cellar/go/1.26.5/libexec/src/runtime/panic.go:860 +0x12c
+github.com/ollama/ollama/mcp.newOAuthSession({0x100903e04, 0x6}, {0x0, 0x0}, 0x0)
+	/Users/krypto/GitHub/ollama/mcp/oauthhandler.go:83 +0x1dc
+github.com/ollama/ollama/mcp.TestOAuthNeedsSomewhereToKeepTokens(0x17647d98f688)
+	/Users/krypto/GitHub/ollama/mcp/oauthhandler_test.go:128 +0x38
+testing.tRunner(0x17647d98f688, 0x100f10608)
+	/opt/homebrew/Cellar/go/1.26.5/libexec/src/testing/testing.go:2036 +0xc4
+created by testing.(*T).Run in goroutine 1
+	/opt/homebrew/Cellar/go/1.26.5/libexec/src/testing/testing.go:2101 +0x3a8
+FAIL	github.com/ollama/ollama/mcp	0.570s
+FAIL
+EXIT=1
+restored: 09a2ac4060d1a1115670627b59e0e3173f082fe3ef4e063264cf2ed0f5de8c05
+
+=== F8 a stored token is ignored so every launch signs in again ===
+--- sabotage diff ---
+--- /tmp/oauthhandler.go.orig	2026-08-06 20:33:45
++++ mcp/oauthhandler.go	2026-08-06 20:39:23
+@@ -83,7 +83,7 @@
+ 	// A token already stored means the ordinary case: use it, and never open a
+ 	// browser at all.
+ 	if token, err := store.Load(server); err == nil {
+-		config.InitialTokenSource = oauth2.StaticTokenSource(token)
++		_ = token
+ 	} else if !errors.Is(err, ErrNoToken) {
+ 		return nil, err
+ 	}
+--- go test -run TestOAuthUsesAStoredTokenWithoutAnySignIn ./mcp/ ---
+--- FAIL: TestOAuthUsesAStoredTokenWithoutAnySignIn (0.03s)
+    oauthhandler_test.go:153: a stored token must produce a token source, or the server is asked to sign in again every launch
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.603s
+FAIL
+EXIT=1
+restored: 09a2ac4060d1a1115670627b59e0e3173f082fe3ef4e063264cf2ed0f5de8c05
+
+=== F9 an unreadable store is treated as signed out ===
+--- sabotage diff ---
+--- /tmp/oauthhandler.go.orig	2026-08-06 20:33:45
++++ mcp/oauthhandler.go	2026-08-06 20:39:25
+@@ -84,8 +84,6 @@
+ 	// browser at all.
+ 	if token, err := store.Load(server); err == nil {
+ 		config.InitialTokenSource = oauth2.StaticTokenSource(token)
+-	} else if !errors.Is(err, ErrNoToken) {
+-		return nil, err
+ 	}
+ 
+ 	switch mode {
+--- go test -run TestOAuthReportsAnUnreadableStore ./mcp/ ---
+--- FAIL: TestOAuthReportsAnUnreadableStore (0.00s)
+    oauthhandler_test.go:166: a store that cannot be read must fail loudly rather than silently signing the user out
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.571s
+FAIL
+EXIT=1
+restored: 09a2ac4060d1a1115670627b59e0e3173f082fe3ef4e063264cf2ed0f5de8c05
+
+=== F10 a handler is attached to a stdio server ===
+--- sabotage diff ---
+--- /tmp/oauthhandler.go.orig	2026-08-06 20:33:45
++++ mcp/oauthhandler.go	2026-08-06 20:39:26
+@@ -186,7 +186,7 @@
+ // that happens, and in the ordinary case it then fails with ErrSignInRequired
+ // rather than doing anything.
+ func oauthHandlerFor(spec *ServerSpec, store TokenStore, mode signInMode) (*oauthSession, error) {
+-	if spec.transport() != TransportHTTP || store == nil {
++	if store == nil {
+ 		return nil, nil
+ 	}
+ 	return newOAuthSession(spec.Name, store, mode)
+--- go test -run TestOAuthHandlerOnlyForRemoteServers ./mcp/ ---
+--- FAIL: TestOAuthHandlerOnlyForRemoteServers (0.00s)
+    oauthhandler_test.go:304: a stdio server has no authorization to do; a handler there is noise
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.556s
+FAIL
+EXIT=1
+restored: 09a2ac4060d1a1115670627b59e0e3173f082fe3ef4e063264cf2ed0f5de8c05
+

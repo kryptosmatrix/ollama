@@ -1,0 +1,105 @@
+The Windows token store — proven on real Windows, not cross-compiled
+
+I refused this twice, saying I could not execute Windows code. That was true of
+this machine and false of the situation: Ollama's own CI runs the Go suite on
+windows-latest and ubuntu-latest, and Actions is enabled on the fork. The same
+failure as the warning-channel ruling — a mechanism I had not looked for
+deciding a question for me.
+
+The proof is a throwaway branch, ci/token-store-proof, carrying a minimal
+workflow that runs `go vet ./mcp/` and `go test -v ./mcp/` on both platforms.
+It is deleted after this record; it is evidence, not CI policy.
+
+RUN 1 — https://github.com/kryptosmatrix/ollama/actions/runs/31257320656
+
+    ubuntu-latest: success
+    windows-latest: FAILURE
+
+AND THE FAILURE IS THE POINT OF DOING THIS AT ALL. The package cross-compiled
+cleanly for windows/amd64, vetted cleanly for windows/amd64, and still failed on
+a real Windows runner. Had I shipped on "it compiles", that would have gone
+upstream broken.
+
+The cause was not the store. It was TestSDKIsContainedToThisPackage, failing
+because my workflow did not create app/ui/app/dist — app/ui/app.go embeds it,
+`go list` cannot load the module without it, and the containment test is a
+`go list` sweep. The handoff has documented that trap since session one, and the
+failure still names the embed rather than containment, exactly as recorded.
+
+The DPAPI tests themselves all passed on that same run:
+
+    === RUN   TestDPAPIRoundTrip
+    --- PASS: TestDPAPIRoundTrip (0.00s)
+    === RUN   TestDPAPIRefusesADamagedBlob
+    --- PASS: TestDPAPIRefusesADamagedBlob (0.00s)
+    === RUN   TestDPAPIProtectsRepeatedly
+    --- PASS: TestDPAPIProtectsRepeatedly (0.07s)
+    === RUN   TestTheWindowsDefaultStoreEncrypts
+    --- PASS: TestTheWindowsDefaultStoreEncrypts (0.00s)
+
+RUN 2, after adding the placeholder —
+https://github.com/kryptosmatrix/ollama/actions/runs/31257441109
+
+    ubuntu-latest: success
+    windows-latest: success
+
+WHAT EACH TEST IS FOR
+
+  TestDPAPIRoundTrip — the blob layout and the call convention. A token that
+  survives encrypt-then-decrypt and does not appear in the ciphertext.
+
+  TestDPAPIRefusesADamagedBlob — a store that cannot be decrypted must fail
+  loudly. Reading it as empty would sign the user out and then overwrite it.
+
+  TestDPAPIProtectsRepeatedly — two hundred round trips at varying sizes. This
+  is the pointer-lifetime test: a blob whose backing memory was collected early
+  or freed twice shows up here intermittently rather than cleanly, which is
+  exactly the class of bug that cross-compilation cannot reveal.
+
+  TestTheWindowsDefaultStoreEncrypts — activation evidence. A protector nothing
+  constructs is a protector nobody uses.
+
+WHAT WAS PROVEN WITHOUT WINDOWS, DELIBERATELY
+
+The envelope, the migration from an existing cleartext file, the refusal to read
+a protected file without a protector, the refusal to fall back to cleartext when
+encryption fails, and the description changing with the protection — all run on
+any platform against a stand-in protector, and all ran on Linux and macOS too.
+That plumbing is where the mistakes live; the syscalls are the small part. The
+split is deliberate so that most of the risk is provable on the machine the code
+is written on.
+
+VERBATIM
+
+mcp (ubuntu-latest) | go test | 2026-08-08T12:32:01.5786262Z --- PASS: TestSDKIsContainedToThisPackage (0.54s)
+mcp (ubuntu-latest) | go test | 2026-08-08T12:32:17.1660936Z === RUN   TestAProtectedStoreKeepsNoCleartextOnDisk
+mcp (ubuntu-latest) | go test | 2026-08-08T12:32:17.1673364Z --- PASS: TestAProtectedStoreKeepsNoCleartextOnDisk (0.00s)
+mcp (ubuntu-latest) | go test | 2026-08-08T12:32:17.1674567Z === RUN   TestTurningProtectionOnMigratesAnExistingFile
+mcp (ubuntu-latest) | go test | 2026-08-08T12:32:17.1688359Z --- PASS: TestTurningProtectionOnMigratesAnExistingFile (0.00s)
+mcp (ubuntu-latest) | go test | 2026-08-08T12:32:17.1689286Z === RUN   TestAProtectedStoreCannotBeReadWithoutTheProtector
+mcp (ubuntu-latest) | go test | 2026-08-08T12:32:17.1696577Z --- PASS: TestAProtectedStoreCannotBeReadWithoutTheProtector (0.00s)
+mcp (ubuntu-latest) | go test | 2026-08-08T12:32:17.1697493Z === RUN   TestAFailingProtectorNeverWritesCleartext
+mcp (ubuntu-latest) | go test | 2026-08-08T12:32:17.1699225Z --- PASS: TestAFailingProtectorNeverWritesCleartext (0.00s)
+mcp (ubuntu-latest) | go test | 2026-08-08T12:32:17.1699961Z === RUN   TestDescriptionSaysWhatActuallyProtectsIt
+mcp (ubuntu-latest) | go test | 2026-08-08T12:32:17.1701770Z --- PASS: TestDescriptionSaysWhatActuallyProtectsIt (0.00s)
+mcp (ubuntu-latest) | go test | 2026-08-08T12:32:41.6340731Z ok   | github.com/ollama/ollama/mcp | 40.645s
+mcp (windows-latest) | go test | 2026-08-08T12:32:59.0197705Z --- PASS: TestSDKIsContainedToThisPackage (15.19s)
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.5858093Z === RUN   TestAProtectedStoreKeepsNoCleartextOnDisk
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.6295494Z --- PASS: TestAProtectedStoreKeepsNoCleartextOnDisk (0.04s)
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.6296619Z === RUN   TestTurningProtectionOnMigratesAnExistingFile
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.6402920Z --- PASS: TestTurningProtectionOnMigratesAnExistingFile (0.01s)
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.6403530Z === RUN   TestAProtectedStoreCannotBeReadWithoutTheProtector
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.6903928Z --- PASS: TestAProtectedStoreCannotBeReadWithoutTheProtector (0.05s)
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.6904513Z === RUN   TestAFailingProtectorNeverWritesCleartext
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.6913074Z --- PASS: TestAFailingProtectorNeverWritesCleartext (0.00s)
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.6913754Z === RUN   TestDescriptionSaysWhatActuallyProtectsIt
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.6920668Z --- PASS: TestDescriptionSaysWhatActuallyProtectsIt (0.00s)
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.6922026Z === RUN   TestDPAPIRoundTrip
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.6940255Z --- PASS: TestDPAPIRoundTrip (0.00s)
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.6940766Z === RUN   TestDPAPIRefusesADamagedBlob
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.6942468Z --- PASS: TestDPAPIRefusesADamagedBlob (0.00s)
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.6943146Z === RUN   TestDPAPIProtectsRepeatedly
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.7280859Z --- PASS: TestDPAPIProtectsRepeatedly (0.03s)
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.7281481Z === RUN   TestTheWindowsDefaultStoreEncrypts
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.7291702Z --- PASS: TestTheWindowsDefaultStoreEncrypts (0.00s)
+mcp (windows-latest) | go test | 2026-08-08T12:33:13.7477053Z ok   | github.com/ollama/ollama/mcp | 30.017s

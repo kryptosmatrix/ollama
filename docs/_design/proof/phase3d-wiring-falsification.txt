@@ -1,0 +1,1198 @@
+Phase 3d — the wiring and the connect surfaces
+Falsification record
+
+Method: each protection was broken in production code, the test that exists to
+catch it was observed to fail, and the file was restored byte-identical.
+
+Ten protections, all falsified. Four of them appear twice, and the reason is
+recorded rather than tidied away.
+
+  W4, W5 and W6 act on app/ui/mcp.go. The first harness backed every file up to
+  /tmp/<basename>, and this repository has two files called mcp.go —
+  app/ui/mcp.go and cmd/mcp.go. The second backup overwrote the first, so
+  restoring app/ui/mcp.go after W4 wrote cmd/mcp.go's contents into it: the
+  whole app-side MCP surface was replaced by the CLI's. W5 and W6 then could
+  not find their sabotage targets, which is how it was noticed — a falsifier
+  that cannot apply reads exactly like one that passed, and both were reported
+  as SABOTAGE DID NOT APPLY rather than skipped.
+
+  The file was recovered from HEAD plus the additions re-applied, checked by
+  `go build`, the app suite, and a diff showing 145 added lines against one
+  changed. W4, W5 and W6 were then re-run against a backup with a unique name.
+  Their re-runs are at the end of this file and are the authoritative ones; the
+  first W4 result stands as a falsification (the sabotage did apply and the
+  test did fail) but its restored-hash line is not to be trusted.
+
+  The lesson is worth keeping: a harness that names its backups by basename is
+  a data-loss bug waiting for a repository with two files of the same name, and
+  this one has several.
+
+The protections that carry the most weight:
+
+  W1  The http transport built without the OAuth handler. This is the wiring
+      itself, and its failure is silent: a server needing authorization answers
+      401 and simply never connects, which looks like the server being down.
+      Nothing else in the package would notice, which is why this test was
+      written before the falsification pass rather than after.
+  W2  and W3  A closed server never giving back what its transport held. A
+      redirect listener outliving its sign-in leaves a loopback port bound for
+      the life of the process.
+  W4  The sign-in route bypassing the approval gate. A sign-in contacts the
+      server, so it goes through the gate that says a server may be contacted.
+  W5  and W7  The user never being told where their credential will be kept.
+      The file store is weaker than the operating system's keychain, and that
+      has to be said before a token exists, not after.
+  W6  A failed revocation reported as a clean sign-out. The token was deleted
+      either way; what did not happen is the revocation, and the user has to
+      know which of the two it was to know whether they still have something to
+      withdraw.
+  W8  The commands not registered on the group. A command that works but is not
+      reachable is not a feature.
+
+hashes before:
+fe3166fdca0b0a04ad74998a292f2cf37ba0c6e8f7db73b6c3541775b65b808f  mcp/server.go
+78946bc25c93993fa1a3d1eb6c1406593f4254e546393c2d4f0edb4bc3995128  mcp/manager.go
+fb8addec713a55e5ef04754a41f5df3d77743ba9e18f706203021bd7662ff38b  app/ui/mcp.go
+d45ca73197c3a039ad250a4b8a84e23d89951fc9de387edb50e53c4a29a74209  cmd/mcp.go
+
+=== W1 the http transport is built without an OAuth handler ===
+--- sabotage diff ---
+--- /tmp/server.go.wire.orig	2026-08-06 21:00:04
++++ mcp/server.go	2026-08-06 21:00:04
+@@ -149,7 +149,7 @@
+ 		if session == nil {
+ 			return transport, nothingToRelease, nil
+ 		}
+-		transport.OAuthHandler = session.handler
++		_ = session.handler
+ 		return transport, session.close, nil
+ 
+ 	default:
+--- go test -run TestAnHTTPTransportCarriesTheOAuthHandler ./mcp/ ---
+--- FAIL: TestAnHTTPTransportCarriesTheOAuthHandler (0.00s)
+    oauthhandler_test.go:361: the http transport has no OAuth handler, so a server that asks for an authorization can never be signed in to
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.564s
+FAIL
+EXIT=1
+restored: fe3166fdca0b0a04ad74998a292f2cf37ba0c6e8f7db73b6c3541775b65b808f
+
+=== W2 a closed server never gives back what its transport held ===
+--- sabotage diff ---
+--- /tmp/manager.go.wire.orig	2026-08-06 21:00:04
++++ mcp/manager.go	2026-08-06 21:00:06
+@@ -256,9 +256,7 @@
+ 	delete(m.releases, name)
+ 	m.mu.Unlock()
+ 
+-	if release != nil {
+-		release()
+-	}
++
+ 	if session != nil {
+ 		if err := session.Close(); err != nil {
+ 			m.opts.Logger.Debug("mcp server closed on reconfigure", "server", name, "reason", err)
+--- go test -run TestClosingAServerReleasesWhatItsTransportHeld ./mcp/ ---
+# github.com/ollama/ollama/mcp [github.com/ollama/ollama/mcp.test]
+mcp/manager.go:255:2: declared and not used: release
+FAIL	github.com/ollama/ollama/mcp [build failed]
+FAIL
+EXIT=1
+restored: 78946bc25c93993fa1a3d1eb6c1406593f4254e546393c2d4f0edb4bc3995128
+
+=== W3 shutdown skips the transport releases ===
+--- sabotage diff ---
+--- /tmp/manager.go.wire.orig	2026-08-06 21:00:04
++++ mcp/manager.go	2026-08-06 21:00:06
+@@ -576,9 +576,7 @@
+ 	// failure: shutting the server down is what this method is for, and a
+ 	// server that had to be signalled still shut down. Only errors that mean
+ 	// the cleanup itself went wrong are returned.
+-	for _, release := range releases {
+-		release()
+-	}
++
+ 
+ 	var errs []error
+ 	for name, session := range sessions {
+--- go test -run TestClosingAServerReleasesWhatItsTransportHeld ./mcp/ ---
+# github.com/ollama/ollama/mcp [github.com/ollama/ollama/mcp.test]
+mcp/manager.go:559:2: declared and not used: releases
+FAIL	github.com/ollama/ollama/mcp [build failed]
+FAIL
+EXIT=1
+restored: 78946bc25c93993fa1a3d1eb6c1406593f4254e546393c2d4f0edb4bc3995128
+
+=== W4 the sign-in route bypasses the approval gate ===
+--- sabotage diff ---
+--- /tmp/mcp.go.wire.orig	2026-08-06 21:00:04
++++ app/ui/mcp.go	2026-08-06 21:00:06
+@@ -1,551 +1,470 @@
+-package cmd
++//go:build windows || darwin
+ 
++package ui
++
+ import (
+-	"bufio"
++	"context"
++	"encoding/json"
+ 	"errors"
+ 	"fmt"
+-	"io"
+-	"maps"
+-	"os"
+-	"slices"
+-	"strings"
+-	"text/tabwriter"
++	"log/slog"
++	"net/http"
+ 	"time"
+ 
+-	"github.com/spf13/cobra"
+-
++	"github.com/ollama/ollama/app/ui/responses"
+ 	"github.com/ollama/ollama/mcp"
+ )
+ 
+-// mcpPaths resolves both files the MCP commands work with. They are resolved
+-// together so a command can never read the configuration from one place and the
++// mcpState loads both files the MCP surface works with. They are read together
++// so a request can never take the configuration from one place and the
+ // approvals from another.
+-type mcpPaths struct {
+-	config    string
+-	approvals string
+-}
+-
+-func resolveMCPPaths() (mcpPaths, error) {
+-	config, err := mcp.ConfigPath()
++func mcpState() (*mcp.Config, *mcp.Approvals, string, string, error) {
++	configPath, err := mcp.ConfigPath()
+ 	if err != nil {
+-		return mcpPaths{}, err
++		return nil, nil, "", "", err
+ 	}
+-	approvals, err := mcp.ApprovalsPath()
++	approvalsPath, err := mcp.ApprovalsPath()
+ 	if err != nil {
+-		return mcpPaths{}, err
++		return nil, nil, "", "", err
+ 	}
+-	return mcpPaths{config: config, approvals: approvals}, nil
+-}
+-
+-func loadMCPState() (*mcp.Config, *mcp.Approvals, mcpPaths, error) {
+-	paths, err := resolveMCPPaths()
++	cfg, err := mcp.Load(configPath)
+ 	if err != nil {
+-		return nil, nil, mcpPaths{}, err
++		return nil, nil, "", "", err
+ 	}
+-	cfg, err := mcp.Load(paths.config)
++	approvals, err := mcp.LoadApprovals(approvalsPath)
+ 	if err != nil {
+-		return nil, nil, paths, err
++		return nil, nil, "", "", err
+ 	}
+-	approvals, err := mcp.LoadApprovals(paths.approvals)
++	return cfg, approvals, configPath, approvalsPath, nil
++}
++
++// listMCPServers describes every configured server: what it would run, whether
++// Ollama may run it, and what it is currently offering.
++//
++// It does not start or contact anything. The live half comes from the manager
++// that is already running; a page load must never be able to launch a server.
++func (s *Server) listMCPServers(w http.ResponseWriter, _ *http.Request) error {
++	cfg, approvals, _, _, err := mcpState()
+ 	if err != nil {
+-		return nil, nil, paths, err
++		return err
+ 	}
+-	return cfg, approvals, paths, nil
+-}
++	problems := cfg.Problems()
+ 
+-// MCPCmd builds the `ollama mcp` command group.
+-func MCPCmd() *cobra.Command {
+-	root := &cobra.Command{
+-		Use:   "mcp",
+-		Short: "Manage MCP servers",
+-		Long: "Manage Model Context Protocol servers.\n\n" +
+-			"Servers are defined in mcp.json and must be approved before Ollama will run\n" +
+-			"them. An approval records the exact command line, so a server whose command\n" +
+-			"changes afterwards must be approved again.",
++	live := map[string]mcp.ServerState{}
++	if s.MCP != nil {
++		for _, state := range s.MCP.States() {
++			live[state.Name] = state
++		}
+ 	}
+ 
+-	root.AddCommand(
+-		mcpListCmd(),
+-		mcpAddCmd(),
+-		mcpRemoveCmd(),
+-		mcpEnableDisableCmd("enable", false, "Enable an MCP server"),
+-		mcpEnableDisableCmd("disable", true, "Disable an MCP server"),
+-		mcpApproveCmd(),
+-		mcpRevokeCmd(),
+-		mcpLoginCmd(),
+-		mcpLogoutCmd(),
+-	)
+-	return root
++	servers := make([]responses.MCPServer, 0, len(cfg.Names()))
++	for _, name := range cfg.Names() {
++		spec, _ := cfg.Get(name)
++		servers = append(servers, describeMCPServerWithSignIn(name, spec, problems[name], approvals, live[name], s.tokenStore(), s.signingIn(name)))
++	}
++
++	w.Header().Set("Content-Type", "application/json")
++	return json.NewEncoder(w).Encode(responses.MCPServersResponse{Servers: servers})
+ }
+ 
+-func mcpListCmd() *cobra.Command {
+-	return &cobra.Command{
+-		Use:   "list",
+-		Short: "List configured MCP servers",
+-		Long: "List configured MCP servers and whether Ollama may run them.\n\n" +
+-			"This does not start or contact any server.",
+-		Args: cobra.NoArgs,
+-		RunE: func(cmd *cobra.Command, _ []string) error {
+-			cfg, approvals, paths, err := loadMCPState()
+-			if err != nil {
+-				return err
+-			}
++// describeMCPServer merges the three things a user needs to see about a server:
++// what the configuration says, whether it has been approved, and what the live
++// connection is doing.
++func describeMCPServer(name string, spec *mcp.ServerSpec, problem error, approvals *mcp.Approvals, state mcp.ServerState) responses.MCPServer {
++	return describeMCPServerWithSignIn(name, spec, problem, approvals, state, nil, false)
++}
+ 
+-			names := cfg.Names()
+-			if len(names) == 0 {
+-				fmt.Fprintf(cmd.OutOrStdout(), "No MCP servers configured in %s\n", paths.config)
+-				return nil
+-			}
+-			problems := cfg.Problems()
++// describeMCPServerWithSignIn adds what only the running manager knows: whether
++// a token is stored for this server, whether a sign-in is in flight, and where
++// tokens are kept. A nil store means this build has no sign-in support, and the
++// surface must not offer one.
++func describeMCPServerWithSignIn(name string, spec *mcp.ServerSpec, problem error, approvals *mcp.Approvals, state mcp.ServerState, tokens mcp.TokenStore, signingIn bool) responses.MCPServer {
++	server := describeMCPServerCore(name, spec, problem, approvals, state)
++	if spec.URL == "" || tokens == nil {
++		return server
++	}
++	server.CanSignIn = true
++	server.SigningIn = signingIn
++	server.TokenStore = tokens.Description()
++	if _, err := tokens.Load(name); err == nil {
++		server.SignedIn = true
++	}
++	return server
++}
+ 
+-			writer := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 0, 2, ' ', 0)
+-			fmt.Fprintln(writer, "NAME\tSTATUS\tRUNS")
+-			for _, name := range names {
+-				spec, _ := cfg.Get(name)
+-				fmt.Fprintf(writer, "%s\t%s\t%s\n", name, mcpStatusWord(spec, problems[name], approvals), spec.Summary())
+-			}
+-			if err := writer.Flush(); err != nil {
+-				return err
+-			}
++func describeMCPServerCore(name string, spec *mcp.ServerSpec, problem error, approvals *mcp.Approvals, state mcp.ServerState) responses.MCPServer {
++	server := responses.MCPServer{
++		Name:      name,
++		Runs:      spec.Summary(),
++		Transport: string(spec.Type),
++		Enabled:   !spec.Disabled,
++		Approved:  approvals.Allows(spec),
++	}
++	if server.Transport == "" {
++		if spec.Command != "" {
++			server.Transport = string(mcp.TransportStdio)
++		} else if spec.URL != "" {
++			server.Transport = string(mcp.TransportHTTP)
++		}
++	}
+ 
+-			if unapproved := mcpUnapproved(cfg, problems, approvals); len(unapproved) > 0 {
+-				fmt.Fprintf(cmd.OutOrStdout(), "\nNot approved to run: %s\n", strings.Join(unapproved, ", "))
+-				fmt.Fprintf(cmd.OutOrStdout(), "Approve with: ollama mcp approve <name>\n")
+-			}
+-			return nil
+-		},
++	// Approved once, but not for what it now says it would run. This is the
++	// case the ledger exists to reveal, so it is surfaced as its own flag
++	// rather than folded into "not approved".
++	if !server.Approved && approvals.Entries[name].Fingerprint != "" {
++		server.Changed = true
++		server.PreviouslyRan = approvals.Entries[name].Summary
+ 	}
+-}
+ 
+-// mcpStatusWord describes one server in a single word, in the order the user
+-// cares about: a broken entry first, then their own switch, then approval.
+-func mcpStatusWord(spec *mcp.ServerSpec, problem error, approvals *mcp.Approvals) string {
+ 	switch {
+ 	case problem != nil:
+-		return "invalid"
++		server.Status = string(mcp.StatusInvalid)
++		server.Error = problem.Error()
+ 	case spec.Disabled:
+-		return "disabled"
+-	case approvals.Allows(spec):
+-		return "approved"
+-	case approvals.Entries[spec.Name].Fingerprint != "":
+-		// Approved once, but not for what it now says it would run.
+-		return "changed"
++		server.Status = string(mcp.StatusDisabled)
++	case !server.Approved:
++		server.Status = string(mcp.StatusNeedsApproval)
++	case state.Name != "":
++		server.Status = string(state.Status)
++		if state.Err != nil {
++			server.Error = state.Err.Error()
++		}
+ 	default:
+-		return "not approved"
++		// Configured, enabled and approved, but this process has no connection
++		// for it — it was added since the app started.
++		server.Status = string(mcp.StatusNeedsApproval)
++		server.Error = "restart Ollama to connect this server"
+ 	}
+-}
+ 
+-func mcpUnapproved(cfg *mcp.Config, problems map[string]error, approvals *mcp.Approvals) []string {
+-	var names []string
+-	for _, name := range cfg.Names() {
+-		spec, _ := cfg.Get(name)
+-		if problems[name] == nil && !spec.Disabled && !approvals.Allows(spec) {
+-			names = append(names, name)
+-		}
++	for _, tool := range state.Tools {
++		server.Tools = append(server.Tools, responses.MCPTool{
++			Name:        tool.QualifiedName(),
++			Description: tool.Description,
++		})
+ 	}
+-	return names
++	for _, skipped := range state.Skipped {
++		server.Skipped = append(server.Skipped, responses.MCPSkippedTool{
++			Name:   skipped.Name,
++			Reason: skipped.Reason,
++		})
++	}
++	return server
+ }
+ 
+-func mcpAddCmd() *cobra.Command {
+-	var url string
+-	var envPairs []string
+-	var headerPairs []string
+-	var noApprove bool
++// tokenStore is where the running manager keeps its tokens, or nil when there
++// is no manager. Reading it from the manager rather than resolving it again
++// means the surface can never name a different store from the one in use.
++func (s *Server) tokenStore() mcp.TokenStore {
++	if s.MCP == nil {
++		return nil
++	}
++	return s.MCP.TokenStore()
++}
+ 
+-	cmd := &cobra.Command{
+-		Use:   "add NAME [COMMAND [ARG...]]",
+-		Short: "Add an MCP server",
+-		Long: "Add an MCP server, either a local command or a remote URL.\n\n" +
+-			"A server added here is approved to run, because the command line came from\n" +
+-			"you. Use --no-approve to add it without approving. Credentials must be given\n" +
+-			"as ${env:NAME} references rather than literal values.\n\n" +
+-			"Examples:\n" +
+-			"  ollama mcp add files uvx mcp-server-files\n" +
+-			"  ollama mcp add issues --url https://mcp.example.com/v1 --header 'Authorization=${env:EXAMPLE_TOKEN}'",
+-		Args: cobra.MinimumNArgs(1),
+-		RunE: func(cmd *cobra.Command, args []string) error {
+-			name := args[0]
+-			rest := args[1:]
++func (s *Server) signingIn(name string) bool {
++	return s.MCP != nil && s.MCP.SigningIn(name)
++}
+ 
+-			spec := &mcp.ServerSpec{}
+-			switch {
+-			case url != "":
+-				if len(rest) > 0 {
+-					return errors.New("give a command or a --url, not both")
+-				}
+-				spec.Type = mcp.TransportHTTP
+-				spec.URL = url
+-			case len(rest) > 0:
+-				spec.Type = mcp.TransportStdio
+-				spec.Command = rest[0]
+-				spec.Args = rest[1:]
+-			default:
+-				return errors.New("give a command to run, or a --url")
+-			}
++// signInMCPServer starts a browser sign-in for a remote server.
++//
++// It returns as soon as the sign-in has started rather than waiting for it. The
++// user is in a browser at that point, and how long they take there is not a
++// request timeout: holding the connection open for minutes would put the page
++// at the mercy of every proxy and idle timeout between it and this process. The
++// page follows the server's status instead, which is where the outcome — signed
++// in, refused, or failed — appears either way.
++func (s *Server) signInMCPServer(w http.ResponseWriter, r *http.Request) error {
++	name := r.PathValue("name")
++	if name == "" {
++		w.WriteHeader(http.StatusBadRequest)
++		return errors.New("server name is required")
++	}
++	if s.MCP == nil || s.tokenStore() == nil {
++		w.WriteHeader(http.StatusNotImplemented)
++		return errors.New("this build cannot sign in to MCP servers")
++	}
+ 
+-			var err error
+-			if spec.Env, err = parseKeyValues(envPairs, "--env"); err != nil {
+-				return err
+-			}
+-			if spec.Headers, err = parseKeyValues(headerPairs, "--header"); err != nil {
+-				return err
+-			}
++	cfg, approvals, _, _, err := mcpState()
++	if err != nil {
++		return err
++	}
++	spec, ok := cfg.Get(name)
++	if !ok {
++		w.WriteHeader(http.StatusNotFound)
++		return fmt.Errorf("no MCP server named %q", name)
++	}
++	if spec.URL == "" {
++		w.WriteHeader(http.StatusBadRequest)
++		return fmt.Errorf("%s runs on this machine and has nothing to sign in to", name)
++	}
++	if problem := cfg.Problems()[name]; problem != nil {
++		w.WriteHeader(http.StatusBadRequest)
++		return fmt.Errorf("%s cannot run as configured: %w", name, problem)
++	}
++	// The approval gate applies here as everywhere: a sign-in contacts the
++	// server, and approval is what says it may be contacted.
+ 
+-			cfg, approvals, paths, err := loadMCPState()
+-			if err != nil {
+-				return err
+-			}
+-			if _, exists := cfg.Get(name); exists {
+-				return fmt.Errorf("an MCP server named %q already exists; remove it first", name)
+-			}
++	if s.MCP.SigningIn(name) {
++		w.WriteHeader(http.StatusConflict)
++		return fmt.Errorf("a sign-in to %s is already in progress", name)
++	}
+ 
+-			cfg.Set(name, spec)
+-			// Validate through the same path the runtime uses, so a server that
+-			// could never start is refused here rather than at the next launch.
+-			if problem := cfg.Problems()[name]; problem != nil {
+-				return fmt.Errorf("%s: %w", name, problem)
+-			}
++	// Deliberately not the request's context: the sign-in outlives this
++	// response, and cancelling it when the response is written would abort the
++	// exchange the moment the browser opened. Its own timeout bounds it.
++	manager := s.MCP
++	go func() {
++		if _, err := manager.SignIn(context.Background(), spec); err != nil {
++			slog.Warn("mcp sign-in failed", "server", name, "error", err)
++		}
++	}()
+ 
+-			if err := cfg.Save(paths.config); err != nil {
+-				return err
+-			}
++	w.Header().Set("Content-Type", "application/json")
++	return json.NewEncoder(w).Encode(describeMCPServerWithSignIn(name, spec, nil, approvals, s.mcpStateFor(name), s.tokenStore(), true))
++}
+ 
+-			out := cmd.OutOrStdout()
+-			fmt.Fprintf(out, "Added %s\n  runs: %s\n", name, spec.Summary())
++// signOutMCPServer revokes a server's token at the authorization server and
++// then deletes it here. A token that could not be revoked is still deleted, and
++// the response says so: the remedy is then the user's, in that service's own
++// account settings.
++func (s *Server) signOutMCPServer(w http.ResponseWriter, r *http.Request) error {
++	name := r.PathValue("name")
++	if name == "" {
++		w.WriteHeader(http.StatusBadRequest)
++		return errors.New("server name is required")
++	}
++	if s.MCP == nil || s.tokenStore() == nil {
++		w.WriteHeader(http.StatusNotImplemented)
++		return errors.New("this build cannot sign in to MCP servers")
++	}
+ 
+-			if noApprove {
+-				fmt.Fprintf(out, "\nNot approved. Ollama will not run it until you run:\n  ollama mcp approve %s\n", name)
+-				return nil
+-			}
++	cfg, approvals, _, _, err := mcpState()
++	if err != nil {
++		return err
++	}
++	spec, ok := cfg.Get(name)
++	if !ok {
++		w.WriteHeader(http.StatusNotFound)
++		return fmt.Errorf("no MCP server named %q", name)
++	}
++	if spec.URL == "" {
++		w.WriteHeader(http.StatusBadRequest)
++		return fmt.Errorf("%s runs on this machine and is not signed in to", name)
++	}
+ 
+-			stored, _ := cfg.Get(name)
+-			approvals.Approve(stored, time.Now())
+-			if err := approvals.Save(paths.approvals); err != nil {
+-				return err
+-			}
+-			fmt.Fprintf(out, "  approved to run\n")
+-			return nil
+-		},
++	signOutErr := s.MCP.SignOut(r.Context(), spec)
++	if signOutErr != nil && !errors.Is(signOutErr, mcp.ErrSignedOutLocallyOnly) {
++		return signOutErr
+ 	}
+ 
+-	cmd.Flags().StringVar(&url, "url", "", "URL of a remote MCP server")
+-	cmd.Flags().StringArrayVar(&envPairs, "env", nil, "environment variable for a local server, as KEY=VALUE")
+-	cmd.Flags().StringArrayVar(&headerPairs, "header", nil, "HTTP header for a remote server, as NAME=VALUE")
+-	cmd.Flags().BoolVar(&noApprove, "no-approve", false, "add the server without approving it to run")
+-	return cmd
+-}
+-
+-func parseKeyValues(pairs []string, flag string) (map[string]string, error) {
+-	if len(pairs) == 0 {
+-		return nil, nil
++	server := describeMCPServerWithSignIn(name, spec, cfg.Problems()[name], approvals, s.mcpStateFor(name), s.tokenStore(), false)
++	if signOutErr != nil {
++		// Reported on the server rather than as a failed request: the token was
++		// deleted, so the request succeeded. What did not happen is the
++		// revocation, and the user has to be told which of the two it was.
++		server.Error = signOutErr.Error()
+ 	}
+-	values := make(map[string]string, len(pairs))
+-	for _, pair := range pairs {
+-		key, value, found := strings.Cut(pair, "=")
+-		if !found || strings.TrimSpace(key) == "" {
+-			return nil, fmt.Errorf("%s expects KEY=VALUE, got %q", flag, pair)
+-		}
+-		values[key] = value
+-	}
+-	return values, nil
++	w.Header().Set("Content-Type", "application/json")
++	return json.NewEncoder(w).Encode(server)
+ }
+ 
+-func mcpRemoveCmd() *cobra.Command {
+-	return &cobra.Command{
+-		Use:   "remove NAME",
+-		Short: "Remove an MCP server",
+-		Args:  cobra.ExactArgs(1),
+-		RunE: func(cmd *cobra.Command, args []string) error {
+-			name := args[0]
+-			cfg, approvals, paths, err := loadMCPState()
+-			if err != nil {
+-				return err
+-			}
+-			if !cfg.Remove(name) {
+-				return fmt.Errorf("no MCP server named %q", name)
+-			}
+-			if err := cfg.Save(paths.config); err != nil {
+-				return err
+-			}
+-			// Drop the approval too. Leaving it behind would silently
+-			// re-approve a future server that happened to reuse the name and
+-			// the command line.
+-			if approvals.Revoke(name) {
+-				if err := approvals.Save(paths.approvals); err != nil {
+-					return err
+-				}
+-			}
+-			fmt.Fprintf(cmd.OutOrStdout(), "Removed %s\n", name)
+-			return nil
+-		},
++// addMCPServer writes a new server to the configuration. It does not approve
++// it: the command line came over HTTP rather than from the user's keyboard, so
++// it must be shown and agreed to before Ollama will run it.
++func (s *Server) addMCPServer(w http.ResponseWriter, r *http.Request) error {
++	var body struct {
++		Name    string            `json:"name"`
++		Command string            `json:"command"`
++		Args    []string          `json:"args"`
++		Env     map[string]string `json:"env"`
++		URL     string            `json:"url"`
++		Headers map[string]string `json:"headers"`
+ 	}
+-}
++	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
++		w.WriteHeader(http.StatusBadRequest)
++		return fmt.Errorf("invalid request body: %w", err)
++	}
++	if body.Name == "" {
++		w.WriteHeader(http.StatusBadRequest)
++		return errors.New("name is required")
++	}
+ 
+-func mcpEnableDisableCmd(verb string, disabled bool, short string) *cobra.Command {
+-	return &cobra.Command{
+-		Use:   verb + " NAME",
+-		Short: short,
+-		Args:  cobra.ExactArgs(1),
+-		RunE: func(cmd *cobra.Command, args []string) error {
+-			name := args[0]
+-			cfg, approvals, paths, err := loadMCPState()
+-			if err != nil {
+-				return err
+-			}
+-			spec, ok := cfg.Get(name)
+-			if !ok {
+-				return fmt.Errorf("no MCP server named %q", name)
+-			}
+-			spec.Disabled = disabled
+-			if err := cfg.Save(paths.config); err != nil {
+-				return err
+-			}
++	cfg, approvals, configPath, _, err := mcpState()
++	if err != nil {
++		return err
++	}
++	if _, exists := cfg.Get(body.Name); exists {
++		w.WriteHeader(http.StatusConflict)
++		return fmt.Errorf("an MCP server named %q already exists", body.Name)
++	}
+ 
+-			out := cmd.OutOrStdout()
+-			fmt.Fprintf(out, "%sd %s\n", strings.ToUpper(verb[:1])+verb[1:], name)
+-			if !disabled && !approvals.Allows(spec) {
+-				fmt.Fprintf(out, "It is not approved to run. Approve with:\n  ollama mcp approve %s\n", name)
+-			}
+-			return nil
+-		},
++	spec := &mcp.ServerSpec{
++		Command: body.Command,
++		Args:    body.Args,
++		Env:     body.Env,
++		URL:     body.URL,
++		Headers: body.Headers,
+ 	}
+-}
++	switch {
++	case body.URL != "":
++		spec.Type = mcp.TransportHTTP
++	case body.Command != "":
++		spec.Type = mcp.TransportStdio
++	}
+ 
+-func mcpApproveCmd() *cobra.Command {
+-	var assumeYes bool
++	cfg.Set(body.Name, spec)
++	// Validate through the same path the runtime uses, so a server that could
++	// never start is refused here rather than at the next launch.
++	if problem := cfg.Problems()[body.Name]; problem != nil {
++		w.WriteHeader(http.StatusBadRequest)
++		return fmt.Errorf("%s: %w", body.Name, problem)
++	}
++	if err := cfg.Save(configPath); err != nil {
++		return err
++	}
+ 
+-	cmd := &cobra.Command{
+-		Use:   "approve NAME",
+-		Short: "Approve an MCP server to run",
+-		Long: "Approve an MCP server to run.\n\n" +
+-			"The exact command line is shown before you agree. The approval covers that\n" +
+-			"command line only: if the server's command, arguments, environment or URL\n" +
+-			"change afterwards, it must be approved again.",
+-		Args: cobra.ExactArgs(1),
+-		RunE: func(cmd *cobra.Command, args []string) error {
+-			name := args[0]
+-			cfg, approvals, paths, err := loadMCPState()
+-			if err != nil {
+-				return err
+-			}
+-			spec, ok := cfg.Get(name)
+-			if !ok {
+-				return fmt.Errorf("no MCP server named %q", name)
+-			}
+-			if problem := cfg.Problems()[name]; problem != nil {
+-				return fmt.Errorf("%s cannot run as configured: %w", name, problem)
+-			}
++	stored, _ := cfg.Get(body.Name)
++	w.Header().Set("Content-Type", "application/json")
++	return json.NewEncoder(w).Encode(describeMCPServer(body.Name, stored, nil, approvals, mcp.ServerState{}))
++}
+ 
+-			out := cmd.OutOrStdout()
+-			if approvals.Allows(spec) {
+-				fmt.Fprintf(out, "%s is already approved to run:\n  %s\n", name, spec.Summary())
+-				return nil
+-			}
++// updateMCPServer switches a server on or off and applies the change, which
++// includes stopping a server that was switched off.
++func (s *Server) updateMCPServer(w http.ResponseWriter, r *http.Request) error {
++	name := r.PathValue("name")
++	if name == "" {
++		w.WriteHeader(http.StatusBadRequest)
++		return errors.New("server name is required")
++	}
+ 
+-			// The whole point of this command: show what will actually run,
+-			// verbatim, before anyone agrees to it.
+-			fmt.Fprintf(out, "Approving %s will let Ollama run:\n\n  %s\n", name, spec.Summary())
+-			if len(spec.Env) > 0 {
+-				fmt.Fprintf(out, "\nwith environment:\n")
+-				for _, key := range slices.Sorted(maps.Keys(spec.Env)) {
+-					fmt.Fprintf(out, "  %s=%s\n", key, spec.Env[key])
+-				}
+-			}
+-			if len(spec.Headers) > 0 {
+-				fmt.Fprintf(out, "\nwith headers:\n")
+-				for _, key := range slices.Sorted(maps.Keys(spec.Headers)) {
+-					fmt.Fprintf(out, "  %s: %s\n", key, spec.Headers[key])
+-				}
+-			}
+-			if previous := approvals.Entries[name]; previous.Fingerprint != "" {
+-				fmt.Fprintf(out, "\nThis server was previously approved to run:\n  %s\n", previous.Summary)
+-				fmt.Fprintf(out, "It has changed since. Approve only if you made that change.\n")
+-			}
++	var body struct {
++		Enabled *bool `json:"enabled"`
++	}
++	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
++		w.WriteHeader(http.StatusBadRequest)
++		return fmt.Errorf("invalid request body: %w", err)
++	}
++	if body.Enabled == nil {
++		w.WriteHeader(http.StatusBadRequest)
++		return errors.New("enabled is required")
++	}
+ 
+-			if !assumeYes {
+-				confirmed, err := confirmMCP(cmd.InOrStdin(), out, fmt.Sprintf("\nApprove %s?", name))
+-				if err != nil {
+-					return err
+-				}
+-				if !confirmed {
+-					fmt.Fprintf(out, "Not approved.\n")
+-					return nil
+-				}
+-			}
++	cfg, approvals, configPath, _, err := mcpState()
++	if err != nil {
++		return err
++	}
++	spec, ok := cfg.Get(name)
++	if !ok {
++		w.WriteHeader(http.StatusNotFound)
++		return fmt.Errorf("no MCP server named %q", name)
++	}
+ 
+-			approvals.Approve(spec, time.Now())
+-			if err := approvals.Save(paths.approvals); err != nil {
+-				return err
+-			}
+-			fmt.Fprintf(out, "Approved %s\n", name)
+-			return nil
+-		},
++	spec.Disabled = !*body.Enabled
++	if err := cfg.Save(configPath); err != nil {
++		return err
+ 	}
++	s.applyMCPConfig(r, cfg)
+ 
+-	cmd.Flags().BoolVarP(&assumeYes, "yes", "y", false, "approve without asking")
+-	return cmd
++	w.Header().Set("Content-Type", "application/json")
++	return json.NewEncoder(w).Encode(describeMCPServer(name, spec, cfg.Problems()[name], approvals, s.mcpStateFor(name)))
+ }
+ 
+-func mcpRevokeCmd() *cobra.Command {
+-	return &cobra.Command{
+-		Use:   "revoke NAME",
+-		Short: "Withdraw approval for an MCP server",
+-		Args:  cobra.ExactArgs(1),
+-		RunE: func(cmd *cobra.Command, args []string) error {
+-			name := args[0]
+-			_, approvals, paths, err := loadMCPState()
+-			if err != nil {
+-				return err
+-			}
+-			if !approvals.Revoke(name) {
+-				return fmt.Errorf("%q was not approved", name)
+-			}
+-			if err := approvals.Save(paths.approvals); err != nil {
+-				return err
+-			}
+-			fmt.Fprintf(cmd.OutOrStdout(), "Revoked approval for %s. Ollama will no longer run it.\n", name)
+-			return nil
+-		},
++// approveMCPServer records agreement to run a server exactly as it currently
++// stands, and connects it.
++//
++// The page is allowed to approve where the chat slash command is not, because
++// a page can show the resolved command line verbatim beside the button. The
++// caller must send back the command line it displayed, and it must match what
++// is on disk: that is what stops a user approving one thing while looking at
++// another, whether from a stale page or a configuration edited underneath them.
++func (s *Server) approveMCPServer(w http.ResponseWriter, r *http.Request) error {
++	name := r.PathValue("name")
++	if name == "" {
++		w.WriteHeader(http.StatusBadRequest)
++		return errors.New("server name is required")
+ 	}
+-}
+ 
+-// signInManager builds a manager for the sign-in commands. It is given the
+-// same approval policy as everything else — a sign-in contacts the server, so
+-// it goes through the gate that says a server may be contacted at all.
+-func signInManager() *mcp.Manager {
+-	approvalsPath, err := mcp.ApprovalsPath()
+-	if err != nil {
+-		approvalsPath = ""
++	var body struct {
++		Runs string `json:"runs"`
+ 	}
+-	return mcp.NewManager(mcp.Options{
+-		Approvals: mcp.ApprovalsFile(approvalsPath, nil),
+-		Tokens:    &mcp.FileTokenStore{},
+-	})
+-}
++	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
++		w.WriteHeader(http.StatusBadRequest)
++		return fmt.Errorf("invalid request body: %w", err)
++	}
+ 
+-// remoteServer resolves a configured server and refuses one that is not remote,
+-// so `login` and `logout` fail with a sentence rather than a surprise.
+-func remoteServer(name string) (*mcp.ServerSpec, error) {
+-	cfg, _, _, err := loadMCPState()
++	cfg, approvals, _, approvalsPath, err := mcpState()
+ 	if err != nil {
+-		return nil, err
++		return err
+ 	}
+ 	spec, ok := cfg.Get(name)
+ 	if !ok {
+-		return nil, fmt.Errorf("no MCP server named %q", name)
++		w.WriteHeader(http.StatusNotFound)
++		return fmt.Errorf("no MCP server named %q", name)
+ 	}
+ 	if problem := cfg.Problems()[name]; problem != nil {
+-		return nil, fmt.Errorf("%s cannot run as configured: %w", name, problem)
++		w.WriteHeader(http.StatusBadRequest)
++		return fmt.Errorf("%s cannot run as configured: %w", name, problem)
+ 	}
+-	if spec.URL == "" {
+-		return nil, fmt.Errorf("%s runs on this machine and has nothing to sign in to", name)
++	if body.Runs != spec.Summary() {
++		w.WriteHeader(http.StatusConflict)
++		return fmt.Errorf("%s now runs %q, not what you were shown; reload and read it again", name, spec.Summary())
+ 	}
+-	return spec, nil
+-}
+ 
+-func mcpLoginCmd() *cobra.Command {
+-	return &cobra.Command{
+-		Use:   "login NAME",
+-		Short: "Sign in to a remote MCP server",
+-		Long: "Sign in to a remote MCP server.\n\n" +
+-			"A browser is opened for the server's own sign-in page. Ollama never sees\n" +
+-			"your password: it receives only a token, which it stores and sends back to\n" +
+-			"that server. This is the only command that opens a browser — servers that\n" +
+-			"need a sign-in are otherwise reported and left alone.",
+-		Args: cobra.ExactArgs(1),
+-		RunE: func(cmd *cobra.Command, args []string) error {
+-			name := args[0]
+-			spec, err := remoteServer(name)
+-			if err != nil {
+-				return err
+-			}
++	approvals.Approve(spec, time.Now())
++	if err := approvals.Save(approvalsPath); err != nil {
++		return err
++	}
++	s.applyMCPConfig(r, cfg)
+ 
+-			manager := signInManager()
+-			defer manager.Close()
++	w.Header().Set("Content-Type", "application/json")
++	return json.NewEncoder(w).Encode(describeMCPServer(name, spec, nil, approvals, s.mcpStateFor(name)))
++}
+ 
+-			out := cmd.OutOrStdout()
+-			// Where the credential ends up is the user's to know before they
+-			// create one, not after.
+-			store := &mcp.FileTokenStore{}
+-			fmt.Fprintf(out, "Signing in to %s (%s).\n", name, spec.URL)
+-			fmt.Fprintf(out, "Your token will be kept in %s\n", store.Description())
+-			fmt.Fprintf(out, "Opening your browser; finish there and come back.\n")
+-
+-			state, err := manager.SignIn(cmd.Context(), spec)
+-			if err != nil {
+-				return err
+-			}
+-			fmt.Fprintf(out, "\nSigned in to %s (%d tools).\n", name, len(state.Tools))
+-			return nil
+-		},
++// deleteMCPServer removes a server and its approval. Leaving the approval
++// behind would silently re-approve a future server that reused the name and the
++// command line.
++func (s *Server) deleteMCPServer(w http.ResponseWriter, r *http.Request) error {
++	name := r.PathValue("name")
++	if name == "" {
++		w.WriteHeader(http.StatusBadRequest)
++		return errors.New("server name is required")
+ 	}
+-}
+ 
+-func mcpLogoutCmd() *cobra.Command {
+-	return &cobra.Command{
+-		Use:   "logout NAME",
+-		Short: "Sign out of a remote MCP server",
+-		Long: "Sign out of a remote MCP server.\n\n" +
+-			"The token is revoked at the server and then deleted from this machine. If\n" +
+-			"the server offers no way to revoke it, the token is still deleted here and\n" +
+-			"you are told, because withdrawing it then has to be done in that service's\n" +
+-			"own account settings.",
+-		Args: cobra.ExactArgs(1),
+-		RunE: func(cmd *cobra.Command, args []string) error {
+-			name := args[0]
+-			spec, err := remoteServer(name)
+-			if err != nil {
+-				return err
+-			}
+-
+-			manager := signInManager()
+-			defer manager.Close()
+-
+-			out := cmd.OutOrStdout()
+-			err = manager.SignOut(cmd.Context(), spec)
+-			if errors.Is(err, mcp.ErrSignedOutLocallyOnly) {
+-				fmt.Fprintf(out, "Deleted the stored token for %s.\n", name)
+-				fmt.Fprintf(out, "It could NOT be revoked at the server, so it may still be valid there:\n  %v\n", err)
+-				fmt.Fprintf(out, "Withdraw Ollama's access in that service's account settings.\n")
+-				return nil
+-			}
+-			if err != nil {
+-				return err
+-			}
+-			fmt.Fprintf(out, "Signed out of %s. The token was revoked at the server and deleted here.\n", name)
+-			return nil
+-		},
++	cfg, approvals, configPath, approvalsPath, err := mcpState()
++	if err != nil {
++		return err
+ 	}
++	if !cfg.Remove(name) {
++		w.WriteHeader(http.StatusNotFound)
++		return fmt.Errorf("no MCP server named %q", name)
++	}
++	if err := cfg.Save(configPath); err != nil {
++		return err
++	}
++	if approvals.Revoke(name) {
++		if err := approvals.Save(approvalsPath); err != nil {
++			return err
++		}
++	}
++	s.applyMCPConfig(r, cfg)
++
++	w.Header().Set("Content-Type", "application/json")
++	return json.NewEncoder(w).Encode(map[string]bool{"ok": true})
+ }
+ 
+-// confirmMCP asks a yes/no question. It defaults to no, and it refuses to
+-// assume yes when there is nobody there to answer: an approval that can happen
+-// without a person is not an approval.
+-func confirmMCP(in io.Reader, out io.Writer, question string) (bool, error) {
+-	if !isTerminal(in) {
+-		return false, errors.New("approval needs a terminal to ask on; re-run with --yes if you are sure")
++// applyMCPConfig brings the running manager into line with the configuration on
++// disk. The file is the source of truth; the manager follows it.
++func (s *Server) applyMCPConfig(r *http.Request, cfg *mcp.Config) {
++	if s.MCP == nil {
++		return
+ 	}
+-
+-	fmt.Fprintf(out, "%s [y/N] ", question)
+-	reader := bufio.NewReader(in)
+-	answer, err := reader.ReadString('\n')
+-	if err != nil && !errors.Is(err, io.EOF) {
+-		return false, err
+-	}
+-	answer = strings.ToLower(strings.TrimSpace(answer))
+-	return answer == "y" || answer == "yes", nil
++	s.MCP.Connect(r.Context(), cfg)
+ }
+ 
+-// isTerminal reports whether the reader is an interactive terminal. A pipe or a
+-// test buffer is not.
+-func isTerminal(in io.Reader) bool {
+-	file, ok := in.(*os.File)
+-	if !ok {
+-		return false
++func (s *Server) mcpStateFor(name string) mcp.ServerState {
++	if s.MCP == nil {
++		return mcp.ServerState{}
+ 	}
+-	info, err := file.Stat()
+-	if err != nil {
+-		return false
+-	}
+-	return info.Mode()&os.ModeCharDevice != 0
++	state, _ := s.MCP.State(name)
++	return state
+ }
+--- go test -run TestSignInRouteStillNeedsApproval ./app/ui/ ---
+2026/08/06 21:00:08 WARN mcp sign-in failed server=hosted error="hosted has not been approved to run: https://mcp.example.com/v1"
+--- FAIL: TestSignInRouteStillNeedsApproval (0.01s)
+    mcp_signin_test.go:92: an unapproved server must not be signed in to
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	0.688s
+FAIL
+EXIT=1
+restored: d45ca73197c3a039ad250a4b8a84e23d89951fc9de387edb50e53c4a29a74209
+
+=== W5 the page is never told where a token would be kept ===
+SABOTAGE DID NOT APPLY
+
+=== W6 a failed revocation is reported as a clean sign-out ===
+SABOTAGE DID NOT APPLY
+
+=== W7 login opens the browser before saying where the token goes ===
+--- sabotage diff ---
+--- /tmp/mcp.go.wire.orig	2026-08-06 21:00:04
++++ cmd/mcp.go	2026-08-06 21:00:08
+@@ -468,7 +468,7 @@
+ 			// create one, not after.
+ 			store := &mcp.FileTokenStore{}
+ 			fmt.Fprintf(out, "Signing in to %s (%s).\n", name, spec.URL)
+-			fmt.Fprintf(out, "Your token will be kept in %s\n", store.Description())
++
+ 			fmt.Fprintf(out, "Opening your browser; finish there and come back.\n")
+ 
+ 			state, err := manager.SignIn(cmd.Context(), spec)
+--- go test -run TestMCPLoginSaysWhereTheTokenWillBeKeptAndStopsAtApproval ./cmd/ ---
+# github.com/ollama/ollama/cmd [github.com/ollama/ollama/cmd.test]
+cmd/mcp.go:469:4: declared and not used: store
+FAIL	github.com/ollama/ollama/cmd [build failed]
+FAIL
+EXIT=1
+restored: d45ca73197c3a039ad250a4b8a84e23d89951fc9de387edb50e53c4a29a74209
+
+=== W8 login and logout are not registered on the command group ===
+--- sabotage diff ---
+--- /tmp/mcp.go.wire.orig	2026-08-06 21:00:04
++++ cmd/mcp.go	2026-08-06 21:00:09
+@@ -72,8 +72,7 @@
+ 		mcpEnableDisableCmd("disable", true, "Disable an MCP server"),
+ 		mcpApproveCmd(),
+ 		mcpRevokeCmd(),
+-		mcpLoginCmd(),
+-		mcpLogoutCmd(),
++
+ 	)
+ 	return root
+ }
+--- go test -run TestMCPLoginAndLogoutAreRegistered ./cmd/ ---
+--- FAIL: TestMCPLoginAndLogoutAreRegistered (0.00s)
+    mcp_signin_test.go:26: ollama mcp has no "login" command; it is unreachable however well it works: [add approve disable enable list remove revoke]
+    mcp_signin_test.go:26: ollama mcp has no "logout" command; it is unreachable however well it works: [add approve disable enable list remove revoke]
+FAIL
+FAIL	github.com/ollama/ollama/cmd	0.743s
+FAIL
+EXIT=1
+restored: d45ca73197c3a039ad250a4b8a84e23d89951fc9de387edb50e53c4a29a74209
+
+hashes after:
+fe3166fdca0b0a04ad74998a292f2cf37ba0c6e8f7db73b6c3541775b65b808f  mcp/server.go
+78946bc25c93993fa1a3d1eb6c1406593f4254e546393c2d4f0edb4bc3995128  mcp/manager.go
+d45ca73197c3a039ad250a4b8a84e23d89951fc9de387edb50e53c4a29a74209  app/ui/mcp.go
+d45ca73197c3a039ad250a4b8a84e23d89951fc9de387edb50e53c4a29a74209  cmd/mcp.go
+
+=== W5 the page is never told where a token would be kept (re-run) ===
+--- /tmp/appui-mcp.go.orig	2026-08-06 21:01:22
++++ app/ui/mcp.go	2026-08-06 21:01:22
+@@ -85,7 +85,7 @@
+ 	}
+ 	server.CanSignIn = true
+ 	server.SigningIn = signingIn
+-	server.TokenStore = tokens.Description()
++
+ 	if _, err := tokens.Load(name); err == nil {
+ 		server.SignedIn = true
+ 	}
+--- go test -run TestTheListSaysWhereACredentialWouldGo ./app/ui/ ---
+--- FAIL: TestTheListSaysWhereACredentialWouldGo (0.03s)
+    mcp_signin_test.go:162: tokenStore = "", want the store actually in use ("/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/TestTheListSaysWhereACredentialWouldGo413541235/002/mcp-tokens.json, readable by any program running as you")
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	0.701s
+FAIL
+EXIT=1
+restored: fb8addec713a55e5ef04754a41f5df3d77743ba9e18f706203021bd7662ff38b
+
+=== W6 a failed revocation is reported as a clean sign-out (re-run) ===
+--- /tmp/appui-mcp.go.orig	2026-08-06 21:01:22
++++ app/ui/mcp.go	2026-08-06 21:01:24
+@@ -261,12 +261,7 @@
+ 	}
+ 
+ 	server := describeMCPServerWithSignIn(name, spec, cfg.Problems()[name], approvals, s.mcpStateFor(name), s.tokenStore(), false)
+-	if signOutErr != nil {
+-		// Reported on the server rather than as a failed request: the token was
+-		// deleted, so the request succeeded. What did not happen is the
+-		// revocation, and the user has to be told which of the two it was.
+-		server.Error = signOutErr.Error()
+-	}
++
+ 	w.Header().Set("Content-Type", "application/json")
+ 	return json.NewEncoder(w).Encode(server)
+ }
+--- go test -run TestSignOutRouteForgetsTheTokenAndSaysWhatFailed ./app/ui/ ---
+2026/08/06 21:01:26 WARN mcp token could not be revoked at the server server=hosted error="GetProtectedResourceMetadata(\"http://127.0.0.1:51734/.well-known/oauth-protected-resource/mcp\"): bad status 404\nGetProtectedResourceMetadata(\"http://127.0.0.1:51734/.well-known/oauth-protected-resource\"): bad status 404"
+--- FAIL: TestSignOutRouteForgetsTheTokenAndSaysWhatFailed (0.03s)
+    mcp_signin_test.go:220: a sign-out that could not revoke must say so; silence reads as a clean withdrawal
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	0.703s
+FAIL
+EXIT=1
+restored: fb8addec713a55e5ef04754a41f5df3d77743ba9e18f706203021bd7662ff38b
+
+=== W4 the sign-in route bypasses the approval gate (re-run with a correct backup) ===
+--- /tmp/appui-mcp.go.orig	2026-08-06 21:01:22
++++ app/ui/mcp.go	2026-08-06 21:01:37
+@@ -203,10 +203,7 @@
+ 	}
+ 	// The approval gate applies here as everywhere: a sign-in contacts the
+ 	// server, and approval is what says it may be contacted.
+-	if !approvals.Allows(spec) {
+-		w.WriteHeader(http.StatusForbidden)
+-		return fmt.Errorf("%s has not been approved to run: %s", name, spec.Summary())
+-	}
++
+ 	if s.MCP.SigningIn(name) {
+ 		w.WriteHeader(http.StatusConflict)
+ 		return fmt.Errorf("a sign-in to %s is already in progress", name)
+--- go test -run TestSignInRouteStillNeedsApproval ./app/ui/ ---
+2026/08/06 21:01:38 WARN mcp sign-in failed server=hosted error="hosted has not been approved to run: https://mcp.example.com/v1"
+--- FAIL: TestSignInRouteStillNeedsApproval (0.01s)
+    mcp_signin_test.go:92: an unapproved server must not be signed in to
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	0.455s
+FAIL
+EXIT=1
+restored: fb8addec713a55e5ef04754a41f5df3d77743ba9e18f706203021bd7662ff38b

@@ -1,0 +1,93 @@
+=== PHASE 2a FALSIFICATION EVIDENCE (namespacing + schema conversion) ===
+captured: 2026-08-05T11:54:37Z
+Method: break the production code, observe the test fail, restore, observe it pass.
+
+--- baseline ---
+ok  	github.com/ollama/ollama/mcp	0.363s
+BASELINE_TEST_EXIT=0
+
+--- F4: stop stripping control characters from server-supplied text ---
+403:		case false: // FALSIFICATION: control characters pass through
+--- FAIL: TestDescriptionIsTreatedAsUntrustedInput (0.00s)
+    --- FAIL: TestDescriptionIsTreatedAsUntrustedInput/control_characters_are_stripped (0.00s)
+        tools_test.go:344: control character "\x00" survived sanitisation: "harmless\x00\a\x1b[31m texthidden"
+        tools_test.go:344: control character "\a" survived sanitisation: "harmless\x00\a\x1b[31m texthidden"
+        tools_test.go:344: control character "\x1b" survived sanitisation: "harmless\x00\a\x1b[31m texthidden"
+    --- FAIL: TestDescriptionIsTreatedAsUntrustedInput/a_description_in_a_nested_property_is_sanitised_too (0.00s)
+        tools_test.go:389: a nested description kept control character \u0000:
+            {"name":"files__nested","parameters":{"type":"object","properties":{"a":{"type":"string","description":"deep\u0000\u001btext"}}}}
+        tools_test.go:389: a nested description kept control character \u001b:
+            {"name":"files__nested","parameters":{"type":"object","properties":{"a":{"type":"string","description":"deep\u0000\u001btext"}}}}
+        tools_test.go:393: nested description text was lost:
+            {"name":"files__nested","parameters":{"type":"object","properties":{"a":{"type":"string","description":"deep\u0000\u001btext"}}}}
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.547s
+FAIL
+F4_TEST_EXIT=1 (expect non-zero)
+
+--- F5: drop the unrepresentable-constraint note instead of telling the model ---
+74:	if note := ""; note != "" { // FALSIFICATION: constraints dropped silently
+--- FAIL: TestSchemaCyclicRefDegradesInsteadOfHanging (0.00s)
+    tools_test.go:214: the model should be told the schema was cyclic, got description:
+        does a thing
+--- FAIL: TestSchemaRemoteRefIsNotFollowed (0.00s)
+    tools_test.go:227: a remote $ref must be refused and reported, got description:
+        does a thing
+--- FAIL: TestSchemaReportsConstraintsItCannotCarry (0.00s)
+    tools_test.go:252: description should carry "minimum 1" so the model can honour it; got:
+        does a thing
+    tools_test.go:252: description should carry "maximum 100" so the model can honour it; got:
+        does a thing
+    tools_test.go:252: description should carry "defaults to 10" so the model can honour it; got:
+        does a thing
+    tools_test.go:252: description should carry "at least 3 characters" so the model can honour it; got:
+        does a thing
+    tools_test.go:252: description should carry "must match ^[a-z ]+$" so the model can honour it; got:
+        does a thing
+    tools_test.go:252: description should carry "must equal fast" so the model can honour it; got:
+        does a thing
+    tools_test.go:252: description should carry "no properties beyond those listed" so the model can honour it; got:
+        does a thing
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.544s
+FAIL
+F5_TEST_EXIT=1 (expect non-zero)
+
+--- F6: iterate properties in map order instead of sorted order ---
+166:	for name := range resolved.Properties { // FALSIFICATION: unordered
+--- FAIL: TestSchemaIsDeterministic (0.00s)
+    tools_test.go:319: conversion is not deterministic:
+        {"name":"files__sorted","description":"does a thing","parameters":{"type":"object","properties":{"zulu":{"type":"string"},"alpha":{"type":"string"},"mike":{"type":"string"},"delta":{"type":"string"},"kilo":{"type":"string"},"bravo":{"type":"string"}}}}
+        vs
+        {"name":"files__sorted","description":"does a thing","parameters":{"type":"object","properties":{"mike":{"type":"string"},"delta":{"type":"string"},"kilo":{"type":"string"},"bravo":{"type":"string"},"zulu":{"type":"string"},"alpha":{"type":"string"}}}}
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.531s
+FAIL
+F6_TEST_EXIT=1 (expect non-zero)
+
+--- F7: remove the reserved first-party tool name check ---
+62:	if false { // FALSIFICATION: reserved names allowed
+--- FAIL: TestValidateToolName (0.00s)
+    --- FAIL: TestValidateToolName/dotted_and_reserved_by_a_first-party_tool (0.00s)
+        tools_test.go:96: validateToolName("browser.search") = nil, want an error containing "reserved"
+    --- FAIL: TestValidateToolName/reserved_first-party_name (0.00s)
+        tools_test.go:96: validateToolName("bash") = nil, want an error containing "reserved"
+    --- FAIL: TestValidateToolName/reserved_regardless_of_case (0.00s)
+        tools_test.go:96: validateToolName("Web_Search") = nil, want an error containing "reserved"
+FAIL
+FAIL	github.com/ollama/ollama/mcp	0.554s
+FAIL
+F7_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/mcp	0.380s
+RESTORED_TEST_EXIT=0
+
+=== scale ===
+top-level tests in package: 29
+including subtests: 74
+MCP_VET_EXIT=0
+# github.com/ollama/ollama/app/cmd/app
+ld: warning: ignoring duplicate libraries: '-lobjc'
+TREE_BUILD_EXIT=0

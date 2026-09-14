@@ -1,0 +1,75 @@
+=== PHASE 3a /mcp FALSIFICATION EVIDENCE ===
+captured: 2026-08-05T14:00:42Z
+
+--- baseline ---
+ok  	github.com/ollama/ollama/cmd/tui/chat	0.475s
+ok  	github.com/ollama/ollama/cmd	3.271s
+ok  	github.com/ollama/ollama/mcp	10.443s
+BASELINE_TEST_EXIT=0
+
+--- F29: /mcp does not rebuild the tool registry after a toggle ---
+297:	// FALSIFICATION: stale tool list kept
+--- FAIL: TestMCPEnableAppliesTheChangeAndRebuildsTheToolList (0.00s)
+    mcp_test.go:142: the tool registry must be rebuilt, or the model keeps offering the old tool list
+    mcp_test.go:145: the system prompt must be rebuilt from the new registry
+    mcp_test.go:148: the rebuilt registry was not adopted
+FAIL
+FAIL	github.com/ollama/ollama/cmd/tui/chat	0.422s
+FAIL
+F29_TEST_EXIT=1 (expect non-zero)
+
+--- F30: /mcp rebuilds the tool list even when the change failed ---
+292:		// FALSIFICATION: rebuild on failure
+--- FAIL: TestMCPEnableReportsFailureAndDoesNotRebuild (0.00s)
+    mcp_test.go:194: a failed change must not rebuild the tool list; the model would be told about tools that are not connected
+    mcp_test.go:198: the reason should reach the user, got:
+        Enabled files.
+    mcp_test.go:201: status = "mcp enabled", want error
+FAIL
+FAIL	github.com/ollama/ollama/cmd/tui/chat	0.424s
+FAIL
+F30_TEST_EXIT=1 (expect non-zero)
+
+--- F31: a toggle updates the manager but is never written to the config ---
+333:	// FALSIFICATION: change not persisted
+[1mwarning:[0m mcp raw: skipped tool "bash": tool name "bash" from server "raw" is reserved by Ollama
+[1mwarning:[0m mcp raw: skipped tool "scalar_input": tool "raw__scalar_input": input schema has type "string"; only an object of arguments can be represented
+[1mwarning:[0m mcp unapproved is not approved to run: /var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/TestSetAgentMCPEnabledWritesTheConfigAndAppliesIt1732233884/001/rawserver -silent
+Loaded MCP servers: raw (3 tools)
+--- FAIL: TestSetAgentMCPEnabledWritesTheConfigAndAppliesIt (0.86s)
+    --- FAIL: TestSetAgentMCPEnabledWritesTheConfigAndAppliesIt/disable_stops_offering_the_tools_and_is_written_to_the_config (0.00s)
+        agent_tui_mcp_test.go:298: the change was not written to the config, so it would be forgotten at the next launch
+FAIL
+FAIL	github.com/ollama/ollama/cmd	1.459s
+FAIL
+F31_TEST_EXIT=1 (expect non-zero)
+
+--- F32: enabling an unapproved server is reported as success ---
+343:		case mcp.StatusNeedsApproval: // FALSIFICATION: silent failure
+[1mwarning:[0m mcp raw: skipped tool "bash": tool name "bash" from server "raw" is reserved by Ollama
+[1mwarning:[0m mcp raw: skipped tool "scalar_input": tool "raw__scalar_input": input schema has type "string"; only an object of arguments can be represented
+[1mwarning:[0m mcp unapproved is not approved to run: /var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/TestSetAgentMCPEnabledWritesTheConfigAndAppliesIt1015219368/001/rawserver -silent
+Loaded MCP servers: raw (3 tools)
+--- FAIL: TestSetAgentMCPEnabledWritesTheConfigAndAppliesIt (0.74s)
+    --- FAIL: TestSetAgentMCPEnabledWritesTheConfigAndAppliesIt/enabling_an_unapproved_server_fails_and_says_how_to_approve_it (0.01s)
+        agent_tui_mcp_test.go:314: an unapproved server must not be enabled into use silently
+FAIL
+FAIL	github.com/ollama/ollama/cmd	1.342s
+FAIL
+F32_TEST_EXIT=1 (expect non-zero)
+
+--- F33: switching a server off leaves its process running ---
+195:		case spec.Disabled: // FALSIFICATION: session left open
+--- FAIL: TestDisablingAServerStopsItsProcess (15.77s)
+    subprocess_test.go:340: the server process survived being switched off
+FAIL
+FAIL	github.com/ollama/ollama/mcp	16.213s
+FAIL
+F33_TEST_EXIT=1 (expect non-zero)
+
+--- restored ---
+RESTORE_IDENTICAL=yes
+ok  	github.com/ollama/ollama/cmd/tui/chat	0.478s
+ok  	github.com/ollama/ollama/cmd	3.204s
+ok  	github.com/ollama/ollama/mcp	10.334s
+RESTORED_TEST_EXIT=0
