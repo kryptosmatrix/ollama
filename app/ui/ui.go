@@ -1439,8 +1439,9 @@ func (s *Server) registerMCPTools(registry *tools.Registry) {
 // when the user declined, when nobody answered, or when the chat ended — and in
 // every one of those cases the tool must not run.
 //
-// A tool that does not require approval, or a scope the chat has already
-// granted, returns immediately without asking.
+// A tool that does not require approval, a scope the chat has already
+// granted, or any call made while the settings switch approves every tool
+// call, returns immediately without asking.
 func (s *Server) awaitToolApproval(ctx context.Context, w http.ResponseWriter, flusher http.Flusher, chatID string, registry *tools.Registry, toolName string, args map[string]any) error {
 	tool, ok := registry.Get(toolName)
 	if !ok {
@@ -1455,6 +1456,9 @@ func (s *Server) awaitToolApproval(ctx context.Context, w http.ResponseWriter, f
 	approvals := s.approvals()
 	scope := tools.ToolApprovalScope(tool, args)
 	if approvals.State(chatID).Allows(scope) {
+		return nil
+	}
+	if s.autoApprovesTools(chatID, toolName, scope) {
 		return nil
 	}
 
@@ -1498,6 +1502,34 @@ func (s *Server) approvals() *tools.Approvals {
 		}
 	})
 	return s.Approvals
+}
+
+// autoApprovesTools reports whether the user has switched off approval prompts
+// for every tool call, and records the call it is letting through.
+//
+// The switch is read from the store on every call rather than held in memory,
+// for the same reason the MCP approval ledger is re-read on every question:
+// the user changes it while the app is running and expects the next call to
+// obey it. A call already waiting for an answer is not released by switching
+// it on — that question was put to the user and stays theirs to answer.
+//
+// Without a store there is no switch, and a store that cannot be read leaves
+// the question to the user, which is where it was before the switch existed;
+// neither failure runs a tool that nobody agreed to.
+func (s *Server) autoApprovesTools(chatID, toolName, scope string) bool {
+	if s.Store == nil {
+		return false
+	}
+	settings, err := s.Store.Settings()
+	if err != nil {
+		s.log().Warn("could not read settings; asking for tool approval instead", "chat", chatID, "tool", toolName, "error", err)
+		return false
+	}
+	if !settings.AutoApproveTools {
+		return false
+	}
+	s.log().Info("tool call approved automatically by the settings switch", "chat", chatID, "tool", toolName, "scope", scope)
+	return true
 }
 
 // chatApproval carries the user's answer back to the tool call that is waiting
