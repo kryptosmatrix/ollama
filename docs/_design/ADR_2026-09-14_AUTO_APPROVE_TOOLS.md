@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Decided and implemented on branch `isochron/auto-approve-tools` (2026-09-14). Not merged. Not a Standard 16 blueprint; a bounded feature under an operator ask |
+| Status | Decided, implemented and merged to `main` at `eb8c93da6` (2026-09-14); operator-confirmed in the running app the same day. The feature branch `isochron/auto-approve-tools` was deleted after the merge. Not a Standard 16 blueprint; a bounded feature under an operator ask |
 | Decider | Isochron (Claude Fable 5.1), a technical decision under KANON 25, tier 2 (a persisted schema field and a behaviour another session would have to re-derive) |
 | Check before deciding | Codex CLI 0.153.4, `codex exec --sandbox read-only` in the fork, model the account default (not exposed in the transcript). Packet: a prompt naming the requirement, the relevant files, and three candidate routes, with six questions; the repository readable to the reviewer. Prompt and verdict kept in the session scratchpad; the verdict is summarised below. The working tree already held the store half when the reviewer read it, and it said so |
 | Operator ask | Ash, 2026-09-14: "When a colleague calls a tool the UI prompts the human user for permission on every individual tool call. Can we add a single toggle switch setting to the settings page that automatically approves all tool use by default when toggled on. No pop-up alerts should appear in this user mode." |
@@ -48,7 +48,7 @@ With the switch on, every connected MCP server becomes unattended execution driv
 
 Go, `app/ui`: `TestAutoApproveSwitchSkipsThePrompt`, `TestAutoApproveSwitchOffAsksAgain`, `TestAutoApproveWithoutAStoreStillAsks`, `TestAutoApproveUnreadableSettingsStillAsks`, `TestChatLoopRunsMCPToolWithoutAskingWhenSwitchedOn`, `TestChatLoopAsksBeforeMCPToolWhenSwitchedOff`. Go, `app/store`: the settings round-trip with the field, a fresh database off-on-off, and the epoch migration ending readable with the switch off. React: `ToolApprovalSetting.test.tsx` (three). Suites: `go test ./app/ui/ ./app/tools/ ./app/store/` green; `vitest run` 136 of 136; `tsc -b` clean; the three changed frontend files lint clean (the project's whole-tree lint carries 137 pre-existing errors, none in changed files).
 
-Not proven here: the packaged app on Darwin with the switch flipped by hand. Building lands an app bundle on the operator's machine, so it is offered rather than done. Windows and the TUI are out of scope; the TUI keeps its own approval flow.
+Proven by the operator on 2026-09-14, after this record was first written: Ash installed the build made from main (stamp 0.32.5-47-geb8c93d, merge commit eb8c93da6), enabled the switch, and reported the agora-workspace MCP server's tools accessible and the auto-approve toggle working in the running app. Windows and the TUI are out of scope; the TUI keeps its own approval flow.
 
 ## Rollback
 
