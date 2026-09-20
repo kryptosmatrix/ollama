@@ -1,0 +1,12 @@
+[
+  {
+    "ImportPath": "github.com/ollama/ollama/app/webview",
+    "Action": "build-output",
+    "Output": "# github.com/ollama/ollama/app/webview\nIn file included from webview.cc:1:\n./webview.h:1589:22: warning: identifier '_cls' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]\n./webview.h:1592:23: warning: identifier '_sel' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]\n./webview.h:1595:22: warning: identifier '_str' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]\n"
+  },
+  {
+    "ImportPath": "github.com/ollama/ollama/app/cmd/app.test",
+    "Action": "build-output",
+    "Output": "# github.com/ollama/ollama/app/cmd/app.test\nld: warning: ignoring duplicate libraries: '-lobjc'\n"
+  }
+]

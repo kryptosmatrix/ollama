@@ -1,0 +1,16 @@
+{
+  "files": {
+    "app-suite-result.json": "46c6f6668695628e9ccdfe33e5f729a59393bac3f6aeb4c8c8da6b412567716e",
+    "ignore-commit.json": "041c47e9aab78570b36f00ac6cd7d36dad5eaa618d5d0e2b032d02a40acba786",
+    "ignore-negative-controls.json": "d59d5b5289343df8d59725c55c02bf5a4f9ffff979e56b99fad0736335922201",
+    "ignore-rules-proof.json": "0e2af57962d393ecbb4f70986dd5d8b9bd3d84c283d503dc2d9e8000975ae557",
+    "independent-executed-verification.json": "579d833fdb67c423a1646d3c86a6634e4a13c6a7d043b7f6ecd36d63ad215edf",
+    "independent-review-result.json": "2d04ef53c0d09dbcdbe551e8a2f93b531220db57b7b77ae21cd0098e8b344903",
+    "independent-review.md": "400b355e6d830af33f9ccdebfa890369ea5c7ec1e1b4acadeb9e3ffddc83a803",
+    "lint-comparison.json": "a49fd8d4fc25672f04b6d3ea57119e85f3a688a26a7eddf7da3300c871df2c63",
+    "native-warnings.json": "7d14b9c2b1e71d2e1d38b4aefc4ef1951a9b52a97c06d5a79439be7ad66c5a99"
+  },
+  "source_commit": "85c69f45e7c0fa731dcb18058c24c2b0a6d03d12",
+  "raw_evidence_root": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont06",
+  "integration_approved": false
+}

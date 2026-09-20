@@ -1,0 +1,97 @@
+{
+  "candidate_cases": [
+    {
+      "path": "app/ui/app/src/components/FutureDiscovery.tsx",
+      "expected_ignored": false,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "",
+      "pass": true
+    },
+    {
+      "path": "app/ui/app/src/utils/recoverConversation.ts",
+      "expected_ignored": false,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "",
+      "pass": true
+    },
+    {
+      "path": "app/ui/recover_history_test.go",
+      "expected_ignored": false,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "",
+      "pass": true
+    },
+    {
+      "path": "app/ui/app/coverage/index.html",
+      "expected_ignored": true,
+      "exit_code": 0,
+      "stdout": "app/.gitignore:7:coverage/\tapp/ui/app/coverage/index.html\n",
+      "stderr": "",
+      "pass": true
+    },
+    {
+      "path": "app/coverage.out",
+      "expected_ignored": true,
+      "exit_code": 0,
+      "stdout": "app/.gitignore:9:coverage*.out\tapp/coverage.out\n",
+      "stderr": "",
+      "pass": true
+    },
+    {
+      "path": "app/test.coverprofile",
+      "expected_ignored": true,
+      "exit_code": 0,
+      "stdout": "app/.gitignore:8:*.coverprofile\tapp/test.coverprofile\n",
+      "stderr": "",
+      "pass": true
+    },
+    {
+      "path": "app/cover.html",
+      "expected_ignored": true,
+      "exit_code": 0,
+      "stdout": "app/.gitignore:12:cover.html\tapp/cover.html\n",
+      "stderr": "",
+      "pass": true
+    },
+    {
+      "path": "app/.env",
+      "expected_ignored": true,
+      "exit_code": 0,
+      "stdout": "app/.gitignore:14:.env\tapp/.env\n",
+      "stderr": "",
+      "pass": true
+    },
+    {
+      "path": "app/unsafe.crt",
+      "expected_ignored": true,
+      "exit_code": 0,
+      "stdout": "app/.gitignore:2:*.crt\tapp/unsafe.crt\n",
+      "stderr": "",
+      "pass": true
+    }
+  ],
+  "baseline_controls": [
+    {
+      "path": "app/ui/app/src/components/FutureDiscovery.tsx",
+      "exit_code": 0,
+      "stdout": "app/.gitignore:7:*cover*\tapp/ui/app/src/components/FutureDiscovery.tsx\n",
+      "pass": true
+    },
+    {
+      "path": "app/ui/app/src/utils/recoverConversation.ts",
+      "exit_code": 0,
+      "stdout": "app/.gitignore:7:*cover*\tapp/ui/app/src/utils/recoverConversation.ts\n",
+      "pass": true
+    },
+    {
+      "path": "app/ui/recover_history_test.go",
+      "exit_code": 0,
+      "stdout": "app/.gitignore:7:*cover*\tapp/ui/recover_history_test.go\n",
+      "pass": true
+    }
+  ],
+  "pass": true
+}

@@ -1,0 +1,58 @@
+{
+  "messages_identical": true,
+  "affected_source_bytes_identical": true,
+  "scope": "Matching failures are baseline debt, not a passing lint result or a release verdict.",
+  "runs": [
+    {
+      "label": "main-baseline",
+      "exit_code": 1,
+      "seconds": 12.469415707979351,
+      "errors": 137,
+      "warnings": 11,
+      "source_hashes": {
+        "codegen/gotypes.gen.ts": "49052e66cbd7e279e7bc2abd0270df4f8746fb1545e0e8d486deb51cbf791154",
+        "src/components/Chat.tsx": "ba273fb1c2613aa3722cb1e30a94f445bf68a1283d8db01f7a9970b16cae0f64",
+        "src/components/ChatForm.tsx": "188d685011c07eccf363e8174ff5e0256abd8deb1456c4dcfb05114a74cecf12",
+        "src/components/ChatSidebar.tsx": "be0686033c6304358b52e858fc3611be6405fc3138d0d9911e5a2904c3195293",
+        "src/components/Message.tsx": "959c6c3ca96b8297f9fcfc0b76eef2e2d36dbcd1d662c28369c3635e924b5b48",
+        "src/components/MessageList.tsx": "b6800f9cf043847ddfaba3db2ceec7f09ea0b7feed57bc1242d5934513e1a5ee",
+        "src/components/ModelPicker.tsx": "c093ee076dc9dd5803b6e52dfab3e28487ea1aed516f3fecccb82973809acfd3",
+        "src/components/SpeechSettings.tsx": "324115ae67b489abf94178050979be97bf419e97cab7cf8f3c274166c14608c3",
+        "src/components/StreamingMarkdownContent.tsx": "ac588ae15809347996f8bdb719c56c64ba2c9449dc46469eb3225e4bfdff8c53",
+        "src/components/ThinkButton.tsx": "7b9a38520bc73f87d13dea4ed05d43b26ba43bce43ecb3fc4dbe56b820943e14",
+        "src/components/ui/slider.tsx": "3cb01a40b1ff248647da419663487dabb1c57375b0aa1f9dc1e43814da71ad33",
+        "src/contexts/StreamingContext.tsx": "c2b04bf51d05d3f3af2ac22e838e46f400100719914fb57336d4fd805d0b13c9",
+        "src/hooks/useChats.ts": "b8b3f66706d484d7ba56f9cc4f2fd94373787011b670e20844e50d3d077669fb",
+        "src/hooks/useSelectedModel.ts": "e59fdae32b83d8d54183067098f2bc94d7c9a219fabc49b9d586a9a7998bafeb",
+        "src/utils/remarkCitationParser.ts": "4105ec18e00c19385b51918f50b6a67b32da84572f97467b104cdc490b739608"
+      },
+      "stdout_sha256": "216fbcb2743afe3e2232d7216f4d72eb246cad3cd29168b842f8c6f1e49a4b99"
+    },
+    {
+      "label": "candidate",
+      "exit_code": 1,
+      "seconds": 8.358365916996263,
+      "errors": 137,
+      "warnings": 11,
+      "source_hashes": {
+        "codegen/gotypes.gen.ts": "49052e66cbd7e279e7bc2abd0270df4f8746fb1545e0e8d486deb51cbf791154",
+        "src/components/Chat.tsx": "ba273fb1c2613aa3722cb1e30a94f445bf68a1283d8db01f7a9970b16cae0f64",
+        "src/components/ChatForm.tsx": "188d685011c07eccf363e8174ff5e0256abd8deb1456c4dcfb05114a74cecf12",
+        "src/components/ChatSidebar.tsx": "be0686033c6304358b52e858fc3611be6405fc3138d0d9911e5a2904c3195293",
+        "src/components/Message.tsx": "959c6c3ca96b8297f9fcfc0b76eef2e2d36dbcd1d662c28369c3635e924b5b48",
+        "src/components/MessageList.tsx": "b6800f9cf043847ddfaba3db2ceec7f09ea0b7feed57bc1242d5934513e1a5ee",
+        "src/components/ModelPicker.tsx": "c093ee076dc9dd5803b6e52dfab3e28487ea1aed516f3fecccb82973809acfd3",
+        "src/components/SpeechSettings.tsx": "324115ae67b489abf94178050979be97bf419e97cab7cf8f3c274166c14608c3",
+        "src/components/StreamingMarkdownContent.tsx": "ac588ae15809347996f8bdb719c56c64ba2c9449dc46469eb3225e4bfdff8c53",
+        "src/components/ThinkButton.tsx": "7b9a38520bc73f87d13dea4ed05d43b26ba43bce43ecb3fc4dbe56b820943e14",
+        "src/components/ui/slider.tsx": "3cb01a40b1ff248647da419663487dabb1c57375b0aa1f9dc1e43814da71ad33",
+        "src/contexts/StreamingContext.tsx": "c2b04bf51d05d3f3af2ac22e838e46f400100719914fb57336d4fd805d0b13c9",
+        "src/hooks/useChats.ts": "b8b3f66706d484d7ba56f9cc4f2fd94373787011b670e20844e50d3d077669fb",
+        "src/hooks/useSelectedModel.ts": "e59fdae32b83d8d54183067098f2bc94d7c9a219fabc49b9d586a9a7998bafeb",
+        "src/utils/remarkCitationParser.ts": "4105ec18e00c19385b51918f50b6a67b32da84572f97467b104cdc490b739608"
+      },
+      "stdout_sha256": "f0d3923687a9b93440bb550d780f7a4a59a267793ea21bd369855dbc74caa0f4"
+    }
+  ],
+  "complete_comparison_sha256": "82a82a27a94e97443a6d1a898237ca13c140d3671ef25901b4a78d3e63ee8fc7"
+}
