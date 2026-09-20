@@ -10,6 +10,8 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
+
+	"github.com/ollama/ollama/app/types/not"
 )
 
 // currentSchemaVersion defines the current database schema version.
@@ -691,7 +693,7 @@ func (db *database) getChatWithOptions(id string, loadAttachmentData bool) (*Cha
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("chat not found")
+			return nil, fmt.Errorf("%w: chat %s", not.Found, id)
 		}
 		return nil, fmt.Errorf("query chat: %w", err)
 	}

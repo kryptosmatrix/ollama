@@ -430,12 +430,7 @@ func (s *Store) ChatWithOptions(id string, loadAttachmentData bool) (*Chat, erro
 		return nil, err
 	}
 
-	chat, err := s.db.getChatWithOptions(id, loadAttachmentData)
-	if err != nil {
-		return nil, fmt.Errorf("%w: chat %s", not.Found, id)
-	}
-
-	return chat, nil
+	return s.db.getChatWithOptions(id, loadAttachmentData)
 }
 
 func (s *Store) SetChat(chat Chat) error {
