@@ -1,0 +1,19 @@
+{
+  "complete": true,
+  "requested_cases": [
+    "candidate",
+    "rewrap",
+    "consumer-bypass",
+    "always-error",
+    "empty-success",
+    "candidate"
+  ],
+  "execution_coverage": true,
+  "all_expectations_met": true,
+  "bounded_review_pass": true,
+  "source_unchanged": true,
+  "candidate": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+  "report_sha256": "c1983ecacf04835e8359122101e165484ded6d2ffefe561df467f3ea9e2c6c5d",
+  "controller_sha256": "349782a8850ce690f0ca4c290d67838fbee41b532202adc19c68edcf6e1b78c4",
+  "scope": "Independent model-directed fresh tests through bounded controller; not release or full-regression acceptance"
+}

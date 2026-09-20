@@ -1,0 +1,18 @@
+{
+  "app/ui/app.go": "91bda15197b29f81091b05fa0c8d39a492dd02cc8ae4a073c838eeb40c8f5afd",
+  "app/ui/mcp_discover_test.go": "4d5a90fbc7890741b281eb8c4db05906958229d72748578819eff4f89f824ec0",
+  "app/store/database.go": "6905b4e6146f76e0aed66f97e17a39245d27a0182f0051d06642389de042b551",
+  "app/ui/chat_read_errors_test.go": "299356bec304683503fe4410f19f2f0496307ff64848ebaf0f13fd854421440a",
+  "app/ui/tts_test.go": "1d18445991670de7ad9d239626e43af19809ca8c2d725fdb562ae1d4147649b0",
+  "app/ui/app/src/components/MCPLocalDiscovery.tsx": "4181a47258597a2e9e35c627dac2c50c35fa74ca780a82ccc4c6bba5d29c755a",
+  "app/ui/app/src/utils/mcpDiscovery.ts": "f694dd00b9d418b9f101a75defc3788328d7acc68790ce5be15fe7e15c545f2e",
+  "app/types/not/found.go": "c3aa0def96031735b4ee82e60613261890a01f9d35260099d267f697605f4225",
+  "app/store/store_test.go": "7b027124adf72c5cf3bf3038c796b0c078ac76c6ed60bacf1f7169d7da0fda04",
+  "app/ui/app/src/components/MCPLocalDiscovery.test.tsx": "2275e94a9f7dbf17586d337fe8fd370ceb93e70c6e2e7ad832278b01ccb14a11",
+  "app/ui/ui.go": "dbba86f3d90ec5edac5b23458fec00f25e39f4d9f3ef43ac124571e0c1a0d48e",
+  "app/store/chat_read_errors_test.go": "78adbad3f024feb30e912722026aa9bb8f6ea1f96b08fc241e5ab0c121b57c99",
+  "app/cmd/app/app.go": "bd26cadf650c7d2d7d33c47903dbb3cdce8048d58fd2a2f0149805127133bf26",
+  "app/ui/mcp_discover.go": "37fefe52f44fb278e1350c52ec5ceec25b2e3778f4c33513340e51c965eefb99",
+  "app/ui/app/src/utils/mcpDiscovery.test.ts": "caba913193cceddfe517ffa360532de40dae047237defb7f05355a46da0fb51c",
+  "app/store/store.go": "71097b8bc6664c0c9eb87bedfab5c0b79acc2768df20e0dd0319af2fbd5c0862"
+}
