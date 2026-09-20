@@ -4,7 +4,12 @@ ollama.syso
 /app/app
 /app/squirrel
 ollama
-*cover*
+coverage/
+*.coverprofile
+coverage*.out
+coverage*.html
+cover.out
+cover.html
 .vscode
 .env
 .DS_Store
