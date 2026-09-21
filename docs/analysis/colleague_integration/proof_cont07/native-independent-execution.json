@@ -1,0 +1,135 @@
+{
+  "records": [
+    {
+      "name": "candidate-syntax",
+      "argv": [
+        "/usr/bin/clang++",
+        "-std=c++11",
+        "-DWEBVIEW_STATIC",
+        "-DWEBVIEW_COCOA",
+        "-Werror=deprecated-literal-operator",
+        "-fsyntax-only",
+        "app/webview/webview.cc"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "exit_code": 0,
+      "seconds": 2.840486500004772,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "original-syntax",
+      "argv": [
+        "/usr/bin/clang++",
+        "-std=c++11",
+        "-DWEBVIEW_STATIC",
+        "-DWEBVIEW_COCOA",
+        "-Werror=deprecated-literal-operator",
+        "-fsyntax-only",
+        "app/webview/webview.cc"
+      ],
+      "cwd": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-native-review-lceroyuq",
+      "exit_code": 1,
+      "seconds": 2.662637417030055,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "d3228b85467335a43bd6f99215809740f3b659c6a4201a43625a6cde9254b0ba",
+      "stdout": "",
+      "stderr": "In file included from app/webview/webview.cc:1:\napp/webview/webview.h:1589:22: error: identifier '_cls' preceded by whitespace in a literal operator declaration is deprecated [-Werror,-Wdeprecated-literal-operator]\n 1589 | inline id operator\"\" _cls(const char *s, std::size_t) {\n      |           ~~~~~~~~~~~^~~~\n      |           operator\"\"_cls\napp/webview/webview.h:1592:23: error: identifier '_sel' preceded by whitespace in a literal operator declaration is deprecated [-Werror,-Wdeprecated-literal-operator]\n 1592 | inline SEL operator\"\" _sel(const char *s, std::size_t) {\n      |            ~~~~~~~~~~~^~~~\n      |            operator\"\"_sel\napp/webview/webview.h:1595:22: error: identifier '_str' preceded by whitespace in a literal operator declaration is deprecated [-Werror,-Wdeprecated-literal-operator]\n 1595 | inline id operator\"\" _str(const char *s, std::size_t) {\n      |           ~~~~~~~~~~~^~~~\n      |           operator\"\"_str\n3 errors generated.\n"
+    },
+    {
+      "name": "original-object",
+      "argv": [
+        "/usr/bin/clang++",
+        "-std=c++11",
+        "-DWEBVIEW_STATIC",
+        "-DWEBVIEW_COCOA",
+        "-O2",
+        "-c",
+        "app/webview/webview.cc",
+        "-o",
+        "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/independent-native-review/fresh-native/original.o"
+      ],
+      "cwd": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-native-review-lceroyuq",
+      "exit_code": 0,
+      "seconds": 3.522104290954303,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "af08af30b51e52c8942bc07cef5d3fc3dd78b01925c3bc77d9991bfe8b385c28",
+      "stdout": "",
+      "stderr": "In file included from app/webview/webview.cc:1:\napp/webview/webview.h:1589:22: warning: identifier '_cls' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]\n 1589 | inline id operator\"\" _cls(const char *s, std::size_t) {\n      |           ~~~~~~~~~~~^~~~\n      |           operator\"\"_cls\napp/webview/webview.h:1592:23: warning: identifier '_sel' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]\n 1592 | inline SEL operator\"\" _sel(const char *s, std::size_t) {\n      |            ~~~~~~~~~~~^~~~\n      |            operator\"\"_sel\napp/webview/webview.h:1595:22: warning: identifier '_str' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]\n 1595 | inline id operator\"\" _str(const char *s, std::size_t) {\n      |           ~~~~~~~~~~~^~~~\n      |           operator\"\"_str\n3 warnings generated.\n"
+    },
+    {
+      "name": "candidate-object",
+      "argv": [
+        "/usr/bin/clang++",
+        "-std=c++11",
+        "-DWEBVIEW_STATIC",
+        "-DWEBVIEW_COCOA",
+        "-O2",
+        "-c",
+        "app/webview/webview.cc",
+        "-o",
+        "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/independent-native-review/fresh-native/candidate.o"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "exit_code": 0,
+      "seconds": 3.175454916956369,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "candidate-final",
+      "argv": [
+        "/usr/bin/clang++",
+        "-std=c++11",
+        "-DWEBVIEW_STATIC",
+        "-DWEBVIEW_COCOA",
+        "-Werror=deprecated-literal-operator",
+        "-fsyntax-only",
+        "app/webview/webview.cc"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "exit_code": 0,
+      "seconds": 2.287212291965261,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "app-assembly",
+      "argv": [
+        "/opt/homebrew/bin/go",
+        "test",
+        "-count=1",
+        "-json",
+        "-timeout=90s",
+        "./app/cmd/app"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "exit_code": 0,
+      "seconds": 6.226568791025784,
+      "stdout_sha256": "43fcc579064599753baaa5169170fbb96a4f55cbd0e6de1dc354d7bb1811a4ce",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "{\"ImportPath\":\"github.com/ollama/ollama/app/cmd/app.test\",\"Action\":\"build-output\",\"Output\":\"# github.com/ollama/ollama/app/cmd/app.test\\nld: warning: ignoring duplicate libraries: '-lobjc'\\n\"}\n{\"Time\":\"2026-09-21T10:50:15.487055+10:00\",\"Action\":\"start\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\"}\n{\"Time\":\"2026-09-21T10:50:16.449266+10:00\",\"Action\":\"run\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Test\":\"TestManagerExistsWithAnEmptyConfiguration\"}\n{\"Time\":\"2026-09-21T10:50:16.449353+10:00\",\"Action\":\"output\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Test\":\"TestManagerExistsWithAnEmptyConfiguration\",\"Output\":\"=== RUN   TestManagerExistsWithAnEmptyConfiguration\\n\"}\n{\"Time\":\"2026-09-21T10:50:16.451321+10:00\",\"Action\":\"output\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Test\":\"TestManagerExistsWithAnEmptyConfiguration\",\"Output\":\"--- PASS: TestManagerExistsWithAnEmptyConfiguration (0.00s)\\n\"}\n{\"Time\":\"2026-09-21T10:50:16.451417+10:00\",\"Action\":\"pass\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Test\":\"TestManagerExistsWithAnEmptyConfiguration\",\"Elapsed\":0}\n{\"Time\":\"2026-09-21T10:50:16.451449+10:00\",\"Action\":\"run\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Test\":\"TestAServerAddedAfterLaunchCanBeConnected\"}\n{\"Time\":\"2026-09-21T10:50:16.451456+10:00\",\"Action\":\"output\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Test\":\"TestAServerAddedAfterLaunchCanBeConnected\",\"Output\":\"=== RUN   TestAServerAddedAfterLaunchCanBeConnected\\n\"}\n{\"Time\":\"2026-09-21T10:50:16.460668+10:00\",\"Action\":\"output\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Test\":\"TestAServerAddedAfterLaunchCanBeConnected\",\"Output\":\"--- PASS: TestAServerAddedAfterLaunchCanBeConnected (0.01s)\\n\"}\n{\"Time\":\"2026-09-21T10:50:16.461531+10:00\",\"Action\":\"pass\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Test\":\"TestAServerAddedAfterLaunchCanBeConnected\",\"Elapsed\":0.01}\n{\"Time\":\"2026-09-21T10:50:16.461549+10:00\",\"Action\":\"run\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Test\":\"TestManagerIsRefusedWhenMCPIsSwitchedOff\"}\n{\"Time\":\"2026-09-21T10:50:16.461553+10:00\",\"Action\":\"output\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Test\":\"TestManagerIsRefusedWhenMCPIsSwitchedOff\",\"Output\":\"=== RUN   TestManagerIsRefusedWhenMCPIsSwitchedOff\\n\"}\n{\"Time\":\"2026-09-21T10:50:16.464107+10:00\",\"Action\":\"output\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Test\":\"TestManagerIsRefusedWhenMCPIsSwitchedOff\",\"Output\":\"--- PASS: TestManagerIsRefusedWhenMCPIsSwitchedOff (0.00s)\\n\"}\n{\"Time\":\"2026-09-21T10:50:16.464269+10:00\",\"Action\":\"pass\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Test\":\"TestManagerIsRefusedWhenMCPIsSwitchedOff\",\"Elapsed\":0}\n{\"Time\":\"2026-09-21T10:50:16.464278+10:00\",\"Action\":\"run\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Test\":\"TestManagerConnectsWhatIsAlreadyConfigured\"}\n{\"Time\":\"2026-09-21T10:50:16.464281+10:00\",\"Action\":\"output\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Test\":\"TestManagerConnectsWhatIsAlreadyConfigured\",\"Output\":\"=== RUN   TestManagerConnectsWhatIsAlreadyConfigured\\n\"}\n{\"Time\":\"2026-09-21T10:50:16.467538+10:00\",\"Action\":\"output\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Test\":\"TestManagerConnectsWhatIsAlreadyConfigured\",\"Output\":\"2026/09/21 10:50:16 WARN mcp server is not approved to run server=at-launch runs=definitely-not-a-real-command\\n\"}\n{\"Time\":\"2026-09-21T10:50:16.468389+10:00\",\"Action\":\"output\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Test\":\"TestManagerConnectsWhatIsAlreadyConfigured\",\"Output\":\"--- PASS: TestManagerConnectsWhatIsAlreadyConfigured (0.00s)\\n\"}\n{\"Time\":\"2026-09-21T10:50:16.468404+10:00\",\"Action\":\"pass\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Test\":\"TestManagerConnectsWhatIsAlreadyConfigured\",\"Elapsed\":0}\n{\"Time\":\"2026-09-21T10:50:16.468407+10:00\",\"Action\":\"output\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Output\":\"PASS\\n\"}\n{\"Time\":\"2026-09-21T10:50:16.470129+10:00\",\"Action\":\"output\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Output\":\"ok  \\tgithub.com/ollama/ollama/app/cmd/app\\t0.983s\\n\"}\n{\"Time\":\"2026-09-21T10:50:16.470146+10:00\",\"Action\":\"pass\",\"Package\":\"github.com/ollama/ollama/app/cmd/app\",\"Elapsed\":0.983}\n",
+      "stderr": ""
+    }
+  ],
+  "three_spaces_only": true,
+  "fresh_object_bytes_identical": true,
+  "tests": {
+    "github.com/ollama/ollama/app/cmd/app::TestManagerExistsWithAnEmptyConfiguration": "pass",
+    "github.com/ollama/ollama/app/cmd/app::TestAServerAddedAfterLaunchCanBeConnected": "pass",
+    "github.com/ollama/ollama/app/cmd/app::TestManagerIsRefusedWhenMCPIsSwitchedOff": "pass",
+    "github.com/ollama/ollama/app/cmd/app::TestManagerConnectsWhatIsAlreadyConfigured": "pass"
+  },
+  "unfinished": [],
+  "pass": true,
+  "remaining_warnings": [
+    "# github.com/ollama/ollama/app/cmd/app.test\nld: warning: ignoring duplicate libraries: '-lobjc'\n"
+  ],
+  "scope": "Native declaration diagnostics and exact object compatibility plus app assembly; no GUI, Keychain or frontend tests"
+}

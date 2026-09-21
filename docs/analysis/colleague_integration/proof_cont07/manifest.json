@@ -1,0 +1,126 @@
+{
+  "source_commit": "acd8bb3de93ea01d43dd8783bbeff036113f9ab9",
+  "items": [
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/source-commits.json",
+      "destination": "source-commits.json",
+      "bytes": 1893,
+      "sha256": "df56a33dfffcc05280a14a644669c63ba2e57b2bc2af31f72b867d38063e92d6"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/source-backup.json",
+      "destination": "source-backup.json",
+      "bytes": 383,
+      "sha256": "e1f042cad39ec9374d87e4705cb09351dd4377d046e4ffae850d5f218f6ac282"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/containment.json",
+      "destination": "containment.json",
+      "bytes": 2204,
+      "sha256": "1240db3d67852f6ce599e64a6de2fe70d5c604425719041d17208d203bf2e8f0"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/blocked-frontend-execution.json",
+      "destination": "blocked-frontend-execution.json",
+      "bytes": 587,
+      "sha256": "a9747e935ca7bbb1a53d2c89d04e0d211b8c8665eac3e3f67f8fdd22412c2736"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/native-results.json",
+      "destination": "native-author-results.json",
+      "bytes": 4933,
+      "sha256": "414f4fb61b6e8c986611cfecca3d85705753b1906194d555aee824483f5f5c50"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/independent-native-review/result.json",
+      "destination": "native-independent-result.json",
+      "bytes": 245,
+      "sha256": "19279b4bc0cac2055292d12bd3521e728946a5455cb1afff72e996917da2f97f"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/independent-native-review/report.md",
+      "destination": "native-independent-review.md",
+      "bytes": 2786,
+      "sha256": "7b960780fe69a347aa1dacf50f31a969eb7e1f2087164ec2a6b75bf37d92456b"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/independent-native-review/fresh-native/result.json",
+      "destination": "native-independent-execution.json",
+      "bytes": 11358,
+      "sha256": "2986cd6dcd85e14abe237ed1dafbc82529fcbd61da26f757ecdbd414a17f7569"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/independent-native-review/model.json",
+      "destination": "native-review-model.json",
+      "bytes": 593,
+      "sha256": "a15657bebffa854aeddf45521c3a5e1a32e78b8fdbee2985b632c77b383220c0"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/review_native.py",
+      "destination": "native-review-controller.py.txt",
+      "bytes": 12509,
+      "sha256": "1649ecaf86525904a41a9a55ec7e09ce167c762a78a3e0cf2cb0171d82abc101"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/static-final-results.json",
+      "destination": "static-final-results.json",
+      "bytes": 3533,
+      "sha256": "aa52f7e208a580a778ccd6242ba2ae6cbc64969feb5d4b738fa4048f397ee3ee"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/typescript-emission-final.stdout",
+      "destination": "typescript-emission.json",
+      "bytes": 2299,
+      "sha256": "efc42dd6c2f9e10cd6131de3899832582124ea51c00e41206f83b9a3e400b09b"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/review-claim-static-checks.stdout",
+      "destination": "registry-static-control.json",
+      "bytes": 3430,
+      "sha256": "956535e1437c8edacb506abf7ec340ddee3093c6b6e85bdef4541815fe3e7c24"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/maintenance-contract.md",
+      "destination": "maintenance-contract.md",
+      "bytes": 3289,
+      "sha256": "ca4b3516779718de84cb5262d9fccff69700b1c2f8638b7a60e7d54cc9f5c2aa"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/maintenance-amendment-highlighter.md",
+      "destination": "maintenance-amendment-highlighter.md",
+      "bytes": 1992,
+      "sha256": "25ed274f7801a9b3eee6275a2ece5b3dbe82baae0f7bfda8ee6aad5d07f92f10"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/precode-reconciliation.md",
+      "destination": "precode-reconciliation.md",
+      "bytes": 1838,
+      "sha256": "5467b2f5279f68768da54da34ee2a2fb0e2f4cc8461591f18ededb7e72725760"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/precode-review-r2.md",
+      "destination": "precode-review-r2.md",
+      "bytes": 1632,
+      "sha256": "12935e83afe30f4a78a47c43da9f6b72152a54d6e1b86644c3b08f71ea17673d"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/source-review-reconciliation.md",
+      "destination": "source-review-reconciliation.md",
+      "bytes": 2147,
+      "sha256": "bec0d380aae6d169748ff09cefbd5cd94563ba831d9670992137eb4d1a5447e1"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/frontend-source-review.md",
+      "destination": "frontend-source-review-initial.md",
+      "bytes": 5544,
+      "sha256": "d3f46053e3bbfa4ffb6cd4208202d81e7fdc159070a53d9342c0b33aa68f29de"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/frontend-source-review-r2.md",
+      "destination": "frontend-source-review-final.md",
+      "bytes": 1756,
+      "sha256": "a0585e8078d4c9b447866731315f6548755834499ad36c13605edc1c13dab24d"
+    }
+  ],
+  "scope": "Curated proof; full raw outputs remain at the named local evidence directory. No frontend runtime or integration acceptance."
+}

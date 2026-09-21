@@ -1,0 +1,50 @@
+{
+  "typescript": "5.8.3",
+  "compiler_options": {
+    "target": 7,
+    "module": 99,
+    "jsx": 4,
+    "removeComments": true,
+    "verbatimModuleSyntax": true,
+    "useDefineForClassFields": true
+  },
+  "results": [
+    {
+      "file": "src/components/StreamingMarkdownContent.tsx",
+      "before_source_sha256": "ac588ae15809347996f8bdb719c56c64ba2c9449dc46469eb3225e4bfdff8c53",
+      "after_source_sha256": "983e3aa6e4273b861623a97ae5fe5bf9782294a1d0bcb4449e67f808ac7d32a0",
+      "before_emission_sha256": "08c28c83c95578b34a78e612163d43fc64ded918ed73c995b4fba5fb0a2a0887",
+      "after_emission_sha256": "08c28c83c95578b34a78e612163d43fc64ded918ed73c995b4fba5fb0a2a0887",
+      "byte_identical": true,
+      "diagnostic_count": 0
+    },
+    {
+      "file": "src/components/MessageList.tsx",
+      "before_source_sha256": "b6800f9cf043847ddfaba3db2ceec7f09ea0b7feed57bc1242d5934513e1a5ee",
+      "after_source_sha256": "98fb52e407dab24248f3635bec515e6ace897f779a159d649ea6664af149d02e",
+      "before_emission_sha256": "8b5d5c24c1a3dccdcc7b37d649a54e092c46ebed4dd73c8bd297f855cc00342b",
+      "after_emission_sha256": "8b5d5c24c1a3dccdcc7b37d649a54e092c46ebed4dd73c8bd297f855cc00342b",
+      "byte_identical": true,
+      "diagnostic_count": 0
+    },
+    {
+      "file": "src/utils/remarkCitationParser.ts",
+      "before_source_sha256": "4105ec18e00c19385b51918f50b6a67b32da84572f97467b104cdc490b739608",
+      "after_source_sha256": "fda18778386aecda5aac3d49d1cb36bc9593500761dd29f1fb3e9a80011af92c",
+      "before_emission_sha256": "5e5041e86b30a96c2a7d036c002ee2f6692587d44c8eee171814f96832f23f2e",
+      "after_emission_sha256": "5e5041e86b30a96c2a7d036c002ee2f6692587d44c8eee171814f96832f23f2e",
+      "byte_identical": true,
+      "diagnostic_count": 0
+    },
+    {
+      "file": "src/lib/highlighter.ts",
+      "before_source_sha256": "2d374fd433538c368d685569f976c3dd848f8c79101c16fa7bd25f1232bff1de",
+      "after_source_sha256": "e9975a7555a435cd3e899bf4f344cb6fc7f29b10cee8ed2bd2904f53c87848aa",
+      "before_emission_sha256": "95f3b6593d993fe850a1864e00aa229f0e7fb8ff7bbf531a922ab472a0ff8d35",
+      "after_emission_sha256": "95f3b6593d993fe850a1864e00aa229f0e7fb8ff7bbf531a922ab472a0ff8d35",
+      "byte_identical": true,
+      "diagnostic_count": 0
+    }
+  ],
+  "pass": true
+}
