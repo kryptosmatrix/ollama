@@ -1,0 +1,51 @@
+{
+  "name": "run_validation",
+  "arguments": {
+    "case": "generation"
+  },
+  "result": {
+    "case": "generation",
+    "head": "6a3778184d43b23c5cba14e0379922377f615f52",
+    "expectation_met": true,
+    "result_path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-2-generation/result.json",
+    "tests": {
+      "argv": [
+        "/opt/homebrew/bin/npm",
+        "run",
+        "test:codegen"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 34.99115662497934,
+      "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-2-generation/generator-tests.stdout",
+      "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-2-generation/generator-tests.stderr",
+      "stdout_sha256": "1c3249f100ba3a24e60982d8d9d52e5e48e419215035d9044c6f7215e161d9a3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "check_types": {
+      "argv": [
+        "/opt/homebrew/bin/npm",
+        "run",
+        "check:types"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 8.314262832980603,
+      "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-2-generation/check-types.stdout",
+      "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-2-generation/check-types.stderr",
+      "stdout_sha256": "7d41fe89593104cf594c08bcd69046aaa7e628c2679a162f4b05f6d6dbf40390",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "counts": {
+      "tests": 22,
+      "pass": 22,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "source_and_dependencies_unchanged": true
+  }
+}

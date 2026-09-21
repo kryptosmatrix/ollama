@@ -1,0 +1,39 @@
+# G1 instructions — source-bound reconnaissance, not an implementation blueprint
+
+Owner: Eko. Source: `6a3778184d43b23c5cba14e0379922377f615f52`. Read-only product follow-on after generated-model maintenance. This is partial OI-01 evidence and input to OI-02, not OI-01 completion, independent architecture judgement or permission to implement from this note.
+
+## Governing outcome
+
+The canonical R3 commission owns intended behaviour: OI-03/OI-04 and sections 0.6–0.7. Editor → save → restart → new conversation → exact effective instructions at the real model request must pass together. Instructions are revision-bound to each active conversation; edits affect new conversations unless an explicit safe-boundary reload is recorded. Disabled ordinary use must preserve baseline behaviour; invalid selected identity must not silently substitute. Model protocol, host guidance, tools, context limits, compaction and binding scope must be preserved. One authoritative effective-instruction assembly must feed every targeted terminal/app entry path.
+
+No current schema, state enum, storage owner or lifecycle is invented here to make the design look ready. Those are the delegated design work that follows this map.
+
+## Current state, directly observed
+
+**Settings ownership.** `app/store/store.go:123–181` defines the complete public Settings struct, and `:378–414` routes reads/writes through the existing Store/database. It has 17 fields and no saved instruction text, instruction revision or colleague-binding field. `app/store/database.go:19,67–95` establishes schema 17 and the actual settings table; `:1213–1255` selects/scans/updates the same public fields. This is an absence claim about these fully read definitions, not an estate-wide search result. The nonexistent guessed path `app/store/settings.go` was discarded; Settings is in store.go.
+
+**Frontend settings.** `src/api.ts:513–543` GETs/POSTs `/api/v1/settings`, materialising the real generated Settings class. `components/Settings.tsx:73–98,189–224` loads state, writes a full Settings value on change and handles reset. `hooks/useSettings.ts:28–73` is a separate convenience hook over the same API; it is not what the inspected Settings component calls. A new editor cannot be declared wired by changing that convenience hook alone. Its current UI body beyond line 240 was not read in this follow-on and is not claimed absent or reviewed.
+
+**Desktop model request.** `app/ui/ui.go:1711–1754` decodes the full settings value, persists it and applies existing auto-update/restart side effects. Separately, `:928–931` gathers MCP instructions; the chat loop calls `s.buildChatRequest` at `:973`, then the real API client at `:978`. The complete builder at `:1909–2004` prepends nonempty MCP instructions, translates stored messages/attachments/tool calls, and preserves the selected model/think/tools. It does not read a saved colleague instruction revision. This is a specific source-path finding, not a live provider test.
+
+**Terminal model request.** `cmd/agent_tui.go:73–155,214–252` combines default host guidance, the model system text and skill/tool context, then passes the result into `agentchat.Options.SystemPrompt`; model changes use its separate callback. `cmd/tui/chat/input.go:1719–1728` assembles base plus per-run extras. `cmd/tui/chat/chat.go:1116–1185` copies that into `coreagent.RunOptions.SystemPrompt`, constructs the normal Session, and invokes Session.Run. `agent/session.go:385–400,441–467` builds and sends the request, prepending the supplied SystemPrompt while preserving model options/format/think/keepalive/tools. `agent/compactor.go:383–419` includes the supplied SystemPrompt in its estimate. These are separate desktop and terminal request builders, not two names for one function.
+
+**Installed versus source.** Read-only Info.plist and Go build-info inspection of `/Applications/Ollama.app` reports version `0.32.5-47-geb8c93d`, built source `eb8c93da6ab20b980449226029a9bf5cf40a6306` with `vcs.modified=false`, executable SHA-256 `4c8139e32e25645e5bbde7cef7b56384ed4a6501c7f74398341d131212d4bb25`. That differs from this task's source candidate. Build metadata also reports GOARCH=amd64; this does not establish the full bundle's supported slices or actual running-process architecture. No app was launched, user store opened, installed binary replaced or installed workflow tested. Metadata is not behavioural equivalence proof.
+
+## Engineering judgement and finite next boundary
+
+[Inference] The correct next design is a shared revisioned instruction contract feeding the existing two request adapters, rather than a new third prompt-building route or an editor wired only to desktop Settings. Persisting the selected value is not enough: terminal settings access, conversation-bound revision capture, explicit reload, compaction reattachment, model-change compatibility and final request capture need named owners and proofs.
+
+The strongest alternative is to put instruction text directly in the existing Settings row and reread it for each request. That is superficially simpler but contradicts the commissioned freeze-for-active-conversations contract and does not by itself feed the separate terminal assembly. Do not implement that shortcut silently. The actual storage/API choice remains for the owning low-level design and independent comparison; this note does not assign speculative types or schema version 18.
+
+The next finite recon boundary is the lifecycle/data ownership needed to bind an instruction revision once and recover it: terminal transcript/session persistence, app chat creation/loading and request producer population, full Settings UI, normal settings route registration, full compaction/reload paths, existing curated-context designs, and existing scoped instruction tests. Exact known pointers follow. Once those are reconciled, create the G1 design in the discovered canonical design location under current Method 16/pack gates, using the commission's specified outcomes. This note does not waive those gates.
+
+## Read / unread and proof limits
+
+Read ranges and whole-file SHA-256s are in `product-recon/owner-paths-manifest.json` and `consumer-paths-manifest.json`; earlier full database/hook/config reads and exact grep/filename commands are retained in product-recon. Two distinct discovery methods were used (tracked symbol/filename search plus complete relevant type/function reading). Broad no-hit evidence was not promoted into absence.
+
+Unread follow-on bodies: `components/Settings.tsx:241–end`; initial `app/ui/ui.go::chat` creation/load path starting 668; settings route registration; terminal transcript owner/restore code; the full compactor lifecycle beyond the cited request-estimate path. Existing curated documents discovered but not re-read here: `docs/CURATED_CONTEXT_BLUEPRINT.md`, `docs/CURATED_CONTEXT_SYSTEM.md`, `docs/_handoff/CURATED_CONTEXT_BLUEPRINT_CURSOR_ROUND2_FINDINGS.md`. Read them before overlapping design.
+
+Existing test pointers, not executed as G1 proof in this batch: `agent/session_test.go::TestSessionAddsSystemPromptOnlyToRequest` (446); `app/ui/mcp_test.go::TestServerInstructionsReachTheModelsSystemPrompt` (524); `app/ui/ui_test.go::TestHandlePostApiSettings` (23); terminal model/system/compaction tests found by the retained symbol search. No editor/persistence/compaction/installed feature acceptance or independent G1 design review occurred. The generated-model tests prove their own scope, not these new features. Do not run root/Keychain tests or denied fixture changes just to expand this recon.
+
+Verdict: SPEC_INSUFFICIENT for G1 implementation from the current record. The missing lifecycle/storage/binding design is assigned engineering work, not a request for Ash to repeat product approval. All 31 programme items remain unaccepted.

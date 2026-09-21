@@ -1,0 +1,131 @@
+{
+  "app/ui/ui.go": {
+    "file_sha256": "8d6ebf9482c618cd09243d1fde9dc765d8c7934a7de8644bce59b8d9dbd0d68c",
+    "total_lines": 2004,
+    "matches": {
+      "//go:generate node": [
+        42
+      ]
+    }
+  },
+  "app/store/store.go": {
+    "file_sha256": "80c4bf13dd8b811809a389b3a5fc61386770b5963ce10012fe55dc29fab82601",
+    "total_lines": 537,
+    "matches": {
+      "Result    any": [
+        97
+      ]
+    }
+  },
+  "app/ui/responses/types.go": {
+    "file_sha256": "3a8bc6edf63712bea086404f75092248b092c6fe59cee4bed970de8c455eb693",
+    "total_lines": 321,
+    "matches": {
+      "ToolResultData any": [
+        71
+      ],
+      "ApprovalArgs  map": [
+        81
+      ],
+      "ToolState any": [
+        84
+      ],
+      "Think       any": [
+        135
+      ]
+    }
+  },
+  "app/ui/app/codegen/annotate.mjs": {
+    "file_sha256": "dda7d7b64758d99f163221f059167335dd5aeb5f3ebd8d1fb3b811fa44fa880d",
+    "total_lines": 143,
+    "matches": {
+      "export function annotate": [
+        36
+      ],
+      "public field": [
+        57,
+        58,
+        61
+      ],
+      "constructor assignment": [
+        80
+      ],
+      "overlapping annotation": [
+        134
+      ]
+    }
+  },
+  "app/ui/app/codegen/emission.mjs": {
+    "file_sha256": "b62ce223ea3666f2e9835c182ce8b5caa8ce48a8d48eaa49341da1351ef8eaf7",
+    "total_lines": 43,
+    "matches": {
+      "export function compareEmission": [
+        8
+      ],
+      "const result = program.emit": [
+        30
+      ],
+      "Generated JavaScript changed": [
+        40
+      ]
+    }
+  },
+  "app/ui/app/codegen/generate.mjs": {
+    "file_sha256": "6d184adaaa7dc6a16eec031737e9e4987e7164c22e144430c1f1929628bb4755",
+    "total_lines": 93,
+    "matches": {
+      "function verifiedGeneration": [
+        25
+      ],
+      "export function generate": [
+        60
+      ],
+      "if (check)": [
+        65
+      ],
+      "fs.renameSync": [
+        72
+      ]
+    }
+  },
+  "app/ui/app/src/api.ts": {
+    "file_sha256": "19e7d77c7b8e69cf689172f22a67ed7e28707916c199aefea501f43ef5cd16ff",
+    "total_lines": 879,
+    "matches": {
+      "export async function getChat(": [
+        118
+      ]
+    }
+  },
+  "app/ui/app/src/components/StreamingMarkdownContent.tsx": {
+    "file_sha256": "983e3aa6e4273b861623a97ae5fe5bf9782294a1d0bcb4449e67f808ac7d32a0",
+    "total_lines": 353,
+    "matches": {
+      "const StreamingMarkdownContent:": [
+        133
+      ],
+      "<Streamdown": [
+        216
+      ],
+      "{content}": [
+        213,
+        288
+      ]
+    }
+  },
+  "app/ui/app/src/utils/generatedModels.test.tsx": {
+    "file_sha256": "86db34cc04c9dd5996f2251a47610fc218745bbde303fe3abd885b093603d4a5",
+    "total_lines": 211,
+    "matches": {
+      "materialises nested": [
+        77
+      ],
+      "delivers distinct": [
+        102
+      ],
+      "ships generated": [
+        200
+      ]
+    }
+  }
+}

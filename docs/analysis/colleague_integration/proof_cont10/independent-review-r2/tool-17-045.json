@@ -1,0 +1,14 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "name": "selector_failed_run",
+    "start": 1,
+    "count": 60
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-11-normal-entry/result.json",
+    "file_sha256": "d0d84de06338e87e8ac0697389ae04e1dd4f1a462ed42f73e6ceb23d0dd37171",
+    "total_lines": 25,
+    "text": "1: {\n2:   \"case\": \"normal-entry\",\n3:   \"head\": \"6a3778184d43b23c5cba14e0379922377f615f52\",\n4:   \"expectation_met\": false,\n5:   \"result_path\": \"/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-11-normal-entry/result.json\",\n6:   \"tests\": {\n7:     \"argv\": [\n8:       \"/opt/homebrew/bin/go\",\n9:       \"generate\",\n10:       \"-run\",\n11:       \"^node \",\n12:       \"./app/ui\"\n13:     ],\n14:     \"cwd\": \"/Users/krypto/GitHub/ollama-eko-chat-read-integrity\",\n15:     \"exit_code\": 0,\n16:     \"timed_out\": false,\n17:     \"seconds\": 0.4578403750201687,\n18:     \"stdout\": \"/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-11-normal-entry/go-generate.stdout\",\n19:     \"stderr\": \"/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-11-normal-entry/go-generate.stderr\",\n20:     \"stdout_sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\n21:     \"stderr_sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n22:   },\n23:   \"receipt\": {},\n24:   \"source_and_dependencies_unchanged\": true\n25: }"
+  }
+}

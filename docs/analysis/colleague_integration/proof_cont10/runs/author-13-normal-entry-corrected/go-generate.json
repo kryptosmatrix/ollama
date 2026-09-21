@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/go",
+    "generate",
+    "-run",
+    "^//go:generate node ",
+    "./app/ui"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+  "exit_code": 0,
+  "timed_out": false,
+  "seconds": 6.466166625032201,
+  "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-13-normal-entry-corrected/go-generate.stdout",
+  "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-13-normal-entry-corrected/go-generate.stderr",
+  "stdout_sha256": "5be8fe4497450abcdc2f338d3de4bbb8838d3965bdb201f078540edab9d732eb",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

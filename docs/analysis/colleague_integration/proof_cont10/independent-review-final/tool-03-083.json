@@ -1,0 +1,14 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "name": "runner",
+    "start": 200,
+    "count": 23
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/validate_codegen.py",
+    "file_sha256": "7f5786820b4ac29134318b18fed1f30ae0277e547f770f2af20882d91ac0acd2",
+    "total_lines": 222,
+    "text": "200:         if case=='raw-generator':\n201:             lint=exe(['/opt/homebrew/bin/npm','exec','--no','--','eslint','codegen/gotypes.gen.ts','--format=json'],cwd,'raw-lint')\n202:             raw_lint=Path(lint['stdout']).read_text();lint_files=json.loads(raw_lint[raw_lint.index('[{'):])\n203:             messages=[m for f in lint_files for m in f['messages']]\n204:             rejected=lint['exit_code']==1 and bool(messages) and all(m['ruleId']=='@typescript-eslint/no-explicit-any' and m['severity']==2 for m in messages)\n205:             result.update(raw_lint=lint,raw_lint_findings=len(messages),raw_lint_rejected=rejected)\n206:             result['expectation_met'] &= rejected\n207:         if fault:\n208:             result['fault_bytes_unchanged_through_execution']=digest(cwd/'codegen/gotypes.gen.ts')==fault['after_sha256']\n209:             result['expectation_met'] &= result['fault_bytes_unchanged_through_execution']\n210:             # This directory is an exact owned copy of committed files plus the retained fault.\n211:             # No source, private data or unique result lives here; logs and patch remain outside it.\n212:             shutil.rmtree(cwd)\n213:             result['isolated_copy_retired']=not cwd.exists()\n214:     assert_frozen()\n215:     result['source_and_dependencies_unchanged']=True\n216:     save(target/'result.json',result)\n217:     return result\n218: \n219: if __name__=='__main__':\n220:     import argparse\n221:     p=argparse.ArgumentParser();p.add_argument('--case',choices=sorted(CASES),required=True);p.add_argument('--label',required=True)\n222:     a=p.parse_args();r=run(a.case,a.label);print(json.dumps(r,indent=2));raise SystemExit(0 if r['expectation_met'] else 1)"
+  }
+}

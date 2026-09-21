@@ -1,0 +1,103 @@
+{
+  "case": "raw-generator",
+  "head": "6a3778184d43b23c5cba14e0379922377f615f52",
+  "expectation_met": true,
+  "result_path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-4-raw-generator/result.json",
+  "collected": true,
+  "completed": true,
+  "counts": {
+    "passed": 9,
+    "failed": 1,
+    "pending": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "required_titles_discovered": true,
+  "intended_fault_detected": true,
+  "clean_tests_passed": false,
+  "failing_assertions": [
+    {
+      "title": "ships generated declarations without explicit-any syntax",
+      "messages": [
+        "AssertionError: expected [ Array(99) ] to deeply equal []\n    at /Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-4-raw-generator/frontend/src/utils/generatedModels.test.tsx:209:23\n    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)\n    at runSuite (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)"
+      ]
+    }
+  ],
+  "file_load_errors": [],
+  "compile": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "exec",
+      "--no",
+      "--",
+      "tsc",
+      "-b",
+      "--force",
+      "--pretty",
+      "false"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-4-raw-generator/frontend",
+    "exit_code": 0,
+    "timed_out": false,
+    "seconds": 19.19240225001704,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-4-raw-generator/typecheck.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-4-raw-generator/typecheck.stderr",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tests": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "test",
+      "--",
+      "--run",
+      "src/utils/generatedModels.test.tsx",
+      "--reporter=json"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-4-raw-generator/frontend",
+    "exit_code": 1,
+    "timed_out": false,
+    "seconds": 14.402112624957226,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-4-raw-generator/tests.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-4-raw-generator/tests.stderr",
+    "stdout_sha256": "fd33ca8d5f0588e8999eb91e2e3c6f67743d0a33ddd58ac0a5122e27f6d52e43",
+    "stderr_sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+  },
+  "fault": {
+    "case": "raw-generator",
+    "path": "codegen/gotypes.gen.ts",
+    "edits": [
+      {
+        "whole_file_fixture": "raw-generator.ts",
+        "sha256": "52238231b9c26abfd763cee92728890939815fdb338a1a164b7f1c9ecee1d2e3"
+      }
+    ],
+    "before_sha256": "e42678b57046bcbfbb50bb9b1d71aab9a917d06a2cb3ca4dd6ac4d49302c26b5",
+    "after_sha256": "52238231b9c26abfd763cee92728890939815fdb338a1a164b7f1c9ecee1d2e3",
+    "required_failure_title": "ships generated declarations without explicit-any syntax"
+  },
+  "raw_lint": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "exec",
+      "--no",
+      "--",
+      "eslint",
+      "codegen/gotypes.gen.ts",
+      "--format=json"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-4-raw-generator/frontend",
+    "exit_code": 1,
+    "timed_out": false,
+    "seconds": 6.047058625030331,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-4-raw-generator/raw-lint.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-4-raw-generator/raw-lint.stderr",
+    "stdout_sha256": "2d3d6bd452ee28c83e18f7a7ff41072548e7937f64ae838245c7d92084ed2d7a",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "raw_lint_findings": 99,
+  "raw_lint_rejected": true,
+  "fault_bytes_unchanged_through_execution": true,
+  "isolated_copy_retired": true,
+  "source_and_dependencies_unchanged": true
+}

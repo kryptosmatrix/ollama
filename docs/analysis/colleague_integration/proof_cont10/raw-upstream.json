@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/go",
+    "run",
+    "github.com/tkrajina/typescriptify-golang-structs/tscriptify",
+    "-package=github.com/ollama/ollama/app/ui/responses",
+    "-target=/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/fresh-upstream.ts",
+    "responses/types.go"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui",
+  "exit_code": 0,
+  "timed_out": false,
+  "seconds": 3.681626374949701,
+  "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/raw-upstream.stdout",
+  "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/raw-upstream.stderr",
+  "stdout_sha256": "282c2281979fe72571c3d3eefe3b732d0e73ee99b7e265e19d23ebb2aca0d978",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

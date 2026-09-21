@@ -1,0 +1,94 @@
+{
+  "case": "no-messages",
+  "head": "6a3778184d43b23c5cba14e0379922377f615f52",
+  "expectation_met": true,
+  "result_path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-5-no-messages/result.json",
+  "collected": true,
+  "completed": true,
+  "counts": {
+    "passed": 7,
+    "failed": 3,
+    "pending": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "required_titles_discovered": true,
+  "intended_fault_detected": true,
+  "clean_tests_passed": false,
+  "failing_assertions": [
+    {
+      "title": "materialises nested chat models through the real API consumer",
+      "messages": [
+        "AssertionError: expected [] to have a length of 2 but got +0\n    at Proxy.<anonymous> (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/expect/dist/index.js:1257:20)\n    at Proxy.<anonymous> (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/expect/dist/index.js:1029:14)\n    at Proxy.methodWrapper (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/chai/chai.js:1618:25)\n    at /Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-5-no-messages/frontend/src/utils/generatedModels.test.tsx:87:36\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+      ]
+    },
+    {
+      "title": "delivers distinct decoded content to the real Markdown renderer",
+      "messages": [
+        "TypeError: Cannot read properties of undefined (reading 'content')\n    at render (/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-5-no-messages/frontend/src/utils/generatedModels.test.tsx:119:70)\n    at /Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-5-no-messages/frontend/src/utils/generatedModels.test.tsx:121:19\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+      ]
+    },
+    {
+      "title": "keeps string and object constructor inputs equivalent without mutating their values",
+      "messages": [
+        "AssertionError: expected undefined to be an instance of Message\n    at Proxy.<anonymous> (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/expect/dist/index.js:1254:15)\n    at Proxy.<anonymous> (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/expect/dist/index.js:1029:14)\n    at Proxy.methodWrapper (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/chai/chai.js:1618:25)\n    at /Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-5-no-messages/frontend/src/utils/generatedModels.test.tsx:137:37\n    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)"
+      ]
+    }
+  ],
+  "file_load_errors": [],
+  "compile": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "exec",
+      "--no",
+      "--",
+      "tsc",
+      "-b",
+      "--force",
+      "--pretty",
+      "false"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-5-no-messages/frontend",
+    "exit_code": 0,
+    "timed_out": false,
+    "seconds": 20.65227316704113,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-5-no-messages/typecheck.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-5-no-messages/typecheck.stderr",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tests": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "test",
+      "--",
+      "--run",
+      "src/utils/generatedModels.test.tsx",
+      "--reporter=json"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-5-no-messages/frontend",
+    "exit_code": 1,
+    "timed_out": false,
+    "seconds": 15.18091866595205,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-5-no-messages/tests.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-5-no-messages/tests.stderr",
+    "stdout_sha256": "ef78d6f7aa783ff0b7a49ad8bccf3a5376c66eefb20a2c311a3eef5c8f88a969",
+    "stderr_sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+  },
+  "fault": {
+    "case": "no-messages",
+    "path": "codegen/gotypes.gen.ts",
+    "edits": [
+      {
+        "old": "this.messages = this.convertValues((source as Record<string, unknown>)[\"messages\"], Message) as Chat[\"messages\"];",
+        "new": "this.messages = [] as Chat[\"messages\"];"
+      }
+    ],
+    "before_sha256": "e42678b57046bcbfbb50bb9b1d71aab9a917d06a2cb3ca4dd6ac4d49302c26b5",
+    "after_sha256": "de9cf12f9cc52f2e5fa177af15691febdc6f402777bbad7c55e68709e88b9ee8",
+    "required_failure_title": "materialises nested chat models through the real API consumer"
+  },
+  "fault_bytes_unchanged_through_execution": true,
+  "isolated_copy_retired": true,
+  "source_and_dependencies_unchanged": true
+}

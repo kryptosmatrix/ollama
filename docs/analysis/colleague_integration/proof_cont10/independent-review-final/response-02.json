@@ -1,0 +1,52 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "created_at": "2026-09-21T06:36:06.818117635Z",
+  "message": {
+    "role": "assistant",
+    "content": "Now the runner, executor, tsconfig, and vitest config.",
+    "tool_calls": [
+      {
+        "id": "call_a71phefo",
+        "function": {
+          "index": 0,
+          "name": "read_source",
+          "arguments": {
+            "name": "runner",
+            "start": 1,
+            "count": 200
+          }
+        }
+      },
+      {
+        "id": "call_yy1vditp",
+        "function": {
+          "index": 1,
+          "name": "read_source",
+          "arguments": {
+            "name": "tsconfig",
+            "start": 1,
+            "count": 60
+          }
+        }
+      },
+      {
+        "id": "call_xa18z4p4",
+        "function": {
+          "index": 2,
+          "name": "read_source",
+          "arguments": {
+            "name": "vitest_config",
+            "start": 1,
+            "count": 60
+          }
+        }
+      }
+    ]
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 1559789255,
+  "prompt_eval_count": 53882,
+  "prompt_eval_cached_count": 50298,
+  "eval_count": 206
+}

@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/npm",
+    "exec",
+    "--no",
+    "--",
+    "eslint",
+    "codegen/gotypes.gen.ts",
+    "--format=json"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-14-raw-lint/frontend",
+  "exit_code": 1,
+  "timed_out": false,
+  "seconds": 4.833683707984164,
+  "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-14-raw-lint/raw-lint.stdout",
+  "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-14-raw-lint/raw-lint.stderr",
+  "stdout_sha256": "e6174bcd3a0bcf19646cb8f1cd57a8e9528ae7fec14ef8268e13e5c2a70acc92",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

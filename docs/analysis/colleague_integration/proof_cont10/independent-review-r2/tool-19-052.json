@@ -1,0 +1,17 @@
+{
+  "name": "read_run_output",
+  "arguments": {
+    "ordinal": 7,
+    "stream": "stdout",
+    "offset": 49000,
+    "count": 900
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-7-full/tests.stdout",
+    "file_sha256": "212b82fb93b9dcf3db5c15c7ab7f7aa63b184a8adaf591db9b31d122d3ecf935",
+    "total_bytes": 49849,
+    "offset": 49000,
+    "next_offset": 49849,
+    "content": "llName\":\"VRAM Utilities getTotalVRAM should handle empty array\",\"status\":\"passed\",\"title\":\"should handle empty array\",\"duration\":0.14174999999977445,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"VRAM Utilities\",\"getTotalVRAM\"],\"fullName\":\"VRAM Utilities getTotalVRAM should handle single compute\",\"status\":\"passed\",\"title\":\"should handle single compute\",\"duration\":0.07687499999974534,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"VRAM Utilities\",\"getTotalVRAM\"],\"fullName\":\"VRAM Utilities getTotalVRAM should handle decimal values\",\"status\":\"passed\",\"title\":\"should handle decimal values\",\"duration\":0.06408300000020972,\"failureMessages\":[],\"meta\":{}}],\"startTime\":1789972111830,\"endTime\":1789972111855.223,\"status\":\"passed\",\"message\":\"\",\"name\":\"/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/src/utils/vram.test.ts\"}]}\n"
+  }
+}

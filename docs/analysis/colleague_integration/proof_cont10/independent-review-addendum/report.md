@@ -1,0 +1,22 @@
+## Addendum — same review, unchanged candidate
+
+**What the newly delivered full sources establish.**
+
+*Renderer (353 lines, complete).* The consumer body is real: `StreamingMarkdownContent` (line 133) memoises `remarkPlugins` (gfm, math, `remarkCitationParser`), renders `<Streamdown>` with `safeRehypePlugins`, `controls={false}`, custom `img`/`pre`/`table`/`ol-citation` components, and passes `{content}` at lines 288–289. The `ol-citation` component reads `browserToolResult?.page_stack` and indexes `pageStack[cursor]` (line 249) — the exact behaviour the `wrong-page`/`no-citations` faults target. The error boundary (310–351) falls back to plain `{content}`. This confirms the default consumer test's `delivers distinct decoded content to the real Markdown renderer` exercises genuine Markdown→Streamdown rendering, not a stub. No contradiction with the pass.
+
+*Transport (197 lines, complete).* `execute` uses `Popen` with `start_new_session=True`, real exit codes, timeouts, and hashed stdout/stderr; `run` copies committed sources into an isolated dir, symlinks `node_modules`, applies the fault with an exact-once anchor check, compiles first, then requires the named assertion to fail. `met` requires `collected and completed and unchanged and compile exit 0 and (clean or detected)`. This is the same instrument my eleven runs used; nothing hidden contradicts the earlier results.
+
+*Raw-lint (99 findings, exit 1).* The full JSON shows every message is `@typescript-eslint/no-explicit-any`, severity 2, `errorCount:99`, `warningCount:0`, and the embedded `source` is the raw upstream file (`constructor(source: any = {})`, `source["id"]` unguarded). This closes the read-tool gap I disclosed: the real ESLint rule genuinely rejects raw output, and the runner's strict all-messages-are-no-explicit-any check is satisfied.
+
+**Genuine defects / remaining proof gaps.** None found within scope. The delivered sources confirm rather than contradict the pass. Residual limits stand: the raw-lint file was previously unaddressable through my read tool (now supplied); the renderer/transport are Node SSR, not browser styling or app launch; HTTP transport is simulated.
+
+**Factual corrections to my preserved report.**
+1. The directive is `//go:generate node ./app/codegen/generate.mjs` (ui.go:42), not `node ./app/ui`.
+2. There are **four** JSON-owner annotations in `responses/types.go` (`ToolResultData`, `ApprovalArgs`, `ToolState`, `Think`) and **one** in `store.go` (`ToolFunction.Result`, line 97) — five total, not five in responses alone.
+3. Lint comparison is equality of normalised diagnostic tuples (relative path, rule, severity, message, line, column), not raw stdout byte equality.
+4. The annotator uses AST-bounded erased text edits (parsed ranges, `replace`/`insert`), not an AST-printer rewrite.
+5. Chronology: some source inspections occurred after my executions, not all before.
+
+**Existing limits (unchanged, not waived).** Full lint exits 1 (18 handwritten errors, 11 warnings); generated target clean; Browserslist/sourcemap/build warnings retained; root/Keychain/package/main-integration/installation, browser interaction, privacy isolation and memory/autonomy outside this bounded result. Not a JSON validator; legacy time/byte/raw-JSON quirks not blessed.
+
+JUDGE=PASS

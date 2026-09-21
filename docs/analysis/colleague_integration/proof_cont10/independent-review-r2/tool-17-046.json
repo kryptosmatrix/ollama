@@ -1,0 +1,14 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "name": "package",
+    "start": 1,
+    "count": 60
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/package.json",
+    "file_sha256": "0adafa6516c25fe8ff4517558a2e08497008bc186b4efc557b9227b0b2a85c43",
+    "total_lines": 85,
+    "text": "1: {\n2:   \"name\": \"app\",\n3:   \"private\": true,\n4:   \"version\": \"0.0.0\",\n5:   \"type\": \"module\",\n6:   \"scripts\": {\n7:     \"dev\": \"vite\",\n8:     \"generate:types\": \"node codegen/generate.mjs\",\n9:     \"check:types\": \"node codegen/generate.mjs --check\",\n10:     \"test:codegen\": \"node --test --test-reporter=tap codegen/generate.checks.mjs\",\n11:     \"build\": \"tsc -b && vite build\",\n12:     \"lint\": \"eslint .\",\n13:     \"preview\": \"vite preview\",\n14:     \"prettier\": \"prettier --write .\",\n15:     \"prettier:check\": \"prettier --check .\",\n16:     \"storybook\": \"storybook dev -p 6006\",\n17:     \"build-storybook\": \"storybook build\",\n18:     \"test\": \"vitest\",\n19:     \"test:ui\": \"vitest --ui\",\n20:     \"test:coverage\": \"vitest --coverage\"\n21:   },\n22:   \"dependencies\": {\n23:     \"@headlessui/react\": \"^2.2.4\",\n24:     \"@heroicons/react\": \"^2.2.0\",\n25:     \"@tanstack/react-query\": \"^5.80.7\",\n26:     \"@tanstack/react-router\": \"^1.120.20\",\n27:     \"@tanstack/react-router-devtools\": \"^1.120.20\",\n28:     \"clsx\": \"^2.1.1\",\n29:     \"framer-motion\": \"^12.17.0\",\n30:     \"katex\": \"^0.16.22\",\n31:     \"micromark-extension-llm-math\": \"^3.1.0\",\n32:     \"ollama\": \"^0.6.0\",\n33:     \"react\": \"^19.1.0\",\n34:     \"react-dom\": \"^19.1.0\",\n35:     \"rehype-katex\": \"^7.0.1\",\n36:     \"rehype-prism-plus\": \"^2.0.1\",\n37:     \"rehype-raw\": \"^7.0.0\",\n38:     \"rehype-sanitize\": \"^6.0.0\",\n39:     \"remark-math\": \"^6.0.0\",\n40:     \"streamdown\": \"^1.4.0\",\n41:     \"unist-builder\": \"^4.0.0\",\n42:     \"unist-util-parents\": \"^3.0.0\"\n43:   },\n44:   \"devDependencies\": {\n45:     \"@chromatic-com/storybook\": \"^4.0.1\",\n46:     \"@eslint/js\": \"^9.25.0\",\n47:     \"@storybook/addon-a11y\": \"^9.0.14\",\n48:     \"@storybook/addon-docs\": \"^9.0.14\",\n49:     \"@storybook/addon-onboarding\": \"^9.0.14\",\n50:     \"@storybook/addon-vitest\": \"^9.0.14\",\n51:     \"@storybook/react-vite\": \"^9.0.14\",\n52:     \"@tailwindcss/typography\": \"^0.5.16\",\n53:     \"@tailwindcss/vite\": \"^4.1.11\",\n54:     \"@tanstack/router-plugin\": \"^1.120.20\",\n55:     \"@types/node\": \"^24.7.2\",\n56:     \"@types/react\": \"^19.1.2\",\n57:     \"@types/react-dom\": \"^19.1.2\",\n58:     \"@vitejs/plugin-react\": \"^4.4.1\",\n59:     \"@vitest/browser\": \"^3.2.4\",\n60:     \"@vitest/coverage-v8\": \"^3.2.4\","
+  }
+}

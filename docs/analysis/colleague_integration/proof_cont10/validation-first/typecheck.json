@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/.bin/tsc",
+    "-b",
+    "--force"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+  "exit_code": 0,
+  "seconds": 41.78242979198694,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

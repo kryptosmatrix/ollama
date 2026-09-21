@@ -1,0 +1,53 @@
+{
+  "before": {
+    "STATE.json": "bc26cce0b54296d6859ef3580a0a03a1e4676907e2540004f8a3329d876feed6",
+    "HANDOFF.md": "153f7f866208f283ec286df15cf6774b0d42315249ad6a9ac5f5c620a703fc2e",
+    "BLOCKERS.md": "b762a4a0a029252eecd7e7af302e99806f5e0813f2ccc87b9b4428aa7d04c012",
+    "DECISIONS.md": "afed9ecef5ddf98d400d1ed16566f186a8e85041a80431f860587c26bea1f9e4",
+    "REQUIREMENTS.md": "2d2c4095e9320ff6c0cb4e40f57bc7875eaa856817e9fc976710a5434e028b86",
+    "SOURCE_MAP.md": "b9e46576895492f5af1264afad6f080487a09d1e0a1b5a1b033f005d11e70e0d"
+  },
+  "after": {
+    "STATE.json": "d4f56f9ecf8bec66c0189ad142ea68526b7b9fff56b2a61333929a74c045da2e",
+    "HANDOFF.md": "28e4ad5dbea27df60b168121260514d3c366635f1ad9b97858cdb01d1d190c37",
+    "BLOCKERS.md": "0388b1b7ce4f7bd78f5864b7b778e5cc1845d1715fa9cec0c16483f5d917540d",
+    "DECISIONS.md": "906d99b06d4aa62f5a74f5438ebc6ae02a382edd5789da619c66c806e3e79835",
+    "REQUIREMENTS.md": "01ee0e95b09f1c7a8221db4202e7b2543c21dafbde0cf5be40f04d6120d2d6d2",
+    "SOURCE_MAP.md": "936c04c5ca1b3d56f540529320262d6cf377215db86965d71225290b10499397"
+  },
+  "programme_inventory_ids": [
+    "OI-01",
+    "OI-02",
+    "OI-03",
+    "OI-04",
+    "OI-05",
+    "OI-06",
+    "OI-07",
+    "OI-08",
+    "OI-09",
+    "OI-10",
+    "OI-11",
+    "OI-12",
+    "OI-13",
+    "OI-14",
+    "OI-15",
+    "OI-16",
+    "OI-17",
+    "OI-18",
+    "OI-19",
+    "OI-20",
+    "OI-21",
+    "OI-22",
+    "OI-23",
+    "OI-24",
+    "OI-25",
+    "OI-26",
+    "OI-27",
+    "OI-28",
+    "OI-29",
+    "OI-30",
+    "OI-31"
+  ],
+  "programme_accepted_items": 0,
+  "bounded_maintenance_accepted": true
+}

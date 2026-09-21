@@ -1,0 +1,26 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "created_at": "2026-09-21T06:25:14.937440602Z",
+  "message": {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "call_h3h3fdym",
+        "function": {
+          "index": 0,
+          "name": "run_validation",
+          "arguments": {
+            "case": "raw-generator"
+          }
+        }
+      }
+    ]
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 811575930,
+  "prompt_eval_count": 28061,
+  "prompt_eval_cached_count": 24470,
+  "eval_count": 41
+}

@@ -1,0 +1,88 @@
+{
+  "case": "fixed-content",
+  "head": "6a3778184d43b23c5cba14e0379922377f615f52",
+  "expectation_met": true,
+  "result_path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-6-fixed-content/result.json",
+  "collected": true,
+  "completed": true,
+  "counts": {
+    "passed": 8,
+    "failed": 2,
+    "pending": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "required_titles_discovered": true,
+  "intended_fault_detected": true,
+  "clean_tests_passed": false,
+  "failing_assertions": [
+    {
+      "title": "materialises nested chat models through the real API consumer",
+      "messages": [
+        "AssertionError: expected 'constant fault' to be 'Follow-up alpha' // Object.is equality\n    at /Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-6-fixed-content/frontend/src/utils/generatedModels.test.tsx:99:47\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+      ]
+    },
+    {
+      "title": "delivers distinct decoded content to the real Markdown renderer",
+      "messages": [
+        "AssertionError: expected '<div class=\"\\n          max-w-full\\n …' to contain 'Alpha'\n    at /Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-6-fixed-content/frontend/src/utils/generatedModels.test.tsx:123:19\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+      ]
+    }
+  ],
+  "file_load_errors": [],
+  "compile": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "exec",
+      "--no",
+      "--",
+      "tsc",
+      "-b",
+      "--force",
+      "--pretty",
+      "false"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-6-fixed-content/frontend",
+    "exit_code": 0,
+    "timed_out": false,
+    "seconds": 22.58606149989646,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-6-fixed-content/typecheck.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-6-fixed-content/typecheck.stderr",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tests": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "test",
+      "--",
+      "--run",
+      "src/utils/generatedModels.test.tsx",
+      "--reporter=json"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-6-fixed-content/frontend",
+    "exit_code": 1,
+    "timed_out": false,
+    "seconds": 14.967137917061336,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-6-fixed-content/tests.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-6-fixed-content/tests.stderr",
+    "stdout_sha256": "611fb917cc6977f369eff4e59664d43d1e9a4f6ab8517c46483da7ae31c8162a",
+    "stderr_sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+  },
+  "fault": {
+    "case": "fixed-content",
+    "path": "codegen/gotypes.gen.ts",
+    "edits": [
+      {
+        "old": "this.content = (source as Record<string, unknown>)[\"content\"] as Message[\"content\"];",
+        "new": "this.content = \"constant fault\" as Message[\"content\"];"
+      }
+    ],
+    "before_sha256": "e42678b57046bcbfbb50bb9b1d71aab9a917d06a2cb3ca4dd6ac4d49302c26b5",
+    "after_sha256": "13d61de14972cd62a4ae58e2f52a6b10a135d28fd1dfe15f428e0d8644d903c4",
+    "required_failure_title": "delivers distinct decoded content to the real Markdown renderer"
+  },
+  "fault_bytes_unchanged_through_execution": true,
+  "isolated_copy_retired": true,
+  "source_and_dependencies_unchanged": true
+}

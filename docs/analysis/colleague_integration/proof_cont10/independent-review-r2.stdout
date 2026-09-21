@@ -1,0 +1,11 @@
+JUDGE_RAN candidate EXPECTED True COUNTS {'passed': 10, 'failed': 0, 'pending': 0, 'skipped': 0, 'todo': 0}
+JUDGE_RAN generation EXPECTED True COUNTS {'tests': 22, 'pass': 22, 'fail': 0, 'cancelled': 0, 'skipped': 0, 'todo': 0}
+JUDGE_RAN normal-entry EXPECTED True COUNTS None
+JUDGE_RAN raw-generator EXPECTED True COUNTS {'passed': 9, 'failed': 1, 'pending': 0, 'skipped': 0, 'todo': 0}
+JUDGE_RAN no-messages EXPECTED True COUNTS {'passed': 7, 'failed': 3, 'pending': 0, 'skipped': 0, 'todo': 0}
+JUDGE_RAN fixed-content EXPECTED True COUNTS {'passed': 8, 'failed': 2, 'pending': 0, 'skipped': 0, 'todo': 0}
+JUDGE_RAN full EXPECTED True COUNTS {'passed': 164, 'failed': 0, 'pending': 0, 'skipped': 0, 'todo': 0}
+JUDGE_RAN go-store EXPECTED True COUNTS {'started': 42, 'passed': 42, 'top_level': 17, 'bad': 0}
+JUDGE_RAN gate-self-checks EXPECTED True COUNTS None
+JUDGE_RAN build EXPECTED True COUNTS None
+JUDGE_RAN candidate EXPECTED True COUNTS {'passed': 10, 'failed': 0, 'pending': 0, 'skipped': 0, 'todo': 0}

@@ -1,0 +1,61 @@
+{
+  "case": "candidate",
+  "head": "6a3778184d43b23c5cba14e0379922377f615f52",
+  "expectation_met": true,
+  "result_path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-6-candidate/result.json",
+  "collected": true,
+  "completed": true,
+  "counts": {
+    "passed": 10,
+    "failed": 0,
+    "pending": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "required_titles_discovered": true,
+  "intended_fault_detected": false,
+  "clean_tests_passed": true,
+  "failing_assertions": [],
+  "file_load_errors": [],
+  "compile": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "exec",
+      "--no",
+      "--",
+      "tsc",
+      "-b",
+      "--force",
+      "--pretty",
+      "false"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+    "exit_code": 0,
+    "timed_out": false,
+    "seconds": 20.995267749996856,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-6-candidate/typecheck.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-6-candidate/typecheck.stderr",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tests": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "test",
+      "--",
+      "--run",
+      "src/utils/generatedModels.test.tsx",
+      "--reporter=json"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+    "exit_code": 0,
+    "timed_out": false,
+    "seconds": 11.901634291978553,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-6-candidate/tests.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-6-candidate/tests.stderr",
+    "stdout_sha256": "03de25a11c1c55f93061cf99b12d015203dc78ea71315d6c35982d20fc70e85b",
+    "stderr_sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+  },
+  "fault": null,
+  "source_and_dependencies_unchanged": true
+}

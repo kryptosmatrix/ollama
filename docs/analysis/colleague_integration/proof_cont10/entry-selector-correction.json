@@ -1,0 +1,9 @@
+{
+  "finding": "Eko used an incorrect go generate -run selector. Go matched the full directive line; ^node selected nothing and exited 0. The receipt gate correctly rejected it.",
+  "failed_run": "runs/author-11-normal-entry/result.json",
+  "evidence": "entry-selector-diagnosis/",
+  "repair": "Change only the proof command selector to ^//go:generate node. Production unchanged; no positive assertion changed.",
+  "impact": "Independent review was not launched; no acceptance, merge or installation was declared.",
+  "public_primary_reference": "https://go.dev/src/cmd/go/alldocs.go (generate -run full original source text)",
+  "disposition": "Test-instrument defect corrected; failed run preserved, rerun required."
+}

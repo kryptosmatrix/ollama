@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/npm",
+    "test",
+    "--",
+    "--run",
+    "src/utils/generatedModels.test.tsx",
+    "--reporter=json"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+  "exit_code": 0,
+  "timed_out": false,
+  "seconds": 11.210285541019402,
+  "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-15-final/tests.stdout",
+  "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-15-final/tests.stderr",
+  "stdout_sha256": "6883b22d5a6b1b2181b04c1ec3c91f1b051d35fb2af69915c51bf7da04379440",
+  "stderr_sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+}

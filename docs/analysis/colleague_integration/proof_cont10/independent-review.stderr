@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/review_codegen.py", line 119, in <module>
+    if __name__=='__main__':raise SystemExit(main())
+                                             ~~~~^^
+  File "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/review_codegen.py", line 105, in main
+    if type(start)!=int or type(count)!=int or start<1 or not 1<=count<=450:raise ValueError('Invalid read bounds')
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Invalid read bounds

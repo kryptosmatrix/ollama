@@ -1,0 +1,45 @@
+{
+  "case": "generation",
+  "head": "6a3778184d43b23c5cba14e0379922377f615f52",
+  "expectation_met": true,
+  "result_path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-2-generation/result.json",
+  "tests": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "run",
+      "test:codegen"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+    "exit_code": 0,
+    "timed_out": false,
+    "seconds": 27.540199249982834,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-2-generation/generator-tests.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-2-generation/generator-tests.stderr",
+    "stdout_sha256": "85b657d305d46cac50cb0742b16ef091b07c03616404dc7d68d6ad84e2a2cc29",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "check_types": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "run",
+      "check:types"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+    "exit_code": 0,
+    "timed_out": false,
+    "seconds": 7.633844874915667,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-2-generation/check-types.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-2-generation/check-types.stderr",
+    "stdout_sha256": "5c417ec11cd55d29c11afa2b653f36f47edfe7ff00057380b0c3bb0835cda485",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "counts": {
+    "tests": 22,
+    "pass": 22,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "source_and_dependencies_unchanged": true
+}

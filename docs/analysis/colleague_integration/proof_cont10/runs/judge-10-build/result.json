@@ -1,0 +1,23 @@
+{
+  "case": "build",
+  "head": "6a3778184d43b23c5cba14e0379922377f615f52",
+  "expectation_met": true,
+  "result_path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-10-build/result.json",
+  "tests": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "run",
+      "build"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+    "exit_code": 0,
+    "timed_out": false,
+    "seconds": 65.72949674993288,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-10-build/build.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-10-build/build.stderr",
+    "stdout_sha256": "be2ba71991d72314f0b3d1e6a68bfe686403b50fdb06c97f0fd78c24e4f7ad4a",
+    "stderr_sha256": "7cb0f022ea81adb449ae9f49e0fd651734f8ec69d9a75931c2d821d1c80f8f7a"
+  },
+  "warning_limit": "Existing dependency and build warnings retained; not a clean whole-programme gate",
+  "source_and_dependencies_unchanged": true
+}

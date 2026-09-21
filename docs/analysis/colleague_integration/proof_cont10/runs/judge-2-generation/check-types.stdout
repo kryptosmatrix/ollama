@@ -1,0 +1,92 @@
+
+> app@0.0.0 check:types
+> node codegen/generate.mjs --check
+
+{
+  "classes": 35,
+  "helpers": 16,
+  "raw_sha256": "5c243e47f525e822765979531e64081ed52bd591261be2f36d24f5912fd33ab9",
+  "emission": {
+    "compiler": "5.8.3",
+    "config_sha256": "77e0bc69de1e379dd2725a2ab2e7dab81eba688149b0a3d8a50ff7dcbc828d02",
+    "options": {
+      "baseUrl": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+      "tsBuildInfoFile": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/.tmp/tsconfig.app.tsbuildinfo",
+      "target": 7,
+      "useDefineForClassFields": true,
+      "lib": [
+        "lib.es2020.d.ts",
+        "lib.dom.d.ts",
+        "lib.dom.iterable.d.ts"
+      ],
+      "module": 99,
+      "skipLibCheck": true,
+      "types": [],
+      "moduleResolution": 100,
+      "allowImportingTsExtensions": false,
+      "verbatimModuleSyntax": true,
+      "moduleDetection": 3,
+      "noEmit": false,
+      "jsx": 4,
+      "strict": true,
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
+      "erasableSyntaxOnly": true,
+      "noFallthroughCasesInSwitch": true,
+      "noUncheckedSideEffectImports": true,
+      "paths": {
+        "@/gotypes": [
+          "codegen/gotypes.gen.ts"
+        ],
+        "@/*": [
+          "src/*"
+        ]
+      },
+      "pathsBasePath": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+      "removeComments": true,
+      "sourceMap": false,
+      "inlineSourceMap": false
+    },
+    "overrides": {
+      "noEmit": false,
+      "allowImportingTsExtensions": false,
+      "removeComments": true,
+      "sourceMap": false,
+      "inlineSourceMap": false
+    },
+    "javascript_sha256": "b25ca8e6b74f0aaab8871f17c6b65be7dbde79da63c9f1755ab34de19108d5d5",
+    "javascript_bytes": 53014,
+    "identical": true
+  },
+  "generator_version": "v0.2.0",
+  "upstream_runs": [
+    {
+      "argv": [
+        "go",
+        "list",
+        "-m",
+        "-json",
+        "github.com/tkrajina/typescriptify-golang-structs"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n\t\"Path\": \"github.com/tkrajina/typescriptify-golang-structs\",\n\t\"Version\": \"v0.2.0\",\n\t\"Time\": \"2024-10-18T10:54:16Z\",\n\t\"Dir\": \"/Users/krypto/go/pkg/mod/github.com/tkrajina/typescriptify-golang-structs@v0.2.0\",\n\t\"GoMod\": \"/Users/krypto/go/pkg/mod/cache/download/github.com/tkrajina/typescriptify-golang-structs/@v/v0.2.0.mod\",\n\t\"GoVersion\": \"1.16\",\n\t\"Sum\": \"h1:ZedWk82egydDspGTryAatbX0/1NZDQbdiZLoCbOk4f8=\",\n\t\"GoModSum\": \"h1:sjU00nti/PMEOZb07KljFlR+lJ+RotsC0GBQMv9EKls=\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "go",
+        "run",
+        "github.com/tkrajina/typescriptify-golang-structs/tscriptify",
+        "-package=github.com/ollama/ollama/app/ui/responses",
+        "-target=/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/ollama-gotypes-iHGk14/gotypes.raw.ts",
+        "responses/types.go"
+      ],
+      "exit_code": 0,
+      "stdout": "Parsing: responses/types.go\ngo run /var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/ollama-gotypes-iHGk14/typescriptify_779426111.go\nConverting type responses.ChatInfo\n- simple field ChatInfo.ID\n- simple field ChatInfo.Title\n- simple field ChatInfo.UserExcerpt\n- simple field ChatInfo.CreatedAt\n- simple field ChatInfo.UpdatedAt\nConverting type responses.ChatsResponse\n- struct slice ChatsResponse.ChatInfos ([]responses.ChatInfo)\nConverting type responses.ChatResponse\n- struct ChatResponse.Chat (store.Chat)\n   Converting type store.Chat\n   - simple field Chat.ID\n   - struct slice Chat.Messages ([]store.Message)\n      Converting type store.Message\n      - simple field Message.Role\n      - simple field Message.Content\n      - simple field Message.Thinking\n      - simple field Message.Stream\n      - simple field Message.Model\n      - struct slice Message.Attachments ([]store.File)\n         Converting type store.File\n         - simple field File.Filename\n         - slice field File.Data\n      - struct slice Message.ToolCalls ([]store.ToolCall)\n         Converting type store.ToolCall\n         - simple field ToolCall.Type\n         - struct ToolCall.Function (store.ToolFunction)\n            Converting type store.ToolFunction\n            - simple field ToolFunction.Name\n            - simple field ToolFunction.Arguments\n            - simple field ToolFunction.Result\n      - struct Message.ToolCall (store.ToolCall)\n      - simple field Message.ToolName\n      - slice field Message.ToolResult\n      - struct Message.CreatedAt (time.Time)\n         Converting type time.Time\n      - struct Message.UpdatedAt (time.Time)\n      - simple field Message.ThinkingTimeStart\n      - simple field Message.ThinkingTimeEnd\n   - simple field Chat.Title\n   - struct Chat.CreatedAt (time.Time)\n   - simple field Chat.BrowserState\nConverting type responses.Model\n- simple field Model.Model\n- simple field Model.Digest\n- struct Model.ModifiedAt (time.Time)\nConverting type responses.ModelsResponse\n- struct slice ModelsResponse.Models ([]responses.Model)\nConverting type responses.InferenceCompute\n- simple field InferenceCompute.Library\n- simple field InferenceCompute.Variant\n- simple field InferenceCompute.Compute\n- simple field InferenceCompute.Driver\n- simple field InferenceCompute.Name\n- simple field InferenceCompute.VRAM\nConverting type responses.InferenceComputeResponse\n- struct slice InferenceComputeResponse.InferenceComputes ([]responses.InferenceCompute)\n- simple field InferenceComputeResponse.DefaultContextLength\nConverting type responses.ModelCapabilitiesResponse\n- slice field ModelCapabilitiesResponse.Capabilities\nConverting type responses.ChatEvent\n- simple field ChatEvent.EventName\n- simple field ChatEvent.Content\n- simple field ChatEvent.Thinking\n- simple field ChatEvent.ThinkingTimeStart\n- simple field ChatEvent.ThinkingTimeEnd\n- struct slice ChatEvent.ToolCalls ([]store.ToolCall)\n- struct ChatEvent.ToolCall (store.ToolCall)\n- simple field ChatEvent.ToolName\n- simple field ChatEvent.ToolResult\n- simple field ChatEvent.ToolResultData\n- simple field ChatEvent.ChatID\n- simple field ChatEvent.ApprovalID\n- simple field ChatEvent.ApprovalScope\n- simple field ChatEvent.ApprovalArgs\n- simple field ChatEvent.ToolState\nConverting type responses.DownloadEvent\n- simple field DownloadEvent.EventName\n- simple field DownloadEvent.Total\n- simple field DownloadEvent.Completed\n- simple field DownloadEvent.Done\nConverting type responses.ErrorEvent\n- simple field ErrorEvent.EventName\n- simple field ErrorEvent.Error\n- simple field ErrorEvent.Code\n- simple field ErrorEvent.Details\nConverting type responses.SettingsResponse\n- struct SettingsResponse.Settings (store.Settings)\n   Converting type store.Settings\n   - simple field Settings.Expose\n   - simple field Settings.Browser\n   - simple field Settings.Survey\n   - simple field Settings.Models\n   - simple field Settings.Agent\n   - simple field Settings.Tools\n   - simple field Settings.WorkingDir\n   - simple field Settings.ContextLength\n   - simple field Settings.TurboEnabled\n   - simple field Settings.WebSearchEnabled\n   - simple field Settings.ThinkEnabled\n   - simple field Settings.ThinkLevel\n   - simple field Settings.SelectedModel\n   - simple field Settings.SidebarOpen\n   - simple field Settings.LastHomeView\n   - simple field Settings.AutoUpdateEnabled\n   - simple field Settings.AutoApproveTools\nConverting type responses.HealthResponse\n- simple field HealthResponse.Healthy\nConverting type responses.User\n- simple field User.ID\n- simple field User.Email\n- simple field User.Name\n- simple field User.Bio\n- simple field User.AvatarURL\n- simple field User.FirstName\n- simple field User.LastName\n- simple field User.Plan\nConverting type responses.Attachment\n- simple field Attachment.Filename\n- simple field Attachment.Data\nConverting type responses.ChatRequest\n- simple field ChatRequest.Model\n- simple field ChatRequest.Prompt\n- simple field ChatRequest.Index\n- struct slice ChatRequest.Attachments ([]responses.Attachment)\n- simple field ChatRequest.WebSearch\n- simple field ChatRequest.FileTools\n- simple field ChatRequest.ForceUpdate\n- simple field ChatRequest.Think\nConverting type responses.Error\n- simple field Error.Error\nConverting type responses.ModelUpstreamResponse\n- simple field ModelUpstreamResponse.Stale\n- simple field ModelUpstreamResponse.Error\nConverting type responses.BrowserStateData\n- slice field BrowserStateData.PageStack\n- simple field BrowserStateData.ViewTokens\n- map field BrowserStateData.URLToPage\n   Converting type responses.Page\n   - simple field Page.URL\n   - simple field Page.Title\n   - simple field Page.Text\n   - slice field Page.Lines\n   - simple field Page.Links\n   - struct Page.FetchedAt (time.Time)\nConverting type responses.MCPTool\n- simple field MCPTool.Name\n- simple field MCPTool.Description\nConverting type responses.MCPSkippedTool\n- simple field MCPSkippedTool.Name\n- simple field MCPSkippedTool.Reason\nConverting type responses.MCPServer\n- simple field MCPServer.Name\n- simple field MCPServer.Status\n- simple field MCPServer.Transport\n- simple field MCPServer.Runs\n- simple field MCPServer.Enabled\n- simple field MCPServer.Approved\n- simple field MCPServer.Changed\n- simple field MCPServer.PreviouslyRan\n- simple field MCPServer.Error\n- struct slice MCPServer.Tools ([]responses.MCPTool)\n- struct slice MCPServer.Skipped ([]responses.MCPSkippedTool)\n- simple field MCPServer.CanSignIn\n- simple field MCPServer.SignedIn\n- simple field MCPServer.SigningIn\n- slice field MCPServer.Warnings\n- simple field MCPServer.TokenStore\nConverting type responses.MCPServersResponse\n- struct slice MCPServersResponse.Servers ([]responses.MCPServer)\nConverting type responses.MCPRegistryEntry\n- simple field MCPRegistryEntry.Name\n- simple field MCPRegistryEntry.Title\n- simple field MCPRegistryEntry.Description\n- simple field MCPRegistryEntry.Version\n- simple field MCPRegistryEntry.Publisher\n- simple field MCPRegistryEntry.Repository\n- simple field MCPRegistryEntry.WebsiteURL\n- simple field MCPRegistryEntry.Installable\n- simple field MCPRegistryEntry.Reason\n- simple field MCPRegistryEntry.Transport\n- simple field MCPRegistryEntry.Runs\n- simple field MCPRegistryEntry.SuggestedName\n- simple field MCPRegistryEntry.Command\n- slice field MCPRegistryEntry.Args\n- map field MCPRegistryEntry.Env\n- simple field MCPRegistryEntry.URL\n- map field MCPRegistryEntry.Headers\n- slice field MCPRegistryEntry.Variables\nConverting type responses.MCPRegistryResponse\n- struct slice MCPRegistryResponse.Entries ([]responses.MCPRegistryEntry)\n- simple field MCPRegistryResponse.NextCursor\n- simple field MCPRegistryResponse.NotVetted\nConverting type responses.MCPDiscoveredServer\n- simple field MCPDiscoveredServer.Name\n- slice field MCPDiscoveredServer.Sources\n- slice field MCPDiscoveredServer.Paths\n- simple field MCPDiscoveredServer.Runs\n- simple field MCPDiscoveredServer.Origin\n- slice field MCPDiscoveredServer.Notes\n- simple field MCPDiscoveredServer.Problem\n- simple field MCPDiscoveredServer.Command\n- slice field MCPDiscoveredServer.Args\n- map field MCPDiscoveredServer.Env\n- simple field MCPDiscoveredServer.URL\n- map field MCPDiscoveredServer.Headers\n- simple field MCPDiscoveredServer.Disabled\nConverting type responses.MCPDiscoveryResponse\n- struct slice MCPDiscoveryResponse.Servers ([]responses.MCPDiscoveredServer)\n- slice field MCPDiscoveryResponse.Searched\n- simple field MCPDiscoveryResponse.Error\nOK\n\n",
+      "stderr": ""
+    }
+  ],
+  "output": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/codegen/gotypes.gen.ts",
+  "output_sha256": "e42678b57046bcbfbb50bb9b1d71aab9a917d06a2cb3ca4dd6ac4d49302c26b5",
+  "mode": "check"
+}

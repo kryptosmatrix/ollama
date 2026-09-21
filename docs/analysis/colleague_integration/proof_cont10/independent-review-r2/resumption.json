@@ -1,0 +1,32 @@
+{
+  "previous_response_sha256": "bca1f96ba49eaefd797036a5c080f2922d521bdb21ca63004c642a998b4c40a2",
+  "previous_controller_sha256": "4b9c4b733655b5756e68591055b9e6559f19f35e1073aab6637eef090d048daa",
+  "recovered_errors": [
+    {
+      "name": "read_source",
+      "arguments": {
+        "name": "contract",
+        "start": 0,
+        "count": 200
+      },
+      "result": {
+        "error": "Source line numbers are one-based: start must be at least 1. Nothing was read; correct the request.",
+        "executed": false
+      }
+    },
+    {
+      "name": "read_source",
+      "arguments": {
+        "name": "self_audit",
+        "start": 0,
+        "count": 200
+      },
+      "result": {
+        "error": "Source line numbers are one-based: start must be at least 1. Nothing was read; correct the request.",
+        "executed": false
+      }
+    }
+  ],
+  "previous_completed_reads": 0,
+  "previous_validation_runs": 0
+}

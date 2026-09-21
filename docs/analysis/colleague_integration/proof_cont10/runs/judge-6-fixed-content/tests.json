@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/npm",
+    "test",
+    "--",
+    "--run",
+    "src/utils/generatedModels.test.tsx",
+    "--reporter=json"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-6-fixed-content/frontend",
+  "exit_code": 1,
+  "timed_out": false,
+  "seconds": 14.967137917061336,
+  "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-6-fixed-content/tests.stdout",
+  "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-6-fixed-content/tests.stderr",
+  "stdout_sha256": "611fb917cc6977f369eff4e59664d43d1e9a4f6ab8517c46483da7ae31c8162a",
+  "stderr_sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+}

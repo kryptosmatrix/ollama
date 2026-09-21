@@ -1,0 +1,26 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "created_at": "2026-09-21T06:27:54.516832655Z",
+  "message": {
+    "role": "assistant",
+    "content": "Now the full frontend regression, lint baseline, go-store, gate-self-checks, and build.",
+    "tool_calls": [
+      {
+        "id": "call_txs36k6o",
+        "function": {
+          "index": 0,
+          "name": "run_validation",
+          "arguments": {
+            "case": "full"
+          }
+        }
+      }
+    ]
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 940872055,
+  "prompt_eval_count": 33414,
+  "prompt_eval_cached_count": 31878,
+  "eval_count": 59
+}

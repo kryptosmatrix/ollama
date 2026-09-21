@@ -1,0 +1,52 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "created_at": "2026-09-21T06:36:04.597361985Z",
+  "message": {
+    "role": "assistant",
+    "content": "I'll inspect the six missing surfaces plus the actual ToolFunction.Result region.",
+    "tool_calls": [
+      {
+        "id": "call_hzrn6ft8",
+        "function": {
+          "index": 0,
+          "name": "read_source",
+          "arguments": {
+            "name": "go_store",
+            "start": 85,
+            "count": 30
+          }
+        }
+      },
+      {
+        "id": "call_vq7hoofj",
+        "function": {
+          "index": 1,
+          "name": "read_source",
+          "arguments": {
+            "name": "api",
+            "start": 1,
+            "count": 120
+          }
+        }
+      },
+      {
+        "id": "call_r0bglgx2",
+        "function": {
+          "index": 2,
+          "name": "read_source",
+          "arguments": {
+            "name": "renderer",
+            "start": 1,
+            "count": 120
+          }
+        }
+      }
+    ]
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 2030160022,
+  "prompt_eval_count": 50428,
+  "prompt_eval_cached_count": 48148,
+  "eval_count": 207
+}

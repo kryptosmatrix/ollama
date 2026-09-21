@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/go",
+    "test",
+    "-count=1",
+    "-json",
+    "./app/store",
+    "./app/ui/responses"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+  "exit_code": 0,
+  "timed_out": false,
+  "seconds": 3.7788060000166297,
+  "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-8-go-store/go-tests.stdout",
+  "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-8-go-store/go-tests.stderr",
+  "stdout_sha256": "ed2faec774b0c3d3d01dbf82343122f3439850788d6da169a8ce1495f708a554",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

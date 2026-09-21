@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/npm",
+    "test",
+    "--",
+    "--run",
+    "src/utils/generatedModels.test.tsx",
+    "--reporter=json"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-14-raw-lint/frontend",
+  "exit_code": 1,
+  "timed_out": false,
+  "seconds": 11.407401249976829,
+  "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-14-raw-lint/tests.stdout",
+  "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-14-raw-lint/tests.stderr",
+  "stdout_sha256": "9875e2cf754117a1452f7953dfb6fa51d652c6b9eaf7e41068daeacdb666685f",
+  "stderr_sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+}

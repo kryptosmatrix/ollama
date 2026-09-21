@@ -1,0 +1,14 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "name": "go_store",
+    "start": 85,
+    "count": 30
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/store/store.go",
+    "file_sha256": "80c4bf13dd8b811809a389b3a5fc61386770b5963ce10012fe55dc29fab82601",
+    "total_lines": 537,
+    "text": "85: \n86: \treturn msg\n87: }\n88: \n89: type ToolCall struct {\n90: \tType     string       `json:\"type\"`\n91: \tFunction ToolFunction `json:\"function\"`\n92: }\n93: \n94: type ToolFunction struct {\n95: \tName      string `json:\"name\"`\n96: \tArguments string `json:\"arguments\"`\n97: \tResult    any    `json:\"result,omitempty\" ts_type:\"JSONValue\"`\n98: }\n99: \n100: type Model struct {\n101: \tModel      string     `json:\"model\"`                 // Model name\n102: \tDigest     string     `json:\"digest,omitempty\"`      // Model digest from the registry\n103: \tModifiedAt *time.Time `json:\"modified_at,omitempty\"` // When the model was last modified locally\n104: }\n105: \n106: type Chat struct {\n107: \tID           string          `json:\"id\"`\n108: \tMessages     []Message       `json:\"messages\"`\n109: \tTitle        string          `json:\"title\"`\n110: \tCreatedAt    time.Time       `json:\"created_at\"`\n111: \tBrowserState json.RawMessage `json:\"browser_state,omitempty\" ts_type:\"BrowserStateData\"`\n112: }\n113: \n114: // NewChat creates a new Chat with the ID, with CreatedAt timestamp initialized"
+  }
+}

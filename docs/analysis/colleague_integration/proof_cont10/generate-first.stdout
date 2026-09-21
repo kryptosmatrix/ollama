@@ -1,0 +1,65 @@
+
+> app@0.0.0 generate:types
+> node codegen/generate.mjs
+
+{
+  "classes": 35,
+  "helpers": 16,
+  "raw_sha256": "5c243e47f525e822765979531e64081ed52bd591261be2f36d24f5912fd33ab9",
+  "emission": {
+    "compiler": "5.8.3",
+    "config_sha256": "77e0bc69de1e379dd2725a2ab2e7dab81eba688149b0a3d8a50ff7dcbc828d02",
+    "options": {
+      "baseUrl": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+      "tsBuildInfoFile": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/.tmp/tsconfig.app.tsbuildinfo",
+      "target": 7,
+      "useDefineForClassFields": true,
+      "lib": [
+        "lib.es2020.d.ts",
+        "lib.dom.d.ts",
+        "lib.dom.iterable.d.ts"
+      ],
+      "module": 99,
+      "skipLibCheck": true,
+      "types": [],
+      "moduleResolution": 100,
+      "allowImportingTsExtensions": false,
+      "verbatimModuleSyntax": true,
+      "moduleDetection": 3,
+      "noEmit": false,
+      "jsx": 4,
+      "strict": true,
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
+      "erasableSyntaxOnly": true,
+      "noFallthroughCasesInSwitch": true,
+      "noUncheckedSideEffectImports": true,
+      "paths": {
+        "@/gotypes": [
+          "codegen/gotypes.gen.ts"
+        ],
+        "@/*": [
+          "src/*"
+        ]
+      },
+      "pathsBasePath": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+      "removeComments": true,
+      "sourceMap": false,
+      "inlineSourceMap": false
+    },
+    "overrides": {
+      "noEmit": false,
+      "allowImportingTsExtensions": false,
+      "removeComments": true,
+      "sourceMap": false,
+      "inlineSourceMap": false
+    },
+    "javascript_sha256": "b25ca8e6b74f0aaab8871f17c6b65be7dbde79da63c9f1755ab34de19108d5d5",
+    "javascript_bytes": 53014,
+    "identical": true
+  },
+  "generator_version": "v0.2.0",
+  "output": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/codegen/gotypes.gen.ts",
+  "output_sha256": "e42678b57046bcbfbb50bb9b1d71aab9a917d06a2cb3ca4dd6ac4d49302c26b5",
+  "mode": "write"
+}
