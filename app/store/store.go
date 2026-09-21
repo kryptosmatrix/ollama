@@ -94,7 +94,7 @@ type ToolCall struct {
 type ToolFunction struct {
 	Name      string `json:"name"`
 	Arguments string `json:"arguments"`
-	Result    any    `json:"result,omitempty"`
+	Result    any    `json:"result,omitempty" ts_type:"JSONValue"`
 }
 
 type Model struct {

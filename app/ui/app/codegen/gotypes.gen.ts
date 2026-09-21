@@ -1,3 +1,5 @@
+export type JSONValue = string | number | boolean | null | JSONValue[] | { [key: string]: JSONValue };
+
 /* Do not change, this code is generated from Golang structs */
 
 
@@ -8,33 +10,33 @@ export class ChatInfo {
     createdAt: Date;
     updatedAt: Date;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.id = source["id"];
-        this.title = source["title"];
-        this.userExcerpt = source["userExcerpt"];
-        this.createdAt = new Date(source["createdAt"]);
-        this.updatedAt = new Date(source["updatedAt"]);
+        this.id = (source as Record<string, unknown>)["id"] as ChatInfo["id"];
+        this.title = (source as Record<string, unknown>)["title"] as ChatInfo["title"];
+        this.userExcerpt = (source as Record<string, unknown>)["userExcerpt"] as ChatInfo["userExcerpt"];
+        this.createdAt = new Date((source as Record<string, unknown>)["createdAt"] as string | number | Date) as ChatInfo["createdAt"];
+        this.updatedAt = new Date((source as Record<string, unknown>)["updatedAt"] as string | number | Date) as ChatInfo["updatedAt"];
     }
 }
 export class ChatsResponse {
     chatInfos: ChatInfo[];
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.chatInfos = this.convertValues(source["chatInfos"], ChatInfo);
+        this.chatInfos = this.convertValues((source as Record<string, unknown>)["chatInfos"], ChatInfo) as ChatsResponse["chatInfos"];
     }
 
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	convertValues(a: unknown, classs: new (source: unknown) => unknown, asMap: boolean = false): unknown {
 	    if (!a) {
 	        return a;
 	    }
 	    if (Array.isArray(a)) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	        return (a as unknown[]).map(elem => this.convertValues(elem, classs));
 	    } else if ("object" === typeof a) {
 	        if (asMap) {
 	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
+	                (a as Record<string, unknown>)[key] = new classs((a as Record<string, unknown>)[key]);
 	            }
 	            return a;
 	        }
@@ -46,7 +48,7 @@ export class ChatsResponse {
 export class Time {
 
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
 
     }
@@ -54,35 +56,35 @@ export class Time {
 export class ToolFunction {
     name: string;
     arguments: string;
-    result?: any;
+    result?: JSONValue;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.name = source["name"];
-        this.arguments = source["arguments"];
-        this.result = source["result"];
+        this.name = (source as Record<string, unknown>)["name"] as ToolFunction["name"];
+        this.arguments = (source as Record<string, unknown>)["arguments"] as ToolFunction["arguments"];
+        this.result = (source as Record<string, unknown>)["result"] as ToolFunction["result"];
     }
 }
 export class ToolCall {
     type: string;
     function: ToolFunction;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.type = source["type"];
-        this.function = this.convertValues(source["function"], ToolFunction);
+        this.type = (source as Record<string, unknown>)["type"] as ToolCall["type"];
+        this.function = this.convertValues((source as Record<string, unknown>)["function"], ToolFunction) as ToolCall["function"];
     }
 
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	convertValues(a: unknown, classs: new (source: unknown) => unknown, asMap: boolean = false): unknown {
 	    if (!a) {
 	        return a;
 	    }
 	    if (Array.isArray(a)) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	        return (a as unknown[]).map(elem => this.convertValues(elem, classs));
 	    } else if ("object" === typeof a) {
 	        if (asMap) {
 	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
+	                (a as Record<string, unknown>)[key] = new classs((a as Record<string, unknown>)[key]);
 	            }
 	            return a;
 	        }
@@ -95,10 +97,10 @@ export class File {
     filename: string;
     data: number[];
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.filename = source["filename"];
-        this.data = source["data"];
+        this.filename = (source as Record<string, unknown>)["filename"] as File["filename"];
+        this.data = (source as Record<string, unknown>)["data"] as File["data"];
     }
 }
 export class Message {
@@ -117,34 +119,34 @@ export class Message {
     thinkingTimeStart?: Date | undefined;
     thinkingTimeEnd?: Date | undefined;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.role = source["role"];
-        this.content = source["content"];
-        this.thinking = source["thinking"];
-        this.stream = source["stream"];
-        this.model = source["model"];
-        this.attachments = this.convertValues(source["attachments"], File);
-        this.tool_calls = this.convertValues(source["tool_calls"], ToolCall);
-        this.tool_call = this.convertValues(source["tool_call"], ToolCall);
-        this.tool_name = source["tool_name"];
-        this.tool_result = source["tool_result"];
-        this.created_at = this.convertValues(source["created_at"], Time);
-        this.updated_at = this.convertValues(source["updated_at"], Time);
-        this.thinkingTimeStart = source["thinkingTimeStart"] && new Date(source["thinkingTimeStart"]);
-        this.thinkingTimeEnd = source["thinkingTimeEnd"] && new Date(source["thinkingTimeEnd"]);
+        this.role = (source as Record<string, unknown>)["role"] as Message["role"];
+        this.content = (source as Record<string, unknown>)["content"] as Message["content"];
+        this.thinking = (source as Record<string, unknown>)["thinking"] as Message["thinking"];
+        this.stream = (source as Record<string, unknown>)["stream"] as Message["stream"];
+        this.model = (source as Record<string, unknown>)["model"] as Message["model"];
+        this.attachments = this.convertValues((source as Record<string, unknown>)["attachments"], File) as Message["attachments"];
+        this.tool_calls = this.convertValues((source as Record<string, unknown>)["tool_calls"], ToolCall) as Message["tool_calls"];
+        this.tool_call = this.convertValues((source as Record<string, unknown>)["tool_call"], ToolCall) as Message["tool_call"];
+        this.tool_name = (source as Record<string, unknown>)["tool_name"] as Message["tool_name"];
+        this.tool_result = (source as Record<string, unknown>)["tool_result"] as Message["tool_result"];
+        this.created_at = this.convertValues((source as Record<string, unknown>)["created_at"], Time) as Message["created_at"];
+        this.updated_at = this.convertValues((source as Record<string, unknown>)["updated_at"], Time) as Message["updated_at"];
+        this.thinkingTimeStart = (source as Record<string, unknown>)["thinkingTimeStart"] as Message["thinkingTimeStart"] && new Date((source as Record<string, unknown>)["thinkingTimeStart"] as string | number | Date);
+        this.thinkingTimeEnd = (source as Record<string, unknown>)["thinkingTimeEnd"] as Message["thinkingTimeEnd"] && new Date((source as Record<string, unknown>)["thinkingTimeEnd"] as string | number | Date);
     }
 
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	convertValues(a: unknown, classs: new (source: unknown) => unknown, asMap: boolean = false): unknown {
 	    if (!a) {
 	        return a;
 	    }
 	    if (Array.isArray(a)) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	        return (a as unknown[]).map(elem => this.convertValues(elem, classs));
 	    } else if ("object" === typeof a) {
 	        if (asMap) {
 	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
+	                (a as Record<string, unknown>)[key] = new classs((a as Record<string, unknown>)[key]);
 	            }
 	            return a;
 	        }
@@ -160,25 +162,25 @@ export class Chat {
     created_at: Time;
     browser_state?: BrowserStateData;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.id = source["id"];
-        this.messages = this.convertValues(source["messages"], Message);
-        this.title = source["title"];
-        this.created_at = this.convertValues(source["created_at"], Time);
-        this.browser_state = source["browser_state"];
+        this.id = (source as Record<string, unknown>)["id"] as Chat["id"];
+        this.messages = this.convertValues((source as Record<string, unknown>)["messages"], Message) as Chat["messages"];
+        this.title = (source as Record<string, unknown>)["title"] as Chat["title"];
+        this.created_at = this.convertValues((source as Record<string, unknown>)["created_at"], Time) as Chat["created_at"];
+        this.browser_state = (source as Record<string, unknown>)["browser_state"] as Chat["browser_state"];
     }
 
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	convertValues(a: unknown, classs: new (source: unknown) => unknown, asMap: boolean = false): unknown {
 	    if (!a) {
 	        return a;
 	    }
 	    if (Array.isArray(a)) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	        return (a as unknown[]).map(elem => this.convertValues(elem, classs));
 	    } else if ("object" === typeof a) {
 	        if (asMap) {
 	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
+	                (a as Record<string, unknown>)[key] = new classs((a as Record<string, unknown>)[key]);
 	            }
 	            return a;
 	        }
@@ -190,21 +192,21 @@ export class Chat {
 export class ChatResponse {
     chat: Chat;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.chat = this.convertValues(source["chat"], Chat);
+        this.chat = this.convertValues((source as Record<string, unknown>)["chat"], Chat) as ChatResponse["chat"];
     }
 
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	convertValues(a: unknown, classs: new (source: unknown) => unknown, asMap: boolean = false): unknown {
 	    if (!a) {
 	        return a;
 	    }
 	    if (Array.isArray(a)) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	        return (a as unknown[]).map(elem => this.convertValues(elem, classs));
 	    } else if ("object" === typeof a) {
 	        if (asMap) {
 	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
+	                (a as Record<string, unknown>)[key] = new classs((a as Record<string, unknown>)[key]);
 	            }
 	            return a;
 	        }
@@ -218,23 +220,23 @@ export class Model {
     digest?: string;
     modified_at?: Time;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.model = source["model"];
-        this.digest = source["digest"];
-        this.modified_at = this.convertValues(source["modified_at"], Time);
+        this.model = (source as Record<string, unknown>)["model"] as Model["model"];
+        this.digest = (source as Record<string, unknown>)["digest"] as Model["digest"];
+        this.modified_at = this.convertValues((source as Record<string, unknown>)["modified_at"], Time) as Model["modified_at"];
     }
 
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	convertValues(a: unknown, classs: new (source: unknown) => unknown, asMap: boolean = false): unknown {
 	    if (!a) {
 	        return a;
 	    }
 	    if (Array.isArray(a)) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	        return (a as unknown[]).map(elem => this.convertValues(elem, classs));
 	    } else if ("object" === typeof a) {
 	        if (asMap) {
 	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
+	                (a as Record<string, unknown>)[key] = new classs((a as Record<string, unknown>)[key]);
 	            }
 	            return a;
 	        }
@@ -246,21 +248,21 @@ export class Model {
 export class ModelsResponse {
     models: Model[];
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.models = this.convertValues(source["models"], Model);
+        this.models = this.convertValues((source as Record<string, unknown>)["models"], Model) as ModelsResponse["models"];
     }
 
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	convertValues(a: unknown, classs: new (source: unknown) => unknown, asMap: boolean = false): unknown {
 	    if (!a) {
 	        return a;
 	    }
 	    if (Array.isArray(a)) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	        return (a as unknown[]).map(elem => this.convertValues(elem, classs));
 	    } else if ("object" === typeof a) {
 	        if (asMap) {
 	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
+	                (a as Record<string, unknown>)[key] = new classs((a as Record<string, unknown>)[key]);
 	            }
 	            return a;
 	        }
@@ -277,36 +279,36 @@ export class InferenceCompute {
     name: string;
     vram: string;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.library = source["library"];
-        this.variant = source["variant"];
-        this.compute = source["compute"];
-        this.driver = source["driver"];
-        this.name = source["name"];
-        this.vram = source["vram"];
+        this.library = (source as Record<string, unknown>)["library"] as InferenceCompute["library"];
+        this.variant = (source as Record<string, unknown>)["variant"] as InferenceCompute["variant"];
+        this.compute = (source as Record<string, unknown>)["compute"] as InferenceCompute["compute"];
+        this.driver = (source as Record<string, unknown>)["driver"] as InferenceCompute["driver"];
+        this.name = (source as Record<string, unknown>)["name"] as InferenceCompute["name"];
+        this.vram = (source as Record<string, unknown>)["vram"] as InferenceCompute["vram"];
     }
 }
 export class InferenceComputeResponse {
     inferenceComputes: InferenceCompute[];
     defaultContextLength: number;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.inferenceComputes = this.convertValues(source["inferenceComputes"], InferenceCompute);
-        this.defaultContextLength = source["defaultContextLength"];
+        this.inferenceComputes = this.convertValues((source as Record<string, unknown>)["inferenceComputes"], InferenceCompute) as InferenceComputeResponse["inferenceComputes"];
+        this.defaultContextLength = (source as Record<string, unknown>)["defaultContextLength"] as InferenceComputeResponse["defaultContextLength"];
     }
 
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	convertValues(a: unknown, classs: new (source: unknown) => unknown, asMap: boolean = false): unknown {
 	    if (!a) {
 	        return a;
 	    }
 	    if (Array.isArray(a)) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	        return (a as unknown[]).map(elem => this.convertValues(elem, classs));
 	    } else if ("object" === typeof a) {
 	        if (asMap) {
 	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
+	                (a as Record<string, unknown>)[key] = new classs((a as Record<string, unknown>)[key]);
 	            }
 	            return a;
 	        }
@@ -318,9 +320,9 @@ export class InferenceComputeResponse {
 export class ModelCapabilitiesResponse {
     capabilities: string[];
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.capabilities = source["capabilities"];
+        this.capabilities = (source as Record<string, unknown>)["capabilities"] as ModelCapabilitiesResponse["capabilities"];
     }
 }
 export class ChatEvent {
@@ -333,42 +335,42 @@ export class ChatEvent {
     toolCall?: ToolCall;
     toolName?: string;
     toolResult?: boolean;
-    toolResultData?: any;
+    toolResultData?: JSONValue;
     chatId?: string;
     approvalId?: string;
     approvalScope?: string;
-    approvalArgs?: {[key: string]: any};
-    toolState?: any;
+    approvalArgs?: {[key: string]: JSONValue};
+    toolState?: JSONValue;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.eventName = source["eventName"];
-        this.content = source["content"];
-        this.thinking = source["thinking"];
-        this.thinkingTimeStart = source["thinkingTimeStart"] && new Date(source["thinkingTimeStart"]);
-        this.thinkingTimeEnd = source["thinkingTimeEnd"] && new Date(source["thinkingTimeEnd"]);
-        this.toolCalls = this.convertValues(source["toolCalls"], ToolCall);
-        this.toolCall = this.convertValues(source["toolCall"], ToolCall);
-        this.toolName = source["toolName"];
-        this.toolResult = source["toolResult"];
-        this.toolResultData = source["toolResultData"];
-        this.chatId = source["chatId"];
-        this.approvalId = source["approvalId"];
-        this.approvalScope = source["approvalScope"];
-        this.approvalArgs = source["approvalArgs"];
-        this.toolState = source["toolState"];
+        this.eventName = (source as Record<string, unknown>)["eventName"] as ChatEvent["eventName"];
+        this.content = (source as Record<string, unknown>)["content"] as ChatEvent["content"];
+        this.thinking = (source as Record<string, unknown>)["thinking"] as ChatEvent["thinking"];
+        this.thinkingTimeStart = (source as Record<string, unknown>)["thinkingTimeStart"] as ChatEvent["thinkingTimeStart"] && new Date((source as Record<string, unknown>)["thinkingTimeStart"] as string | number | Date);
+        this.thinkingTimeEnd = (source as Record<string, unknown>)["thinkingTimeEnd"] as ChatEvent["thinkingTimeEnd"] && new Date((source as Record<string, unknown>)["thinkingTimeEnd"] as string | number | Date);
+        this.toolCalls = this.convertValues((source as Record<string, unknown>)["toolCalls"], ToolCall) as ChatEvent["toolCalls"];
+        this.toolCall = this.convertValues((source as Record<string, unknown>)["toolCall"], ToolCall) as ChatEvent["toolCall"];
+        this.toolName = (source as Record<string, unknown>)["toolName"] as ChatEvent["toolName"];
+        this.toolResult = (source as Record<string, unknown>)["toolResult"] as ChatEvent["toolResult"];
+        this.toolResultData = (source as Record<string, unknown>)["toolResultData"] as ChatEvent["toolResultData"];
+        this.chatId = (source as Record<string, unknown>)["chatId"] as ChatEvent["chatId"];
+        this.approvalId = (source as Record<string, unknown>)["approvalId"] as ChatEvent["approvalId"];
+        this.approvalScope = (source as Record<string, unknown>)["approvalScope"] as ChatEvent["approvalScope"];
+        this.approvalArgs = (source as Record<string, unknown>)["approvalArgs"] as ChatEvent["approvalArgs"];
+        this.toolState = (source as Record<string, unknown>)["toolState"] as ChatEvent["toolState"];
     }
 
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	convertValues(a: unknown, classs: new (source: unknown) => unknown, asMap: boolean = false): unknown {
 	    if (!a) {
 	        return a;
 	    }
 	    if (Array.isArray(a)) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	        return (a as unknown[]).map(elem => this.convertValues(elem, classs));
 	    } else if ("object" === typeof a) {
 	        if (asMap) {
 	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
+	                (a as Record<string, unknown>)[key] = new classs((a as Record<string, unknown>)[key]);
 	            }
 	            return a;
 	        }
@@ -383,12 +385,12 @@ export class DownloadEvent {
     completed: number;
     done: boolean;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.eventName = source["eventName"];
-        this.total = source["total"];
-        this.completed = source["completed"];
-        this.done = source["done"];
+        this.eventName = (source as Record<string, unknown>)["eventName"] as DownloadEvent["eventName"];
+        this.total = (source as Record<string, unknown>)["total"] as DownloadEvent["total"];
+        this.completed = (source as Record<string, unknown>)["completed"] as DownloadEvent["completed"];
+        this.done = (source as Record<string, unknown>)["done"] as DownloadEvent["done"];
     }
 }
 export class ErrorEvent {
@@ -397,12 +399,12 @@ export class ErrorEvent {
     code?: string;
     details?: string;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.eventName = source["eventName"];
-        this.error = source["error"];
-        this.code = source["code"];
-        this.details = source["details"];
+        this.eventName = (source as Record<string, unknown>)["eventName"] as ErrorEvent["eventName"];
+        this.error = (source as Record<string, unknown>)["error"] as ErrorEvent["error"];
+        this.code = (source as Record<string, unknown>)["code"] as ErrorEvent["code"];
+        this.details = (source as Record<string, unknown>)["details"] as ErrorEvent["details"];
     }
 }
 export class Settings {
@@ -424,45 +426,45 @@ export class Settings {
     AutoUpdateEnabled: boolean;
     AutoApproveTools: boolean;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.Expose = source["Expose"];
-        this.Browser = source["Browser"];
-        this.Survey = source["Survey"];
-        this.Models = source["Models"];
-        this.Agent = source["Agent"];
-        this.Tools = source["Tools"];
-        this.WorkingDir = source["WorkingDir"];
-        this.ContextLength = source["ContextLength"];
-        this.TurboEnabled = source["TurboEnabled"];
-        this.WebSearchEnabled = source["WebSearchEnabled"];
-        this.ThinkEnabled = source["ThinkEnabled"];
-        this.ThinkLevel = source["ThinkLevel"];
-        this.SelectedModel = source["SelectedModel"];
-        this.SidebarOpen = source["SidebarOpen"];
-        this.LastHomeView = source["LastHomeView"];
-        this.AutoUpdateEnabled = source["AutoUpdateEnabled"];
-        this.AutoApproveTools = source["AutoApproveTools"];
+        this.Expose = (source as Record<string, unknown>)["Expose"] as Settings["Expose"];
+        this.Browser = (source as Record<string, unknown>)["Browser"] as Settings["Browser"];
+        this.Survey = (source as Record<string, unknown>)["Survey"] as Settings["Survey"];
+        this.Models = (source as Record<string, unknown>)["Models"] as Settings["Models"];
+        this.Agent = (source as Record<string, unknown>)["Agent"] as Settings["Agent"];
+        this.Tools = (source as Record<string, unknown>)["Tools"] as Settings["Tools"];
+        this.WorkingDir = (source as Record<string, unknown>)["WorkingDir"] as Settings["WorkingDir"];
+        this.ContextLength = (source as Record<string, unknown>)["ContextLength"] as Settings["ContextLength"];
+        this.TurboEnabled = (source as Record<string, unknown>)["TurboEnabled"] as Settings["TurboEnabled"];
+        this.WebSearchEnabled = (source as Record<string, unknown>)["WebSearchEnabled"] as Settings["WebSearchEnabled"];
+        this.ThinkEnabled = (source as Record<string, unknown>)["ThinkEnabled"] as Settings["ThinkEnabled"];
+        this.ThinkLevel = (source as Record<string, unknown>)["ThinkLevel"] as Settings["ThinkLevel"];
+        this.SelectedModel = (source as Record<string, unknown>)["SelectedModel"] as Settings["SelectedModel"];
+        this.SidebarOpen = (source as Record<string, unknown>)["SidebarOpen"] as Settings["SidebarOpen"];
+        this.LastHomeView = (source as Record<string, unknown>)["LastHomeView"] as Settings["LastHomeView"];
+        this.AutoUpdateEnabled = (source as Record<string, unknown>)["AutoUpdateEnabled"] as Settings["AutoUpdateEnabled"];
+        this.AutoApproveTools = (source as Record<string, unknown>)["AutoApproveTools"] as Settings["AutoApproveTools"];
     }
 }
 export class SettingsResponse {
     settings: Settings;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.settings = this.convertValues(source["settings"], Settings);
+        this.settings = this.convertValues((source as Record<string, unknown>)["settings"], Settings) as SettingsResponse["settings"];
     }
 
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	convertValues(a: unknown, classs: new (source: unknown) => unknown, asMap: boolean = false): unknown {
 	    if (!a) {
 	        return a;
 	    }
 	    if (Array.isArray(a)) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	        return (a as unknown[]).map(elem => this.convertValues(elem, classs));
 	    } else if ("object" === typeof a) {
 	        if (asMap) {
 	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
+	                (a as Record<string, unknown>)[key] = new classs((a as Record<string, unknown>)[key]);
 	            }
 	            return a;
 	        }
@@ -474,9 +476,9 @@ export class SettingsResponse {
 export class HealthResponse {
     healthy: boolean;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.healthy = source["healthy"];
+        this.healthy = (source as Record<string, unknown>)["healthy"] as HealthResponse["healthy"];
     }
 }
 export class User {
@@ -489,26 +491,26 @@ export class User {
     lastname?: string;
     plan?: string;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.id = source["id"];
-        this.email = source["email"];
-        this.name = source["name"];
-        this.bio = source["bio"];
-        this.avatarurl = source["avatarurl"];
-        this.firstname = source["firstname"];
-        this.lastname = source["lastname"];
-        this.plan = source["plan"];
+        this.id = (source as Record<string, unknown>)["id"] as User["id"];
+        this.email = (source as Record<string, unknown>)["email"] as User["email"];
+        this.name = (source as Record<string, unknown>)["name"] as User["name"];
+        this.bio = (source as Record<string, unknown>)["bio"] as User["bio"];
+        this.avatarurl = (source as Record<string, unknown>)["avatarurl"] as User["avatarurl"];
+        this.firstname = (source as Record<string, unknown>)["firstname"] as User["firstname"];
+        this.lastname = (source as Record<string, unknown>)["lastname"] as User["lastname"];
+        this.plan = (source as Record<string, unknown>)["plan"] as User["plan"];
     }
 }
 export class Attachment {
     filename: string;
     data?: string;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.filename = source["filename"];
-        this.data = source["data"];
+        this.filename = (source as Record<string, unknown>)["filename"] as Attachment["filename"];
+        this.data = (source as Record<string, unknown>)["data"] as Attachment["data"];
     }
 }
 export class ChatRequest {
@@ -519,30 +521,30 @@ export class ChatRequest {
     web_search?: boolean;
     file_tools?: boolean;
     forceUpdate?: boolean;
-    think?: any;
+    think?: JSONValue;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.model = source["model"];
-        this.prompt = source["prompt"];
-        this.index = source["index"];
-        this.attachments = this.convertValues(source["attachments"], Attachment);
-        this.web_search = source["web_search"];
-        this.file_tools = source["file_tools"];
-        this.forceUpdate = source["forceUpdate"];
-        this.think = source["think"];
+        this.model = (source as Record<string, unknown>)["model"] as ChatRequest["model"];
+        this.prompt = (source as Record<string, unknown>)["prompt"] as ChatRequest["prompt"];
+        this.index = (source as Record<string, unknown>)["index"] as ChatRequest["index"];
+        this.attachments = this.convertValues((source as Record<string, unknown>)["attachments"], Attachment) as ChatRequest["attachments"];
+        this.web_search = (source as Record<string, unknown>)["web_search"] as ChatRequest["web_search"];
+        this.file_tools = (source as Record<string, unknown>)["file_tools"] as ChatRequest["file_tools"];
+        this.forceUpdate = (source as Record<string, unknown>)["forceUpdate"] as ChatRequest["forceUpdate"];
+        this.think = (source as Record<string, unknown>)["think"] as ChatRequest["think"];
     }
 
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	convertValues(a: unknown, classs: new (source: unknown) => unknown, asMap: boolean = false): unknown {
 	    if (!a) {
 	        return a;
 	    }
 	    if (Array.isArray(a)) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	        return (a as unknown[]).map(elem => this.convertValues(elem, classs));
 	    } else if ("object" === typeof a) {
 	        if (asMap) {
 	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
+	                (a as Record<string, unknown>)[key] = new classs((a as Record<string, unknown>)[key]);
 	            }
 	            return a;
 	        }
@@ -554,19 +556,19 @@ export class ChatRequest {
 export class Error {
     error: string;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.error = source["error"];
+        this.error = (source as Record<string, unknown>)["error"] as Error["error"];
     }
 }
 export class ModelUpstreamResponse {
     stale: boolean;
     error?: string;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.stale = source["stale"];
-        this.error = source["error"];
+        this.stale = (source as Record<string, unknown>)["stale"] as ModelUpstreamResponse["stale"];
+        this.error = (source as Record<string, unknown>)["error"] as ModelUpstreamResponse["error"];
     }
 }
 export class Page {
@@ -577,26 +579,26 @@ export class Page {
     links?: Record<number, string>;
     fetched_at: Time;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.url = source["url"];
-        this.title = source["title"];
-        this.text = source["text"];
-        this.lines = source["lines"];
-        this.links = source["links"];
-        this.fetched_at = this.convertValues(source["fetched_at"], Time);
+        this.url = (source as Record<string, unknown>)["url"] as Page["url"];
+        this.title = (source as Record<string, unknown>)["title"] as Page["title"];
+        this.text = (source as Record<string, unknown>)["text"] as Page["text"];
+        this.lines = (source as Record<string, unknown>)["lines"] as Page["lines"];
+        this.links = (source as Record<string, unknown>)["links"] as Page["links"];
+        this.fetched_at = this.convertValues((source as Record<string, unknown>)["fetched_at"], Time) as Page["fetched_at"];
     }
 
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	convertValues(a: unknown, classs: new (source: unknown) => unknown, asMap: boolean = false): unknown {
 	    if (!a) {
 	        return a;
 	    }
 	    if (Array.isArray(a)) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	        return (a as unknown[]).map(elem => this.convertValues(elem, classs));
 	    } else if ("object" === typeof a) {
 	        if (asMap) {
 	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
+	                (a as Record<string, unknown>)[key] = new classs((a as Record<string, unknown>)[key]);
 	            }
 	            return a;
 	        }
@@ -610,11 +612,11 @@ export class BrowserStateData {
     view_tokens: number;
     url_to_page: {[key: string]: Page};
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.page_stack = source["page_stack"];
-        this.view_tokens = source["view_tokens"];
-        this.url_to_page = source["url_to_page"];
+        this.page_stack = (source as Record<string, unknown>)["page_stack"] as BrowserStateData["page_stack"];
+        this.view_tokens = (source as Record<string, unknown>)["view_tokens"] as BrowserStateData["view_tokens"];
+        this.url_to_page = (source as Record<string, unknown>)["url_to_page"] as BrowserStateData["url_to_page"];
     }
 }
 
@@ -622,20 +624,20 @@ export class MCPTool {
     name: string;
     description: string;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.name = source["name"];
-        this.description = source["description"];
+        this.name = (source as Record<string, unknown>)["name"] as MCPTool["name"];
+        this.description = (source as Record<string, unknown>)["description"] as MCPTool["description"];
     }
 }
 export class MCPSkippedTool {
     name: string;
     reason: string;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.name = source["name"];
-        this.reason = source["reason"];
+        this.name = (source as Record<string, unknown>)["name"] as MCPSkippedTool["name"];
+        this.reason = (source as Record<string, unknown>)["reason"] as MCPSkippedTool["reason"];
     }
 }
 export class MCPServer {
@@ -656,36 +658,36 @@ export class MCPServer {
     warnings?: string[];
     tokenStore?: string;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.name = source["name"];
-        this.status = source["status"];
-        this.transport = source["transport"];
-        this.runs = source["runs"];
-        this.enabled = source["enabled"];
-        this.approved = source["approved"];
-        this.changed = source["changed"];
-        this.previouslyRan = source["previouslyRan"];
-        this.error = source["error"];
-        this.tools = this.convertValues(source["tools"], MCPTool);
-        this.skipped = this.convertValues(source["skipped"], MCPSkippedTool);
-        this.canSignIn = source["canSignIn"];
-        this.signedIn = source["signedIn"];
-        this.signingIn = source["signingIn"];
-        this.warnings = source["warnings"];
-        this.tokenStore = source["tokenStore"];
+        this.name = (source as Record<string, unknown>)["name"] as MCPServer["name"];
+        this.status = (source as Record<string, unknown>)["status"] as MCPServer["status"];
+        this.transport = (source as Record<string, unknown>)["transport"] as MCPServer["transport"];
+        this.runs = (source as Record<string, unknown>)["runs"] as MCPServer["runs"];
+        this.enabled = (source as Record<string, unknown>)["enabled"] as MCPServer["enabled"];
+        this.approved = (source as Record<string, unknown>)["approved"] as MCPServer["approved"];
+        this.changed = (source as Record<string, unknown>)["changed"] as MCPServer["changed"];
+        this.previouslyRan = (source as Record<string, unknown>)["previouslyRan"] as MCPServer["previouslyRan"];
+        this.error = (source as Record<string, unknown>)["error"] as MCPServer["error"];
+        this.tools = this.convertValues((source as Record<string, unknown>)["tools"], MCPTool) as MCPServer["tools"];
+        this.skipped = this.convertValues((source as Record<string, unknown>)["skipped"], MCPSkippedTool) as MCPServer["skipped"];
+        this.canSignIn = (source as Record<string, unknown>)["canSignIn"] as MCPServer["canSignIn"];
+        this.signedIn = (source as Record<string, unknown>)["signedIn"] as MCPServer["signedIn"];
+        this.signingIn = (source as Record<string, unknown>)["signingIn"] as MCPServer["signingIn"];
+        this.warnings = (source as Record<string, unknown>)["warnings"] as MCPServer["warnings"];
+        this.tokenStore = (source as Record<string, unknown>)["tokenStore"] as MCPServer["tokenStore"];
     }
 
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	convertValues(a: unknown, classs: new (source: unknown) => unknown, asMap: boolean = false): unknown {
 	    if (!a) {
 	        return a;
 	    }
 	    if (Array.isArray(a)) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	        return (a as unknown[]).map(elem => this.convertValues(elem, classs));
 	    } else if ("object" === typeof a) {
 	        if (asMap) {
 	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
+	                (a as Record<string, unknown>)[key] = new classs((a as Record<string, unknown>)[key]);
 	            }
 	            return a;
 	        }
@@ -697,21 +699,21 @@ export class MCPServer {
 export class MCPServersResponse {
     servers: MCPServer[];
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.servers = this.convertValues(source["servers"], MCPServer);
+        this.servers = this.convertValues((source as Record<string, unknown>)["servers"], MCPServer) as MCPServersResponse["servers"];
     }
 
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	convertValues(a: unknown, classs: new (source: unknown) => unknown, asMap: boolean = false): unknown {
 	    if (!a) {
 	        return a;
 	    }
 	    if (Array.isArray(a)) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	        return (a as unknown[]).map(elem => this.convertValues(elem, classs));
 	    } else if ("object" === typeof a) {
 	        if (asMap) {
 	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
+	                (a as Record<string, unknown>)[key] = new classs((a as Record<string, unknown>)[key]);
 	            }
 	            return a;
 	        }
@@ -740,26 +742,26 @@ export class MCPRegistryEntry {
     headers?: {[key: string]: string};
     variables?: string[];
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.name = source["name"];
-        this.title = source["title"];
-        this.description = source["description"];
-        this.version = source["version"];
-        this.publisher = source["publisher"];
-        this.repository = source["repository"];
-        this.websiteUrl = source["websiteUrl"];
-        this.installable = source["installable"];
-        this.reason = source["reason"];
-        this.transport = source["transport"];
-        this.runs = source["runs"];
-        this.suggestedName = source["suggestedName"];
-        this.command = source["command"];
-        this.args = source["args"];
-        this.env = source["env"];
-        this.url = source["url"];
-        this.headers = source["headers"];
-        this.variables = source["variables"];
+        this.name = (source as Record<string, unknown>)["name"] as MCPRegistryEntry["name"];
+        this.title = (source as Record<string, unknown>)["title"] as MCPRegistryEntry["title"];
+        this.description = (source as Record<string, unknown>)["description"] as MCPRegistryEntry["description"];
+        this.version = (source as Record<string, unknown>)["version"] as MCPRegistryEntry["version"];
+        this.publisher = (source as Record<string, unknown>)["publisher"] as MCPRegistryEntry["publisher"];
+        this.repository = (source as Record<string, unknown>)["repository"] as MCPRegistryEntry["repository"];
+        this.websiteUrl = (source as Record<string, unknown>)["websiteUrl"] as MCPRegistryEntry["websiteUrl"];
+        this.installable = (source as Record<string, unknown>)["installable"] as MCPRegistryEntry["installable"];
+        this.reason = (source as Record<string, unknown>)["reason"] as MCPRegistryEntry["reason"];
+        this.transport = (source as Record<string, unknown>)["transport"] as MCPRegistryEntry["transport"];
+        this.runs = (source as Record<string, unknown>)["runs"] as MCPRegistryEntry["runs"];
+        this.suggestedName = (source as Record<string, unknown>)["suggestedName"] as MCPRegistryEntry["suggestedName"];
+        this.command = (source as Record<string, unknown>)["command"] as MCPRegistryEntry["command"];
+        this.args = (source as Record<string, unknown>)["args"] as MCPRegistryEntry["args"];
+        this.env = (source as Record<string, unknown>)["env"] as MCPRegistryEntry["env"];
+        this.url = (source as Record<string, unknown>)["url"] as MCPRegistryEntry["url"];
+        this.headers = (source as Record<string, unknown>)["headers"] as MCPRegistryEntry["headers"];
+        this.variables = (source as Record<string, unknown>)["variables"] as MCPRegistryEntry["variables"];
     }
 }
 export class MCPRegistryResponse {
@@ -767,23 +769,23 @@ export class MCPRegistryResponse {
     nextCursor?: string;
     notVetted: boolean;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.entries = this.convertValues(source["entries"], MCPRegistryEntry);
-        this.nextCursor = source["nextCursor"];
-        this.notVetted = source["notVetted"];
+        this.entries = this.convertValues((source as Record<string, unknown>)["entries"], MCPRegistryEntry) as MCPRegistryResponse["entries"];
+        this.nextCursor = (source as Record<string, unknown>)["nextCursor"] as MCPRegistryResponse["nextCursor"];
+        this.notVetted = (source as Record<string, unknown>)["notVetted"] as MCPRegistryResponse["notVetted"];
     }
 
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	convertValues(a: unknown, classs: new (source: unknown) => unknown, asMap: boolean = false): unknown {
 	    if (!a) {
 	        return a;
 	    }
 	    if (Array.isArray(a)) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	        return (a as unknown[]).map(elem => this.convertValues(elem, classs));
 	    } else if ("object" === typeof a) {
 	        if (asMap) {
 	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
+	                (a as Record<string, unknown>)[key] = new classs((a as Record<string, unknown>)[key]);
 	            }
 	            return a;
 	        }
@@ -807,21 +809,21 @@ export class MCPDiscoveredServer {
     headers?: {[key: string]: string};
     disabled?: boolean;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.name = source["name"];
-        this.sources = source["sources"];
-        this.paths = source["paths"];
-        this.runs = source["runs"];
-        this.origin = source["origin"];
-        this.notes = source["notes"];
-        this.problem = source["problem"];
-        this.command = source["command"];
-        this.args = source["args"];
-        this.env = source["env"];
-        this.url = source["url"];
-        this.headers = source["headers"];
-        this.disabled = source["disabled"];
+        this.name = (source as Record<string, unknown>)["name"] as MCPDiscoveredServer["name"];
+        this.sources = (source as Record<string, unknown>)["sources"] as MCPDiscoveredServer["sources"];
+        this.paths = (source as Record<string, unknown>)["paths"] as MCPDiscoveredServer["paths"];
+        this.runs = (source as Record<string, unknown>)["runs"] as MCPDiscoveredServer["runs"];
+        this.origin = (source as Record<string, unknown>)["origin"] as MCPDiscoveredServer["origin"];
+        this.notes = (source as Record<string, unknown>)["notes"] as MCPDiscoveredServer["notes"];
+        this.problem = (source as Record<string, unknown>)["problem"] as MCPDiscoveredServer["problem"];
+        this.command = (source as Record<string, unknown>)["command"] as MCPDiscoveredServer["command"];
+        this.args = (source as Record<string, unknown>)["args"] as MCPDiscoveredServer["args"];
+        this.env = (source as Record<string, unknown>)["env"] as MCPDiscoveredServer["env"];
+        this.url = (source as Record<string, unknown>)["url"] as MCPDiscoveredServer["url"];
+        this.headers = (source as Record<string, unknown>)["headers"] as MCPDiscoveredServer["headers"];
+        this.disabled = (source as Record<string, unknown>)["disabled"] as MCPDiscoveredServer["disabled"];
     }
 }
 export class MCPDiscoveryResponse {
@@ -829,23 +831,23 @@ export class MCPDiscoveryResponse {
     searched?: string[];
     error?: string;
 
-    constructor(source: any = {}) {
+    constructor(source: unknown = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.servers = this.convertValues(source["servers"], MCPDiscoveredServer);
-        this.searched = source["searched"];
-        this.error = source["error"];
+        this.servers = this.convertValues((source as Record<string, unknown>)["servers"], MCPDiscoveredServer) as MCPDiscoveryResponse["servers"];
+        this.searched = (source as Record<string, unknown>)["searched"] as MCPDiscoveryResponse["searched"];
+        this.error = (source as Record<string, unknown>)["error"] as MCPDiscoveryResponse["error"];
     }
 
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
+	convertValues(a: unknown, classs: new (source: unknown) => unknown, asMap: boolean = false): unknown {
 	    if (!a) {
 	        return a;
 	    }
 	    if (Array.isArray(a)) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
+	        return (a as unknown[]).map(elem => this.convertValues(elem, classs));
 	    } else if ("object" === typeof a) {
 	        if (asMap) {
 	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
+	                (a as Record<string, unknown>)[key] = new classs((a as Record<string, unknown>)[key]);
 	            }
 	            return a;
 	        }

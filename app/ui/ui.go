@@ -39,7 +39,7 @@ import (
 	_ "github.com/tkrajina/typescriptify-golang-structs/typescriptify"
 )
 
-//go:generate tscriptify -package=github.com/ollama/ollama/app/ui/responses -target=./app/codegen/gotypes.gen.ts responses/types.go
+//go:generate node ./app/codegen/generate.mjs
 //go:generate npm --prefix ./app run build
 
 var CORS = envconfig.Bool("OLLAMA_CORS")

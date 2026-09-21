@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "generate:types": "node codegen/generate.mjs",
+    "check:types": "node codegen/generate.mjs --check",
+    "test:codegen": "node --test --test-reporter=tap codegen/generate.checks.mjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",

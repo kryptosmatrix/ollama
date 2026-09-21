@@ -68,7 +68,7 @@ type ChatEvent struct {
 	ToolCall       *store.ToolCall  `json:"toolCall,omitempty"`
 	ToolName       *string          `json:"toolName,omitempty"`
 	ToolResult     *bool            `json:"toolResult,omitempty"`
-	ToolResultData any              `json:"toolResultData,omitempty"`
+	ToolResultData any              `json:"toolResultData,omitempty" ts_type:"JSONValue"`
 
 	// Chat creation fields
 	ChatID *string `json:"chatId,omitempty"`
@@ -78,10 +78,10 @@ type ChatEvent struct {
 	// /api/v1/chat/{id}/approval carrying ApprovalID.
 	ApprovalID    *string        `json:"approvalId,omitempty"`
 	ApprovalScope *string        `json:"approvalScope,omitempty"`
-	ApprovalArgs  map[string]any `json:"approvalArgs,omitempty"`
+	ApprovalArgs  map[string]any `json:"approvalArgs,omitempty" ts_type:"{[key: string]: JSONValue}"`
 
 	// Tool state field from the new code
-	ToolState any `json:"toolState,omitempty"`
+	ToolState any `json:"toolState,omitempty" ts_type:"JSONValue"`
 }
 
 // DownloadEvent is for model download progress
@@ -132,7 +132,7 @@ type ChatRequest struct {
 	WebSearch   *bool        `json:"web_search,omitempty"`
 	FileTools   *bool        `json:"file_tools,omitempty"`
 	ForceUpdate bool         `json:"forceUpdate,omitempty"`
-	Think       any          `json:"think,omitempty"`
+	Think       any          `json:"think,omitempty" ts_type:"JSONValue"`
 }
 
 type Error struct {
