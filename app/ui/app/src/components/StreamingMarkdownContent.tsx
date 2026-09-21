@@ -13,7 +13,7 @@ interface StreamingMarkdownContentProps {
   content: string;
   isStreaming?: boolean;
   size?: "sm" | "md" | "lg";
-  browserToolResult?: any; // TODO: proper type
+  browserToolResult?: { page_stack: string[] };
 }
 
 // Helper to extract text from React nodes
@@ -22,7 +22,7 @@ const extractText = (node: React.ReactNode): string => {
   if (typeof node === "number") return String(node);
   if (!node) return "";
   if (React.isValidElement(node)) {
-    const props = node.props as any;
+    const props = node.props as { children?: React.ReactNode };
     if (props?.children) {
       return extractText(props.children as React.ReactNode);
     }
@@ -54,11 +54,11 @@ const CodeBlock = React.memo(
         return {
           light: highlighter.codeToTokensBase(codeText, {
             lang: language as BundledLanguage,
-            theme: "one-light" as any,
+            theme: "one-light",
           }),
           dark: highlighter.codeToTokensBase(codeText, {
             lang: language as BundledLanguage,
-            theme: "one-dark" as any,
+            theme: "one-dark",
           }),
         };
       } catch (error) {
@@ -85,9 +85,9 @@ const CodeBlock = React.memo(
         <pre className="dark:hidden m-0 bg-neutral-100 text-sm overflow-x-auto p-4">
           <code className="font-mono text-sm">
             {tokens?.light
-              ? tokens.light.map((line: any, i: number) => (
+              ? tokens.light.map((line, i: number) => (
                   <React.Fragment key={i}>
-                    {line.map((token: any, j: number) => (
+                    {line.map((token, j: number) => (
                       <span
                         key={j}
                         style={{
@@ -107,9 +107,9 @@ const CodeBlock = React.memo(
         <pre className="hidden dark:block m-0 bg-neutral-800 text-sm overflow-x-auto p-4">
           <code className="font-mono text-sm">
             {tokens?.dark
-              ? tokens.dark.map((line: any, i: number) => (
+              ? tokens.dark.map((line, i: number) => (
                   <React.Fragment key={i}>
-                    {line.map((token: any, j: number) => (
+                    {line.map((token, j: number) => (
                       <span
                         key={j}
                         style={{

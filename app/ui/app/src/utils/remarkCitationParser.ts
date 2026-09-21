@@ -1,5 +1,23 @@
 import { visit } from "unist-util-visit";
 import type { Root, RootContent } from "mdast";
+import type { Node } from "unist";
+
+interface CitationNode extends Node {
+  type: "custom-citation";
+  data: {
+    hName: "ol-citation";
+    hProperties: { cursor: string; start?: string; end?: string };
+  };
+}
+
+declare module "mdast" {
+  interface PhrasingContentMap {
+    customCitation: CitationNode;
+  }
+  interface RootContentMap {
+    customCitation: CitationNode;
+  }
+}
 
 export default function remarkMyDelimiter() {
   return (tree: Root) => {
@@ -23,7 +41,6 @@ export default function remarkMyDelimiter() {
         }
         // the delimited content → new custom node
         pieces.push({
-          // @ts-expect-error: custom type
           type: "custom-citation" as const,
           data: {
             // tell rehype/rehype-react to render <Citation>
@@ -51,7 +68,6 @@ export default function remarkMyDelimiter() {
           });
         }
         pieces.push({
-          // @ts-expect-error: custom type
           type: "custom-citation" as const,
           data: {
             hName: "ol-citation",
@@ -83,8 +99,8 @@ export default function remarkMyDelimiter() {
         index !== undefined &&
         index > 0
       ) {
-        const currentNode = node as any;
-        const prevNode = parent.children[index - 1] as any;
+        const currentNode = node;
+        const prevNode = parent.children[index - 1];
 
         // Check if both nodes are citations with the same cursor
         if (
