@@ -1,0 +1,19 @@
+{
+  "source_declared_new_cases": [
+    "materialises nested chat models through the real API consumer",
+    "delivers distinct decoded content to the real Markdown renderer",
+    "keeps string and object constructor inputs equivalent without mutating their values",
+    "preserves optional nested values without inventing arrays or objects",
+    "performs declared Date transforms on real generated classes",
+    "preserves primitive and structured JSON payloads",
+    "retains nested Settings construction and false or zero values",
+    "retains map conversion and its existing reference behaviour",
+    "does not swallow malformed JSON constructor errors",
+    "ships generated declarations without explicit-any syntax"
+  ],
+  "new_tests_run": false,
+  "production_source_unchanged": true,
+  "baseline_tests": 154,
+  "program_emission_sha256": "b25ca8e6b74f0aaab8871f17c6b65be7dbde79da63c9f1755ab34de19108d5d5",
+  "programme_accepted_items": 0
+}

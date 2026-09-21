@@ -1,0 +1,17 @@
+{
+  "job_id": "e997c03979514b46a864eb8e69d32fb1",
+  "input_id": "eko-cont09-consumer-baseline",
+  "tool": "Eko_Write_Bridge.send_command_input",
+  "action": "Run the new generatedModels.test.tsx through the normal npm/Vitest command, retaining stdout/stderr and parsed results in continuation-09 evidence.",
+  "argv": ["/opt/homebrew/bin/npm", "test", "--", "--run", "src/utils/generatedModels.test.tsx", "--reporter=json"],
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+  "status": "blocked_before_execution",
+  "message": "This tool call was blocked by OpenAI because we couldn't determine the safety status of the request.",
+  "child_exit_code": null,
+  "new_test_count_from_source": 10,
+  "new_tests_discovered_by_runner": null,
+  "new_tests_executed": false,
+  "rerouted": false,
+  "production_changes_applied": false,
+  "scope_note": "This is a refusal of the specific invocation, not proof of a repository defect, a test result, or permanent tool unavailability. The earlier 154-test baseline ran before the new test file was created and is not acceptance of this candidate."
+}
