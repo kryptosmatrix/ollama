@@ -1,0 +1,7 @@
+{
+  "source_relative_path": "cloud-budget-probe/deliberately-small-requested-context.request.json",
+  "source_sha256": "540d02c65b45254c184635643d68e34133f5651312b6a13ca15f582b2a4f7a0b",
+  "source_bytes": 333,
+  "encoding": "utf-8",
+  "content": "{\"model\":\"deepseek-v4.1-flash:cloud\",\"stream\":false,\"think\":false,\"truncate\":false,\"shift\":false,\"options\":{\"num_ctx\":8,\"num_predict\":4,\"temperature\":0},\"messages\":[{\"role\":\"system\",\"content\":\"This is a synthetic transport check. Reply only OK.\"},{\"role\":\"user\",\"content\":\"Please acknowledge this harmless synthetic test with OK.\"}]}"
+}

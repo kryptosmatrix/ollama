@@ -1,0 +1,7 @@
+{
+  "source_relative_path": "cloud-budget-probe/deliberately-small-requested-context.response.json",
+  "source_sha256": "cce5f3aaf16cb6a79780e46726cded843f68ade08e80dd94ee73eebc8a2aa58b",
+  "source_bytes": 251,
+  "encoding": "utf-8",
+  "content": "{\"model\":\"deepseek-v4.1-flash\",\"created_at\":\"2026-09-21T08:20:56.348715965Z\",\"message\":{\"role\":\"assistant\",\"content\":\"OK\"},\"done\":true,\"done_reason\":\"stop\",\"total_duration\":574810171,\"prompt_eval_count\":25,\"prompt_eval_cached_count\":0,\"eval_count\":2}\n"
+}

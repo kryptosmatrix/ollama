@@ -1,0 +1,7 @@
+{
+  "source_relative_path": "g1-draft-review/result.json",
+  "source_sha256": "4359572812a513ee63877b5a86dc1763e6d7da586167d0cc1b800345b6158bec",
+  "source_bytes": 789,
+  "encoding": "utf-8",
+  "content": "{\n  \"scope\": \"G1 draft technical soundness, source excerpts and recorded probes only; not formal blueprint promotion or executable review\",\n  \"requested_model\": \"deepseek-v4.1-flash:cloud\",\n  \"served_model\": \"deepseek-v4.1-flash\",\n  \"prompt_sha256\": \"bce7e0759a34257778f3a9b7feceac10c96e028432fd7959b40e8270b2ed6821\",\n  \"request_sha256\": \"3238f0de4db8959d9d75add640f9e488c18c9ce913ac1c6ca05c42ba0e5d95ac\",\n  \"response_sha256\": \"86fcf094c446490ffecab0dbc5ddfb976397505d3e7b81c18b906bf15f2860ee\",\n  \"http_status\": 200,\n  \"done\": true,\n  \"done_reason\": \"stop\",\n  \"elapsed_seconds\": 24.593540583970025,\n  \"error\": null,\n  \"prompt_eval_count\": 38107,\n  \"eval_count\": 3001,\n  \"report_sha256\": \"ddf9032cda221832dbb55e85ba7a8f2397d770d69ea36651d07b83a9a08353d7\",\n  \"formal_round_counted\": false\n}\n"
+}

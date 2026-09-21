@@ -1,0 +1,7 @@
+{
+  "source_relative_path": "blocked-http-fixture-read.json",
+  "source_sha256": "242e79c37a7d39ad69c8e804ef85c29d8984fa9e9f1f87ccbb3be87460a7d0fa",
+  "source_bytes": 535,
+  "encoding": "utf-8",
+  "content": "{\n  \"job_id\": \"95a46d7323694b5c91b8f50d1239e127\",\n  \"input_id\": \"eko-cont11-http-fixture-check\",\n  \"attempted_action\": \"Read app/ui/tts_test.go lines 1-101 for the existing authenticated HTTP test fixture\",\n  \"platform_message\": \"This tool call was blocked by OpenAI because we couldn't determine the safety status of the request.\",\n  \"executed\": false,\n  \"child_result\": null,\n  \"disposition\": \"No retry or alternative route; the fixture-dependent HTTP failure-baseline task is blocked. Independent design/source review continues.\"\n}\n"
+}

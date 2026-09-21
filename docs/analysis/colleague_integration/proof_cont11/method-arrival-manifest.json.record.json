@@ -1,0 +1,7 @@
+{
+  "source_relative_path": "method-arrival-manifest.json",
+  "source_sha256": "9ce24c7840dcd0b5ef0b8c8c194fa9774401c51dbd6d2de2c6dda24134d66b06",
+  "source_bytes": 1067,
+  "encoding": "utf-8",
+  "content": "[\n  {\n    \"path\": \"/Users/krypto/GitHub/TECHNE/TECHNE_AGENT_START.md\",\n    \"file_sha256\": \"d2cb4701e92a68844d15b966d39c50fa4edee400731365e7936a3aba16a15e47\",\n    \"lines\": 116\n  },\n  {\n    \"path\": \"/Users/krypto/GitHub/TECHNE/KANON.md\",\n    \"file_sha256\": \"8667a6e524fe1c73fa1b4aaccb5afdc5d965bb121694c93abdc8a888f17f2365\",\n    \"lines\": 553\n  },\n  {\n    \"path\": \"/Users/krypto/GitHub/TECHNE/CONSTITUTION.md\",\n    \"file_sha256\": \"38230c5cd06f26bfd2d0aa16422bec265aab2d796c6a0f209ba9acdbcf171062\",\n    \"lines\": 699\n  },\n  {\n    \"path\": \"/Users/krypto/GitHub/TECHNE/PSYCHE-WELCOME.md\",\n    \"file_sha256\": \"2aff05ab269bf9cc8670f6622048876afc1578915f3d856cccb8e2a9779decac\",\n    \"lines\": 52\n  },\n  {\n    \"path\": \"/Users/krypto/GitHub/TECHNE/PSYCHE_NORTH_STAR.md\",\n    \"file_sha256\": \"15e0877c9901ba4bca685b4a241a76b8bce857f3d78247319da52e77a4baf71b\",\n    \"lines\": 251\n  },\n  {\n    \"path\": \"/Users/krypto/GitHub/TECHNE/Method/16_Implementation_Ready_Standard.md\",\n    \"file_sha256\": \"df589510432ba5e60848feca4eed9d93b5fb031f7bd07dee03e1d46b2daed564\",\n    \"lines\": 573\n  }\n]\n"
+}

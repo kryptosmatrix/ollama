@@ -1,0 +1,7 @@
+{
+  "source_relative_path": "http-baseline-incident.json",
+  "source_sha256": "786d0f39c2f090bce66a4fdffad9a4a25c840b7ca666002aa962c887d9f8f9c2",
+  "source_bytes": 1200,
+  "encoding": "utf-8",
+  "content": "{\n  \"first_execution\": {\n    \"input_id\": \"eko-cont11-independent-http-baseline\",\n    \"status\": \"outer process timeout after 120 seconds\",\n    \"declared_go_test_timeout_seconds\": 60,\n    \"test_exit\": null,\n    \"partial_output_saved\": false,\n    \"full_test_result_available\": false,\n    \"author_error\": \"The initial wrapper used capture_output and did not retain TimeoutExpired output. This is an instrument failure, not a passing test or proof of a missing API.\",\n    \"test_source\": \"testdata/instructions_http_baseline_test.go\",\n    \"keychain_fixture_read\": false,\n    \"production_constructor_used\": \"app/ui/ui.go::Server.Handler\"\n  },\n  \"later_inspection\": {\n    \"input_id\": \"eko-cont11-timeout-containment\",\n    \"status\": \"platform blocked before execution\",\n    \"message\": \"This tool call was blocked by OpenAI because we couldn't determine the safety status of the request.\",\n    \"process_snapshot_available\": false,\n    \"retry_or_alternate_inspection\": false\n  },\n  \"scope\": \"No further HTTP baseline run. Whole owned Bridge process group will be stopped through the dedicated job control; that is containment, not test acceptance.\",\n  \"timestamp_brisbane\": \"2026-09-21T18:48:40.230025+10:00\"\n}\n"
+}

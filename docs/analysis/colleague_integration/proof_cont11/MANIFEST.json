@@ -1,0 +1,261 @@
+{
+  "records": [
+    {
+      "source": "git-preflight.json",
+      "stored_as": "git-preflight.json.record.json",
+      "sha256": "56bde789599c5bf4d962d6b6a887cd0c4181c2ece82568a7c3d15be3d762d81b",
+      "bytes": 1566
+    },
+    {
+      "source": "method-arrival-manifest.json",
+      "stored_as": "method-arrival-manifest.json.record.json",
+      "sha256": "9ce24c7840dcd0b5ef0b8c8c194fa9774401c51dbd6d2de2c6dda24134d66b06",
+      "bytes": 1067
+    },
+    {
+      "source": "design-route-manifest.json",
+      "stored_as": "design-route-manifest.json.record.json",
+      "sha256": "a49529703089f6d6da0ff3d48cef42c8ea1c73970e7b365c4990642e7c411d67",
+      "bytes": 1026
+    },
+    {
+      "source": "lifecycle-source-manifest.json",
+      "stored_as": "lifecycle-source-manifest.json.record.json",
+      "sha256": "dab827d04d416ae08e0c959ffde9260b9c014a2ec11522a875be7d9dd9e76f45",
+      "bytes": 1306
+    },
+    {
+      "source": "G1_SOURCE_ANCHORS.json",
+      "stored_as": "G1_SOURCE_ANCHORS.json.record.json",
+      "sha256": "f0c46ede59a79a84c3cffb0ce6a665df2b6204c4544b05e3a763b9f7786f1cea",
+      "bytes": 7091
+    },
+    {
+      "source": "g1-draft-precheck.json",
+      "stored_as": "g1-draft-precheck.json.record.json",
+      "sha256": "5b07640685a5e5e349fdafa53844fd5dcdaa6cb40da545d40e747f6cc0eb8561",
+      "bytes": 745
+    },
+    {
+      "source": "g1-initialisation-design-change.json",
+      "stored_as": "g1-initialisation-design-change.json.record.json",
+      "sha256": "9921a9e82715b84265db9a27a6196bab38adc2aeff342936c7a74b235fd51503",
+      "bytes": 823
+    },
+    {
+      "source": "json-body-envelope-measurement.json",
+      "stored_as": "json-body-envelope-measurement.json.record.json",
+      "sha256": "630a8bab207b331f6a993b23ec132c89ab97352e40ee90f73623458c6babbb0f",
+      "bytes": 521
+    },
+    {
+      "source": "focused-baseline.json",
+      "stored_as": "focused-baseline.json.record.json",
+      "sha256": "5be872fd580817cc8189424d4a7df12f649051f1ca58fececf772100fbc3efd3",
+      "bytes": 1923
+    },
+    {
+      "source": "instructions-existing.stdout",
+      "stored_as": "instructions-existing.stdout.record.json",
+      "sha256": "c321c8fceb5e8475b616b8c45ac48fdec23e20bf2c9e85c5e18b858803cae983",
+      "bytes": 2654
+    },
+    {
+      "source": "instructions-existing.stderr",
+      "stored_as": "instructions-existing.stderr.record.json",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "prompt-retention-existing.stdout",
+      "stored_as": "prompt-retention-existing.stdout.record.json",
+      "sha256": "1076607bf8c19c539e993afaa77440a8452e2d6fbd0d4e0e7d7213f821ce04b3",
+      "bytes": 1924
+    },
+    {
+      "source": "prompt-retention-existing.stderr",
+      "stored_as": "prompt-retention-existing.stderr.record.json",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "blocked-http-fixture-read.json",
+      "stored_as": "blocked-http-fixture-read.json.record.json",
+      "sha256": "242e79c37a7d39ad69c8e804ef85c29d8984fa9e9f1f87ccbb3be87460a7d0fa",
+      "bytes": 535
+    },
+    {
+      "source": "http-baseline-incident.json",
+      "stored_as": "http-baseline-incident.json.record.json",
+      "sha256": "786d0f39c2f090bce66a4fdffad9a4a25c840b7ca666002aa962c887d9f8f9c2",
+      "bytes": 1200
+    },
+    {
+      "source": "testdata/instructions_http_baseline_test.go",
+      "stored_as": "testdata/instructions_http_baseline_test.go.record.json",
+      "sha256": "22032a934af4e7df912f50afa04ec964706a5c0c15e2199e46d9b313c24b2f0b",
+      "bytes": 4116
+    },
+    {
+      "source": "g1-before-draft-review.md",
+      "stored_as": "g1-before-draft-review.md.record.json",
+      "sha256": "17a25bf3c2d306c475494e2eb3f50cc3f168d8b4b21749527e0916e8d0d67212",
+      "bytes": 40761
+    },
+    {
+      "source": "g1-before-initialisation-detail.md",
+      "stored_as": "g1-before-initialisation-detail.md.record.json",
+      "sha256": "46d52889a32c2f4d32d505d31e48e92795d745adde052ab0b307206e0390b10e",
+      "bytes": 47045
+    },
+    {
+      "source": "cloud-budget-probe/deliberately-small-requested-context.request.json",
+      "stored_as": "cloud-budget-probe/deliberately-small-requested-context.request.json.record.json",
+      "sha256": "540d02c65b45254c184635643d68e34133f5651312b6a13ca15f582b2a4f7a0b",
+      "bytes": 333
+    },
+    {
+      "source": "cloud-budget-probe/deliberately-small-requested-context.response.json",
+      "stored_as": "cloud-budget-probe/deliberately-small-requested-context.response.json.record.json",
+      "sha256": "cce5f3aaf16cb6a79780e46726cded843f68ade08e80dd94ee73eebc8a2aa58b",
+      "bytes": 251
+    },
+    {
+      "source": "cloud-budget-probe/one-token-longer-repeat.request.json",
+      "stored_as": "cloud-budget-probe/one-token-longer-repeat.request.json.record.json",
+      "sha256": "193d994735aae8347e63733032f22ce3d489f85df296471bff3362c24b848838",
+      "bytes": 2868
+    },
+    {
+      "source": "cloud-budget-probe/one-token-longer-repeat.response.json",
+      "stored_as": "cloud-budget-probe/one-token-longer-repeat.response.json.record.json",
+      "sha256": "c356c65f49bfa6f47c997fc623e8e0f4eaef5c976c49da0d271c75843369a7d6",
+      "bytes": 256
+    },
+    {
+      "source": "cloud-budget-probe/one-token-longer.request.json",
+      "stored_as": "cloud-budget-probe/one-token-longer.request.json.record.json",
+      "sha256": "193d994735aae8347e63733032f22ce3d489f85df296471bff3362c24b848838",
+      "bytes": 2868
+    },
+    {
+      "source": "cloud-budget-probe/one-token-longer.response.json",
+      "stored_as": "cloud-budget-probe/one-token-longer.response.json.record.json",
+      "sha256": "ae36791c8f6196e698321c5a6fcc0cb2be727a804ac00f73a09420425fee5d2d",
+      "bytes": 254
+    },
+    {
+      "source": "cloud-budget-probe/one-token-results.json",
+      "stored_as": "cloud-budget-probe/one-token-results.json.record.json",
+      "sha256": "7dcd1cd63fc9e5814ecbfbf726c7bae5af094111cb467947628c0d1e45ef4e80",
+      "bytes": 2178
+    },
+    {
+      "source": "cloud-budget-probe/one-token-short.request.json",
+      "stored_as": "cloud-budget-probe/one-token-short.request.json.record.json",
+      "sha256": "2c207ca577ea2b01503822be3523cc367de30e3b3d17afe0cc39006f69e284b1",
+      "bytes": 336
+    },
+    {
+      "source": "cloud-budget-probe/one-token-short.response.json",
+      "stored_as": "cloud-budget-probe/one-token-short.response.json.record.json",
+      "sha256": "3e6052b0bbe24d51298cdea7edc61de06a80d590d13686422a9ce39fcffcb39c",
+      "bytes": 253
+    },
+    {
+      "source": "cloud-budget-probe/ordinary-headroom.request.json",
+      "stored_as": "cloud-budget-probe/ordinary-headroom.request.json.record.json",
+      "sha256": "6f5f497f7f87579073596adb408fcd46c8838ccb1952f2cc5aabb2d66a8e2c52",
+      "bytes": 336
+    },
+    {
+      "source": "cloud-budget-probe/ordinary-headroom.response.json",
+      "stored_as": "cloud-budget-probe/ordinary-headroom.response.json.record.json",
+      "sha256": "7cb5a532b0f30a328bad07cdb40bd24a99486fe9158a67be4e0436f8d129bf33",
+      "bytes": 251
+    },
+    {
+      "source": "cloud-budget-probe/prefill-results.json",
+      "stored_as": "cloud-budget-probe/prefill-results.json.record.json",
+      "sha256": "47b4b1810cfdc523483bb89b518716b2dcbac8fd598b4194379d04ffe301333e",
+      "bytes": 1516
+    },
+    {
+      "source": "cloud-budget-probe/results.json",
+      "stored_as": "cloud-budget-probe/results.json.record.json",
+      "sha256": "32c075cf0caaa5054a987dabe7198da39a537dd5653d7d3c02dcb6bb555e5817",
+      "bytes": 1327
+    },
+    {
+      "source": "cloud-budget-probe/zero-output-longer.request.json",
+      "stored_as": "cloud-budget-probe/zero-output-longer.request.json.record.json",
+      "sha256": "5388b9d7e870056ebacd18de8f7723cc8da9bbcd4597508d1e26ee6424ee0167",
+      "bytes": 2868
+    },
+    {
+      "source": "cloud-budget-probe/zero-output-longer.response.json",
+      "stored_as": "cloud-budget-probe/zero-output-longer.response.json.record.json",
+      "sha256": "1f0d4464ee8f866f3f2137863e722ff88b9ba71e3c0adb6eb12e65894a051b27",
+      "bytes": 92
+    },
+    {
+      "source": "cloud-budget-probe/zero-output-short.request.json",
+      "stored_as": "cloud-budget-probe/zero-output-short.request.json.record.json",
+      "sha256": "3196477bf9af67adbdb4519ea3be5bab1d5190aa57a83d655b0e5b49f062078e",
+      "bytes": 336
+    },
+    {
+      "source": "cloud-budget-probe/zero-output-short.response.json",
+      "stored_as": "cloud-budget-probe/zero-output-short.response.json.record.json",
+      "sha256": "ae27784f52d2b96c4a41ecf8b2bd246e5d1231355ae138e5cc1494b4655b5fcf",
+      "bytes": 92
+    },
+    {
+      "source": "g1-draft-review/dispositions.json",
+      "stored_as": "g1-draft-review/dispositions.json.record.json",
+      "sha256": "39f5259e476c9ce2bb54054569dbf7e87cec044d18c832061b0460509d33ab76",
+      "bytes": 5759
+    },
+    {
+      "source": "g1-draft-review/manifest.json",
+      "stored_as": "g1-draft-review/manifest.json.record.json",
+      "sha256": "6d3fb734e966fca2e2823ab60e7be751c73db7a8a1eb70479307f33bfd825f2f",
+      "bytes": 4921
+    },
+    {
+      "source": "g1-draft-review/prompt.txt",
+      "stored_as": "g1-draft-review/prompt.txt.record.json",
+      "sha256": "bce7e0759a34257778f3a9b7feceac10c96e028432fd7959b40e8270b2ed6821",
+      "bytes": 131293
+    },
+    {
+      "source": "g1-draft-review/report.md",
+      "stored_as": "g1-draft-review/report.md.record.json",
+      "sha256": "ddf9032cda221832dbb55e85ba7a8f2397d770d69ea36651d07b83a9a08353d7",
+      "bytes": 13302
+    },
+    {
+      "source": "g1-draft-review/request.json",
+      "stored_as": "g1-draft-review/request.json.record.json",
+      "sha256": "3238f0de4db8959d9d75add640f9e488c18c9ce913ac1c6ca05c42ba0e5d95ac",
+      "bytes": 138139
+    },
+    {
+      "source": "g1-draft-review/response.json",
+      "stored_as": "g1-draft-review/response.json.record.json",
+      "sha256": "86fcf094c446490ffecab0dbc5ddfb976397505d3e7b81c18b906bf15f2860ee",
+      "bytes": 13712
+    },
+    {
+      "source": "g1-draft-review/result.json",
+      "stored_as": "g1-draft-review/result.json.record.json",
+      "sha256": "4359572812a513ee63877b5a86dc1763e6d7da586167d0cc1b800345b6158bec",
+      "bytes": 789
+    }
+  ],
+  "source_commit": "17197224933cbdd9875c2277f18767c5f6f134a2",
+  "scope": "Documentation and source/probe evidence; no G1 implementation acceptance",
+  "blueprint_sha256": "24d76eb771d94d64979dbeed74aa6c1b706bab98edad56280399a521f292645c",
+  "raw_sources_retained": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont11",
+  "snapshot_before_final_git_and_job_closeout": true
+}

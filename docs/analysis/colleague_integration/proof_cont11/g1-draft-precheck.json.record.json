@@ -1,0 +1,7 @@
+{
+  "source_relative_path": "g1-draft-precheck.json",
+  "source_sha256": "5b07640685a5e5e349fdafa53844fd5dcdaa6cb40da545d40e747f6cc0eb8561",
+  "source_bytes": 745,
+  "encoding": "utf-8",
+  "content": "{\n  \"before_sha256\": \"610ab82907a0f46014f0acc54fa184439b98efa926e8ea64112c6d68588747f6\",\n  \"after_sha256\": \"17a25bf3c2d306c475494e2eb3f50cc3f168d8b4b21749527e0916e8d0d67212\",\n  \"bytes\": 40761,\n  \"requirement_ids\": [\n    \"G1-R-01\",\n    \"G1-R-02\",\n    \"G1-R-03\",\n    \"G1-R-04\",\n    \"G1-R-05\",\n    \"G1-R-06\",\n    \"G1-R-07\",\n    \"G1-R-08\",\n    \"G1-R-09\",\n    \"G1-R-10\",\n    \"G1-R-11\",\n    \"G1-R-12\",\n    \"G1-R-13\",\n    \"G1-R-14\",\n    \"G1-R-15\",\n    \"G1-R-16\",\n    \"G1-R-17\",\n    \"G1-R-18\"\n  ],\n  \"count\": 18,\n  \"source_anchors\": 20,\n  \"full_blueprint_promotion\": false,\n  \"changes\": [\n    \"precise inactive-binding contract\",\n    \"restore-history read surface\",\n    \"correct worst-case JSON body cap\",\n    \"exact terminal construction anchor\"\n  ]\n}\n"
+}

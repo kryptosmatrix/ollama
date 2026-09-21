@@ -1,0 +1,7 @@
+{
+  "source_relative_path": "cloud-budget-probe/ordinary-headroom.request.json",
+  "source_sha256": "6f5f497f7f87579073596adb408fcd46c8838ccb1952f2cc5aabb2d66a8e2c52",
+  "source_bytes": 336,
+  "encoding": "utf-8",
+  "content": "{\"model\":\"deepseek-v4.1-flash:cloud\",\"stream\":false,\"think\":false,\"truncate\":false,\"shift\":false,\"options\":{\"num_ctx\":4096,\"num_predict\":4,\"temperature\":0},\"messages\":[{\"role\":\"system\",\"content\":\"This is a synthetic transport check. Reply only OK.\"},{\"role\":\"user\",\"content\":\"Please acknowledge this harmless synthetic test with OK.\"}]}"
+}

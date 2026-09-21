@@ -1,0 +1,7 @@
+{
+  "source_relative_path": "g1-initialisation-design-change.json",
+  "source_sha256": "9921a9e82715b84265db9a27a6196bab38adc2aeff342936c7a74b235fd51503",
+  "source_bytes": 823,
+  "encoding": "utf-8",
+  "content": "{\n  \"before_sha256\": \"46d52889a32c2f4d32d505d31e48e92795d745adde052ab0b307206e0390b10e\",\n  \"after_sha256\": \"24d76eb771d94d64979dbeed74aa6c1b706bab98edad56280399a521f292645c\",\n  \"document_bytes\": 54453,\n  \"production_estimate_loc\": 1489,\n  \"byte_ceiling\": 59560,\n  \"status\": \"pre-adjudication draft; no production or readiness promotion\",\n  \"newly_specified\": [\n    \"same-filesystem staged database publication\",\n    \"complete table schema\",\n    \"CAS/binding/reload transaction order\",\n    \"typed wire success/error envelopes\",\n    \"idempotent reload and exact event/generation cap\",\n    \"measured raw JSON envelope bound\"\n  ],\n  \"remaining_open\": [\n    \"OQ-1 full capacity admission\",\n    \"OQ-3 complete restart/request baseline\",\n    \"OQ-4 derived source/guard/test coverage and independent two-substrate promotion\"\n  ]\n}\n"
+}

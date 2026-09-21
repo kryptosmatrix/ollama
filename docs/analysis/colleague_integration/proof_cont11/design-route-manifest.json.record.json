@@ -1,0 +1,7 @@
+{
+  "source_relative_path": "design-route-manifest.json",
+  "source_sha256": "a49529703089f6d6da0ff3d48cef42c8ea1c73970e7b365c4990642e7c411d67",
+  "source_bytes": 1026,
+  "encoding": "utf-8",
+  "content": "[\n  {\n    \"path\": \"TECHNE/Method/02_Blueprint_Method.md\",\n    \"file_sha256\": \"e1c160a2bcbe0137f2af014285a6831ff2e44d38bb363785818eb2957edbf62c\",\n    \"lines\": 473\n  },\n  {\n    \"path\": \"TECHNE/Method/09_Code_Excellence_Method.md\",\n    \"file_sha256\": \"6a607fd80f642fd433b6f609200494d06164b9649432e587b9f16f1e92a8ac7e\",\n    \"lines\": 374\n  },\n  {\n    \"path\": \"TECHNE/Method/04_Implementation_Proof_Method.md\",\n    \"file_sha256\": \"261e9c16f3041bca0fe19f98f1ff9cf06acdfe914152094eaf8e6c8cf964d64a\",\n    \"lines\": 482\n  },\n  {\n    \"path\": \"TECHNE/Method/21_Branch_And_Merge_Discipline.md\",\n    \"file_sha256\": \"59bf8294cdcda7b53f31769d5b80164c1ae5741426c7b6028c76bb15e244f92c\",\n    \"lines\": 213\n  },\n  {\n    \"path\": \"TECHNE/Role_Cards/Blueprint_Creator_Rewriter.md\",\n    \"file_sha256\": \"5133cba4cf2de59a26904a07ccface019f27443b5fffc463f34a216b4015d5f9\",\n    \"lines\": 324\n  },\n  {\n    \"path\": \"TECHNE/Role_Cards/Architect.md\",\n    \"file_sha256\": \"03d50e190751f59b7be720903cd23364f8e0ebc501ecf145ea2345eeb30c05a4\",\n    \"lines\": 265\n  }\n]\n"
+}

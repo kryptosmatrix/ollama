@@ -1,0 +1,7 @@
+{
+  "source_relative_path": "cloud-budget-probe/one-token-short.request.json",
+  "source_sha256": "2c207ca577ea2b01503822be3523cc367de30e3b3d17afe0cc39006f69e284b1",
+  "source_bytes": 336,
+  "encoding": "utf-8",
+  "content": "{\"model\":\"deepseek-v4.1-flash:cloud\",\"stream\":false,\"think\":false,\"truncate\":false,\"shift\":false,\"options\":{\"num_ctx\":4096,\"num_predict\":1,\"temperature\":0},\"messages\":[{\"role\":\"system\",\"content\":\"This is a synthetic transport check. Reply only OK.\"},{\"role\":\"user\",\"content\":\"Please acknowledge this harmless synthetic test with OK.\"}]}"
+}

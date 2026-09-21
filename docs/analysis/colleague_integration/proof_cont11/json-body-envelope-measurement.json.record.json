@@ -1,0 +1,7 @@
+{
+  "source_relative_path": "json-body-envelope-measurement.json",
+  "source_sha256": "630a8bab207b331f6a993b23ec132c89ab97352e40ee90f73623458c6babbb0f",
+  "source_bytes": 521,
+  "encoding": "utf-8",
+  "content": "{\n  \"raw_body_limit\": 524288,\n  \"decoded_text_limit\": 65536,\n  \"max_binding_bytes\": 2432,\n  \"six_byte_escaping_significant_body\": 407970,\n  \"fixed_envelope_bytes_in_worked_instance\": 162,\n  \"remaining_bytes\": 116318,\n  \"input_character\": \"U+0001 (valid UTF-8, NUL-free, six-byte JSON escape)\",\n  \"whitespace_policy\": \"Raw bodies exceeding 524288 are refused even if the decoded strings would fit; padding whitespace is not exempt.\",\n  \"sample_digest\": \"0b59664b704b51ae53ba213c0e3359a2b60a0bdd11abc751dc6674da2220be16\"\n}\n"
+}

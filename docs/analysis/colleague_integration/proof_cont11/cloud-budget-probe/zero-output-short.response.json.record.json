@@ -1,0 +1,7 @@
+{
+  "source_relative_path": "cloud-budget-probe/zero-output-short.response.json",
+  "source_sha256": "ae27784f52d2b96c4a41ecf8b2bd246e5d1231355ae138e5cc1494b4655b5fcf",
+  "source_bytes": 92,
+  "encoding": "utf-8",
+  "content": "{\"error\":\"max_tokens must be positive, got: 0 (ref: ff401e42-957e-4168-a487-c6a78d6c0d39)\"}\n"
+}
