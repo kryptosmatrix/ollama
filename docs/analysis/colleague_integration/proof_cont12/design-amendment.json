@@ -1,0 +1,30 @@
+{
+  "before_sha256": "24d76eb771d94d64979dbeed74aa6c1b706bab98edad56280399a521f292645c",
+  "after_sha256": "8bfea5fc2804b40bcd23d6f99f4d970e2507dab28d084e8203ced7534725ecab",
+  "bytes_before": 54453,
+  "bytes_after": 58792,
+  "ceiling_bytes": 59560,
+  "estimated_production_LOC_unchanged": 1489,
+  "frozen_requirement_rows": 18,
+  "frozen_requirement_bytes_unchanged": true,
+  "source_and_test_runtime_files_changed": false,
+  "mode": "REPAIR; source reconciliation, narrowed open decision, reference vectors and measured baseline; SPEC-DRAFT retained",
+  "carry_over": [
+    {
+      "scope": "canonical digest existing field order and no-normalisation contract",
+      "status": "KEPT; three executed reference vectors added; production/null-binding limits explicit"
+    },
+    {
+      "scope": "section 6 existing observations and cloud probe history",
+      "status": "KEPT; unselected one-token option explicitly rejected; native preparation/count interface located"
+    },
+    {
+      "scope": "section 9 earlier focused baseline",
+      "status": "KEPT; newly completed entry-failure baselines added without relabelling previous timeout"
+    },
+    {
+      "scope": "all other sections, requirements, schema, types, lifecycle, errors, caps, pack ordering and proof obligations",
+      "status": "KEPT byte-for-byte outside the three exact replacement/insertion sites"
+    }
+  ]
+}

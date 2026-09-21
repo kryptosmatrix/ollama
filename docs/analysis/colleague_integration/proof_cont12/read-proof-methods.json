@@ -1,0 +1,32 @@
+[
+  {
+    "path": "TECHNE/KANON.md",
+    "file_sha256": "8667a6e524fe1c73fa1b4aaccb5afdc5d965bb121694c93abdc8a888f17f2365",
+    "lines": 553
+  },
+  {
+    "path": "TECHNE/CONSTITUTION.md",
+    "file_sha256": "38230c5cd06f26bfd2d0aa16422bec265aab2d796c6a0f209ba9acdbcf171062",
+    "lines": 699
+  },
+  {
+    "path": "TECHNE/Method/04_Implementation_Proof_Method.md",
+    "file_sha256": "261e9c16f3041bca0fe19f98f1ff9cf06acdfe914152094eaf8e6c8cf964d64a",
+    "lines": 482
+  },
+  {
+    "path": "TECHNE/Method/21_Branch_And_Merge_Discipline.md",
+    "file_sha256": "59bf8294cdcda7b53f31769d5b80164c1ae5741426c7b6028c76bb15e244f92c",
+    "lines": 213
+  },
+  {
+    "path": "TECHNE/Role_Cards/Tester.md",
+    "file_sha256": "155820e09aef485e327d2ec6330f0b83860f3e1ee695c08ed96c388b9fdabec7",
+    "lines": 236
+  },
+  {
+    "path": "TECHNE/Templates/Feature_Acceptance_Evidence.md",
+    "file_sha256": "385815c3f2b88f74f04deae18e3212e42dba2032d7a4ca761ec0cfd4c52cb84b",
+    "lines": 107
+  }
+]

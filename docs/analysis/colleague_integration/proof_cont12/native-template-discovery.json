@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "git",
+    "grep",
+    "-n",
+    "-E",
+    "post_apply_template|post_chat_completions|post_tokenize|oaicompat_chat.*parse|chat_params_parse",
+    "--",
+    "tools/server"
+  ],
+  "exit_code": 0,
+  "stdout": "tools/server/server-common.cpp:905:json oaicompat_chat_params_parse(\ntools/server/server-common.h:310:json oaicompat_chat_params_parse(\ntools/server/server-context.cpp:4687:    this->post_chat_completions = [this](const server_http_req & req) {\ntools/server/server-context.cpp:4691:        json body_parsed = oaicompat_chat_params_parse(\ntools/server/server-context.cpp:4703:    this->post_chat_completions_tok = [this](const server_http_req & req) {\ntools/server/server-context.cpp:4750:        json body_parsed = oaicompat_chat_params_parse(\ntools/server/server-context.cpp:4782:        json body_parsed = oaicompat_chat_params_parse(\ntools/server/server-context.cpp:4800:        json body_parsed = oaicompat_chat_params_parse(\ntools/server/server-context.cpp:4817:    this->post_apply_template = [this](const server_http_req & req) {\ntools/server/server-context.cpp:4821:        json data = oaicompat_chat_params_parse(\ntools/server/server-context.cpp:4870:    this->post_tokenize = [this](const server_http_req & req) {\ntools/server/server-context.cpp:5320:    json body_parsed = oaicompat_chat_params_parse(\ntools/server/server-context.h:139:    server_http_context::handler_t post_chat_completions;\ntools/server/server-context.h:140:    server_http_context::handler_t post_chat_completions_tok;\ntools/server/server-context.h:147:    server_http_context::handler_t post_apply_template;\ntools/server/server-context.h:149:    server_http_context::handler_t post_tokenize;\ntools/server/server.cpp:194:        routes.post_chat_completions       = models_routes->proxy_post;\ntools/server/server.cpp:204:        routes.post_tokenize               = models_routes->proxy_post;\ntools/server/server.cpp:206:        routes.post_apply_template         = models_routes->proxy_post;\ntools/server/server.cpp:207:        routes.post_chat_completions_tok   = models_routes->proxy_post;\ntools/server/server.cpp:235:    ctx_http.post(\"/chat/completions\",         ex_wrapper(routes.post_chat_completions));\ntools/server/server.cpp:236:    ctx_http.post(\"/v1/chat/completions\",      ex_wrapper(routes.post_chat_completions));\ntools/server/server.cpp:251:    ctx_http.post(\"/tokenize\",                 ex_wrapper(routes.post_tokenize));\ntools/server/server.cpp:253:    ctx_http.post(\"/apply-template\",           ex_wrapper(routes.post_apply_template));\ntools/server/server.cpp:255:    ctx_http.post(\"/chat/completions/input_tokens\",    ex_wrapper(routes.post_chat_completions_tok));\ntools/server/server.cpp:256:    ctx_http.post(\"/v1/chat/completions/input_tokens\", ex_wrapper(routes.post_chat_completions_tok));\n",
+  "stderr": ""
+}

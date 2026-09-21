@@ -1,0 +1,7 @@
+{
+  "format": "eko-utf8-evidence-v1",
+  "original_relative_path": "budget-source/server__routes.go__2310_2330.txt",
+  "bytes": 567,
+  "sha256": "ddc0112ab27e02c25d63a10a203b7ccebc4750a83e31ae90ad8e6b2ae1b1965f",
+  "content": "2310: \treturn renderers.LeadingBOSForRenderer(resolveRendererName(m))\n2311: }\n2312: \n2313: func optionsForPrompt(opts *api.Options, runner llm.LlamaServer) *api.Options {\n2314: \tif opts == nil || runner == nil {\n2315: \t\treturn opts\n2316: \t}\n2317: \n2318: \tif ctxLen := runner.ContextLength(); ctxLen > 0 && opts.NumCtx > ctxLen {\n2319: \t\tcopied := *opts\n2320: \t\tcopied.NumCtx = ctxLen\n2321: \t\treturn &copied\n2322: \t}\n2323: \n2324: \treturn opts\n2325: }\n2326: \n2327: type chatExecutionMode int\n2328: \n2329: const (\n2330: \tchatExecutionModeNative chatExecutionMode = iota\n"
+}

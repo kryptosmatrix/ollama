@@ -1,0 +1,57 @@
+{
+  "source_base": "6a3778184d43b23c5cba14e0379922377f615f52",
+  "git_checks": [
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all"
+      ],
+      "exit_code": 0,
+      "stdout": " M docs/_design/G1_PERSISTED_INSTRUCTIONS.md\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--name-only",
+        "6a377818",
+        "--",
+        ".",
+        ":(exclude)docs"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--name-only"
+      ],
+      "exit_code": 0,
+      "stdout": "docs/_design/G1_PERSISTED_INSTRUCTIONS.md\n",
+      "stderr": ""
+    }
+  ],
+  "control_preimages": {
+    "STATE.json": "484486fcf54033aaa0840a00607f7e462c9741fb74e170a79b7d212e8985dc9c",
+    "HANDOFF.md": "d8d8c5487b1cb2ee1ef2302d45f2080bb72e0b26d5d8bf0df214722ecab57a6b",
+    "DECISIONS.md": "c733bd200b2898d1b03088f79b5eb19a0fea40d7f96b34c6d77612892697ac2e",
+    "BLOCKERS.md": "02067cce871982b2501de9488b61acc54df6173808e26318462a148c6d63aace",
+    "REQUIREMENTS.md": "ba7655da025f220df2a09d7a16ca400e7286fa68c23bac607228ed961b195986"
+  }
+}

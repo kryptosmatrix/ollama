@@ -1,0 +1,42 @@
+[
+  {
+    "label": "build",
+    "argv": [
+      "/opt/homebrew/bin/go",
+      "build",
+      "-o",
+      "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont12/cli-baseline/ollama-candidate",
+      "."
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed_seconds": 20.89459491695743,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "help",
+    "argv": [
+      "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont12/cli-baseline/ollama-candidate",
+      "--help"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed_seconds": 0.9976049580145627,
+    "stdout_sha256": "129e23fab45268bf2ca93ba82c1ff708a08bdbfa4ee1c2b2f94a7d6e34557597",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "instructions",
+    "argv": [
+      "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont12/cli-baseline/ollama-candidate",
+      "instructions",
+      "--help"
+    ],
+    "exit_code": 1,
+    "timed_out": false,
+    "elapsed_seconds": 0.03537512489128858,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "5150f1215d99485549ed2ef25a05df508de0437057a2f2a090176ce8a7b61f7a"
+  }
+]

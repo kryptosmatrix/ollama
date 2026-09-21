@@ -1,0 +1,26 @@
+[
+  {
+    "path": "TECHNE/Method/02_Blueprint_Method.md",
+    "file_sha256": "e1c160a2bcbe0137f2af014285a6831ff2e44d38bb363785818eb2957edbf62c",
+    "bytes": 23598,
+    "lines": 473
+  },
+  {
+    "path": "TECHNE/Guides/BLUEPRINT_GUIDELINES.md",
+    "file_sha256": "4c28c91705cf83080c987b818334d94809eea7911afdb80379ca2a36481e6e05",
+    "bytes": 78661,
+    "lines": 1530
+  },
+  {
+    "path": "TECHNE/Method/09_Code_Excellence_Method.md",
+    "file_sha256": "6a607fd80f642fd433b6f609200494d06164b9649432e587b9f16f1e92a8ac7e",
+    "bytes": 14185,
+    "lines": 374
+  },
+  {
+    "path": "TECHNE/Role_Cards/Blueprint_Creator_Rewriter.md",
+    "file_sha256": "5133cba4cf2de59a26904a07ccface019f27443b5fffc463f34a216b4015d5f9",
+    "bytes": 11441,
+    "lines": 324
+  }
+]

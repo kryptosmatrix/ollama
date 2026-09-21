@@ -1,0 +1,16 @@
+{
+  "http_status": 200,
+  "requested_model": "deepseek-v4.1-flash:cloud",
+  "served_model": "deepseek-v4.1-flash",
+  "tag_digest": "e04da138d31e0c9468e982e1ae9503d06cb7e170caa16a90c17d931c4aa140f8",
+  "cloud_weights_pinned": false,
+  "done": true,
+  "done_reason": "stop",
+  "seconds": 16.378296791925095,
+  "prompt_bytes": 99870,
+  "prompt_sha256": "526242d9fdde994c27afe66e47551f83d1a98293eba38bad3e367a84f0fc7b5e",
+  "prompt_eval_count": 26372,
+  "eval_count": 2339,
+  "report_sha256": "d229d5efa0b73c0211225c2852fd0579075de73f58ffe022e89ef1d8c1fca75a",
+  "scope": "source-only design consultation, not promotion or execution proof"
+}

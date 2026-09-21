@@ -1,0 +1,7 @@
+{
+  "format": "eko-utf8-evidence-v1",
+  "original_relative_path": "cli-baseline/instructions.stderr",
+  "bytes": 51,
+  "sha256": "5150f1215d99485549ed2ef25a05df508de0437057a2f2a090176ce8a7b61f7a",
+  "content": "Error: unknown command \"instructions\" for \"ollama\"\n"
+}

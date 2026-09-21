@@ -1,0 +1,60 @@
+{
+  "timestamp": "2026-09-21T19:35:03.432636+10:00",
+  "results": [
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "stdout": "baedaf58a711606f343c9c83e13bb68a0169528f\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--name-only",
+        "17197224..HEAD"
+      ],
+      "exit_code": 0,
+      "stdout": "docs/_design/G1_PERSISTED_INSTRUCTIONS.md\ndocs/_design/G1_PERSISTENT_INSTRUCTIONS_CONCEPT.md\ndocs/analysis/colleague_integration/proof_cont11/BLOCKERS.md\ndocs/analysis/colleague_integration/proof_cont11/CONTINUATION_11_REPORT.md\ndocs/analysis/colleague_integration/proof_cont11/G1_SOURCE_ANCHORS.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/HANDOFF.md\ndocs/analysis/colleague_integration/proof_cont11/MANIFEST.json\ndocs/analysis/colleague_integration/proof_cont11/REQUIREMENTS.md\ndocs/analysis/colleague_integration/proof_cont11/blocked-http-fixture-read.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/cloud-budget-probe/deliberately-small-requested-context.request.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/cloud-budget-probe/deliberately-small-requested-context.response.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/cloud-budget-probe/one-token-longer-repeat.request.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/cloud-budget-probe/one-token-longer-repeat.response.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/cloud-budget-probe/one-token-longer.request.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/cloud-budget-probe/one-token-longer.response.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/cloud-budget-probe/one-token-results.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/cloud-budget-probe/one-token-short.request.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/cloud-budget-probe/one-token-short.response.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/cloud-budget-probe/ordinary-headroom.request.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/cloud-budget-probe/ordinary-headroom.response.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/cloud-budget-probe/prefill-results.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/cloud-budget-probe/results.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/cloud-budget-probe/zero-output-longer.request.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/cloud-budget-probe/zero-output-longer.response.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/cloud-budget-probe/zero-output-short.request.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/cloud-budget-probe/zero-output-short.response.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/design-route-manifest.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/focused-baseline.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/g1-before-draft-review.md.record.json\ndocs/analysis/colleague_integration/proof_cont11/g1-before-initialisation-detail.md.record.json\ndocs/analysis/colleague_integration/proof_cont11/g1-draft-precheck.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/g1-draft-review/dispositions.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/g1-draft-review/manifest.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/g1-draft-review/prompt.txt.record.json\ndocs/analysis/colleague_integration/proof_cont11/g1-draft-review/report.md.record.json\ndocs/analysis/colleague_integration/proof_cont11/g1-draft-review/request.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/g1-draft-review/response.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/g1-draft-review/result.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/g1-initialisation-design-change.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/git-preflight.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/http-baseline-incident.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/instructions-existing.stderr.record.json\ndocs/analysis/colleague_integration/proof_cont11/instructions-existing.stdout.record.json\ndocs/analysis/colleague_integration/proof_cont11/json-body-envelope-measurement.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/lifecycle-source-manifest.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/method-arrival-manifest.json.record.json\ndocs/analysis/colleague_integration/proof_cont11/prompt-retention-existing.stderr.record.json\ndocs/analysis/colleague_integration/proof_cont11/prompt-retention-existing.stdout.record.json\ndocs/analysis/colleague_integration/proof_cont11/testdata/instructions_http_baseline_test.go.record.json\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "worktree",
+        "list",
+        "--porcelain"
+      ],
+      "exit_code": 0,
+      "stdout": "worktree /Users/krypto/GitHub/ollama\nHEAD 953de98d408a9697fa20a48c23973b9dc8eee921\nbranch refs/heads/main\n\nworktree /Users/krypto/GitHub/ollama-eko-chat-read-integrity\nHEAD baedaf58a711606f343c9c83e13bb68a0169528f\nbranch refs/heads/eko/chat-read-integrity-20260920\n\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "ls-remote",
+        "origin",
+        "refs/heads/main",
+        "refs/heads/eko/chat-read-integrity-20260920"
+      ],
+      "exit_code": 0,
+      "stdout": "baedaf58a711606f343c9c83e13bb68a0169528f\trefs/heads/eko/chat-read-integrity-20260920\n953de98d408a9697fa20a48c23973b9dc8eee921\trefs/heads/main\n",
+      "stderr": ""
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "http_status": 200,
+  "requested_model": "deepseek-v4.1-flash:cloud",
+  "served_model": "deepseek-v4.1-flash",
+  "done": true,
+  "done_reason": "stop",
+  "elapsed_seconds": 7.924942957935855,
+  "prompt_eval_count": 53643,
+  "eval_count": 1164,
+  "prior_messages_preserved": true,
+  "design_sha256": "3d2f2db8ff514119f63f302b939455f6ed81b9257c5082e29f1cd9534e2b9241",
+  "report_sha256": "04704ef50cf391a3378b79376ffda59b2033b28dbb9ff5c8f1024858ef1c1bb2",
+  "scope": "continued source-only consultation; no independent execution or promotion"
+}

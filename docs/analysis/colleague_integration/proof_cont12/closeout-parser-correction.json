@@ -1,0 +1,16 @@
+{
+  "prior_input_id": "eko-cont12-evidence-reconciliation",
+  "prior_exit": 1,
+  "error": "The closeout aggregator expected an unreported parser exception string and uppercase HTML doctype. The original test logs decoded=false and lowercase <!doctype html>.",
+  "raw_test_output_sha256": "b5a276fd5222b35879a223124406d1efbac04d0e077847edc6aa13a057afbbf2",
+  "original_output_unchanged": true,
+  "actual_failure_marker": {
+    "Time": "2026-09-21T19:37:17.076423+10:00",
+    "Action": "output",
+    "Package": "command-line-arguments",
+    "Test": "TestG1BaselineInstructionSaveBoundary",
+    "Output": "    instructions_http_baseline_test.go:85: G1_SAVE_BOUNDARY_MISSING: authenticated PUT status=200 decoded=false revision=\"\"; response=<!doctype html>\n"
+  },
+  "correction": "Match the source test actual G1_SAVE_BOUNDARY_MISSING marker and reconcile its completed fail event; do not edit the production or diagnostic test.",
+  "test_rerun_or_assertion_change": false
+}
