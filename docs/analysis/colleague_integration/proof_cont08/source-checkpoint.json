@@ -1,0 +1,31 @@
+{
+  "source_commit": "8977b03cc4224a8226f1fac93647246b8edfa16a",
+  "parent": "d559da25a4db89fa9369d8be4106100803e82a58",
+  "files": [
+    "app/ui/app/src/components/StreamingMarkdownContent.integration.test.tsx",
+    "app/ui/app/vitest.config.ts"
+  ],
+  "source_matches_reviewed_bytes": true,
+  "review": {
+    "passed": true,
+    "required_execution_coverage": true,
+    "requested_cases": [
+      "candidate",
+      "no-output",
+      "no-citations",
+      "wrong-page",
+      "full",
+      "candidate"
+    ],
+    "all_expectations_met": true,
+    "source_unchanged": true,
+    "report_sha256": "15fa062d0d667ed3af1075304d45ccd99c674021045b03812b6ae5969df73bd7",
+    "scope": "Independent model-directed Node SSR/type regression review, not integration/release"
+  },
+  "remote": "https://github.com/kryptosmatrix/ollama.git",
+  "verified_remote_tip": "8977b03cc4224a8226f1fac93647246b8edfa16a",
+  "main_merged": false,
+  "installed": false,
+  "worktree_clean": true,
+  "timestamp_brisbane": "2026-09-21T13:43:19.463944+10:00"
+}

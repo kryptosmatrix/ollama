@@ -1,0 +1,13 @@
+{
+  "case": "no-output",
+  "file": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-2-no-output/frontend/src/components/StreamingMarkdownContent.tsx",
+  "edits": [
+    [
+      "{content}\n          </Streamdown>",
+      "{\"\"}\n          </Streamdown>"
+    ]
+  ],
+  "before_sha256": "983e3aa6e4273b861623a97ae5fe5bf9782294a1d0bcb4449e67f808ac7d32a0",
+  "after_sha256": "c49514f676aa085c1c747909ea7cd1593a37ed78d48c7fa8ed32444ac9fbff43",
+  "required_failure_title": "renders distinct upstream Markdown rather than fixed or empty output"
+}

@@ -1,0 +1,14 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "count": 60,
+    "name": "highlighter",
+    "start": 1
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/src/lib/highlighter.ts",
+    "file_sha256": "e9975a7555a435cd3e899bf4f344cb6fc7f29b10cee8ed2bd2904f53c87848aa",
+    "total_lines": 156,
+    "text": "1: import { createHighlighter } from \"shiki\";\n2: import type { ThemeRegistration, HighlighterCore } from \"shiki\";\n3: \n4: const oneLightTheme: ThemeRegistration = {\n5:   name: \"one-light\",\n6:   type: \"light\",\n7:   colors: {\n8:     \"editor.background\": \"#fafafa\",\n9:     \"editor.foreground\": \"#383a42\",\n10:   },\n11:   tokenColors: [\n12:     {\n13:       scope: [\"comment\", \"punctuation.definition.comment\"],\n14:       settings: { foreground: \"#a0a1a7\" },\n15:     },\n16:     {\n17:       scope: [\"keyword\", \"storage.type\", \"storage.modifier\"],\n18:       settings: { foreground: \"#a626a4\" },\n19:     },\n20:     { scope: [\"string\", \"string.quoted\"], settings: { foreground: \"#50a14f\" } },\n21:     {\n22:       scope: [\"function\", \"entity.name.function\", \"support.function\"],\n23:       settings: { foreground: \"#4078f2\" },\n24:     },\n25:     {\n26:       scope: [\n27:         \"constant.numeric\",\n28:         \"constant.language\",\n29:         \"constant.character\",\n30:         \"number\",\n31:       ],\n32:       settings: { foreground: \"#c18401\" },\n33:     },\n34:     {\n35:       scope: [\"variable\", \"support.variable\"],\n36:       settings: { foreground: \"#e45649\" },\n37:     },\n38:     {\n39:       scope: [\"entity.name.tag\", \"entity.name.type\", \"entity.name.class\"],\n40:       settings: { foreground: \"#e45649\" },\n41:     },\n42:     {\n43:       scope: [\"entity.other.attribute-name\"],\n44:       settings: { foreground: \"#c18401\" },\n45:     },\n46:     {\n47:       scope: [\"keyword.operator\", \"operator\"],\n48:       settings: { foreground: \"#a626a4\" },\n49:     },\n50:     { scope: [\"punctuation\"], settings: { foreground: \"#383a42\" } },\n51:     {\n52:       scope: [\"markup.heading\"],\n53:       settings: { foreground: \"#e45649\", fontStyle: \"bold\" },\n54:     },\n55:     {\n56:       scope: [\"markup.bold\"],\n57:       settings: { foreground: \"#c18401\", fontStyle: \"bold\" },\n58:     },\n59:     {\n60:       scope: [\"markup.italic\"],"
+  }
+}

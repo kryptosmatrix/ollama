@@ -1,0 +1,75 @@
+{
+  "case": "no-citations",
+  "head": "d559da25a4db89fa9369d8be4106100803e82a58",
+  "expectation_met": true,
+  "compile": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "exec",
+      "--no",
+      "--",
+      "tsc",
+      "-b",
+      "--force",
+      "--pretty",
+      "false"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/frontend",
+    "exit_code": 0,
+    "timed_out": false,
+    "seconds": 24.902904291986488,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/typecheck.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/typecheck.stderr",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tests": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "test",
+      "--",
+      "--run",
+      "src/components/StreamingMarkdownContent.integration.test.tsx",
+      "src/utils/remarkCitationParser.test.ts",
+      "--reporter=json"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/frontend",
+    "exit_code": 1,
+    "timed_out": false,
+    "seconds": 22.266557792085223,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/tests.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/tests.stderr",
+    "stdout_sha256": "2815d61cfaa8f769ab78c1caffef2cf6ea6f56d824aa527416344b1a51442c5f",
+    "stderr_sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+  },
+  "expected_count": 11,
+  "collected_assertions": 11,
+  "required_titles_discovered": true,
+  "counts": {
+    "passed": 9,
+    "failed": 2,
+    "pending": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "complete": true,
+  "original_source_unchanged": true,
+  "clean_tests_passed": false,
+  "intended_fault_detected": true,
+  "failing_assertions": [
+    {
+      "title": "uses the citation cursor to select the correct upstream page",
+      "messages": [
+        "AssertionError: expected '<div class=\"\\n          max-w-full\\n …' to contain 'href=\"https://second.example/right-pa…'\n    at /Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/frontend/src/components/StreamingMarkdownContent.integration.test.tsx:50:18\n    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)\n    at runSuite (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)"
+      ]
+    },
+    {
+      "title": "does not invent a link for a missing citation page",
+      "messages": [
+        "AssertionError: expected '<div class=\"\\n          max-w-full\\n …' to contain '[9]'\n    at /Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/frontend/src/components/StreamingMarkdownContent.integration.test.tsx:57:18\n    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)\n    at runSuite (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)"
+      ]
+    }
+  ],
+  "file_load_errors": [],
+  "result_path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/result.json"
+}

@@ -1,0 +1,1081 @@
+{
+  "source_commit": "8977b03cc4224a8226f1fac93647246b8edfa16a",
+  "files": [
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/VALIDATION_CONTRACT.md",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/VALIDATION_CONTRACT.md",
+      "bytes": 4379,
+      "sha256": "118cd3f91aaec893bb788e048bd2dca77eeb0629044a9d3eeb6d3bb1df5c2e6f"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/LINT_FOLLOW_ON.md",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/LINT_FOLLOW_ON.md",
+      "bytes": 2619,
+      "sha256": "ed215898faa45b8b548fe4afb905d735c751bfbacf62e33267964dbac041f69d"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/source-checkpoint.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/source-checkpoint.json",
+      "bytes": 1030,
+      "sha256": "5903dc603eff1f481dd30c13461f3d71f8096999879b4408accff371d8f0afd9"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/control-instrument-correction.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/control-instrument-correction.json",
+      "bytes": 438,
+      "sha256": "cb474f60a49b4224f7a2eed1d4a77d3fc4861ab03acfd865fbcb5f7abdd76d39"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/archive-maintenance.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/archive-maintenance.json",
+      "bytes": 419,
+      "sha256": "63a693945da52133d04786de1c0f0952c20300ab17365913c8ba154dd57b2706"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/frontend-focused.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/frontend-focused.stdout",
+      "bytes": 3209,
+      "sha256": "c295d1740cf36da538f548d24fd880379eb4c1ebc3d3c9cf9126aa8f6caed3cb"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/frontend-focused.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/frontend-focused.stderr",
+      "bytes": 192,
+      "sha256": "19569b9a0e2d5dfc3d798437ed77ee0604a1980ab3181d8415a96f1a25cb19bf"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/frontend-focused.exit",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/frontend-focused.exit",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/frontend-focused-r2.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/frontend-focused-r2.stdout",
+      "bytes": 6234,
+      "sha256": "bcaacaa349c7fefede8d83ac259a7a700ec8bbc3e334ed7c63fbbdc6fd72c811"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/frontend-focused-r2.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/frontend-focused-r2.stderr",
+      "bytes": 343,
+      "sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/frontend-focused-r2.exit",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/frontend-focused-r2.exit",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-review-invocation.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review-invocation.json",
+      "bytes": 344,
+      "sha256": "641ae47caa016b960e2ee8a336f852e30c8b7a10812590b93db0237730df8fae"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/validate_frontend.py",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/validate_frontend.py.txt",
+      "bytes": 9351,
+      "sha256": "76f9e131b609191188acbd20af9397577cf24e61a9e55660323ea326975d0ae6"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/validate_frontend_v1.py.txt",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/validate_frontend_v1.py.txt",
+      "bytes": 9344,
+      "sha256": "a9584c8e0fc8f50175ad605b95cf0a71a571501036438aeb07c5f6cc3f30768d"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/review_frontend.py",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/review_frontend.py.txt",
+      "bytes": 11412,
+      "sha256": "9bfef2bf5c0982fe9538f029d0adcda8befd55970f33ce79ffcf587b3417d30a"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/regression/summary.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/regression/summary.json",
+      "bytes": 4429,
+      "sha256": "a2da106ddab4c94731396dfe14c1fbb5f5bb673f6a67ac47caf829cd2b5ebb31"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/regression/production-build.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/regression/production-build.json",
+      "bytes": 675,
+      "sha256": "359d499ec6dab65235f2dc0dccc94a6cdbb5059290177701fea5527caa1a54d6"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/regression/lint.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/regression/lint.json",
+      "bytes": 681,
+      "sha256": "0e70ae3fc4fb7e9d1ea1e86da2777352d5e5af0bce7c7de29b4cfe032728f956"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/regression/lint.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/regression/lint.stdout",
+      "bytes": 318155,
+      "sha256": "0fed227eba030d1f5f3d59d88ccaa792db2abf1c1f9240042d16c6034ea2239b"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/conversation.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/conversation.json",
+      "bytes": 98013,
+      "sha256": "166cf5521eb1ec390b5e1baf070e961a858a7c9a27dcaf539bd3396ff042cc77"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/initial-request.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/initial-request.json",
+      "bytes": 5513,
+      "sha256": "80715d741c0a1b2ba0cda23511dc17c86af0ab28d45fbe1782a385be2ebaca19"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/model-observation.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/model-observation.json",
+      "bytes": 593,
+      "sha256": "a15657bebffa854aeddf45521c3a5e1a32e78b8fdbee2985b632c77b383220c0"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/report.md",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/report.md",
+      "bytes": 4493,
+      "sha256": "15fa062d0d667ed3af1075304d45ccd99c674021045b03812b6ae5969df73bd7"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/response-01.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/response-01.json",
+      "bytes": 933,
+      "sha256": "9c54ded2ac7970b025470680f362a8ee341e195f2039ca5a3e0cc64b07022998"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/response-02.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/response-02.json",
+      "bytes": 1390,
+      "sha256": "4cbe7c19a656b7fa2ce0ef1846b58010220dee0a38596f375cf14d4d4fbb2f23"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/response-03.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/response-03.json",
+      "bytes": 1439,
+      "sha256": "249b16a9142e9f363b06795e323dd80b5aea6ce7549aa73e7312117b0b118979"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/response-04.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/response-04.json",
+      "bytes": 951,
+      "sha256": "79fa789bd285fb8c5fb53876c75f39e67f9eab1f0513fe155ee3d37d4496f7e1"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/response-05.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/response-05.json",
+      "bytes": 649,
+      "sha256": "efd76d35321d7fceba46b337c3f445e7b00850219b509244053dff1a4ceeb97c"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/response-06.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/response-06.json",
+      "bytes": 1051,
+      "sha256": "90ea3b2aab9eab75ec1452909f11caefa678ccb7dd38e34e46fa264b2b168e32"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/response-07.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/response-07.json",
+      "bytes": 661,
+      "sha256": "1836a0abd4a7b6f6ac244e9e9d8bd60f92c99435df9ec1ac83762a705828310e"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/response-08.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/response-08.json",
+      "bytes": 645,
+      "sha256": "5009532205d6d5a06d94ec7fe7a755d721d94074517b1d0aec1fea6b716cb17f"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/response-09.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/response-09.json",
+      "bytes": 1062,
+      "sha256": "694a3b2a22ff8174f11d186741215df41b4a7ddbc3d8fd3bbe822fb075e1eb55"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/response-10.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/response-10.json",
+      "bytes": 4854,
+      "sha256": "b88bfb91ad9195147a43bc76fecfe6b44f1e23571272bc49ad2645c202daa938"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/result.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/result.json",
+      "bytes": 433,
+      "sha256": "cf0745cc1b9b1c7322738b6e3ca79e60e95c749ce032bf57c912fd344ca6b923"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/source-identities.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/source-identities.json",
+      "bytes": 16425,
+      "sha256": "22f05fec2ec28680b46bfddad5841e681f8ac8801686b80db79924fd6fcb4abf"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-01-003.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-01-003.json",
+      "bytes": 4897,
+      "sha256": "5ca5365bbaeeabd479e81943ea180c3a3bc62bdebb8871a1358ddbe38a00b848"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-01-004.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-01-004.json",
+      "bytes": 10816,
+      "sha256": "2a007e6de45f8bee9491afb11eee1dd872c5a555756073e3a0da52ff10b195a1"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-02-006.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-02-006.json",
+      "bytes": 1074,
+      "sha256": "18e2db3000eb291a1a1932836a7ae1461004fb2a6efe2d087dfb96545b4c1060"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-02-007.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-02-007.json",
+      "bytes": 2961,
+      "sha256": "b76f4b592e442e5c02e7e81118317f2e5cfa27a16e609164a5059e9a269c6b3e"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-02-008.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-02-008.json",
+      "bytes": 8217,
+      "sha256": "e2019f5df63fdd3f5431e491bf68604f46904e98c1296dd910e5c2b625c98eb8"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-02-009.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-02-009.json",
+      "bytes": 4424,
+      "sha256": "c6e313c48615467ec8ca02be15f787be4fd24ff2dd59b2f2e74fc89d45a41a8c"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-03-011.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-03-011.json",
+      "bytes": 6649,
+      "sha256": "dcfe4b015c8d3f2e788dc44ccfa4c33f991808c209e653112bacdadbd3443cd2"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-03-012.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-03-012.json",
+      "bytes": 3545,
+      "sha256": "b3ed40e936e0cc47d3dbafad8d93eac903a7a4c4c9362d49a5b1df8c3b847376"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-03-013.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-03-013.json",
+      "bytes": 3594,
+      "sha256": "c7f436848e11b9c1f9daaefe57cab9052150eb999e1dab8111b91b28b2bbaada"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-03-014.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-03-014.json",
+      "bytes": 2422,
+      "sha256": "947ee87e0ceba4ee31ae0f31a6c50a39c11ad471e43dd96fcc4c81294b34a66f"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-04-016.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-04-016.json",
+      "bytes": 3064,
+      "sha256": "13bd7e6903ddfcfa3b38a23d75254dcac7c18a15d262f93717a99717885217c4"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-04-017.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-04-017.json",
+      "bytes": 2712,
+      "sha256": "21c5ab688e4b49eeab0bd7c56481ba08dff24ebc228cb278484d6a7a301fe0cb"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-05-019.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-05-019.json",
+      "bytes": 2521,
+      "sha256": "49684f8fe6cbc2abcf5999378a58106366eafe6334ff6d76fd0d32ae68fc1647"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-06-021.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-06-021.json",
+      "bytes": 10311,
+      "sha256": "33afc98b528d153e72dec0434600b5708c428fe1e4e6bc4a8a01c0d75387e5e0"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-06-022.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-06-022.json",
+      "bytes": 5752,
+      "sha256": "4fe64817be3b94f184056dc73d9801659f7f1f8548b62eabfcc801764265bc92"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-06-023.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-06-023.json",
+      "bytes": 4219,
+      "sha256": "1b54f900b7c017d68cee1c429760d986129acb6f80d6e77183f4e99da982ce07"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-07-025.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-07-025.json",
+      "bytes": 2373,
+      "sha256": "538a552d35e1a9815b314531bf94b5116b852cdbced88273a9dad6ce5d691ff3"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-08-027.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-08-027.json",
+      "bytes": 2527,
+      "sha256": "468653ff391e5bc1161657cc8e337a476f47ddb1d8e3ea8a4d63148a9ce313a3"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-09-029.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-09-029.json",
+      "bytes": 772,
+      "sha256": "b4c9b3a763f3a728403d3b078aa01792b6c2290ca16340744bcbd28f6d9aff60"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/independent-frontend-review/tool-09-030.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/independent-review/tool-09-030.json",
+      "bytes": 775,
+      "sha256": "499fa9d1ce2bfa538e803afa6921e1d0f579bfaa93417184437b6708b92f87bc"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-clean/result.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-clean/result.json",
+      "bytes": 2273,
+      "sha256": "e9aa49bd068a59518856e5a59c938ca87d6b0a7a4270301f06d1e3b74cff7455"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-clean/invocation.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-clean/invocation.json",
+      "bytes": 462,
+      "sha256": "ee359a8c9f4aa649fc5794b817cdc7b8570958e9023d2adb175420b420037e37"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-clean/source-before.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-clean/source-before.json",
+      "bytes": 14983,
+      "sha256": "03b81e553b22049c23c26fa396b2c6e4c9f846ced6945874c973d967793e91b2"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-clean/typecheck.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-clean/typecheck.json",
+      "bytes": 736,
+      "sha256": "0294e640e86f625f691de32f0c1968035b9c0929a8d570a127a53d89410a4fd8"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-clean/typecheck.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-clean/typecheck.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-clean/typecheck.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-clean/typecheck.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-clean/tests.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-clean/tests.json",
+      "bytes": 816,
+      "sha256": "bb5bcd5accffca0c3e06a07384909cdbb744317b9390141258fe1acac96a4b75"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-clean/tests.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-clean/tests.stdout",
+      "bytes": 4889,
+      "sha256": "d8262d4636044d640fe6c50b896bce019231aaba571454b8f6cc32c22bfee6b2"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-clean/tests.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-clean/tests.stderr",
+      "bytes": 343,
+      "sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-full/result.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-full/result.json",
+      "bytes": 2147,
+      "sha256": "f2db229c5e61021e02b8ebc00a33387387cdaf4268016c0b7b6fb1b77968942a"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-full/invocation.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-full/invocation.json",
+      "bytes": 457,
+      "sha256": "ae7a911663bae6f6c454bb9031550a430f1ea29454dc67a36189d25db22e3002"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-full/source-before.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-full/source-before.json",
+      "bytes": 14983,
+      "sha256": "03b81e553b22049c23c26fa396b2c6e4c9f846ced6945874c973d967793e91b2"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-full/typecheck.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-full/typecheck.json",
+      "bytes": 733,
+      "sha256": "473868e088b96ca128613506780e46ae14328a9413ba0e6380ae0984cc557813"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-full/typecheck.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-full/typecheck.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-full/typecheck.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-full/typecheck.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-full/tests.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-full/tests.json",
+      "bytes": 700,
+      "sha256": "58dec8b58176c82fc5d95d705416b4e0e1a96ac5f001e42e97a5391ba412ce6d"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-full/tests.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-full/tests.stdout",
+      "bytes": 46387,
+      "sha256": "e02e33b28c072afcf3f6c770e36b765dc603e95f907c8fccdf0e8913e03b75df"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-full/tests.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-full/tests.stderr",
+      "bytes": 343,
+      "sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-control-clean/result.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-control-clean/result.json",
+      "bytes": 2330,
+      "sha256": "9f706f4be6c29e0c60053cdb0c77f5c74c5d17c30b043694748752be29415e5c"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-control-clean/invocation.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-control-clean/invocation.json",
+      "bytes": 462,
+      "sha256": "1a81a2f3bfd24908d42ec6929925b898f2392471b82f198735791a65c1cda6a9"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-control-clean/source-before.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-control-clean/source-before.json",
+      "bytes": 14983,
+      "sha256": "03b81e553b22049c23c26fa396b2c6e4c9f846ced6945874c973d967793e91b2"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-control-clean/typecheck.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-control-clean/typecheck.json",
+      "bytes": 767,
+      "sha256": "a9c7111467532ba04ecb46b21b22e79a2d697810dfd37fb8730128db91e910ee"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-control-clean/typecheck.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-control-clean/typecheck.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-control-clean/typecheck.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-control-clean/typecheck.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-control-clean/tests.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-control-clean/tests.json",
+      "bytes": 832,
+      "sha256": "f9c87bf49ad3c5521751f8a0f459f859779fae464d5f3ed12ceeba0552f993c5"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-control-clean/tests.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-control-clean/tests.stdout",
+      "bytes": 4890,
+      "sha256": "57762c20b14d053857347d3ed62896b4f12459dd9e5868a57c93cb007b3f9355"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-control-clean/tests.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-control-clean/tests.stderr",
+      "bytes": 343,
+      "sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-output-r2/result.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-output-r2/result.json",
+      "bytes": 10061,
+      "sha256": "f0ed70db3706b2a382e23c87724332c9009bddd0c1ef6c207518cba2481dbcd0"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-output-r2/invocation.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-output-r2/invocation.json",
+      "bytes": 1076,
+      "sha256": "ada9e603e7bb226d7e009d207f1ab970c62676ecc51fe926f9f17ecd73eeaedd"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-output-r2/source-before.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-output-r2/source-before.json",
+      "bytes": 14983,
+      "sha256": "03b81e553b22049c23c26fa396b2c6e4c9f846ced6945874c973d967793e91b2"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-output-r2/typecheck.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-output-r2/typecheck.json",
+      "bytes": 827,
+      "sha256": "8f3f96e4b3110bfd3cc068cdb6ff96476fc42f5d7749c7c40b0ae9973639265a"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-output-r2/typecheck.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-output-r2/typecheck.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-output-r2/typecheck.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-output-r2/typecheck.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-output-r2/tests.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-output-r2/tests.json",
+      "bytes": 892,
+      "sha256": "a385df5048c84421109609d02532ba3f0f6dd3527065ad6072bb39301f72c131"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-output-r2/tests.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-output-r2/tests.stdout",
+      "bytes": 11967,
+      "sha256": "cf9fb44b3ce47f5af048b677a9fbf1009172454a3129b3b03a2efd8965b44127"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-output-r2/tests.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-output-r2/tests.stderr",
+      "bytes": 343,
+      "sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-output-r2/fault.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-output-r2/fault.json",
+      "bytes": 595,
+      "sha256": "d02d31f458f4839e20d773e916f49b3b9d0f9356b5ffe05aad84cf849353afa5"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/result.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-citations/result.json",
+      "bytes": 5503,
+      "sha256": "a32bab89c9121b31821d56ad26e6d62f6126a13fa506af7867c3f9e9d24c6c54"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/invocation.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-citations/invocation.json",
+      "bytes": 1148,
+      "sha256": "33d8b151f2403223ff5e824e9cf251511dd5fedeae0aa6c0d4f372c652b99db8"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/source-before.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-citations/source-before.json",
+      "bytes": 14983,
+      "sha256": "03b81e553b22049c23c26fa396b2c6e4c9f846ced6945874c973d967793e91b2"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/typecheck.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-citations/typecheck.json",
+      "bytes": 827,
+      "sha256": "6cb8f100c0e57968ca6c6c61147ea151435bbb9877a9f3b2d0d68ae2e626eb5e"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/typecheck.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-citations/typecheck.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/typecheck.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-citations/typecheck.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/tests.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-citations/tests.json",
+      "bytes": 892,
+      "sha256": "5916a2179507c91ae0bb6d1ae04486b4c54cdb529ef8102064931b4dfe0a75f3"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/tests.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-citations/tests.stdout",
+      "bytes": 7811,
+      "sha256": "2815d61cfaa8f769ab78c1caffef2cf6ea6f56d824aa527416344b1a51442c5f"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/tests.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-citations/tests.stderr",
+      "bytes": 343,
+      "sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-citations/fault.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-no-citations/fault.json",
+      "bytes": 656,
+      "sha256": "3d204d7578f408676fb06aacffca211e69bc669686a522ec72d7bffa193340cd"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-wrong-page/result.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-wrong-page/result.json",
+      "bytes": 3984,
+      "sha256": "0b060f434fccfff15a3e385bb3e842cdb3f2e8ed0373e80de9992a6a7122dc47"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-wrong-page/invocation.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-wrong-page/invocation.json",
+      "bytes": 1032,
+      "sha256": "b8be9e1eb2ea3fd7fc2e3b82c6b41e83f2c3651ae71de2fecdd5c353a57fee99"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-wrong-page/source-before.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-wrong-page/source-before.json",
+      "bytes": 14983,
+      "sha256": "03b81e553b22049c23c26fa396b2c6e4c9f846ced6945874c973d967793e91b2"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-wrong-page/typecheck.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-wrong-page/typecheck.json",
+      "bytes": 820,
+      "sha256": "eb204de81d16581e97292dce122c7c9f7d265fbc26dad1e0fad70238a1394ae2"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-wrong-page/typecheck.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-wrong-page/typecheck.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-wrong-page/typecheck.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-wrong-page/typecheck.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-wrong-page/tests.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-wrong-page/tests.json",
+      "bytes": 886,
+      "sha256": "d5c9f8958b664577a68c63c25e864c76a9ffe0d55ea9f715e617622b6bf3b57d"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-wrong-page/tests.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-wrong-page/tests.stdout",
+      "bytes": 6425,
+      "sha256": "ba5749adaaddd0a9d970893b85e2703f39ab392c0c57f8301f9d27a67b7fa7d8"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-wrong-page/tests.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-wrong-page/tests.stderr",
+      "bytes": 343,
+      "sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-wrong-page/fault.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-wrong-page/fault.json",
+      "bytes": 550,
+      "sha256": "2b3f7b41f7bfaf2f92f2a4030b7ea55ef6db70d12242b3f24180c02fab330f1c"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-final/result.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-final/result.json",
+      "bytes": 2289,
+      "sha256": "e5bb080609a55cb1d7738344401c13e9fcb2b07396c14393ca537fb934759e1e"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-final/invocation.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-final/invocation.json",
+      "bytes": 462,
+      "sha256": "1a81a2f3bfd24908d42ec6929925b898f2392471b82f198735791a65c1cda6a9"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-final/source-before.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-final/source-before.json",
+      "bytes": 14983,
+      "sha256": "03b81e553b22049c23c26fa396b2c6e4c9f846ced6945874c973d967793e91b2"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-final/typecheck.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-final/typecheck.json",
+      "bytes": 750,
+      "sha256": "1c843722a582c71fddfdd2776b8deec713798a46f46251c574330ad5bfcc7fed"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-final/typecheck.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-final/typecheck.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-final/typecheck.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-final/typecheck.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-final/tests.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-final/tests.json",
+      "bytes": 816,
+      "sha256": "5b3e325bf67d48d354289e56b96352884938783e64533c2fc8008c6a8ad89064"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-final/tests.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-final/tests.stdout",
+      "bytes": 4887,
+      "sha256": "658ef855f2d36c74e6eb6bfcb8a7d29c5196bc7b521b3200c5d5052d53ee7979"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-final/tests.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/author-final/tests.stderr",
+      "bytes": 343,
+      "sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-1-candidate/result.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-1-candidate/result.json",
+      "bytes": 2309,
+      "sha256": "bf62f24ada62e421c04c58c41a431d377f94b15a160dcdb996b5045a7400e861"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-1-candidate/invocation.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-1-candidate/invocation.json",
+      "bytes": 462,
+      "sha256": "1a81a2f3bfd24908d42ec6929925b898f2392471b82f198735791a65c1cda6a9"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-1-candidate/source-before.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-1-candidate/source-before.json",
+      "bytes": 14983,
+      "sha256": "03b81e553b22049c23c26fa396b2c6e4c9f846ced6945874c973d967793e91b2"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-1-candidate/typecheck.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-1-candidate/typecheck.json",
+      "bytes": 755,
+      "sha256": "978fff48cbbb4fbd496b7f61e6b51d8abb9f632fb08b47db2eb1b1a26b7ff6af"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-1-candidate/typecheck.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-1-candidate/typecheck.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-1-candidate/typecheck.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-1-candidate/typecheck.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-1-candidate/tests.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-1-candidate/tests.json",
+      "bytes": 826,
+      "sha256": "cb9ac6c4fc697a0748d3b131d11e2386b4e0dcda8261df5434b1053bc6c91d32"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-1-candidate/tests.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-1-candidate/tests.stdout",
+      "bytes": 4885,
+      "sha256": "275f60594ad71fa300bbc631b14cbcba205170528789357bc5ac533e6ae06172"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-1-candidate/tests.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-1-candidate/tests.stderr",
+      "bytes": 343,
+      "sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-2-no-output/result.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-2-no-output/result.json",
+      "bytes": 10037,
+      "sha256": "9268fa5b3c0c4669ee321d1946c7983869303a7468e64e34591addcda33a2630"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-2-no-output/invocation.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-2-no-output/invocation.json",
+      "bytes": 1074,
+      "sha256": "a56e0e94cf586f2fc042a48bf841c8a1337f3e5113ac8e263a3bba4f704be646"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-2-no-output/source-before.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-2-no-output/source-before.json",
+      "bytes": 14983,
+      "sha256": "03b81e553b22049c23c26fa396b2c6e4c9f846ced6945874c973d967793e91b2"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-2-no-output/typecheck.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-2-no-output/typecheck.json",
+      "bytes": 821,
+      "sha256": "1d4b6e2b303161cc72ef2812ce6c05e1d65446c5a83da6d69b5f7679f42549d7"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-2-no-output/typecheck.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-2-no-output/typecheck.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-2-no-output/typecheck.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-2-no-output/typecheck.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-2-no-output/tests.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-2-no-output/tests.json",
+      "bytes": 886,
+      "sha256": "e80d11aa47af79741788f1cceeba3f30ce52ffde7c9027257544b161fdee27a4"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-2-no-output/tests.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-2-no-output/tests.stdout",
+      "bytes": 11954,
+      "sha256": "218339908d23f554bc5ff76dde7b5888ef8fb77273541e86855a4b31336b9f2f"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-2-no-output/tests.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-2-no-output/tests.stderr",
+      "bytes": 343,
+      "sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-2-no-output/fault.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-2-no-output/fault.json",
+      "bytes": 593,
+      "sha256": "e8cf44fa454a67c4c3d150babfba36c53266e5af31c0e72b195bde3452ab6115"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-3-no-citations/result.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-3-no-citations/result.json",
+      "bytes": 5511,
+      "sha256": "de878fe5eedb14bce26a0e6e441972849412c834380737073e85792c2975721a"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-3-no-citations/invocation.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-3-no-citations/invocation.json",
+      "bytes": 1149,
+      "sha256": "66c42b7c9aa982871f654eb5613240f60ef904b04e8eab93e5f35cfd7d6da9f2"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-3-no-citations/source-before.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-3-no-citations/source-before.json",
+      "bytes": 14983,
+      "sha256": "03b81e553b22049c23c26fa396b2c6e4c9f846ced6945874c973d967793e91b2"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-3-no-citations/typecheck.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-3-no-citations/typecheck.json",
+      "bytes": 830,
+      "sha256": "fe421fcc8038738deefd71eb52c072ed59e50af3604486a16f59bcfab660331b"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-3-no-citations/typecheck.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-3-no-citations/typecheck.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-3-no-citations/typecheck.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-3-no-citations/typecheck.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-3-no-citations/tests.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-3-no-citations/tests.json",
+      "bytes": 894,
+      "sha256": "2f880e31e8b57063ba3e275df0e0afbe558995fd2ae091da98335a1ed8cb4611"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-3-no-citations/tests.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-3-no-citations/tests.stdout",
+      "bytes": 7817,
+      "sha256": "23e2efb8a92cd9ff6da9e101a34a7aff4951be2326000c207c75e9a0f067adbb"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-3-no-citations/tests.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-3-no-citations/tests.stderr",
+      "bytes": 343,
+      "sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-3-no-citations/fault.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-3-no-citations/fault.json",
+      "bytes": 657,
+      "sha256": "e49b9cf899e93bc23caea19c7d8c4df760dcdbe753031ff06d055886bc1a5569"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-4-wrong-page/result.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-4-wrong-page/result.json",
+      "bytes": 3992,
+      "sha256": "497532155686ee639d45fc1f42b682881259ed26fe72df34cbaa322e247db09e"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-4-wrong-page/invocation.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-4-wrong-page/invocation.json",
+      "bytes": 1033,
+      "sha256": "e371dc5aa92a4bda23b8fadbf02e0a4a90ce235c2e940499fa246b1f0b25d1fd"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-4-wrong-page/source-before.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-4-wrong-page/source-before.json",
+      "bytes": 14983,
+      "sha256": "03b81e553b22049c23c26fa396b2c6e4c9f846ced6945874c973d967793e91b2"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-4-wrong-page/typecheck.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-4-wrong-page/typecheck.json",
+      "bytes": 823,
+      "sha256": "a9268c325b33cb13d97174d63ce3df2f7a961d135d78c81bbc1107aa00041118"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-4-wrong-page/typecheck.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-4-wrong-page/typecheck.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-4-wrong-page/typecheck.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-4-wrong-page/typecheck.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-4-wrong-page/tests.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-4-wrong-page/tests.json",
+      "bytes": 889,
+      "sha256": "2362c2b4f834bfdc472f0b0a8b3b630b6501cb0417ce28745ff86c3e7fd2cd02"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-4-wrong-page/tests.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-4-wrong-page/tests.stdout",
+      "bytes": 6426,
+      "sha256": "42b07d93a568253fceea3ad7aac7c1c7bfec97c1cfc1546d623a0a061a03b800"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-4-wrong-page/tests.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-4-wrong-page/tests.stderr",
+      "bytes": 343,
+      "sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-4-wrong-page/fault.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-4-wrong-page/fault.json",
+      "bytes": 551,
+      "sha256": "076d087d4bcee82bba37084fb94569be6de778ad9bf7da8c71c21e5347382434"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-5-full/result.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-5-full/result.json",
+      "bytes": 2170,
+      "sha256": "fc69d8794a57d8a7ec9768882b4d3f8b077e2caea012234157d895027d2b3b05"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-5-full/invocation.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-5-full/invocation.json",
+      "bytes": 457,
+      "sha256": "6598cfe35ab47c155f68bdc86d574fb5adeb911c5496cea1cde4408a79030f4d"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-5-full/source-before.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-5-full/source-before.json",
+      "bytes": 14983,
+      "sha256": "03b81e553b22049c23c26fa396b2c6e4c9f846ced6945874c973d967793e91b2"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-5-full/typecheck.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-5-full/typecheck.json",
+      "bytes": 751,
+      "sha256": "17a5356923f84a9074997f51d6aca8ee272ca416258a57d92ec665f99986afb6"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-5-full/typecheck.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-5-full/typecheck.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-5-full/typecheck.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-5-full/typecheck.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-5-full/tests.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-5-full/tests.json",
+      "bytes": 702,
+      "sha256": "e631aa5a40b823e453ea9a0210b16848a0636b629fb95a5b6f2c326c0306b28c"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-5-full/tests.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-5-full/tests.stdout",
+      "bytes": 46399,
+      "sha256": "f8fdb5a373032f40f6c965e1135ad0786518b6538b1bbe24d4e66e8dc3e1d504"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-5-full/tests.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-5-full/tests.stderr",
+      "bytes": 343,
+      "sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-6-candidate/result.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-6-candidate/result.json",
+      "bytes": 2315,
+      "sha256": "7671cf8c40328ba85fa5ecfbe575a8d94cd3b0e9c19c1ab105e3ade16d0bdcb0"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-6-candidate/invocation.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-6-candidate/invocation.json",
+      "bytes": 462,
+      "sha256": "1a81a2f3bfd24908d42ec6929925b898f2392471b82f198735791a65c1cda6a9"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-6-candidate/source-before.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-6-candidate/source-before.json",
+      "bytes": 14983,
+      "sha256": "03b81e553b22049c23c26fa396b2c6e4c9f846ced6945874c973d967793e91b2"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-6-candidate/typecheck.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-6-candidate/typecheck.json",
+      "bytes": 761,
+      "sha256": "6b2695da09b5e0781b0ce3fcf2b125a259d82d47f7bbdeac0a19eb6c8f736bdc"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-6-candidate/typecheck.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-6-candidate/typecheck.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-6-candidate/typecheck.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-6-candidate/typecheck.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-6-candidate/tests.json",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-6-candidate/tests.json",
+      "bytes": 826,
+      "sha256": "799c39f09e6fa46392aa5215fd5be3b98ddd3df2a8a6e79a3f45fa96401aa887"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-6-candidate/tests.stdout",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-6-candidate/tests.stdout",
+      "bytes": 4892,
+      "sha256": "9443b170cf71e0ba125cda984428e9efae2d14fd146c410b8ef7f57145503677"
+    },
+    {
+      "source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-6-candidate/tests.stderr",
+      "destination": "docs/analysis/colleague_integration/proof_cont08/runs/judge-6-candidate/tests.stderr",
+      "bytes": 343,
+      "sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+    }
+  ],
+  "raw_paths_preserved": true,
+  "build_stderr_original_retained": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/regression/production-build.stderr",
+  "not_copied": [
+    "mutant source copies",
+    "node_modules",
+    "build binaries",
+    "fonts"
+  ]
+}

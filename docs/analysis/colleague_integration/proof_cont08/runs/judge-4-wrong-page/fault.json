@@ -1,0 +1,13 @@
+{
+  "case": "wrong-page",
+  "file": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-4-wrong-page/frontend/src/components/StreamingMarkdownContent.tsx",
+  "edits": [
+    [
+      "pageStack[cursor]",
+      "pageStack[0]"
+    ]
+  ],
+  "before_sha256": "983e3aa6e4273b861623a97ae5fe5bf9782294a1d0bcb4449e67f808ac7d32a0",
+  "after_sha256": "2c6da8b58d88c61fb398832980eb523fe6e5f0df033e1ff1c9dec0253b17122b",
+  "required_failure_title": "uses the citation cursor to select the correct upstream page"
+}

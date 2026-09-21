@@ -1,0 +1,42 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "created_at": "2026-09-21T03:42:06.662108485Z",
+  "message": {
+    "role": "assistant",
+    "content": "Let me verify the raw failure messages directly from the retained output for the no-output mutant, to confirm the failures are behavioural (assertion) not setup.",
+    "tool_calls": [
+      {
+        "id": "call_d24xykxg",
+        "function": {
+          "index": 0,
+          "name": "read_run_output",
+          "arguments": {
+            "ordinal": 2,
+            "stream": "stderr",
+            "start": 1,
+            "count": 40
+          }
+        }
+      },
+      {
+        "id": "call_9szijqhy",
+        "function": {
+          "index": 1,
+          "name": "read_run_output",
+          "arguments": {
+            "ordinal": 3,
+            "stream": "stderr",
+            "start": 1,
+            "count": 40
+          }
+        }
+      }
+    ]
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 1898590453,
+  "prompt_eval_count": 27458,
+  "prompt_eval_cached_count": 26488,
+  "eval_count": 198
+}

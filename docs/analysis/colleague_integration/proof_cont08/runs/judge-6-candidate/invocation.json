@@ -1,0 +1,12 @@
+{
+  "case": "candidate",
+  "head": "d559da25a4db89fa9369d8be4106100803e82a58",
+  "baseline": "d559da25a4db89fa9369d8be4106100803e82a58",
+  "controller_sha256": "76f9e131b609191188acbd20af9397577cf24e61a9e55660323ea326975d0ae6",
+  "environment_overrides": {
+    "PATH": "/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "CI": "true"
+  },
+  "scope": "Real Node SSR renderer, Shiki, remark; not browser styling, app launch or live services",
+  "fault": null
+}

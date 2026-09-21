@@ -1,0 +1,66 @@
+{
+  "name": "run_validation",
+  "arguments": {
+    "case": "full"
+  },
+  "result": {
+    "case": "full",
+    "head": "d559da25a4db89fa9369d8be4106100803e82a58",
+    "expectation_met": true,
+    "compile": {
+      "argv": [
+        "/opt/homebrew/bin/npm",
+        "exec",
+        "--no",
+        "--",
+        "tsc",
+        "-b",
+        "--force",
+        "--pretty",
+        "false"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 11.824216124999992,
+      "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-5-full/typecheck.stdout",
+      "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-5-full/typecheck.stderr",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "tests": {
+      "argv": [
+        "/opt/homebrew/bin/npm",
+        "test",
+        "--",
+        "--run",
+        "--reporter=json"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 20.223640458000006,
+      "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-5-full/tests.stdout",
+      "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-5-full/tests.stderr",
+      "stdout_sha256": "f8fdb5a373032f40f6c965e1135ad0786518b6538b1bbe24d4e66e8dc3e1d504",
+      "stderr_sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+    },
+    "expected_count": 154,
+    "collected_assertions": 154,
+    "required_titles_discovered": true,
+    "counts": {
+      "passed": 154,
+      "failed": 0,
+      "pending": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "complete": true,
+    "original_source_unchanged": true,
+    "clean_tests_passed": true,
+    "intended_fault_detected": false,
+    "failing_assertions": [],
+    "file_load_errors": [],
+    "result_path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-5-full/result.json"
+  }
+}
