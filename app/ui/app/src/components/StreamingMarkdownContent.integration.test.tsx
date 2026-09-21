@@ -21,10 +21,12 @@ describe("StreamingMarkdownContent with real Streamdown and Shiki", () => {
     const first = render("Alpha **important**.");
     const second = render("Bravo *different*.");
     expect(first).toContain("Alpha");
-    expect(first).toContain("<strong>important</strong>");
+    expect(first).toMatch(
+      /<span\b[^>]*data-streamdown="strong"[^>]*>important<\/span>/,
+    );
     expect(first).not.toContain("Bravo");
     expect(second).toContain("Bravo");
-    expect(second).toContain("<em>different</em>");
+    expect(second).toMatch(/<em\b[^>]*>different<\/em>/);
     expect(second).not.toContain("Alpha");
   });
 
