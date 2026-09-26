@@ -5,7 +5,7 @@
 | Identity | OLLAMA-G1-INSTRUCTIONS; edition 1; one feature, OI-03 + OI-04 |
 | Author | Eko, GPT-6 Astra Pro, 21 September 2026 (edition 1 draft); revised by Thole, Claude Opus 5.5, 26 September 2026 (continuation 13: header, §0, §5, §6, §7–§11); OQ-3 and §7's CLI rule by Letterlock, Claude Opus 5.5, 26 September 2026 (continuation 14: header, §0, §7, §9, §11) |
 | Document class | implementation blueprint |
-| Design readiness | [SPEC-DRAFT]; OQ-1 decided in §6 and amended for cloud models (A13) on Ash's ruling of 26 September 2026; OQ-3 measured in continuation 14 (instrument revision 2, its round-2 review pending at this edit); OQ-4 and the first Method 16 panel remain owed |
+| Design readiness | [SPEC-DRAFT]; OQ-1 decided in §6 and amended for cloud models (A13) on Ash's ruling of 26 September 2026; OQ-3 measured in continuation 14 (baseline 66/39, confirmed by a round-2 Codex review that found six further blocking defects in the instrument's fitness as the acceptance gate, to be repaired and re-reviewed); OQ-4 and the first Method 16 panel remain owed |
 | Implementation status | Not Yet Implemented |
 | Source revision | 17197224933cbdd9875c2277f18767c5f6f134a2 for §2–§5; 04009c432e313eef65172293e75feb038ebe476b for §6 (no production or test file differs between them) |
 | Concept | docs/_design/G1_PERSISTENT_INSTRUCTIONS_CONCEPT.md; SHA256 9396cd684d47d3e6e200c227e75e1a0114d7cd8a20107db528c4bc26871fb241 |

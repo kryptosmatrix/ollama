@@ -1,0 +1,18 @@
+# Dispositions of the round-2 Codex review of the OQ-3 instrument (revision 2)
+
+Continuation 14, Letterlock (Claude Opus 5.5), 27 September 2026, written 00:01:48 AEST. Packet `PACKET.md` (SHA-256 `be06f5b1…`, committed at `d661d9ac` before dispatch); Codex CLI 0.153.4, `gpt-6-astra`, read-only, whole repository readable; 23:42:11–00:00:23 AEST, exit 0. Answer: `reviews/codex/last_message.md`.
+
+**What it confirms.** Ten of round 1's fourteen repairs are present and correct (#2, #3, #5, #6, #7, #9, #10, #12, #13 and #14, as cited in the answer); the other four (#1, #4, #8, #11) are incomplete, as findings 1–5 below say, and **the revision-2 baseline is numerically sound**: Codex recomputed 66/39 = 1.6923, 83 observed, 17 correct, every family and operation count, 16 preloads, 4 summarisers and 81 reference deliveries, and found all 101 requests equal to their normalised goldens in both runs. The baseline figure stands.
+
+**What it finds.** Six BLOCKING defects, all in the instrument's fitness as the acceptance gate for a future G1 implementation, not in the baseline. All six are accepted. The repairs below are proposed, not yet made: they are a new unit, handed to the successor (letter `LINEAGE/ollama/HANDOFF_2026-09-26_letterlock.md`). After repair the baseline must be re-measured (goldens moved aside first, as `goldens-superseded-39ff30a1/`) and a fresh round-3 review run.
+
+| # | Finding | Disposition and proposed repair |
+|---|---|---|
+| 1 | T8 can pass when a reload wrongly succeeds during the held turn: the idle reload that follows is an idempotent no-op | **Accepted.** Insert an ordinary turn after the held turn completes and before the idle reload, expecting revision 1 at generation 1; a reload wrongly committed while busy then shows as generation 2 there. |
+| 2 | The identity check never observes the conversation ID the runtime passes to `Session.Run` (`cmd/tui/chat/chat.go:1158`) | **Accepted as a blueprint gap (gap 6) and an instrument limit.** No boundary exposes the terminal runtime's conversation ID (`api.ChatRequest` carries none). OQ-4 should decide whether G1's actual-request diagnostics (§5) record it; until then the store's event sequence is the only evidence, and DESIGN.md must say it cannot catch a `/new` that updates bookkeeping but not the runtime ID. |
+| 3 | A request with the wrong HTTP method to `/api/chat` scores correct | **Accepted.** The fake answers only `POST /api/chat` (405 otherwise, as the real daemon, `server/routes.go:1891`); captures are grouped by method as well; a non-POST inference request is an incorrect delivery. |
+| 4 | The leak scan reads raw bytes, so JSON-escaped instruction text passes; headers and query strings are not recorded | **Accepted.** Record headers and the query string with every capture; scan decoded JSON strings, headers and query values, not raw bytes. |
+| 5 | Daemon completion plus 600 ms of quiet does not prove the terminal run finished (`m.running` clears on `chatRunDoneMsg`, `chat.go:373`); the model-picker branch ignores three `quiet` results | **Accepted.** Add an idle barrier after each turn (a command whose output can only appear once the run is done, checked on screen), and make every `quiet` in the picker branch a `mustQuiet`. |
+| 6 | T10 rejects an adapter that refuses at start-up (A12 allows the refusal before any preload) | **Accepted.** In capability-less scenarios, an exit at start-up with no carrier-bearing request is a held refusal, not a harness failure; later steps record that no request was sent. |
+
+**Consequence for the record.** The revision-2 baseline (66/39) remains the measured pre-G1 figure. The instrument is not yet fit to be the failure-number component of G1's acceptance gate; round 3 decides that.
