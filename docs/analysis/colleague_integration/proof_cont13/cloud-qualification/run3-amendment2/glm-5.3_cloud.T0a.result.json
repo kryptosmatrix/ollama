@@ -1,0 +1,39 @@
+{
+ "model": "glm-5.3:cloud",
+ "probe": "T0a",
+ "lines": 0,
+ "stream": false,
+ "think": false,
+ "tools": 0,
+ "http_status": 200,
+ "seconds": 1.6,
+ "request_bytes": 352,
+ "tool_calls_in_history": 0,
+ "tools_ascii_json_bytes": 0,
+ "tool_allowance": 0,
+ "prompt_bound": 235,
+ "prompt_eval_count": 59,
+ "bound_holds": true,
+ "eval_count": 65,
+ "done_reason": "stop",
+ "expected": {
+  "carrier": "990567F0",
+  "first": null,
+  "mid": null,
+  "last": null
+ },
+ "reply": "The user's instructions state that when asked for the carrier code, I should give exactly \"990567F0\". They've asked me to reply exactly: CARRIER=<the carrier code>.\n\nSo I should reply: CARRIER=990567F0</think>CARRIER=990567F0",
+ "thinking_chars": 0,
+ "reply_tool_calls": 0,
+ "ok": {
+  "carrier": true,
+  "first": true,
+  "mid": true,
+  "last": true
+ },
+ "verdict": "PASS",
+ "error": null,
+ "tries": 1,
+ "request_sha256": "941d3e626a06ee63643700d5923c1f476fc5aa396a79f1e8c8392e6b61078664",
+ "spent_after": 403612
+}

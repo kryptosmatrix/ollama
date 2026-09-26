@@ -1,0 +1,16 @@
+start 2026-09-26T21:16:14+1000
+21:16:15 deepseek-v4.1-flash:cloud T0a: http=200 PASS prompt=52 bound=235 holds=True 0.5s spent=402545 reply='CARRIER=3AFCDE83'
+21:16:16 deepseek-v4.1-flash:cloud T0b: http=200 PASS prompt=289 bound=345 holds=True 1.1s spent=402834 reply='CARRIER=3AFCDE83'
+21:16:16 deepseek-v4.1-flash:cloud T0c: http=200 PASS prompt=314 bound=345 holds=True 0.6s spent=403148 reply='CARRIER=3AFCDE83'
+21:16:18 glm-5.2:cloud T0a: http=200 PASS prompt=51 bound=235 holds=True 1.3s spent=403199 reply='CARRIER=F21AD9CA'
+21:16:19 glm-5.2:cloud T0b: http=200 PASS prompt=174 bound=345 holds=True 0.9s spent=403373 reply='CARRIER=F21AD9CA'
+21:16:20 glm-5.2:cloud T0c: http=200 PASS prompt=180 bound=345 holds=True 1.0s spent=403553 reply='CARRIER=F21AD9CA'
+21:16:21 glm-5.3:cloud T0a: http=200 PASS prompt=59 bound=235 holds=True 1.6s spent=403612 reply="The user's instructions state that when asked for the carrier code, I should give exactly "
+21:16:23 glm-5.3:cloud T0b: http=200 PASS prompt=182 bound=345 holds=True 1.5s spent=403794 reply='The user wants me to reply exactly with "CARRIER=" followed by the carrier code. The carri'
+21:16:25 glm-5.3:cloud T0c: http=200 PASS prompt=182 bound=345 holds=True 2.1s spent=403976 reply='CARRIER=990567F0'
+21:16:25 tool allowance: 304 from excess [127, 152, 13, 19, 13, 13]
+21:16:26 deepseek-v4.1-flash:cloud T1: http=200 PASS prompt=11001 bound=30269 holds=True 0.9s spent=414977 reply='CARRIER=EC212572; FIRST=231649; MID=598474; LAST=556527'
+21:16:28 glm-5.2:cloud T1: http=200 PASS prompt=13266 bound=30269 holds=True 1.9s spent=428243 reply='CARRIER=0E6402DC; FIRST=601504; MID=220439; LAST=943108'
+21:16:30 glm-5.3:cloud T1: http=200 PASS prompt=25722 bound=57269 holds=True 2.8s spent=453965 reply='CARRIER=6010B1D6; FIRST=174914; MID=551713; LAST=433591'
+21:16:30 done: 12 probes, prompt tokens spent 453965 of cap 500000 (including 402493 before this run)
+exit=0 2026-09-26T21:16:30+1000

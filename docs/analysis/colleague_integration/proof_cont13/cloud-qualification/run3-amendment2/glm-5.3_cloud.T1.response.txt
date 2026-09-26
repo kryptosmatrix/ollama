@@ -1,0 +1,27 @@
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:29.922972873Z","message":{"role":"assistant","content":"","thinking":"The"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.054422023Z","message":{"role":"assistant","content":"","thinking":" user wants a"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.054460553Z","message":{"role":"assistant","content":"","thinking":" specific format:\nC"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.054518403Z","message":{"role":"assistant","content":"","thinking":"ARRIER=\u003ccarrier"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.054577323Z","message":{"role":"assistant","content":"","thinking":" code\u003e; FIRST=\u003cvalue"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.181942719Z","message":{"role":"assistant","content":"","thinking":" on line 000001\u003e;"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.181991579Z","message":{"role":"assistant","content":"","thinking":" MID=\u003cvalue on line"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.18201653Z","message":{"role":"assistant","content":"","thinking":" 001000\u003e; LAST=\u003cvalue"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.18204979Z","message":{"role":"assistant","content":"","thinking":" on line 002000\u003e"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.18209099Z","message":{"role":"assistant","content":"","thinking":"\n\nCarrier code from"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.311780418Z","message":{"role":"assistant","content":"","thinking":" user instructions: 601"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.311847858Z","message":{"role":"assistant","content":"","thinking":"0B1D6"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.311882968Z","message":{"role":"assistant","content":"","thinking":"\nLine 000001:"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.311916048Z","message":{"role":"assistant","content":"","thinking":" 174914\nLine"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.440944876Z","message":{"role":"assistant","content":"","thinking":" 001000: 55"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.440997267Z","message":{"role":"assistant","content":"","thinking":"1713\nLine"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.441037856Z","message":{"role":"assistant","content":"","thinking":" 002000: 4"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.441066676Z","message":{"role":"assistant","content":"","thinking":"33591\n\nNo tools"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.570484785Z","message":{"role":"assistant","content":"","thinking":" to"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.570520085Z","message":{"role":"assistant","content":"CARRIER=","thinking":" call."},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.570556945Z","message":{"role":"assistant","content":"6010B1D"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.570611045Z","message":{"role":"assistant","content":"6; FIRST="},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.700484134Z","message":{"role":"assistant","content":"174914; MID="},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.700635424Z","message":{"role":"assistant","content":"551713; LAST"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.700724604Z","message":{"role":"assistant","content":"=433591"},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.700772004Z","message":{"role":"assistant","content":""},"done":false}
+{"model":"glm-5.3","created_at":"2026-09-26T11:16:30.775251196Z","message":{"role":"assistant","content":""},"done":true,"done_reason":"stop","total_duration":2385244717,"prompt_eval_count":25722,"prompt_eval_cached_count":0,"eval_count":124}

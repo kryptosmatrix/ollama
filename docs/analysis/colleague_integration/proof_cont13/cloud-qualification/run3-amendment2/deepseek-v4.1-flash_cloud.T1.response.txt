@@ -1,0 +1,7 @@
+{"model":"deepseek-v4.1-flash","created_at":"2026-09-26T11:16:25.95769947Z","message":{"role":"assistant","content":"CARRIER=EC"},"done":false}
+{"model":"deepseek-v4.1-flash","created_at":"2026-09-26T11:16:25.971134175Z","message":{"role":"assistant","content":"212572; FIRST="},"done":false}
+{"model":"deepseek-v4.1-flash","created_at":"2026-09-26T11:16:25.98854623Z","message":{"role":"assistant","content":"231649; MID=598"},"done":false}
+{"model":"deepseek-v4.1-flash","created_at":"2026-09-26T11:16:25.999331008Z","message":{"role":"assistant","content":"474; LAST=556"},"done":false}
+{"model":"deepseek-v4.1-flash","created_at":"2026-09-26T11:16:26.013054441Z","message":{"role":"assistant","content":"527"},"done":false}
+{"model":"deepseek-v4.1-flash","created_at":"2026-09-26T11:16:26.013110401Z","message":{"role":"assistant","content":""},"done":false}
+{"model":"deepseek-v4.1-flash","created_at":"2026-09-26T11:16:26.094498285Z","message":{"role":"assistant","content":""},"done":true,"done_reason":"stop","total_duration":597397098,"prompt_eval_count":11001,"eval_count":24}

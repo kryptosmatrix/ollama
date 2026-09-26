@@ -38,7 +38,8 @@ requests across your four cloud models, well under a million tokens; synthetic t
 before any request, with amendments 1 and 2 appended before the requests they govern; `cloud_check.py` with
 `run1/` (and its `VERDICT_CORRECTION.json`) and `run2-amendment1/`; and, for amendment 2, `cloud_check2.py`, the
 local stand-in `fake_cloud.py`, `run_controls2.sh` and `amendment2-controls/`, which proves the harness in six
-modes and four deliberately broken copies before any real request. Every cloud request is synthetic.
+modes and four deliberately broken copies before any real request; `run3-amendment2/` holds that run (all twelve
+probes passed; `RESULT.md`). Every cloud request is synthetic.
 
 `cloud-admission-check/` holds the blind options check on how to implement Ash's ruling to admit cloud models
 up to their verified sizes (KANON 25): the frozen packet (`PACKET.md`, SHA-256

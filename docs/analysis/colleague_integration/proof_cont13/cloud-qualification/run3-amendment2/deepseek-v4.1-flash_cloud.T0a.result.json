@@ -1,0 +1,39 @@
+{
+ "model": "deepseek-v4.1-flash:cloud",
+ "probe": "T0a",
+ "lines": 0,
+ "stream": false,
+ "think": false,
+ "tools": 0,
+ "http_status": 200,
+ "seconds": 0.5,
+ "request_bytes": 364,
+ "tool_calls_in_history": 0,
+ "tools_ascii_json_bytes": 0,
+ "tool_allowance": 0,
+ "prompt_bound": 235,
+ "prompt_eval_count": 52,
+ "bound_holds": true,
+ "eval_count": 10,
+ "done_reason": "stop",
+ "expected": {
+  "carrier": "3AFCDE83",
+  "first": null,
+  "mid": null,
+  "last": null
+ },
+ "reply": "CARRIER=3AFCDE83",
+ "thinking_chars": 0,
+ "reply_tool_calls": 0,
+ "ok": {
+  "carrier": true,
+  "first": true,
+  "mid": true,
+  "last": true
+ },
+ "verdict": "PASS",
+ "error": null,
+ "tries": 1,
+ "request_sha256": "a62cfe6300484d92bd9799be32b8dece5ff241fc487266a5b33317c5709143e7",
+ "spent_after": 402545
+}
