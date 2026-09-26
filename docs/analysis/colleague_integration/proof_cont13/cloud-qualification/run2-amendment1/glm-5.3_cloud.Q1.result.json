@@ -1,0 +1,30 @@
+{
+ "model": "glm-5.3:cloud",
+ "probe": "Q1",
+ "lines": 0,
+ "http_status": 200,
+ "seconds": 0.7,
+ "request_bytes": 352,
+ "content_utf8_bytes": 177,
+ "conservative_bound": 225,
+ "prompt_eval_count": 58,
+ "eval_count": 57,
+ "done_reason": "stop",
+ "bound_holds": true,
+ "expected": {
+  "carrier": "59B87CA3",
+  "first": null,
+  "last": null
+ },
+ "reply": "The user has configured a carrier code: 59B87CA3. They're asking me to reply exactly with \"CARRIER=<the carrier code>\", so I should format it as \"CARRIER=59B87CA3\".CARRIER=59B87CA3",
+ "ok": {
+  "carrier": true,
+  "first": true,
+  "last": true
+ },
+ "verdict": "PASS",
+ "error": null,
+ "tries": 1,
+ "request_sha256": "55b58c6c60fd11c1b655c787b8d5db8717d06267fabb11173165dc9cc40a0997",
+ "spent_after": 377494
+}

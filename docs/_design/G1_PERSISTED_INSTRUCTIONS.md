@@ -261,7 +261,7 @@ Clauses A1–A12 are the contract. A request that carries an enabled carrier is 
 | llama-server with media | never shifts (A11) | native check; A6 with the existing 768-token image estimate | stops when full; A9 reports it | supported by construction, not measured (V5) | source |
 | Model families launched without shift | never shifts (A11) | as the native route | stops when full; A9 | supported by construction, not measured | source |
 | MLX | — | — | — | refused (A10); no MLX model is available here to qualify it | `x/mlxrunner/pipeline.go:47-57` |
-| Explicit cloud models | — | — | — | refused (A10) until qualified with Ash's authorisation | source |
+| Explicit cloud models | — | — | — | refused (A10); a size-bounded admission is pending Ash's decision. Bounded check authorised by Ash, 26 September 2026 (11 synthetic requests, 402,493 prompt tokens): the carrier's random code and both ends of the prompt were delivered intact on `deepseek-v4.1-flash` up to 99,680 tokens, `glm-5.2` up to 103,671 and `glm-5.3` up to 24,999; `deepseek-v4-flash` is retired (HTTP 410). The byte bound (UTF-8 bytes plus 16 per message) held on all 11. Behaviour above those sizes and during long replies is not measured | `proof_cont13/cloud-qualification/` |
 | Remote-host stubs | — | — | — | refused (A10) until qualified | source |
 | Any daemon without the capability | — | — | — | refused by the client (A12) | — |
 
