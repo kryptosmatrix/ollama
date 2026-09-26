@@ -1,0 +1,9 @@
+{
+  "mode": "baseline",
+  "head": "34716b26011c4ae116b3f3fb87e08381f7f61ad4",
+  "branch": "treadle/g1-oq3-repair-20260927",
+  "go": "go version go1.26.5 darwin/arm64",
+  "uname": "Darwin Kryptos-MBP 25.6.0 Darwin Kernel Version 25.6.0: Fri Jul 31 19:18:53 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T6031 arm64",
+  "started": "2026-09-27T08:23:34+1000",
+  "go_mod_sha256": "afdaa0389e35bcf8497ffd0898b3f4ea936c523ae8526964f7b41d7c7f5d094f"
+}

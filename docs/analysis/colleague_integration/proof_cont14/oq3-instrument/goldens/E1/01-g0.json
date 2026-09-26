@@ -1,0 +1,21 @@
+{
+  "scenario": "E1",
+  "step": 1,
+  "index": 0,
+  "label": "E1/01/entry-start",
+  "trial": "",
+  "expect": {
+    "carrier": false,
+    "adapter": ""
+  },
+  "kind": "preload",
+  "request": {
+    "model": "oq3-model",
+    "options": {},
+    "prompt": "",
+    "suffix": "",
+    "system": "",
+    "template": ""
+  },
+  "source": "34716b26011c4ae116b3f3fb87e08381f7f61ad4 binary 0a882f5598d4c82c7dda0794cb99ca13b0489ff2e0ad1c586c9704b2a1f010f1"
+}
