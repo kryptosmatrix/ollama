@@ -1,0 +1,42 @@
+{
+  "scenario": "D9",
+  "step": 8,
+  "index": 0,
+  "label": "D9/08/desktop-turn",
+  "trial": "D9-X",
+  "expect": {
+    "carrier": true,
+    "revision": 2,
+    "generation": 2,
+    "text": "B",
+    "adapter": "desktop"
+  },
+  "request": {
+    "messages": [
+      {
+        "content": "OQ3 D9 turn 1.",
+        "role": "user"
+      },
+      {
+        "content": "OQ3-REPLY-001",
+        "role": "assistant"
+      },
+      {
+        "content": "OQ3 D9 turn 2, held by the daemon.",
+        "role": "user"
+      },
+      {
+        "content": "OQ3-REPLY-002",
+        "role": "assistant"
+      },
+      {
+        "content": "OQ3 D9 turn 3.",
+        "role": "user"
+      }
+    ],
+    "model": "oq3-model",
+    "options": null,
+    "stream": true
+  },
+  "source": "1869da26cdf87c9511e71e3eb98507e05d888b79 binary 0a882f5598d4c82c7dda0794cb99ca13b0489ff2e0ad1c586c9704b2a1f010f1"
+}

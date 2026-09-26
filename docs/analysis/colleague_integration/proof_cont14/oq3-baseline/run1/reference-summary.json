@@ -1,0 +1,348 @@
+{
+  "mode": "reference",
+  "source": "expected requests sent by the reference arm",
+  "controlled_conversation_trials": 36,
+  "observed_deliveries": 78,
+  "bad_observed_deliveries": 0,
+  "missing_required_deliveries": 0,
+  "unexpected_requests": 0,
+  "failure_number": "0/36 = 0.0000",
+  "failure_numerator": 0,
+  "category_counts_overlapping": {},
+  "per_family": {
+    "compaction": {
+      "bad": 0,
+      "correct": 10,
+      "failure_number": "0/1 = 0.0000",
+      "missing": 0,
+      "observed": 10,
+      "trials": 1
+    },
+    "disable": {
+      "bad": 0,
+      "correct": 22,
+      "failure_number": "0/11 = 0.0000",
+      "missing": 0,
+      "observed": 22,
+      "trials": 11
+    },
+    "edit/continue": {
+      "bad": 0,
+      "correct": 15,
+      "failure_number": "0/6 = 0.0000",
+      "missing": 0,
+      "observed": 15,
+      "trials": 6
+    },
+    "explicit reload": {
+      "bad": 0,
+      "correct": 13,
+      "failure_number": "0/5 = 0.0000",
+      "missing": 0,
+      "observed": 13,
+      "trials": 5
+    },
+    "save/restart/new": {
+      "bad": 0,
+      "correct": 17,
+      "failure_number": "0/12 = 0.0000",
+      "missing": 0,
+      "observed": 17,
+      "trials": 12
+    },
+    "terminal reset": {
+      "bad": 0,
+      "correct": 1,
+      "failure_number": "0/1 = 0.0000",
+      "missing": 0,
+      "observed": 1,
+      "trials": 1
+    }
+  },
+  "per_trial": {
+    "D0-C": {
+      "bad": 0,
+      "correct": 4,
+      "family": "disable",
+      "missing": 0,
+      "observed": 4
+    },
+    "D1-X": {
+      "bad": 0,
+      "correct": 2,
+      "family": "save/restart/new",
+      "missing": 0,
+      "observed": 2
+    },
+    "D10-X": {
+      "bad": 0,
+      "correct": 3,
+      "family": "edit/continue",
+      "missing": 0,
+      "observed": 3
+    },
+    "D2-X": {
+      "bad": 0,
+      "correct": 3,
+      "family": "edit/continue",
+      "missing": 0,
+      "observed": 3
+    },
+    "D2-Y": {
+      "bad": 0,
+      "correct": 1,
+      "family": "save/restart/new",
+      "missing": 0,
+      "observed": 1
+    },
+    "D3-X": {
+      "bad": 0,
+      "correct": 3,
+      "family": "explicit reload",
+      "missing": 0,
+      "observed": 3
+    },
+    "D4-U": {
+      "bad": 0,
+      "correct": 1,
+      "family": "disable",
+      "missing": 0,
+      "observed": 1
+    },
+    "D4-V": {
+      "bad": 0,
+      "correct": 1,
+      "family": "save/restart/new",
+      "missing": 0,
+      "observed": 1
+    },
+    "D4-W": {
+      "bad": 0,
+      "correct": 1,
+      "family": "disable",
+      "missing": 0,
+      "observed": 1
+    },
+    "D4-X": {
+      "bad": 0,
+      "correct": 3,
+      "family": "disable",
+      "missing": 0,
+      "observed": 3
+    },
+    "D4-Z": {
+      "bad": 0,
+      "correct": 1,
+      "family": "disable",
+      "missing": 0,
+      "observed": 1
+    },
+    "D5-L": {
+      "bad": 0,
+      "correct": 2,
+      "family": "explicit reload",
+      "missing": 0,
+      "observed": 2
+    },
+    "D6-X": {
+      "bad": 0,
+      "correct": 2,
+      "family": "edit/continue",
+      "missing": 0,
+      "observed": 2
+    },
+    "D6-Y": {
+      "bad": 0,
+      "correct": 1,
+      "family": "save/restart/new",
+      "missing": 0,
+      "observed": 1
+    },
+    "D7-Q": {
+      "bad": 0,
+      "correct": 1,
+      "family": "save/restart/new",
+      "missing": 0,
+      "observed": 1
+    },
+    "D8-F": {
+      "bad": 0,
+      "correct": 2,
+      "family": "save/restart/new",
+      "missing": 0,
+      "observed": 2
+    },
+    "D8-G": {
+      "bad": 0,
+      "correct": 1,
+      "family": "save/restart/new",
+      "missing": 0,
+      "observed": 1
+    },
+    "D9-X": {
+      "bad": 0,
+      "correct": 3,
+      "family": "explicit reload",
+      "missing": 0,
+      "observed": 3
+    },
+    "E1-X": {
+      "bad": 0,
+      "correct": 1,
+      "family": "save/restart/new",
+      "missing": 0,
+      "observed": 1
+    },
+    "T0-X": {
+      "bad": 0,
+      "correct": 4,
+      "family": "disable",
+      "missing": 0,
+      "observed": 4
+    },
+    "T1-X": {
+      "bad": 0,
+      "correct": 4,
+      "family": "save/restart/new",
+      "missing": 0,
+      "observed": 4
+    },
+    "T2-X": {
+      "bad": 0,
+      "correct": 2,
+      "family": "edit/continue",
+      "missing": 0,
+      "observed": 2
+    },
+    "T2-Y": {
+      "bad": 0,
+      "correct": 1,
+      "family": "terminal reset",
+      "missing": 0,
+      "observed": 1
+    },
+    "T3-X": {
+      "bad": 0,
+      "correct": 2,
+      "family": "explicit reload",
+      "missing": 0,
+      "observed": 2
+    },
+    "T4-X": {
+      "bad": 0,
+      "correct": 2,
+      "family": "disable",
+      "missing": 0,
+      "observed": 2
+    },
+    "T4-Y": {
+      "bad": 0,
+      "correct": 1,
+      "family": "disable",
+      "missing": 0,
+      "observed": 1
+    },
+    "T5-X": {
+      "bad": 0,
+      "correct": 1,
+      "family": "save/restart/new",
+      "missing": 0,
+      "observed": 1
+    },
+    "T6-X": {
+      "bad": 0,
+      "correct": 10,
+      "family": "compaction",
+      "missing": 0,
+      "observed": 10
+    },
+    "T7-X": {
+      "bad": 0,
+      "correct": 2,
+      "family": "edit/continue",
+      "missing": 0,
+      "observed": 2
+    },
+    "T8-X": {
+      "bad": 0,
+      "correct": 3,
+      "family": "explicit reload",
+      "missing": 0,
+      "observed": 3
+    },
+    "T9-X": {
+      "bad": 0,
+      "correct": 3,
+      "family": "edit/continue",
+      "missing": 0,
+      "observed": 3
+    },
+    "X1-T": {
+      "bad": 0,
+      "correct": 1,
+      "family": "save/restart/new",
+      "missing": 0,
+      "observed": 1
+    },
+    "X2-D": {
+      "bad": 0,
+      "correct": 1,
+      "family": "save/restart/new",
+      "missing": 0,
+      "observed": 1
+    },
+    "X3-DC": {
+      "bad": 0,
+      "correct": 2,
+      "family": "disable",
+      "missing": 0,
+      "observed": 2
+    },
+    "X3-DE": {
+      "bad": 0,
+      "correct": 1,
+      "family": "disable",
+      "missing": 0,
+      "observed": 1
+    },
+    "X3-TX": {
+      "bad": 0,
+      "correct": 2,
+      "family": "disable",
+      "missing": 0,
+      "observed": 2
+    }
+  },
+  "operation_verdicts": {},
+  "required_refusal_verdicts": {},
+  "auxiliary_checks": {},
+  "valid": true,
+  "scenarios_run": [
+    "D0",
+    "D1",
+    "D2",
+    "D3",
+    "D4",
+    "D5",
+    "D6",
+    "D7",
+    "D8",
+    "D9",
+    "D10",
+    "T0",
+    "T1",
+    "T2",
+    "T3",
+    "T4",
+    "T5",
+    "T6",
+    "T7",
+    "T8",
+    "T9",
+    "E1",
+    "X1",
+    "X2",
+    "X3"
+  ],
+  "ledger_sha256": "71982d99af9798ff8f62fe0f185adf298727010779df3da7f25fa94acb1390af"
+}

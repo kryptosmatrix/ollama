@@ -1,0 +1,538 @@
+{
+  "scenario": {
+    "id": "D4",
+    "title": "desktop disable, restart while disabled, restore, reset",
+    "trials": [
+      {
+        "id": "D4-X",
+        "family": "disable",
+        "adapter": "desktop",
+        "note": "active conversation keeps A after a global disable, then adopts it"
+      },
+      {
+        "id": "D4-Z",
+        "family": "disable",
+        "adapter": "desktop"
+      },
+      {
+        "id": "D4-W",
+        "family": "disable",
+        "adapter": "desktop",
+        "note": "restart while disabled"
+      },
+      {
+        "id": "D4-V",
+        "family": "save/restart/new",
+        "adapter": "desktop",
+        "note": "restored text"
+      },
+      {
+        "id": "D4-U",
+        "family": "disable",
+        "adapter": "desktop",
+        "note": "reset"
+      }
+    ],
+    "steps": [
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "1",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D4-X",
+        "conv": "X",
+        "prompt": "OQ3 D4 X turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "false",
+          "revision": "2",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "false",
+          "expected_revision": "1",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D4-X",
+        "conv": "X",
+        "prompt": "OQ3 D4 X turn 2.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D4-Z",
+        "conv": "Z",
+        "prompt": "OQ3 D4 Z turn 1.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-reload",
+        "class": "operation",
+        "conv": "X",
+        "want": {
+          "generation": "2",
+          "revision": "2",
+          "status": "200"
+        },
+        "args": {
+          "expected_generation": "1",
+          "expected_target_revision": "2"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D4-X",
+        "conv": "X",
+        "prompt": "OQ3 D4 X turn 3.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D4-W",
+        "conv": "W",
+        "prompt": "OQ3 D4 W turn 1.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "3",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "2",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D4-V",
+        "conv": "V",
+        "prompt": "OQ3 D4 V turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 3,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "false",
+          "revision": "4",
+          "text": ""
+        },
+        "args": {
+          "enabled": "false",
+          "expected_revision": "3",
+          "text": ""
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D4-U",
+        "conv": "U",
+        "prompt": "OQ3 D4 U turn 1.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  "events": null,
+  "deliveries": [
+    {
+      "scenario": "D4",
+      "step": 2,
+      "label": "D4/02/desktop-turn",
+      "trial": "D4-X",
+      "index": 0,
+      "expect": {
+        "carrier": true,
+        "revision": 1,
+        "generation": 1,
+        "text": "A",
+        "adapter": "desktop"
+      },
+      "capture_seq": 1,
+      "status": "correct",
+      "verdict": {
+        "correct": true
+      },
+      "golden": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/goldens/D4/02-0.json"
+    },
+    {
+      "scenario": "D4",
+      "step": 4,
+      "label": "D4/04/desktop-turn",
+      "trial": "D4-X",
+      "index": 0,
+      "expect": {
+        "carrier": true,
+        "revision": 1,
+        "generation": 1,
+        "text": "A",
+        "adapter": "desktop"
+      },
+      "capture_seq": 2,
+      "status": "correct",
+      "verdict": {
+        "correct": true
+      },
+      "golden": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/goldens/D4/04-0.json"
+    },
+    {
+      "scenario": "D4",
+      "step": 5,
+      "label": "D4/05/desktop-turn",
+      "trial": "D4-Z",
+      "index": 0,
+      "expect": {
+        "carrier": false,
+        "adapter": "desktop"
+      },
+      "capture_seq": 3,
+      "status": "correct",
+      "verdict": {
+        "correct": true
+      },
+      "golden": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/goldens/D4/05-0.json"
+    },
+    {
+      "scenario": "D4",
+      "step": 7,
+      "label": "D4/07/desktop-turn",
+      "trial": "D4-X",
+      "index": 0,
+      "expect": {
+        "carrier": false,
+        "adapter": "desktop"
+      },
+      "capture_seq": 4,
+      "status": "correct",
+      "verdict": {
+        "correct": true
+      },
+      "golden": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/goldens/D4/07-0.json"
+    },
+    {
+      "scenario": "D4",
+      "step": 10,
+      "label": "D4/10/desktop-turn",
+      "trial": "D4-W",
+      "index": 0,
+      "expect": {
+        "carrier": false,
+        "adapter": "desktop"
+      },
+      "capture_seq": 5,
+      "status": "correct",
+      "verdict": {
+        "correct": true
+      },
+      "golden": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/goldens/D4/10-0.json"
+    },
+    {
+      "scenario": "D4",
+      "step": 12,
+      "label": "D4/12/desktop-turn",
+      "trial": "D4-V",
+      "index": 0,
+      "expect": {
+        "carrier": true,
+        "revision": 3,
+        "generation": 1,
+        "text": "A",
+        "adapter": "desktop"
+      },
+      "capture_seq": 6,
+      "status": "correct",
+      "verdict": {
+        "correct": true
+      },
+      "golden": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/goldens/D4/12-0.json"
+    },
+    {
+      "scenario": "D4",
+      "step": 14,
+      "label": "D4/14/desktop-turn",
+      "trial": "D4-U",
+      "index": 0,
+      "expect": {
+        "carrier": false,
+        "adapter": "desktop"
+      },
+      "capture_seq": 7,
+      "status": "correct",
+      "verdict": {
+        "correct": true
+      },
+      "golden": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/goldens/D4/14-0.json"
+    }
+  ],
+  "auxiliary": null,
+  "captures": [
+    {
+      "seq": 1,
+      "at": "2026-09-26T23:01:59.851977+10:00",
+      "method": "POST",
+      "path": "/api/chat",
+      "label": "D4/02/desktop-turn",
+      "body": {
+        "admission": {
+          "version": 1
+        },
+        "messages": [
+          {
+            "content": "OQ3 model-system text for oq3-model: SENTINEL-MS1-7f3a.\n\nUser-configured instructions; revision 1; selection 1:\nSENTINEL-A-START-5d2c OQ3 instruction profile A: answer in Australian English and keep replies short.\nSENTINEL-A-MID-9e41 Name the café you would recommend — this line checks bytes beyond ASCII.\nClose every reply with the word ALPHA. SENTINEL-A-END-b7f0",
+            "role": "system"
+          },
+          {
+            "content": "OQ3 D4 X turn 1.",
+            "role": "user"
+          }
+        ],
+        "model": "oq3-model",
+        "options": null,
+        "stream": true
+      },
+      "response_kind": "reply"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-26T23:01:59.852406+10:00",
+      "method": "POST",
+      "path": "/api/chat",
+      "label": "D4/04/desktop-turn",
+      "body": {
+        "admission": {
+          "version": 1
+        },
+        "messages": [
+          {
+            "content": "OQ3 model-system text for oq3-model: SENTINEL-MS1-7f3a.\n\nUser-configured instructions; revision 1; selection 1:\nSENTINEL-A-START-5d2c OQ3 instruction profile A: answer in Australian English and keep replies short.\nSENTINEL-A-MID-9e41 Name the café you would recommend — this line checks bytes beyond ASCII.\nClose every reply with the word ALPHA. SENTINEL-A-END-b7f0",
+            "role": "system"
+          },
+          {
+            "content": "OQ3 D4 X turn 1.",
+            "role": "user"
+          },
+          {
+            "content": "OQ3-REPLY-001",
+            "role": "assistant"
+          },
+          {
+            "content": "OQ3 D4 X turn 2.",
+            "role": "user"
+          }
+        ],
+        "model": "oq3-model",
+        "options": null,
+        "stream": true
+      },
+      "response_kind": "reply"
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-26T23:01:59.852743+10:00",
+      "method": "POST",
+      "path": "/api/chat",
+      "label": "D4/05/desktop-turn",
+      "body": {
+        "messages": [
+          {
+            "content": "OQ3 D4 Z turn 1.",
+            "role": "user"
+          }
+        ],
+        "model": "oq3-model",
+        "options": null,
+        "stream": true
+      },
+      "response_kind": "reply"
+    },
+    {
+      "seq": 4,
+      "at": "2026-09-26T23:01:59.85307+10:00",
+      "method": "POST",
+      "path": "/api/chat",
+      "label": "D4/07/desktop-turn",
+      "body": {
+        "messages": [
+          {
+            "content": "OQ3 D4 X turn 1.",
+            "role": "user"
+          },
+          {
+            "content": "OQ3-REPLY-001",
+            "role": "assistant"
+          },
+          {
+            "content": "OQ3 D4 X turn 2.",
+            "role": "user"
+          },
+          {
+            "content": "OQ3-REPLY-002",
+            "role": "assistant"
+          },
+          {
+            "content": "OQ3 D4 X turn 3.",
+            "role": "user"
+          }
+        ],
+        "model": "oq3-model",
+        "options": null,
+        "stream": true
+      },
+      "response_kind": "reply"
+    },
+    {
+      "seq": 5,
+      "at": "2026-09-26T23:01:59.853421+10:00",
+      "method": "POST",
+      "path": "/api/chat",
+      "label": "D4/10/desktop-turn",
+      "body": {
+        "messages": [
+          {
+            "content": "OQ3 D4 W turn 1.",
+            "role": "user"
+          }
+        ],
+        "model": "oq3-model",
+        "options": null,
+        "stream": true
+      },
+      "response_kind": "reply"
+    },
+    {
+      "seq": 6,
+      "at": "2026-09-26T23:01:59.853736+10:00",
+      "method": "POST",
+      "path": "/api/chat",
+      "label": "D4/12/desktop-turn",
+      "body": {
+        "admission": {
+          "version": 1
+        },
+        "messages": [
+          {
+            "content": "OQ3 model-system text for oq3-model: SENTINEL-MS1-7f3a.\n\nUser-configured instructions; revision 3; selection 1:\nSENTINEL-A-START-5d2c OQ3 instruction profile A: answer in Australian English and keep replies short.\nSENTINEL-A-MID-9e41 Name the café you would recommend — this line checks bytes beyond ASCII.\nClose every reply with the word ALPHA. SENTINEL-A-END-b7f0",
+            "role": "system"
+          },
+          {
+            "content": "OQ3 D4 V turn 1.",
+            "role": "user"
+          }
+        ],
+        "model": "oq3-model",
+        "options": null,
+        "stream": true
+      },
+      "response_kind": "reply"
+    },
+    {
+      "seq": 7,
+      "at": "2026-09-26T23:01:59.854015+10:00",
+      "method": "POST",
+      "path": "/api/chat",
+      "label": "D4/14/desktop-turn",
+      "body": {
+        "messages": [
+          {
+            "content": "OQ3 D4 U turn 1.",
+            "role": "user"
+          }
+        ],
+        "model": "oq3-model",
+        "options": null,
+        "stream": true
+      },
+      "response_kind": "reply"
+    }
+  ],
+  "sandbox": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/TestOQ3FailureNumber3840459307/005/D4"
+}

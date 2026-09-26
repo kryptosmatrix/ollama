@@ -1,0 +1,39 @@
+{
+  "scenario": "D4",
+  "step": 7,
+  "index": 0,
+  "label": "D4/07/desktop-turn",
+  "trial": "D4-X",
+  "expect": {
+    "carrier": false,
+    "adapter": "desktop"
+  },
+  "request": {
+    "messages": [
+      {
+        "content": "OQ3 D4 X turn 1.",
+        "role": "user"
+      },
+      {
+        "content": "OQ3-REPLY-001",
+        "role": "assistant"
+      },
+      {
+        "content": "OQ3 D4 X turn 2.",
+        "role": "user"
+      },
+      {
+        "content": "OQ3-REPLY-002",
+        "role": "assistant"
+      },
+      {
+        "content": "OQ3 D4 X turn 3.",
+        "role": "user"
+      }
+    ],
+    "model": "oq3-model",
+    "options": null,
+    "stream": true
+  },
+  "source": "1869da26cdf87c9511e71e3eb98507e05d888b79 binary 0a882f5598d4c82c7dda0794cb99ca13b0489ff2e0ad1c586c9704b2a1f010f1"
+}

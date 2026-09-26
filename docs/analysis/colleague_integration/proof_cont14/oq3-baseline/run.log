@@ -1,0 +1,11 @@
+OQ3 baseline run at 1869da26cdf87c9511e71e3eb98507e05d888b79
+binary sha256 0a882f5598d4c82c7dda0794cb99ca13b0489ff2e0ad1c586c9704b2a1f010f1
+selftest-failing: go test exit 1, reconcile exit 1
+selftest-missing: go test exit 0, reconcile exit 1
+selftest-empty: go test exit 0, reconcile exit 1
+GATE SELFTEST: all three faults blocked
+controls: go test exit 0, reconcile exit 0
+run1: go test exit 0, reconcile exit 0
+run2: go test exit 0, reconcile exit 0
+REPEAT IDENTICAL
+GATE=PASS (baseline): instrument valid; see run1/summary.json

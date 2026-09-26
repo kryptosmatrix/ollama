@@ -1,0 +1,333 @@
+{
+  "scenario": {
+    "id": "D0",
+    "title": "desktop unconfigured compatibility control (tools, thinking, attachment)",
+    "trials": [
+      {
+        "id": "D0-C",
+        "family": "disable",
+        "adapter": "desktop",
+        "note": "unconfigured control"
+      }
+    ],
+    "steps": [
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "auth-control",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D0-C",
+        "conv": "C",
+        "prompt": "OQ3 D0 turn 1: a plain question.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D0-C",
+        "conv": "C",
+        "prompt": "OQ3 D0 turn 2: with thinking requested.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ],
+        "args": {
+          "think": "true"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D0-C",
+        "conv": "C",
+        "prompt": "OQ3 D0 turn 3: with a text attachment.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ],
+        "args": {
+          "attachment": "notes.txt"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D0-C",
+        "conv": "C",
+        "prompt": "OQ3 D0 turn 4: with web search enabled.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ],
+        "args": {
+          "web_search": "true"
+        }
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  "events": null,
+  "deliveries": [
+    {
+      "scenario": "D0",
+      "step": 2,
+      "label": "D0/02/desktop-turn",
+      "trial": "D0-C",
+      "index": 0,
+      "expect": {
+        "carrier": false,
+        "adapter": "desktop"
+      },
+      "capture_seq": 1,
+      "status": "correct",
+      "verdict": {
+        "correct": true
+      },
+      "golden": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/goldens/D0/02-0.json"
+    },
+    {
+      "scenario": "D0",
+      "step": 3,
+      "label": "D0/03/desktop-turn",
+      "trial": "D0-C",
+      "index": 0,
+      "expect": {
+        "carrier": false,
+        "adapter": "desktop"
+      },
+      "capture_seq": 2,
+      "status": "correct",
+      "verdict": {
+        "correct": true
+      },
+      "golden": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/goldens/D0/03-0.json"
+    },
+    {
+      "scenario": "D0",
+      "step": 4,
+      "label": "D0/04/desktop-turn",
+      "trial": "D0-C",
+      "index": 0,
+      "expect": {
+        "carrier": false,
+        "adapter": "desktop"
+      },
+      "capture_seq": 3,
+      "status": "correct",
+      "verdict": {
+        "correct": true
+      },
+      "golden": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/goldens/D0/04-0.json"
+    },
+    {
+      "scenario": "D0",
+      "step": 5,
+      "label": "D0/05/desktop-turn",
+      "trial": "D0-C",
+      "index": 0,
+      "expect": {
+        "carrier": false,
+        "adapter": "desktop"
+      },
+      "capture_seq": 4,
+      "status": "correct",
+      "verdict": {
+        "correct": true
+      },
+      "golden": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/goldens/D0/05-0.json"
+    }
+  ],
+  "auxiliary": null,
+  "captures": [
+    {
+      "seq": 1,
+      "at": "2026-09-26T23:01:59.633409+10:00",
+      "method": "POST",
+      "path": "/api/chat",
+      "label": "D0/02/desktop-turn",
+      "body": {
+        "messages": [
+          {
+            "content": "OQ3 D0 turn 1: a plain question.",
+            "role": "user"
+          }
+        ],
+        "model": "oq3-model",
+        "options": null,
+        "stream": true
+      },
+      "response_kind": "reply"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-26T23:01:59.633855+10:00",
+      "method": "POST",
+      "path": "/api/chat",
+      "label": "D0/03/desktop-turn",
+      "body": {
+        "messages": [
+          {
+            "content": "OQ3 D0 turn 1: a plain question.",
+            "role": "user"
+          },
+          {
+            "content": "OQ3-REPLY-001",
+            "role": "assistant"
+          },
+          {
+            "content": "OQ3 D0 turn 2: with thinking requested.",
+            "role": "user"
+          }
+        ],
+        "model": "oq3-model",
+        "options": null,
+        "stream": true,
+        "think": true
+      },
+      "response_kind": "reply"
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-26T23:01:59.63419+10:00",
+      "method": "POST",
+      "path": "/api/chat",
+      "label": "D0/04/desktop-turn",
+      "body": {
+        "messages": [
+          {
+            "content": "OQ3 D0 turn 1: a plain question.",
+            "role": "user"
+          },
+          {
+            "content": "OQ3-REPLY-001",
+            "role": "assistant"
+          },
+          {
+            "content": "OQ3 D0 turn 2: with thinking requested.",
+            "role": "user"
+          },
+          {
+            "content": "OQ3-REPLY-002",
+            "role": "assistant"
+          },
+          {
+            "content": "OQ3 D0 turn 3: with a text attachment.\n--- File: notes.txt ---\nOQ3 attachment line one.\nOQ3 attachment line two.\n\n--- End of notes.txt ---",
+            "role": "user"
+          }
+        ],
+        "model": "oq3-model",
+        "options": null,
+        "stream": true
+      },
+      "response_kind": "reply"
+    },
+    {
+      "seq": 4,
+      "at": "2026-09-26T23:01:59.634572+10:00",
+      "method": "POST",
+      "path": "/api/chat",
+      "label": "D0/05/desktop-turn",
+      "body": {
+        "messages": [
+          {
+            "content": "OQ3 D0 turn 1: a plain question.",
+            "role": "user"
+          },
+          {
+            "content": "OQ3-REPLY-001",
+            "role": "assistant"
+          },
+          {
+            "content": "OQ3 D0 turn 2: with thinking requested.",
+            "role": "user"
+          },
+          {
+            "content": "OQ3-REPLY-002",
+            "role": "assistant"
+          },
+          {
+            "content": "OQ3 D0 turn 3: with a text attachment.\n--- File: notes.txt ---\nOQ3 attachment line one.\nOQ3 attachment line two.\n\n--- End of notes.txt ---",
+            "role": "user"
+          },
+          {
+            "content": "OQ3-REPLY-003",
+            "role": "assistant"
+          },
+          {
+            "content": "OQ3 D0 turn 4: with web search enabled.",
+            "role": "user"
+          }
+        ],
+        "model": "oq3-model",
+        "options": null,
+        "stream": true,
+        "tools": [
+          {
+            "function": {
+              "description": "Crawl and extract text content from web pages",
+              "name": "web_fetch",
+              "parameters": {
+                "properties": {
+                  "url": {
+                    "description": "URL to crawl and extract content from",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "type": "object"
+              }
+            },
+            "type": "function"
+          },
+          {
+            "function": {
+              "description": "Search the web for real-time information using ollama.com web search API.",
+              "name": "web_search",
+              "parameters": {
+                "properties": {
+                  "max_results": {
+                    "description": "Maximum number of search results to return. Defaults to 5 when omitted.",
+                    "type": "integer"
+                  },
+                  "query": {
+                    "description": "The search query to execute",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "query"
+                ],
+                "type": "object"
+              }
+            },
+            "type": "function"
+          }
+        ]
+      },
+      "response_kind": "reply"
+    }
+  ],
+  "sandbox": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/TestOQ3FailureNumber3840459307/001/D0"
+}

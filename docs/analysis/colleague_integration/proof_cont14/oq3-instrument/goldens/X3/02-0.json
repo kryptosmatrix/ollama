@@ -1,0 +1,26 @@
+{
+  "scenario": "X3",
+  "step": 2,
+  "index": 0,
+  "label": "X3/02/desktop-turn",
+  "trial": "X3-DC",
+  "expect": {
+    "carrier": true,
+    "revision": 1,
+    "generation": 1,
+    "text": "A",
+    "adapter": "desktop"
+  },
+  "request": {
+    "messages": [
+      {
+        "content": "OQ3 X3 desktop C turn 1.",
+        "role": "user"
+      }
+    ],
+    "model": "oq3-model",
+    "options": null,
+    "stream": true
+  },
+  "source": "1869da26cdf87c9511e71e3eb98507e05d888b79 binary 0a882f5598d4c82c7dda0794cb99ca13b0489ff2e0ad1c586c9704b2a1f010f1"
+}

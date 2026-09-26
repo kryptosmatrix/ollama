@@ -1,0 +1,302 @@
+{
+  "scenario": {
+    "id": "D9",
+    "title": "desktop held turn: a save from another process completes, a reload is refused, then reload at idle",
+    "trials": [
+      {
+        "id": "D9-X",
+        "family": "explicit reload",
+        "adapter": "desktop"
+      }
+    ],
+    "steps": [
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "1",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D9-X",
+        "conv": "X",
+        "prompt": "OQ3 D9 turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D9-X",
+        "conv": "X",
+        "prompt": "OQ3 D9 turn 2, held by the daemon.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ],
+        "args": {
+          "hold": "1"
+        }
+      },
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0"
+        },
+        "args": {
+          "expected_revision": "1",
+          "text": "B"
+        }
+      },
+      {
+        "op": "desktop-reload",
+        "class": "required-refusal",
+        "conv": "X",
+        "want": {
+          "code": "conversation_busy",
+          "status": "409"
+        },
+        "args": {
+          "expected_generation": "1",
+          "expected_target_revision": "2"
+        }
+      },
+      {
+        "op": "desktop-await",
+        "class": "harness",
+        "args": {
+          "conv": "X"
+        }
+      },
+      {
+        "op": "desktop-reload",
+        "class": "operation",
+        "conv": "X",
+        "want": {
+          "generation": "2",
+          "revision": "2",
+          "status": "200"
+        },
+        "args": {
+          "expected_generation": "1",
+          "expected_target_revision": "2"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D9-X",
+        "conv": "X",
+        "prompt": "OQ3 D9 turn 3.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 2,
+            "generation": 2,
+            "text": "B",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  "events": null,
+  "deliveries": [
+    {
+      "scenario": "D9",
+      "step": 2,
+      "label": "D9/02/desktop-turn",
+      "trial": "D9-X",
+      "index": 0,
+      "expect": {
+        "carrier": true,
+        "revision": 1,
+        "generation": 1,
+        "text": "A",
+        "adapter": "desktop"
+      },
+      "capture_seq": 1,
+      "status": "correct",
+      "verdict": {
+        "correct": true
+      },
+      "golden": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/goldens/D9/02-0.json"
+    },
+    {
+      "scenario": "D9",
+      "step": 3,
+      "label": "D9/03/desktop-turn",
+      "trial": "D9-X",
+      "index": 0,
+      "expect": {
+        "carrier": true,
+        "revision": 1,
+        "generation": 1,
+        "text": "A",
+        "adapter": "desktop"
+      },
+      "capture_seq": 2,
+      "status": "correct",
+      "verdict": {
+        "correct": true
+      },
+      "golden": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/goldens/D9/03-0.json"
+    },
+    {
+      "scenario": "D9",
+      "step": 8,
+      "label": "D9/08/desktop-turn",
+      "trial": "D9-X",
+      "index": 0,
+      "expect": {
+        "carrier": true,
+        "revision": 2,
+        "generation": 2,
+        "text": "B",
+        "adapter": "desktop"
+      },
+      "capture_seq": 3,
+      "status": "correct",
+      "verdict": {
+        "correct": true
+      },
+      "golden": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/goldens/D9/08-0.json"
+    }
+  ],
+  "auxiliary": null,
+  "captures": [
+    {
+      "seq": 1,
+      "at": "2026-09-26T23:00:51.437838+10:00",
+      "method": "POST",
+      "path": "/api/chat",
+      "label": "D9/02/desktop-turn",
+      "body": {
+        "admission": {
+          "version": 1
+        },
+        "messages": [
+          {
+            "content": "OQ3 model-system text for oq3-model: SENTINEL-MS1-7f3a.\n\nUser-configured instructions; revision 1; selection 1:\nSENTINEL-A-START-5d2c OQ3 instruction profile A: answer in Australian English and keep replies short.\nSENTINEL-A-MID-9e41 Name the café you would recommend — this line checks bytes beyond ASCII.\nClose every reply with the word ALPHA. SENTINEL-A-END-b7f0",
+            "role": "system"
+          },
+          {
+            "content": "OQ3 D9 turn 1.",
+            "role": "user"
+          }
+        ],
+        "model": "oq3-model",
+        "options": null,
+        "stream": true
+      },
+      "response_kind": "reply"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-26T23:00:51.438606+10:00",
+      "method": "POST",
+      "path": "/api/chat",
+      "label": "D9/03/desktop-turn",
+      "body": {
+        "admission": {
+          "version": 1
+        },
+        "messages": [
+          {
+            "content": "OQ3 model-system text for oq3-model: SENTINEL-MS1-7f3a.\n\nUser-configured instructions; revision 1; selection 1:\nSENTINEL-A-START-5d2c OQ3 instruction profile A: answer in Australian English and keep replies short.\nSENTINEL-A-MID-9e41 Name the café you would recommend — this line checks bytes beyond ASCII.\nClose every reply with the word ALPHA. SENTINEL-A-END-b7f0",
+            "role": "system"
+          },
+          {
+            "content": "OQ3 D9 turn 1.",
+            "role": "user"
+          },
+          {
+            "content": "OQ3-REPLY-001",
+            "role": "assistant"
+          },
+          {
+            "content": "OQ3 D9 turn 2, held by the daemon.",
+            "role": "user"
+          }
+        ],
+        "model": "oq3-model",
+        "options": null,
+        "stream": true
+      },
+      "response_kind": "reply"
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-26T23:00:51.439786+10:00",
+      "method": "POST",
+      "path": "/api/chat",
+      "label": "D9/08/desktop-turn",
+      "body": {
+        "admission": {
+          "version": 1
+        },
+        "messages": [
+          {
+            "content": "OQ3 model-system text for oq3-model: SENTINEL-MS1-7f3a.\n\nUser-configured instructions; revision 2; selection 2:\nSENTINEL-B-START-2a6e OQ3 instruction profile B: answer as a checklist of numbered steps.\nSENTINEL-B-MID-4c18 Prefer metric units — naïve estimates are acceptable here.\nClose every reply with the word BRAVO. SENTINEL-B-END-83d9",
+            "role": "system"
+          },
+          {
+            "content": "OQ3 D9 turn 1.",
+            "role": "user"
+          },
+          {
+            "content": "OQ3-REPLY-001",
+            "role": "assistant"
+          },
+          {
+            "content": "OQ3 D9 turn 2, held by the daemon.",
+            "role": "user"
+          },
+          {
+            "content": "OQ3-REPLY-002",
+            "role": "assistant"
+          },
+          {
+            "content": "OQ3 D9 turn 3.",
+            "role": "user"
+          }
+        ],
+        "model": "oq3-model",
+        "options": null,
+        "stream": true
+      },
+      "response_kind": "reply"
+    }
+  ],
+  "sandbox": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/TestOQ3FailureNumber2494566255/010/D9"
+}
