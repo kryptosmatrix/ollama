@@ -11,6 +11,9 @@ MODELS = ['deepseek-v4.1-flash:cloud', 'glm-5.2:cloud', 'glm-5.3:cloud']
 CAP = 500_000
 Q2_LINES = 2000
 Q3_TARGET_TOKENS = 100_000
+NUM_PREDICT = int(os.environ.get('CLOUD_CHECK_NUM_PREDICT', '48'))
+ONLY = os.environ.get('CLOUD_CHECK_ONLY')  # amendment 1: 'glm-5.3:cloud:Q1,Q2'
+SPENT_BEFORE = int(os.environ.get('CLOUD_CHECK_SPENT_BEFORE', '0'))
 spent = 0
 
 
@@ -58,7 +61,7 @@ def probe(model, name, n_lines):
                 {'role': 'user', 'content': text + '\n\nReply in exactly this format and nothing else: '
                  'CARRIER=<the carrier code>; FIRST=<the value on line 000001>; '
                  f'LAST=<the value on line {n_lines:06d}>'}]
-    body = {'model': model, 'messages': msgs, 'stream': False, 'think': False, 'options': {'num_predict': 48}}
+    body = {'model': model, 'messages': msgs, 'stream': False, 'think': False, 'options': {'num_predict': NUM_PREDICT}}
     raw = json.dumps(body, ensure_ascii=False).encode('utf-8')
     utf8_bytes = sum(len(m['content'].encode('utf-8')) for m in msgs)
     bound = utf8_bytes + 16 * (len(msgs) + 1)
@@ -89,7 +92,7 @@ def probe(model, name, n_lines):
         verdict = 'NO_EVIDENCE_ERROR'
     elif ok_c and ok_f and ok_l:
         verdict = 'PASS'
-    elif ok_l and not (ok_c and ok_f):
+    elif n_lines > 0 and ok_l and not (ok_c and ok_f):
         verdict = 'START_LOST'
     else:
         verdict = 'NO_EVIDENCE'
@@ -116,6 +119,19 @@ def main():
     global spent
     os.makedirs(OUT, exist_ok=True)
     results = []
+    spent = SPENT_BEFORE
+    if ONLY:
+        model, probes = ONLY.rsplit(':', 1)
+        for name in probes.split(','):
+            if name == 'Q1':
+                results.append(probe(model, 'Q1', 0))
+            elif name == 'Q2':
+                if spent + 26_000 > CAP:
+                    log(f'{model} Q2: skipped, would pass the cap ({spent} spent)'); continue
+                results.append(probe(model, 'Q2', Q2_LINES))
+        open(os.path.join(OUT, 'results.json'), 'w').write(json.dumps(results, indent=1) + '\n')
+        log(f'done: {len(results)} probes, prompt tokens spent {spent} of cap {CAP} (including {SPENT_BEFORE} before this run)')
+        return
     for model in MODELS:
         results.append(probe(model, 'Q1', 0))
         q2 = probe(model, 'Q2', Q2_LINES)

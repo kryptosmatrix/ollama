@@ -1,0 +1,30 @@
+{
+ "model": "glm-5.3:cloud",
+ "probe": "Q3",
+ "lines": 8004,
+ "http_status": 200,
+ "seconds": 6.7,
+ "request_bytes": 224564,
+ "content_utf8_bytes": 216385,
+ "conservative_bound": 216433,
+ "prompt_eval_count": 103853,
+ "eval_count": 48,
+ "done_reason": "length",
+ "bound_holds": true,
+ "expected": {
+  "carrier": "4ABC7D32",
+  "first": 300347,
+  "last": 878725
+ },
+ "reply": "The user wants the response in exactly this format: CARRIER=<the carrier code>; FIRST=<the value on line 000001>; LAST=<the value on line 008004>\n\nCarrier code: 4ABC7D32",
+ "ok": {
+  "carrier": false,
+  "first": false,
+  "last": false
+ },
+ "verdict": "NO_EVIDENCE",
+ "error": null,
+ "tries": 1,
+ "request_sha256": "aafbd18360829f01b701948b865609f74e3cf6cef793efcbefea9842812f3618",
+ "spent_after": 377436
+}

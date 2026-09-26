@@ -1,0 +1,1 @@
+{"model": "deepseek-v4.1-flash:cloud", "messages": [{"role": "system", "content": "User-configured instructions; revision 1; selection 1:\nCarrier code: 0983841E. When asked for the carrier code, give exactly this value."}, {"role": "user", "content": "Reply exactly: CARRIER=<the carrier code>"}], "stream": false, "think": false, "options": {"num_predict": 48}}

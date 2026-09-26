@@ -1,0 +1,30 @@
+{
+ "model": "glm-5.2:cloud",
+ "probe": "Q1",
+ "lines": 0,
+ "http_status": 200,
+ "seconds": 0.8,
+ "request_bytes": 351,
+ "content_utf8_bytes": 177,
+ "conservative_bound": 225,
+ "prompt_eval_count": 53,
+ "eval_count": 10,
+ "done_reason": "stop",
+ "bound_holds": true,
+ "expected": {
+  "carrier": "2B49A398",
+  "first": null,
+  "last": null
+ },
+ "reply": "CARRIER=2B49A398",
+ "ok": {
+  "carrier": true,
+  "first": true,
+  "last": true
+ },
+ "verdict": "PASS",
+ "error": null,
+ "tries": 1,
+ "request_sha256": "e24f97bc0e66b090cb7fcc380f40fef9b4eb6585529b6c4babc21029fc94ad67",
+ "spent_after": 119864
+}

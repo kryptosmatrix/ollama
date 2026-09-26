@@ -1,0 +1,74 @@
+[
+ {
+  "model": "deepseek-v4.1-flash:cloud",
+  "probe": "Q1",
+  "recorded_verdict": "PASS",
+  "rederived_verdict": "PASS",
+  "prompt_eval_count": 51,
+  "bound_holds": true
+ },
+ {
+  "model": "deepseek-v4.1-flash:cloud",
+  "probe": "Q2",
+  "recorded_verdict": "PASS",
+  "rederived_verdict": "PASS",
+  "prompt_eval_count": 20080,
+  "bound_holds": true
+ },
+ {
+  "model": "deepseek-v4.1-flash:cloud",
+  "probe": "Q3",
+  "recorded_verdict": "PASS",
+  "rederived_verdict": "PASS",
+  "prompt_eval_count": 99680,
+  "bound_holds": true
+ },
+ {
+  "model": "glm-5.2:cloud",
+  "probe": "Q1",
+  "recorded_verdict": "PASS",
+  "rederived_verdict": "PASS",
+  "prompt_eval_count": 53,
+  "bound_holds": true
+ },
+ {
+  "model": "glm-5.2:cloud",
+  "probe": "Q2",
+  "recorded_verdict": "PASS",
+  "rederived_verdict": "PASS",
+  "prompt_eval_count": 25004,
+  "bound_holds": true
+ },
+ {
+  "model": "glm-5.2:cloud",
+  "probe": "Q3",
+  "recorded_verdict": "PASS",
+  "rederived_verdict": "PASS",
+  "prompt_eval_count": 103671,
+  "bound_holds": true
+ },
+ {
+  "model": "glm-5.3:cloud",
+  "probe": "Q1",
+  "recorded_verdict": "START_LOST",
+  "rederived_verdict": "NO_EVIDENCE",
+  "prompt_eval_count": 58,
+  "bound_holds": true
+ },
+ {
+  "model": "glm-5.3:cloud",
+  "probe": "Q2",
+  "recorded_verdict": "NO_EVIDENCE",
+  "rederived_verdict": "NO_EVIDENCE",
+  "prompt_eval_count": 24986,
+  "bound_holds": true
+ },
+ {
+  "model": "glm-5.3:cloud",
+  "probe": "Q3",
+  "recorded_verdict": "NO_EVIDENCE",
+  "rederived_verdict": "NO_EVIDENCE",
+  "prompt_eval_count": 103853,
+  "bound_holds": true
+ }
+]

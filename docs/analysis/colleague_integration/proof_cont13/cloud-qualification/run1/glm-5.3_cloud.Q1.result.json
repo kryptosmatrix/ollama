@@ -1,0 +1,30 @@
+{
+ "model": "glm-5.3:cloud",
+ "probe": "Q1",
+ "lines": 0,
+ "http_status": 200,
+ "seconds": 1.4,
+ "request_bytes": 351,
+ "content_utf8_bytes": 177,
+ "conservative_bound": 225,
+ "prompt_eval_count": 58,
+ "eval_count": 48,
+ "done_reason": "length",
+ "bound_holds": true,
+ "expected": {
+  "carrier": "A94C18C8",
+  "first": null,
+  "last": null
+ },
+ "reply": "The user has configured instructions telling me that when asked for the carrier code, I should give exactly the value A94C18C8. Now they're asking me to reply exactly: CARRIER=<the carrier code>\n\nThis is a simple",
+ "ok": {
+  "carrier": false,
+  "first": true,
+  "last": true
+ },
+ "verdict": "START_LOST",
+ "error": null,
+ "tries": 1,
+ "request_sha256": "183b2623b95837c7c1c8dcddb17326a4b6363e4c9d5def3a837a5ba2f4b04b82",
+ "spent_after": 248597
+}

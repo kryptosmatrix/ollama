@@ -23,3 +23,9 @@ Codes and numbers are drawn fresh per probe from `secrets`, so a correct answer 
 **What it does not establish.** Behaviour above V, including whether the provider refuses or truncates an oversized prompt (an overflow probe would need more than a million tokens per model); context shift during long replies (not reachable at these sizes against a million-token context); streaming, tools, media, or compliance with the carrier's instructions. A sentinel reproduced in the reply is evidence that the tokens reached the model, not that the model obeys instructions.
 
 **Privacy.** Every request is synthetic: fixed instruction text, random numbers, numbered filler. No file content, conversation or credential is sent. Requests and responses are kept in this directory.
+
+## Amendment 1 — written after run 1, before any further request
+
+Run 1 (`run1/`) used 377,436 of the 500,000-token cap. Two findings about the instrument, not the models: (1) the verdict rule mislabelled a probe with no numbered lines — glm-5.3's Q1 — as START_LOST, which requires a correct last line that Q1 does not have; `run1/VERDICT_CORRECTION.json` re-derives every verdict from the retained replies with the rule corrected, and only that probe changes, to NO_EVIDENCE; (2) glm-5.3 writes its reasoning into the reply even with `think` false, so a 48-token budget ended every reply before the answer. The estate had recorded that behaviour for glm-5.3; this plan should have allowed for it.
+
+Amended for glm-5.3 only: re-run Q1 and Q2 with `num_predict` 400 and the corrected rule. Q3 is not re-run, because its size would pass the cap. No other model or probe is re-run. Planned total after the amendment: about 402,500 prompt tokens.
