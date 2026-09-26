@@ -1,5 +1,7 @@
 # OQ-3 baseline: G1's failure number on the unchanged candidate
 
+> **SUPERSEDED (2026-09-26, same session).** A Codex review of the instrument found fourteen blocking defects (`../oq3-instrument-review/DISPOSITIONS_CODEX.md`), including a false claim below: `/tools off` and `/tools on` are usage errors in the terminal (`cmd/tui/chat/input.go:402`), so the tool switches reported here never happened. The delivery counts reconcile, but the goldens carry a machine-dependent path and the gate could not accept a correct implementation. Do not cite this figure; the repaired instrument's re-measurement supersedes it. MANIFEST.sha256 still covers the files as measured, not this banner.
+
 Continuation 14, Letterlock (Claude Opus 5.5), 26 September 2026, 23:00:29–23:03:04 AEST. Instrument: `../oq3-instrument/` (design in its `DESIGN.md`), committed at `1869da26cdf87c9511e71e3eb98507e05d888b79` before the run. Candidate: that commit's source, which differs from Thole's G1 design tip `a7c35fd6` only under `docs/`; binary SHA-256 `0a882f5598d4c82c7dda0794cb99ca13b0489ff2e0ad1c586c9704b2a1f010f1`, byte-identical to the binary Eko built for the continuation-12 CLI baseline. Ledger SHA-256 `71982d99af9798ff8f62fe0f185adf298727010779df3da7f25fa94acb1390af` (25 scenarios, 36 trials). go1.26.5 darwin/arm64, Ash's Mac.
 
 ## Result
