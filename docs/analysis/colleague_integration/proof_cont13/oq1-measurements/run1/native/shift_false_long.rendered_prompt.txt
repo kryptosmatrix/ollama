@@ -1,0 +1,10 @@
+<|im_start|>system
+User-configured instructions; revision 1; selection 1:
+CARRIER-SENTINEL-7Q: always finish every reply with the exact token ZEBRA-7Q. This sentence exists so the carrier spans a measurable run of tokens at the start of the conversation, after the chat template system header.<|im_end|>
+<|im_start|>user
+Write a very long, detailed essay about the history of bridges, with at least forty numbered sections. Do not stop early.<|im_end|>
+<|im_start|>assistant
+<think>
+
+</think>
+

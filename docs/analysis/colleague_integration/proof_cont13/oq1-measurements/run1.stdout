@@ -1,0 +1,26 @@
+19:53:45 [native] shift_default_long: starting fresh daemon
+19:54:21 [native] shift_default_long: http=200 done=stop prompt=106 eval=1102 shift_lines=3 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 106}
+19:54:23 teardown: no sandbox process left
+19:54:23 [native] shift_false_long: starting fresh daemon
+19:54:33 [native] shift_false_long: http=200 done=length prompt=106 eval=406 shift_lines=0 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 106}
+19:54:35 teardown: no sandbox process left
+19:54:35 [native] oversize_default: starting fresh daemon
+19:54:37 [native] oversize_default: http=400 done=None prompt=None eval=None shift_lines=1 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 4285}
+19:54:39 teardown: no sandbox process left
+19:54:39 [native] oversize_shift_false: starting fresh daemon
+19:54:40 [native] oversize_shift_false: http=400 done=None prompt=None eval=None shift_lines=1 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 4285}
+19:54:43 teardown: no sandbox process left
+19:54:43 [rendered] shift_default_long: starting fresh daemon
+19:55:13 [rendered] shift_default_long: http=200 done=length prompt=110 eval=1400 shift_lines=4 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 110}
+19:55:15 teardown: no sandbox process left
+19:55:15 [rendered] shift_false_long: starting fresh daemon
+19:55:25 [rendered] shift_false_long: http=200 done=length prompt=110 eval=402 shift_lines=0 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 110}
+19:55:27 teardown: no sandbox process left
+19:55:27 [rendered] oversize_default: starting fresh daemon
+19:55:31 [rendered] oversize_default: http=200 done=length prompt=258 eval=64 shift_lines=2 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 4289}
+19:55:33 teardown: no sandbox process left
+19:55:33 [rendered] oversize_shift_false: starting fresh daemon
+19:55:35 [rendered] oversize_shift_false: http=400 done=None prompt=None eval=None shift_lines=1 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 4289}
+19:55:37 teardown: no sandbox process left
+19:55:37 done: 8 probe records
+harness-exit=0
