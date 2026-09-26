@@ -1,0 +1,12 @@
+<bos><|turn>system
+User-configured instructions; revision 1; selection 1:
+Use Australian English. Keep answers short. Finish with ZEBRA-7Q.<|tool>declaration:get_weather{description:<|"|>Current weather for a city<|"|>,parameters:{properties:{city:{description:<|"|>City name<|"|>,type:<|"|>STRING<|"|>}},required:[<|"|>city<|"|>],type:<|"|>OBJECT<|"|>}}<tool|><|tool>declaration:add{description:<|"|>Add two integers<|"|>,parameters:{properties:{a:{type:<|"|>INTEGER<|"|>},b:{type:<|"|>INTEGER<|"|>}},required:[<|"|>a<|"|>,<|"|>b<|"|>],type:<|"|>OBJECT<|"|>}}<tool|><turn|>
+<|turn>user
+Add 17 and 25, then tell me.<turn|>
+<|turn>model
+<|tool_call>call:add{a:17,b:25}<tool_call|><|tool_response>response:add{value:<|"|>42<|"|>}<tool_response|><turn|>
+<|turn>user
+Thanks. Now double it.<turn|>
+<|turn>model
+<|channel>thought
+<channel|>

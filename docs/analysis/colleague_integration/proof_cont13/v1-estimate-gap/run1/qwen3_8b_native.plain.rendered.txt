@@ -1,0 +1,10 @@
+<|im_start|>system
+User-configured instructions; revision 1; selection 1:
+Use Australian English. Keep answers short. Finish with ZEBRA-7Q.<|im_end|>
+<|im_start|>user
+What is the capital of Australia?<|im_end|>
+<|im_start|>assistant
+<think>
+
+</think>
+
