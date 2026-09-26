@@ -303,7 +303,7 @@ func oq3AllScenarios() []oq3Scenario {
 				tSlash("/system on"),
 				with(tTurn("T7-X", "OQ3 T7 turn 2, built-in prompt on.", cT(1, 1, "A")), "assert_system", "present"),
 				h("terminal-stop")}},
-		{ID: "T8", Title: "terminal held turn: a save from another process completes, a reload is refused, then reload at idle",
+		{ID: "T8", Title: "terminal held turn: a save from another process completes, a reload is refused, an ordinary turn keeps the old selection, then reload at idle",
 			Trials: []oq3Trial{{"T8-X", famReload, "terminal", ""}},
 			Steps: []oq3Step{cliSet(0, "A"), h("terminal-start"),
 				tTurn("T8-X", "OQ3 T8 turn 1.", cT(1, 1, "A")),
@@ -311,8 +311,11 @@ func oq3AllScenarios() []oq3Scenario {
 				cliSet(1, "B"),
 				{Op: "terminal-slash", Class: "required-refusal", Args: map[string]string{"cmd": "/instructions reload"}, Want: map[string]string{"refused": "true"}},
 				h("terminal-await"),
+				// Review round 2, finding 1: a reload wrongly committed while busy shows here as revision
+				// 2 at generation 2; the idle reload that follows would otherwise hide it as a no-op.
+				tTurn("T8-X", "OQ3 T8 turn 3, at idle before any reload: the refused reload must not have taken effect.", cT(1, 1, "A")),
 				tSlash("/instructions reload"),
-				tTurn("T8-X", "OQ3 T8 turn 3.", cT(2, 2, "B")),
+				tTurn("T8-X", "OQ3 T8 turn 4.", cT(2, 2, "B")),
 				h("terminal-stop")}},
 		{ID: "T9", Title: "terminal tools and model switches keep the pinned revision",
 			Trials: []oq3Trial{{"T9-X", famEdit, "terminal", "/tools toggled off and on, /model"}},

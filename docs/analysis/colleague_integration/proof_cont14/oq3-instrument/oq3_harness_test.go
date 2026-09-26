@@ -13,7 +13,8 @@
 // the terminal launcher's heartbeat, menu, selection save and model resolution (cmd/cmd.go:2161-2260),
 // which choose the model and do not touch instructions.
 //
-// Author: Letterlock (Claude Opus 5.5), continuation 14, 26 September 2026.
+// Author: Letterlock (Claude Opus 5.5), continuation 14, 26 September 2026. Revision 3 (repairs of the
+// round-2 review): Treadle (Claude Opus 5.5), continuation 15, 27 September 2026.
 
 package cmd
 
@@ -34,6 +35,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -79,9 +81,43 @@ func oq3RunHelper(mode string) int {
 		return oq3HelperCLI()
 	case "legacy":
 		return oq3HelperLegacy()
+	case "terminal-refuse-at-start":
+		return oq3HelperRefuseAtStart()
+	case "terminal-exit-silently":
+		// Runner control only: a terminal session that dies at start-up without any report.
+		return 1
 	}
 	fmt.Fprintf(os.Stderr, "oq3: unknown helper mode %q\n", mode)
 	return 2
+}
+
+// oq3HelperRefuseAtStart is a runner control, never a ledger step: it stands in for a terminal adapter
+// that checks the daemon's capability at start-up and refuses as A12 permits (blueprint §6.3 A12 and
+// §8: no carrier-bearing request, context_unavailable naming the daemon's version). It reads the version
+// from the daemon rather than knowing it.
+func oq3HelperRefuseAtStart() int {
+	resp, err := http.Get(os.Getenv("OLLAMA_HOST") + "/api/version")
+	if err != nil {
+		fmt.Println("oq3 refuse-at-start: version:", err)
+		return 2
+	}
+	defer resp.Body.Close()
+	var v struct {
+		Version      string   `json:"version"`
+		Capabilities []string `json:"capabilities"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&v); err != nil {
+		fmt.Println("oq3 refuse-at-start: decode:", err)
+		return 2
+	}
+	for _, c := range v.Capabilities {
+		if c == "chat.admission.v1" {
+			fmt.Println("oq3 refuse-at-start: the daemon has the capability; this control needs one without it")
+			return 2
+		}
+	}
+	fmt.Printf("Error: context_unavailable: the Ollama daemon (version %s) does not support chat.admission.v1\n", v.Version)
+	return 1
 }
 
 // oq3HelperDesktop serves the real desktop handler the way app/cmd/app/app.go:208-287 assembles it:
@@ -231,6 +267,64 @@ type oq3Capture struct {
 	Body     json.RawMessage `json:"body,omitempty"`
 	RawBody  string          `json:"raw_body,omitempty"`
 	Response string          `json:"response_kind"`
+	// Query and Headers are what the request carried besides its body (review round 2, finding 4).
+	// Credential-shaped header values are stored redacted; HeaderLeaks is the instruction scan of
+	// the unredacted headers, made when the request arrived.
+	Query       string              `json:"query,omitempty"`
+	Headers     map[string][]string `json:"headers,omitempty"`
+	HeaderLeaks []string            `json:"header_leaks,omitempty"`
+}
+
+// oq3RouteMethods mirrors the real daemon's route table for the paths the entry points call
+// (server/routes.go:1859-1891, a gin engine with HandleMethodNotAllowed set at :1852): any other
+// method on these paths is answered 405, as the real daemon answers it (review round 2, finding 3).
+var oq3RouteMethods = map[string][]string{
+	"/": {"GET", "HEAD"}, "/api/version": {"GET", "HEAD"}, "/api/status": {"GET"}, "/api/pull": {"POST"},
+	"/api/tags": {"GET", "HEAD"}, "/api/show": {"POST"}, "/api/me": {"POST"},
+	"/api/experimental/model-recommendations": {"GET"}, "/api/ps": {"GET"},
+	"/api/generate": {"POST"}, "/api/chat": {"POST"},
+}
+
+func oq3MethodAllowed(path, method string) (known, allowed bool) {
+	ms, ok := oq3RouteMethods[path]
+	if !ok {
+		return false, false
+	}
+	for _, m := range ms {
+		if m == method {
+			return true, true
+		}
+	}
+	return true, false
+}
+
+// oq3NoAdmissionVersion is the version a daemon without chat.admission.v1 reports; A12 and §8 require
+// the adapter's refusal to name it.
+const oq3NoAdmissionVersion = "0.0.0-oq3-fake-no-admission"
+
+// oq3Leaks names the instruction markers a decoded text carries: the carrier header and each profile
+// sentinel.
+func oq3Leaks(s string) []string {
+	var out []string
+	if strings.Contains(s, "User-configured instructions") {
+		out = append(out, "carrier-header")
+	}
+	for _, sn := range oq3AllSentinels {
+		if strings.Contains(s, sn) {
+			out = append(out, sn)
+		}
+	}
+	return out
+}
+
+func oq3CredentialHeader(name string) bool {
+	n := strings.ToLower(name)
+	for _, w := range []string{"authorization", "cookie", "token", "key", "secret", "signature"} {
+		if strings.Contains(n, w) {
+			return true
+		}
+	}
+	return false
 }
 
 type oq3Daemon struct {
@@ -373,7 +467,23 @@ func (d *oq3Daemon) record(r *http.Request, body []byte, kind string) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	d.seq++
-	c := oq3Capture{Seq: d.seq, At: time.Now().Format(time.RFC3339Nano), Method: r.Method, Path: r.URL.Path, Label: d.label, Response: kind}
+	c := oq3Capture{Seq: d.seq, At: time.Now().Format(time.RFC3339Nano), Method: r.Method, Path: r.URL.Path, Label: d.label, Response: kind,
+		Query: r.URL.RawQuery}
+	if len(r.Header) > 0 {
+		c.Headers = map[string][]string{}
+		for name, vals := range r.Header {
+			for _, v := range vals {
+				for _, l := range oq3Leaks(name + ": " + v) {
+					c.HeaderLeaks = append(c.HeaderLeaks, name+" "+l)
+				}
+				if oq3CredentialHeader(name) {
+					v = fmt.Sprintf("<redacted %d bytes>", len(v))
+				}
+				c.Headers[name] = append(c.Headers[name], v)
+			}
+		}
+		sort.Strings(c.HeaderLeaks)
+	}
 	if len(body) > 0 {
 		if json.Valid(body) {
 			c.Body = append(json.RawMessage(nil), body...)
@@ -386,6 +496,13 @@ func (d *oq3Daemon) record(r *http.Request, body []byte, kind string) {
 
 func (d *oq3Daemon) serve(w http.ResponseWriter, r *http.Request) {
 	body, _ := io.ReadAll(r.Body)
+	if known, allowed := oq3MethodAllowed(r.URL.Path, r.Method); known && !allowed {
+		// As the real daemon: a registered path with another method is refused, never served.
+		d.record(r, body, "method-not-allowed")
+		w.Header().Set("Allow", strings.Join(oq3RouteMethods[r.URL.Path], ", "))
+		http.Error(w, "405 method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	switch {
 	case r.URL.Path == "/" || r.URL.Path == "/api/version":
 		// Advertises the G1 admission capability (blueprint §6.3 A12) so that a G1 client is expected
@@ -393,7 +510,7 @@ func (d *oq3Daemon) serve(w http.ResponseWriter, r *http.Request) {
 		d.record(r, body, "version")
 		w.Header().Set("Content-Type", "application/json")
 		if d.noCapability {
-			io.WriteString(w, `{"version":"0.0.0-oq3-fake-no-admission"}`)
+			io.WriteString(w, `{"version":"`+oq3NoAdmissionVersion+`"}`)
 		} else {
 			io.WriteString(w, `{"version":"0.0.0-oq3-fake","capabilities":["chat.admission.v1"]}`)
 		}
@@ -746,26 +863,31 @@ type oq3Terminal struct {
 var oq3ANSI = regexp.MustCompile(`\x1b\[[0-9;?:<>=]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(\x07|\x1b\\)|\x1b[()][0-9A-Za-z]|\x1b[=>78DEHMNOPZc]`)
 
 func oq3StartTerminal(t *testing.T, s *oq3Sandbox, d *oq3Daemon, session string) *oq3Terminal {
-	return oq3StartTerminalWith(t.Fatalf, s, d, session, oq3Model, nil)
+	return oq3StartTerminalWith(t.Fatalf, s, d, session, oq3Model, nil, "terminal")
 }
 
 func oq3StartTerminalNoFatal(r *oq3Run, session, model string) *oq3Terminal {
 	if model == "" {
 		model = oq3Model
 	}
-	return oq3StartTerminalWith(oq3Panic, r.s, r.d, session, model, nil)
+	mode := r.terminalHelper
+	if mode == "" {
+		mode = "terminal"
+	}
+	return oq3StartTerminalWith(oq3Panic, r.s, r.d, session, model, nil, mode)
 }
 
-// oq3StartTerminalWith starts either the launch-function helper (argv nil) or a given program
-// (the built binary for the entry arm) on a fresh pseudo-terminal.
-func oq3StartTerminalWith(fail oq3Fail, s *oq3Sandbox, d *oq3Daemon, session, model string, argv []string) *oq3Terminal {
+// oq3StartTerminalWith starts either a helper (argv nil; helperMode "terminal" is the launch function,
+// the other modes are runner controls) or a given program (the built binary for the entry arm) on a
+// fresh pseudo-terminal.
+func oq3StartTerminalWith(fail oq3Fail, s *oq3Sandbox, d *oq3Daemon, session, model string, argv []string, helperMode string) *oq3Terminal {
 	master, slave, err := oq3OpenPTY()
 	if err != nil {
 		fail("pty: %v", err)
 	}
 	var c *exec.Cmd
 	if argv == nil {
-		c = oq3HelperCmd(s, d, "terminal", "OQ3_MODEL="+model)
+		c = oq3HelperCmd(s, d, helperMode, "OQ3_MODEL="+model)
 	} else {
 		c = exec.Command(argv[0], argv[1:]...)
 		c.Dir = s.work
@@ -906,7 +1028,20 @@ func (p *oq3Terminal) screenContainsAfter(mark int, text string) bool {
 	return strings.Contains(oq3ANSI.ReplaceAllString(raw[mark:], ""), text)
 }
 
+// screenContainsJoined reports whether the whole transcript, stripped of escapes and of all white
+// space, contains text (which has none): a line the program wrapped still matches.
+func (p *oq3Terminal) screenContainsJoined(text string) bool {
+	return strings.Contains(strings.Join(strings.Fields(p.screen()), ""), text)
+}
+
+// typeLine types one line into the chat and submits it. ctrl+u first: the chat clears its input line
+// (cmd/tui/chat/chat.go KeyCtrlU -> clearInput), so text an earlier step left in the input box (the
+// chat keeps an unknown command submitted while a turn runs as input, input.go:100) cannot prefix it.
 func (p *oq3Terminal) typeLine(text string) {
+	if _, err := p.master.Write([]byte("\x15")); err != nil {
+		p.fail("pty write: %v", err)
+	}
+	time.Sleep(60 * time.Millisecond)
 	if _, err := p.master.Write([]byte(text)); err != nil {
 		p.fail("pty write: %v", err)
 	}
@@ -914,6 +1049,49 @@ func (p *oq3Terminal) typeLine(text string) {
 	if _, err := p.master.Write([]byte("\r")); err != nil {
 		p.fail("pty write: %v", err)
 	}
+}
+
+// oq3IdleProbeText is the status a single ctrl+d sets on an empty input (cmd/tui/chat/chat.go armQuit).
+const oq3IdleProbeText = "press ctrl+d again to quit"
+
+// idle proves that the chat is idle (review round 2, finding 5). With an empty input a single ctrl+d
+// only arms quitting and sets a status (chat.go updateCtrlD, armQuit), and the chat draws that status
+// only when no turn, compaction, preload or approval prompt is active (render.go
+// renderActionStatusLines, activityLine, notificationLine). A turn still running overwrites the status
+// when it completes (chat.go chatRunDoneMsg), so the text cannot appear before the chat is idle. Each
+// attempt clears the input first (ctrl+d arms only on an empty input) and ends with ctrl+u, which
+// disarms the quit and returns the status to ready (chat.go disarmQuit), so two ctrl+d are never sent
+// without a disarm between them. An open approval prompt ignores both keys (approval.go
+// updateApprovalPrompt), so the probe cannot resolve one; it is never sent while a picker is open. The
+// daemon's own completion and a quiet screen are not this proof: the chat's run can outlast both.
+func (p *oq3Terminal) idle(timeout time.Duration) bool {
+	deadline := time.Now().Add(timeout)
+	write := func(s string) bool {
+		if p.hasExited() {
+			return false
+		}
+		_, err := p.master.Write([]byte(s))
+		return err == nil
+	}
+	for time.Now().Before(deadline) {
+		if !write("\x15") {
+			return false
+		}
+		time.Sleep(60 * time.Millisecond)
+		mark := p.rawLen()
+		if !write("\x04") {
+			return false
+		}
+		seen := oq3WaitFor(1500*time.Millisecond, func() bool { return p.screenContainsAfter(mark, oq3IdleProbeText) })
+		if !write("\x15") {
+			return false
+		}
+		time.Sleep(60 * time.Millisecond)
+		if seen {
+			return true
+		}
+	}
+	return false
 }
 
 func (p *oq3Terminal) key(s string) {
