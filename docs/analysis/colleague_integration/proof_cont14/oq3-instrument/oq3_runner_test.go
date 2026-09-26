@@ -756,7 +756,7 @@ var oq3KnownPaths = func() map[string]bool {
 
 // oq3BodyLeaks scans a request body decoded (review round 2, finding 4): a JSON body is decoded and
 // every object key and string value is scanned, and a string that is itself a JSON document is
-// decoded and scanned in turn, so an escape such as S cannot hide text; a body that is not JSON
+// decoded and scanned in turn, so an escape such as \u0053 cannot hide text; a body that is not JSON
 // is scanned as text. Encodings other than JSON's (base64, for example) are not decoded.
 func oq3BodyLeaks(c oq3Capture) []string {
 	var out []string
