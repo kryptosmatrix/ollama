@@ -1,0 +1,6 @@
+{"ImportPath":"github.com/ollama/ollama/cmd.test","Action":"build-output","Output":"# github.com/ollama/ollama/cmd.test\nld: warning: ignoring duplicate libraries: '-lobjc'\n"}
+{"Time":"2026-09-27T09:17:01.13214+10:00","Action":"start","Package":"github.com/ollama/ollama/cmd"}
+{"Time":"2026-09-27T09:17:01.683618+10:00","Action":"output","Package":"github.com/ollama/ollama/cmd","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-09-27T09:17:01.683697+10:00","Action":"output","Package":"github.com/ollama/ollama/cmd","Output":"PASS\n"}
+{"Time":"2026-09-27T09:17:01.684608+10:00","Action":"output","Package":"github.com/ollama/ollama/cmd","Output":"ok  \tgithub.com/ollama/ollama/cmd\t0.552s [no tests to run]\n"}
+{"Time":"2026-09-27T09:17:01.68464+10:00","Action":"pass","Package":"github.com/ollama/ollama/cmd","Elapsed":0.553}

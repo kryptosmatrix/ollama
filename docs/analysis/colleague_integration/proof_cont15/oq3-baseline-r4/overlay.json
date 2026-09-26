@@ -1,0 +1,11 @@
+{
+ "Replace": {
+  "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/cmd/zz_oq3_harness_test.go": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/oq3_harness_test.go",
+  "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/cmd/zz_oq3_smoke_test.go": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/oq3_smoke_test.go",
+  "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/cmd/zz_oq3_oracle_test.go": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/oq3_oracle_test.go",
+  "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/cmd/zz_oq3_scenarios_test.go": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/oq3_scenarios_test.go",
+  "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/cmd/zz_oq3_runner_test.go": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/oq3_runner_test.go",
+  "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/cmd/zz_oq3_main_test.go": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/oq3_main_test.go",
+  "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/cmd/zz_oq3_controls_test.go": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/oq3_controls_test.go"
+ }
+}

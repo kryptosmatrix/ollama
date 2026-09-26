@@ -1,0 +1,10 @@
+{"ImportPath":"github.com/ollama/ollama/cmd.test","Action":"build-output","Output":"# github.com/ollama/ollama/cmd.test\nld: warning: ignoring duplicate libraries: '-lobjc'\n"}
+{"Time":"2026-09-27T09:16:56.012963+10:00","Action":"start","Package":"github.com/ollama/ollama/cmd"}
+{"Time":"2026-09-27T09:16:56.817392+10:00","Action":"run","Package":"github.com/ollama/ollama/cmd","Test":"TestOQ3FailureNumber"}
+{"Time":"2026-09-27T09:16:56.817488+10:00","Action":"output","Package":"github.com/ollama/ollama/cmd","Test":"TestOQ3FailureNumber","Output":"=== RUN   TestOQ3FailureNumber\n"}
+{"Time":"2026-09-27T09:16:56.817517+10:00","Action":"output","Package":"github.com/ollama/ollama/cmd","Test":"TestOQ3FailureNumber","Output":"    zz_oq3_main_test.go:81: OQ3_EVIDENCE_DIR, OQ3_GOLDENS and OQ3_MODE (baseline|accept) are required\n"}
+{"Time":"2026-09-27T09:16:56.817529+10:00","Action":"output","Package":"github.com/ollama/ollama/cmd","Test":"TestOQ3FailureNumber","Output":"--- FAIL: TestOQ3FailureNumber (0.00s)\n"}
+{"Time":"2026-09-27T09:16:56.817542+10:00","Action":"fail","Package":"github.com/ollama/ollama/cmd","Test":"TestOQ3FailureNumber","Elapsed":0}
+{"Time":"2026-09-27T09:16:56.81755+10:00","Action":"output","Package":"github.com/ollama/ollama/cmd","Output":"FAIL\n"}
+{"Time":"2026-09-27T09:16:56.818444+10:00","Action":"output","Package":"github.com/ollama/ollama/cmd","Output":"FAIL\tgithub.com/ollama/ollama/cmd\t0.805s\n"}
+{"Time":"2026-09-27T09:16:56.818499+10:00","Action":"fail","Package":"github.com/ollama/ollama/cmd","Elapsed":0.806}
