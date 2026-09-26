@@ -10,7 +10,9 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
+	"os"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -331,10 +333,44 @@ func TestOQ3RunnerControls(t *testing.T) {
 		resp.Body.Close()
 		return resp.StatusCode
 	}
+	sendTrailer := func(d *oq3Daemon, name, value string) {
+		pr, pw := io.Pipe()
+		req, err := http.NewRequest(http.MethodPost, d.srv.URL+"/api/show", pr)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Header.Set("Content-Type", "application/json")
+		req.Trailer = http.Header{name: nil}
+		req.ContentLength = -1
+		go func() {
+			io.WriteString(pw, `{"model":"oq3-model"}`)
+			req.Trailer.Set(name, value)
+			pw.Close()
+		}()
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+	}
+	sendHost := func(d *oq3Daemon, host string) {
+		req, err := http.NewRequest(http.MethodGet, d.srv.URL+"/api/tags", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Host = host
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+	}
 	escaped := map[string]string{
 		"leak-escaped-sentinel":    `{"model":"oq3-model","system":"\u0053ENTINEL-A-MID-9e41"}`,
 		"leak-escaped-header-text": `{"model":"oq3-model","system":"\u0055ser-configured instructions; revision 1; selection 1:\n"}`,
 		"leak-nested-json":         `{"model":"oq3-model","meta":"{\"note\":\"\\u0053ENTINEL-B-MID-4c18\"}"}`,
+		"leak-duplicate-escaped":   `{"model":"oq3-model","note":"\u0053ENTINEL-A-MID-9e41","note":""}`,
+		"leak-big-number":          `{"model":"oq3-model","n":1e400,"note":"\u0053ENTINEL-A-MID-9e41"}`,
 	}
 	for fault, body := range escaped {
 		if len(oq3Leaks(body)) != 0 {
@@ -343,7 +379,9 @@ func TestOQ3RunnerControls(t *testing.T) {
 	}
 	for _, fault := range []string{"undeclared-summariser", "leak-in-metadata", "unknown-endpoint",
 		"leak-escaped-sentinel", "leak-escaped-header-text", "leak-nested-json", "leak-in-key", "leak-in-header", "leak-in-query",
-		"metadata-wrong-method", "clean-metadata"} {
+		"metadata-wrong-method", "clean-metadata",
+		"leak-duplicate-member", "leak-duplicate-escaped", "leak-big-number", "leak-query-partial", "leak-header-json",
+		"leak-trailer", "leak-host", "duplicate-member-clean"} {
 		d := oq3StartDaemon(t)
 		s := oq3NewSandbox(t, "AUX-"+fault)
 		sc := oq3Scenario{ID: "AUX", Trials: []oq3Trial{{"AUX-X", famSave, "desktop", ""}},
@@ -358,8 +396,22 @@ func TestOQ3RunnerControls(t *testing.T) {
 			send(d, http.MethodPost, "/api/show", nil, `{"model":"oq3-model","system":"SENTINEL-A-MID-9e41"}`)
 		case "unknown-endpoint":
 			send(d, http.MethodPost, "/api/embed", nil, `{"model":"oq3-model","input":"x"}`)
-		case "leak-escaped-sentinel", "leak-escaped-header-text", "leak-nested-json":
+		case "leak-escaped-sentinel", "leak-escaped-header-text", "leak-nested-json", "leak-duplicate-escaped", "leak-big-number":
 			send(d, http.MethodPost, "/api/show", nil, escaped[fault])
+		case "leak-duplicate-member":
+			// The round-2 raw scan saw this; a decoder that keeps the last member does not.
+			send(d, http.MethodPost, "/api/show", nil, `{"model":"oq3-model","note":"SENTINEL-A-MID-9e41","note":""}`)
+		case "leak-query-partial":
+			// One malformed component must not hide a decodable one.
+			send(d, http.MethodGet, "/api/tags?note=%53ENTINEL-A-MID-9e41&broken=%", nil, "")
+		case "leak-header-json":
+			send(d, http.MethodGet, "/api/tags", map[string]string{"X-OQ3-Note": `{"note":"\u0053ENTINEL-A-MID-9e41"}`}, "")
+		case "leak-trailer":
+			sendTrailer(d, "X-OQ3-Note", "SENTINEL-A-MID-9e41")
+		case "leak-host":
+			sendHost(d, "sentinel-a-mid-9e41.SENTINEL-A-MID-9e41.invalid")
+		case "duplicate-member-clean":
+			send(d, http.MethodPost, "/api/show", nil, `{"model":"oq3-model","model":"oq3-model"}`)
 		case "leak-in-key":
 			send(d, http.MethodPost, "/api/show", nil, `{"model":"oq3-model","SENTINEL-B-START-2a6e":true}`)
 		case "leak-in-header":
@@ -437,6 +489,84 @@ func TestOQ3RunnerControls(t *testing.T) {
 			}
 			t.Logf("method control %-4s -> HTTP %d, delivery %s %v", method, status, got.Status, got.Verdict.Categories)
 		}
+		// Duplicate members (review round 3, finding 5): the same request with its model repeated,
+		// and with a carrier-bearing messages member ahead of the correct one. A decoder that keeps the
+		// last member sees the golden in both; the delivery must still score incorrect.
+		carrier := `{"role":"system","content":` + oq3JSONString(oq3Header(1, 1)+oq3Texts["A"]) + `}`
+		for name, dup := range map[string]string{
+			"duplicate model":             strings.TrimSuffix(body, "}") + `,"model":"oq3-model"}`,
+			"carrier ahead of the golden": `{"messages":[` + carrier + `],` + strings.TrimPrefix(body, "{"),
+		} {
+			d2 := oq3StartDaemon(t)
+			d2.setLabel(oq3Label("RM", 1, "desktop-turn"))
+			status := send(d2, http.MethodPost, "/api/chat", nil, dup)
+			run2 := oq3NewRun(t, sc, d2, s)
+			run2.events = run.events
+			res2 := run2.score(goldens, false, "runner control")
+			if len(res2.Deliveries) != 1 || res2.Deliveries[0].Status != "bad" || !strings.Contains(strings.Join(res2.Deliveries[0].Verdict.Categories, ","), "duplicate-member") {
+				t.Fatalf("%s: status %d, deliveries %+v", name, status, res2.Deliveries)
+			}
+			t.Logf("duplicate control %-28s -> delivery %s %v", name, res2.Deliveries[0].Status, res2.Deliveries[0].Verdict.Categories)
+		}
+	}
+
+	// The preload barrier (review round 3, finding 1): the idle proof cannot see a preload, so a model
+	// switch whose preload is slow must still have its POST /api/generate attributed to the switch,
+	// not to the turn after it. The fake holds the preload's first request back for two seconds.
+	{
+		d := oq3StartDaemon(t)
+		s := oq3NewSandbox(t, "RC-preload")
+		sc := oq3Scenario{ID: "RCP", Trials: []oq3Trial{{"RCP-X", famEdit, "terminal", "preload control"}},
+			Steps: []oq3Step{h("terminal-start"), with(tSlash("/model"), "pick", oq3Model2),
+				with(tTurn("RCP-X", "OQ3 preload control turn.", nT()), "assert_model", oq3Model2), h("terminal-stop")}}
+		pick := oq3Label("RCP", 1, "terminal-slash")
+		d.delay(pick, "POST /api/show", 2*time.Second)
+		run := oq3NewRun(t, sc, d, s)
+		run.execute()
+		res := run.score(goldens, true, "runner control")
+		if len(res.Invalid) != 0 || d.countLabel(http.MethodPost, "/api/generate", pick) != 1 || d.countLabel(http.MethodPost, "/api/generate", oq3Label("RCP", 2, "terminal-turn")) != 0 {
+			t.Fatalf("preload control: invalid %v; generate under the switch %d, under the turn %d", res.Invalid,
+				d.countLabel(http.MethodPost, "/api/generate", pick), d.countLabel(http.MethodPost, "/api/generate", oq3Label("RCP", 2, "terminal-turn")))
+		}
+		t.Log("preload control: the slow preload's generate stayed with the model switch")
+	}
+
+	// T8's refused command is handled while the turn is held (review round 3, finding 2): the step
+	// returns only once a marker typed after the Enter has reached the input box, before the await
+	// step releases the held response.
+	{
+		d := oq3StartDaemon(t)
+		s := oq3NewSandbox(t, "RC-held")
+		sc := oq3Scenario{ID: "RCH", Trials: []oq3Trial{{"RCH-X", famReload, "terminal", "held-command control"}},
+			Steps: []oq3Step{h("terminal-start"),
+				with(tTurn("RCH-X", "OQ3 held-command control "+oq3ToolTrigger, nT(), nT()), "hold", "1", "tool_rounds", "1"),
+				{Op: "terminal-slash", Class: "required-refusal", Args: map[string]string{"cmd": "/instructions reload"}},
+				h("terminal-await"),
+				tTurn("RCH-X", "OQ3 held-command control, after the held turn.", nT()),
+				h("terminal-stop")}}
+		run := oq3NewRun(t, sc, d, s)
+		run.execute()
+		res := run.score(goldens, true, "runner control")
+		handled := false
+		for _, e := range res.Events {
+			if e.Step == 2 {
+				if m, ok := e.Outcome.(map[string]any); ok && m["handled_while_held"] == true {
+					handled = true
+				}
+			}
+		}
+		// Behaviour, not only the record: in the session's transcript the marker must come before the
+		// approval prompt, which can only open once the held response is released.
+		raw, err := os.ReadFile(filepath.Join(s.logs, "terminal-RCH-1.raw"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		plain := oq3ANSI.ReplaceAllString(string(raw), "")
+		ack, prompt := strings.Index(plain, oq3AckMarker), strings.Index(plain, "Approve once")
+		if len(res.Invalid) != 0 || !handled || ack < 0 || prompt < 0 || ack > prompt {
+			t.Fatalf("held-command control: invalid %v; handled while held %v; marker at %d, approval prompt at %d", res.Invalid, handled, ack, prompt)
+		}
+		t.Log("held-command control: the command was handled while the turn was held, before any approval prompt")
 	}
 
 	// The idle proof (review round 2, finding 5), on the real terminal. The probe must read an idle chat
@@ -557,7 +687,7 @@ func TestOQ3RunnerControls(t *testing.T) {
 	// session that reports context_unavailable naming the daemon's version and exits is a held refusal,
 	// and its no-dispatch turn is scored as refused as required; a session that exits without that
 	// report is a harness failure, never a refusal.
-	for _, mode := range []string{"terminal-refuse-at-start", "terminal-exit-silently"} {
+	for _, mode := range []string{"terminal-refuse-at-start", "terminal-exit-silently", "terminal-banner-then-crash", "terminal-refuse-and-stay"} {
 		d := oq3StartDaemon(t)
 		d.noCapability = true
 		s := oq3NewSandbox(t, "RC-"+mode)
@@ -570,7 +700,7 @@ func TestOQ3RunnerControls(t *testing.T) {
 		run.execute()
 		res := run.score(goldens, true, "runner control")
 		switch mode {
-		case "terminal-refuse-at-start":
+		case "terminal-refuse-at-start", "terminal-refuse-and-stay":
 			refused := false
 			for _, e := range res.Events {
 				refused = refused || e.Verdict == "refused-at-start"
@@ -578,9 +708,11 @@ func TestOQ3RunnerControls(t *testing.T) {
 			if len(res.Invalid) != 0 || !refused || len(res.Deliveries) != 1 || res.Deliveries[0].Status != "refused-as-required" {
 				t.Fatalf("a permitted refusal at start-up was not held: invalid %v, events %+v, deliveries %+v", res.Invalid, res.Events, res.Deliveries)
 			}
-		case "terminal-exit-silently":
+		case "terminal-exit-silently", "terminal-banner-then-crash":
+			// Neither is a capability refusal: one reports nothing, the other names the daemon's version
+			// in a banner and fails for another reason (review round 3, finding 3).
 			if len(res.Invalid) == 0 {
-				t.Fatalf("a session that died at start-up without a report passed as a refusal: %+v", res.Deliveries)
+				t.Fatalf("%s passed as a refusal: %+v", mode, res.Deliveries)
 			}
 		}
 		t.Logf("refusal control %-26s -> invalid %v; deliveries %d", mode, res.Invalid, len(res.Deliveries))

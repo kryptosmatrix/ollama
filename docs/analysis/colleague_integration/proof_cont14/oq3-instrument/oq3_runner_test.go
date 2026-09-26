@@ -59,8 +59,53 @@ type oq3Run struct {
 	// without chat.admission.v1 (A12), which the capability-less scenarios allow (review round 2,
 	// finding 6).
 	termRefusedAtStart bool
-	events             []oq3Event
-	invalid            []string
+	// termOpenNotIdle records that a session which refused at start-up stayed open without an idle
+	// chat (for example at a picker), which A12 also allows (review round 3, finding 4).
+	termOpenNotIdle bool
+	events          []oq3Event
+	invalid         []string
+}
+
+// oq3PreloadDone reports whether the chat's preload under label has finished at the daemon. The
+// preload function (cmd/agent_tui.go:583-608, preloadAgentModelIfLocal) sends POST /api/show, POST
+// /api/generate and then GET /api/ps, and returns once that last request is answered; the chat's idle
+// proof cannot see a preload (review round 3, finding 1).
+func (d *oq3Daemon) preloadDone(label string) bool {
+	gen := 0
+	for _, c := range d.snapshot() {
+		switch {
+		case c.Label == label && c.Method == http.MethodPost && c.Path == "/api/generate":
+			gen = c.Seq
+		case gen > 0 && c.Label == label && c.Method == http.MethodGet && c.Path == "/api/ps" && c.Seq > gen:
+			return true
+		}
+	}
+	return false
+}
+
+// mustPreload waits for a preload started by this step to finish at the daemon; a timeout is a harness
+// failure, never a reason to advance.
+func (r *oq3Run) mustPreload(label, when string) {
+	if !oq3WaitFor(30*time.Second, func() bool { return r.d.preloadDone(label) || r.term.hasExited() }) || !r.d.preloadDone(label) {
+		r.harnessFail("the preload %s never finished at the daemon (POST /api/generate, then GET /api/ps, under %s); screen tail %q", when, label, tail(r.term.screen(), 800))
+	}
+}
+
+// oq3RefusalReported reports whether the screen carries the refusal A12 and §8 require against a daemon
+// without chat.admission.v1: the daemon's version, and a name for the refusal (review round 3, finding
+// 3). Compared case-insensitively with white space removed, so a wrapped line still matches. The
+// blueprint states no exact text for the terminal (gap 7).
+func oq3RefusalReported(screen string) bool {
+	j := strings.ToLower(strings.Join(strings.Fields(screen), ""))
+	if !strings.Contains(j, strings.ToLower(oq3NoAdmissionVersion)) {
+		return false
+	}
+	for _, name := range []string{"context_unavailable", "contextunavailable", "chat.admission.v1"} {
+		if strings.Contains(j, name) {
+			return true
+		}
+	}
+	return false
 }
 
 func oq3NewRun(t *testing.T, sc oq3Scenario, d *oq3Daemon, s *oq3Sandbox) *oq3Run {
@@ -219,6 +264,7 @@ func (r *oq3Run) step(i int, st oq3Step, label string) {
 		if !oq3WaitFor(30*time.Second, func() bool { return preloaded() || r.term.hasExited() }) || r.term.hasExited() {
 			r.harnessFail("terminal session never preloaded; screen tail %q", tail(r.term.screen(), 1500))
 		}
+		r.mustPreload(label, "of the session's model")
 		r.mustIdle("after the session started")
 		r.event(i, st, "done", map[string]any{"session": r.termN})
 	case "terminal-stop":
@@ -226,6 +272,14 @@ func (r *oq3Run) step(i int, st oq3Step, label string) {
 			// The session already ended at start-up with its refusal; there is nothing to close.
 			r.event(i, st, "done", map[string]any{"session": r.termN, "exited_at_start": true})
 			r.term.kill()
+			r.term = nil
+			return
+		}
+		if r.termRefusedAtStart && r.termOpenNotIdle {
+			// The session refused and stayed open outside an idle chat, where /bye cannot be typed; the
+			// driver ends it (review round 3, finding 4).
+			r.term.kill()
+			r.event(i, st, "done", map[string]any{"session": r.termN, "ended_by_driver_after_refusal": true})
 			r.term = nil
 			return
 		}
@@ -268,6 +322,7 @@ func (r *oq3Run) step(i int, st oq3Step, label string) {
 		if !oq3WaitFor(30*time.Second, func() bool { return r.d.countLabel("POST", "/api/generate", label) >= 1 || r.term.hasExited() }) || r.term.hasExited() {
 			r.harnessFail("the agent chat never preloaded after the launcher; screen tail %q", tail(r.term.screen(), 1500))
 		}
+		r.mustPreload(label, "after the launcher")
 		r.mustIdle("after the launcher reached the agent chat")
 		r.event(i, st, "done", map[string]any{"session": r.termN, "model_picker_used": picked, "binary": r.builtBinary[0]})
 	case "entry-stop":
@@ -366,13 +421,16 @@ func (r *oq3Run) desktopTurn(i int, st oq3Step, label string) {
 // Terminal turns and commands.
 
 // terminalStartWithoutCapability starts a session against a daemon without chat.admission.v1 (review
-// round 2, finding 6). A12 (blueprint §6.3) and §8 require no carrier-bearing request and a
-// context_unavailable report naming the daemon's version; nothing requires the check to wait for a
-// preload. So the session may preload and go idle (the unchanged candidate does), or refuse at
-// start-up, exiting or staying open. A refusal is recognised only by its report: the daemon's version
-// on screen. A session that ends at start-up without it is a harness failure, never a refusal.
+// round 2, finding 6; round 3, findings 3 and 4). A12 (blueprint §6.3) and §8 require no
+// carrier-bearing request and a context_unavailable report naming the daemon's version; nothing
+// requires the check to wait for a preload, or the session to stay in an idle chat. So the session may
+// preload and go idle (the unchanged candidate does), or refuse at start-up: exiting, staying in an
+// idle chat, or staying open elsewhere (for example at a picker). A refusal is recognised only by its
+// report: the daemon's version and a name for the refusal (oq3RefusalReported). A session that ends at
+// start-up without that report is a harness failure, never a refusal.
 func (r *oq3Run) terminalStartWithoutCapability(i int, st oq3Step, preloaded func() bool) {
-	reported := func() bool { return r.term.screenContainsJoined(oq3NoAdmissionVersion) }
+	label := oq3Label(r.sc.ID, i, st.Op)
+	reported := func() bool { return oq3RefusalReported(r.term.screen()) }
 	if !oq3WaitFor(30*time.Second, func() bool { return preloaded() || r.term.hasExited() || reported() }) {
 		r.harnessFail("terminal session neither preloaded, reported the missing capability nor exited; screen tail %q", tail(r.term.screen(), 1500))
 	}
@@ -380,40 +438,60 @@ func (r *oq3Run) terminalStartWithoutCapability(i int, st oq3Step, preloaded fun
 	if reported() && !r.term.hasExited() {
 		oq3WaitFor(2*time.Second, r.term.hasExited)
 	}
+	refused := func(open, idle bool) {
+		r.termRefusedAtStart = true
+		r.termOpenNotIdle = open && !idle
+		r.event(i, st, "refused-at-start", map[string]any{"session": r.termN, "exited": !open, "idle_chat": idle,
+			"preloaded": preloaded(), "screen_tail": tail(r.term.screen(), 600)})
+	}
 	exitedWithReport := func() {
 		// The output of a process that has just exited may still be draining from the terminal.
 		if !oq3WaitFor(3*time.Second, reported) {
-			r.harnessFail("terminal session exited at start-up without reporting the daemon's version %s; screen tail %q", oq3NoAdmissionVersion, tail(r.term.screen(), 1500))
+			r.harnessFail("terminal session exited at start-up without reporting the refusal (the daemon's version %s and context_unavailable or chat.admission.v1); screen tail %q", oq3NoAdmissionVersion, tail(r.term.screen(), 1500))
 		}
-		r.termRefusedAtStart = true
-		r.event(i, st, "refused-at-start", map[string]any{"session": r.termN, "exited": true, "preloaded": preloaded(), "screen_tail": tail(r.term.screen(), 600)})
+		refused(false, false)
 	}
 	if r.term.hasExited() {
 		exitedWithReport()
 		return
 	}
-	// Still running: whether it preloaded or reported first, it must reach an idle chat, which also
-	// settles any preload that follows a report.
-	if !r.term.idle(30 * time.Second) {
-		if r.term.hasExited() {
-			exitedWithReport()
+	if preloaded() {
+		r.mustPreload(label, "of the session's model")
+	}
+	// Still running: an idle chat is proved as usual; a reported refusal need not reach one.
+	if r.term.idle(15 * time.Second) {
+		if reported() && !preloaded() {
+			refused(true, true)
 			return
 		}
-		r.harnessFail("terminal never proved idle after the session started without the capability; screen tail %q", tail(r.term.screen(), 800))
-	}
-	if !preloaded() && reported() {
-		r.termRefusedAtStart = true
-		r.event(i, st, "refused-at-start", map[string]any{"session": r.termN, "exited": false, "screen_tail": tail(r.term.screen(), 600)})
+		r.event(i, st, "done", map[string]any{"session": r.termN, "preloaded": preloaded(), "reported": reported()})
 		return
 	}
-	r.event(i, st, "done", map[string]any{"session": r.termN, "preloaded": preloaded(), "reported": reported()})
+	switch {
+	case r.term.hasExited():
+		exitedWithReport()
+	case reported():
+		if !r.term.quiet(600*time.Millisecond, 20*time.Second) {
+			r.harnessFail("the session reported its refusal but never went quiet; screen tail %q", tail(r.term.screen(), 800))
+		}
+		refused(true, false)
+	default:
+		r.harnessFail("terminal never proved idle after the session started without the capability, and reported no refusal; screen tail %q", tail(r.term.screen(), 800))
+	}
 }
 
+// oq3RefusedTurnWait is how long a no-dispatch turn waits for any request when the session that
+// refused at start-up cannot be typed into (it exited, or stayed open outside an idle chat).
+const oq3RefusedTurnWait = 5 * time.Second
+
 func (r *oq3Run) terminalTurn(i int, st oq3Step, label string) {
-	if r.termRefusedAtStart && r.term.hasExited() {
-		// The session refused at start-up and has ended: nothing can be typed, and no request under
-		// this step was sent. Scored by the step's class (a refusal held as required).
-		r.event(i, st, "no-request", map[string]any{"session": "refused at start-up; the process has exited"})
+	if r.termRefusedAtStart && (r.term.hasExited() || r.termOpenNotIdle) {
+		// The session refused at start-up and cannot be typed into (it exited, or stayed open outside an
+		// idle chat). Nothing is typed; any request under this step within the wait is still captured,
+		// and the step is scored by its class (a refusal held as required).
+		time.Sleep(oq3RefusedTurnWait)
+		r.event(i, st, "no-request", map[string]any{"session": "refused at start-up", "exited": r.term.hasExited(),
+			"requests_under_step": r.d.countLabel(http.MethodPost, "/api/chat", label)})
 		return
 	}
 	rounds, _ := strconv.Atoi(st.Args["tool_rounds"])
@@ -482,6 +560,10 @@ func (r *oq3Run) mustQuiet(when string) {
 	}
 }
 
+// oq3AckMarker is typed after a command sent while a turn runs; it holds no digit, so an approval prompt
+// (which answers 1, 2 and 3) could not act on it.
+const oq3AckMarker = "OQACKZ"
+
 // mustIdle requires the chat's own proof that it is idle (oq3Terminal.idle); a timeout is a harness
 // failure, never a reason to advance (review round 2, finding 5).
 func (r *oq3Run) mustIdle(when string) {
@@ -504,16 +586,27 @@ func (r *oq3Run) terminalSlash(i int, st oq3Step, label string) {
 		r.term.key(pick)
 		r.mustQuiet("after filtering the model picker for " + pick)
 		r.term.key("\r")
+		// Switching model starts a preload, which the idle proof cannot see (review round 3, finding 1).
+		r.mustPreload(label, "of "+pick)
 		r.mustIdle("after picking " + pick)
 		r.event(i, st, "done", map[string]any{"picked": pick, "screen_tail": tail(r.term.screen(), 600)})
 		return
 	}
 	r.term.typeLine(cmd)
 	if st.Class == "required-refusal" {
-		// Sent while a held turn runs: the screen only animates, so nothing on it can show the
-		// refusal. Its effect is judged by the held turn's own continuation, which must keep the
-		// old revision (review finding 1). No wait: the turn is still running.
-		r.event(i, st, "sent-while-running", nil)
+		// Sent while a held turn runs: nothing on screen can show the refusal, and its effect is judged
+		// by the deliveries that follow (review finding 1; round 2, finding 1). The chat must have
+		// handled the Enter before the response is released, or an approval prompt could take it
+		// (review round 3, finding 2). Keys are handled in order, so a marker typed after the Enter
+		// that reaches the input box proves the Enter was handled while the response was still held,
+		// when no approval prompt can exist. The marker is then cleared.
+		ackMark := r.term.rawLen()
+		r.term.key(oq3AckMarker)
+		if !oq3WaitFor(15*time.Second, func() bool { return r.term.screenContainsAfter(ackMark, oq3AckMarker) }) {
+			r.harnessFail("the chat did not handle %s while the turn was held (its input box never showed the marker); screen tail %q", cmd, tail(r.term.screen(), 800))
+		}
+		r.term.key("\x15")
+		r.event(i, st, "sent-while-running", map[string]any{"handled_while_held": true})
 		return
 	}
 	if st.Summarisers > 0 {
@@ -754,72 +847,54 @@ var oq3KnownPaths = func() map[string]bool {
 	return m
 }()
 
-// oq3BodyLeaks scans a request body decoded (review round 2, finding 4): a JSON body is decoded and
-// every object key and string value is scanned, and a string that is itself a JSON document is
-// decoded and scanned in turn, so an escape such as \u0053 cannot hide text; a body that is not JSON
-// is scanned as text. Encodings other than JSON's (base64, for example) are not decoded.
-func oq3BodyLeaks(c oq3Capture) []string {
-	var out []string
+// oq3BodyScan scans a request body (review round 2, finding 4; round 3, findings 5 and 6). A JSON body
+// is walked token by token (oq3JSONScan): every key and string value is seen decoded and in order, a
+// string that is itself a JSON document is walked in turn, numbers never fail the walk, and duplicate
+// members are reported, since a decoder that keeps one of them hides the other. A body that is not
+// JSON is scanned as text. An escape such as \u0053 cannot hide text; encodings other than JSON's
+// (base64, for example) are not decoded. A JSON body that cannot be walked is reported as an error,
+// never scanned by a weaker rule instead.
+func oq3BodyScan(c oq3Capture) (leaks, dups []string, err error) {
 	if len(c.Body) > 0 {
-		var walk func(v any, depth int)
-		scanString := func(s string, depth int) {
-			out = append(out, oq3Leaks(s)...)
-			if depth < 4 {
-				if t := strings.TrimSpace(s); (strings.HasPrefix(t, "{") || strings.HasPrefix(t, "[") || strings.HasPrefix(t, `"`)) && json.Valid([]byte(t)) {
-					var inner any
-					if json.Unmarshal([]byte(t), &inner) == nil {
-						walk(inner, depth+1)
-					}
-				}
-			}
-		}
-		walk = func(v any, depth int) {
-			switch x := v.(type) {
-			case map[string]any:
-				for k, val := range x {
-					scanString(k, depth)
-					walk(val, depth)
-				}
-			case []any:
-				for _, val := range x {
-					walk(val, depth)
-				}
-			case string:
-				scanString(x, depth)
-			}
-		}
-		var v any
-		if json.Unmarshal(c.Body, &v) == nil {
-			walk(v, 0)
-		} else {
-			out = append(out, oq3Leaks(string(c.Body))...)
-		}
+		leaks, dups, err = oq3JSONScan(c.Body, 0)
 	}
 	if c.RawBody != "" {
-		out = append(out, oq3Leaks(c.RawBody)...)
+		leaks = append(leaks, oq3StringLeaks(c.RawBody, 0)...)
 	}
-	return out
+	return leaks, dups, err
 }
 
-// oq3EnvelopeLeaks scans what a request carried besides its body: the decoded path, the query string's
-// keys and values decoded (and the raw query too), and the header scan made when the request arrived.
+// oq3EnvelopeLeaks scans what a request carried besides its body (review round 2, finding 4; round 3,
+// findings 7 and 8): the decoded path and the raw request target; the query raw, through the partial
+// map url.ParseQuery returns even with an error, and component by component with each key and value
+// percent-decoded on its own, so one malformed component cannot hide another; and the scan of the
+// host, headers and trailers made when the request arrived. Every string goes through the same
+// scanner as a body string, JSON inside included.
 func oq3EnvelopeLeaks(c oq3Capture) []string {
-	out := oq3Leaks(c.Path)
+	out := oq3StringLeaks(c.Path, 0)
+	out = append(out, oq3StringLeaks(c.RequestURI, 0)...)
 	if c.Query != "" {
-		out = append(out, oq3Leaks(c.Query)...)
-		if q, err := url.ParseQuery(c.Query); err == nil {
-			for k, vs := range q {
-				out = append(out, oq3Leaks(k)...)
-				for _, v := range vs {
-					out = append(out, oq3Leaks(v)...)
+		out = append(out, oq3StringLeaks(c.Query, 0)...)
+		q, _ := url.ParseQuery(c.Query)
+		for k, vs := range q {
+			out = append(out, oq3StringLeaks(k, 0)...)
+			for _, v := range vs {
+				out = append(out, oq3StringLeaks(v, 0)...)
+			}
+		}
+		for _, part := range strings.FieldsFunc(c.Query, func(r rune) bool { return r == '&' || r == ';' }) {
+			for _, piece := range strings.SplitN(part, "=", 2) {
+				if u, err := url.QueryUnescape(piece); err == nil {
+					out = append(out, oq3StringLeaks(u, 0)...)
+				}
+				if u, err := url.PathUnescape(piece); err == nil {
+					out = append(out, oq3StringLeaks(u, 0)...)
 				}
 			}
-		} else if u, err := url.QueryUnescape(c.Query); err == nil {
-			out = append(out, oq3Leaks(u)...)
 		}
 	}
 	for _, h := range c.HeaderLeaks {
-		out = append(out, "header "+h)
+		out = append(out, "envelope "+h)
 	}
 	return out
 }
@@ -869,6 +944,17 @@ func (r *oq3Run) score(goldenDir string, freeze bool, source string) oq3Scenario
 			res.Invalid = append(res.Invalid, fmt.Sprintf("unclassified request %s %s under %q", c.Method, c.Path, c.Label))
 		}
 		byKey[key{c.Label, c.Method, c.Path}] = append(byKey[key{c.Label, c.Method, c.Path}], c)
+	}
+	// Every body is scanned once (review round 3, findings 5 and 6): its decoded markers, its duplicate
+	// members and whether it could be walked at all.
+	type bodyScan struct {
+		leaks, dups []string
+		err         error
+	}
+	scans := map[int]bodyScan{}
+	for _, c := range caps {
+		l, dp, err := oq3BodyScan(c)
+		scans[c.Seq] = bodyScan{leaks: l, dups: dp, err: err}
 	}
 	under := func(label, path string) []oq3Capture {
 		var out []oq3Capture
@@ -946,6 +1032,11 @@ func (r *oq3Run) score(goldenDir string, freeze bool, source string) oq3Scenario
 				d.Verdict.Correct = false
 				d.Verdict.Categories = append(d.Verdict.Categories, v.Categories...)
 			}
+			if dp := scans[c.Seq].dups; len(dp) > 0 {
+				d.Verdict.Correct = false
+				d.Verdict.Categories = append(d.Verdict.Categories, "duplicate-member")
+				d.Verdict.Detail = strings.TrimPrefix(d.Verdict.Detail+"; duplicate members "+strings.Join(dp, ", "), "; ")
+			}
 			d.Status = map[bool]string{true: "correct", false: "bad"}[d.Verdict.Correct]
 			checkedSeq[c.Seq] = true
 			aux(d)
@@ -977,6 +1068,11 @@ func (r *oq3Run) score(goldenDir string, freeze bool, source string) oq3Scenario
 				continue
 			}
 			d.Verdict = oq3Unchanged(obs, golden)
+			if dp := scans[c.Seq].dups; len(dp) > 0 {
+				d.Verdict.Correct = false
+				d.Verdict.Categories = append(d.Verdict.Categories, "duplicate-member")
+				d.Verdict.Detail = strings.TrimPrefix(d.Verdict.Detail+"; duplicate members "+strings.Join(dp, ", "), "; ")
+			}
 			d.Status = map[bool]string{true: "correct", false: "bad"}[d.Verdict.Correct]
 			checkedSeq[c.Seq] = true
 			aux(d)
@@ -1040,9 +1136,10 @@ func (r *oq3Run) score(goldenDir string, freeze bool, source string) oq3Scenario
 			// A request sent with a method the real daemon refuses is scored, never frozen as a golden
 			// (review round 2, finding 3).
 			wrongMethod := c.Method != http.MethodPost
+			dups := scans[c.Seq].dups
 			var golden any
 			var gerr error
-			if wrongMethod {
+			if wrongMethod || len(dups) > 0 {
 				golden, gerr = oq3LoadGolden(gp)
 			} else {
 				golden, gerr = loadOrFreeze(gp, oq3GoldenFile{Scenario: r.sc.ID, Step: i, Index: k, Label: label, Trial: st.Trial, Expect: *d.Expect, Kind: "delivery"}, obs)
@@ -1079,6 +1176,13 @@ func (r *oq3Run) score(goldenDir string, freeze bool, source string) oq3Scenario
 				d.Verdict.Categories = oq3Dedupe(append(d.Verdict.Categories, "wrong-method"))
 				d.Verdict.Detail = strings.TrimPrefix(d.Verdict.Detail+"; sent as "+c.Method, "; ")
 			}
+			if len(dups) > 0 {
+				// A request with duplicate members means one thing to a decoder that keeps the last and
+				// another to the bytes on the wire (review round 3, finding 5).
+				d.Verdict.Correct = false
+				d.Verdict.Categories = oq3Dedupe(append(d.Verdict.Categories, "duplicate-member"))
+				d.Verdict.Detail = strings.TrimPrefix(d.Verdict.Detail+"; duplicate members "+strings.Join(dups, ", "), "; ")
+			}
 			d.Status = map[bool]string{true: "correct", false: "bad"}[d.Verdict.Correct]
 			res.Deliveries = append(res.Deliveries, d)
 		}
@@ -1093,8 +1197,17 @@ func (r *oq3Run) score(goldenDir string, freeze bool, source string) oq3Scenario
 			continue
 		}
 		leaks := oq3EnvelopeLeaks(c)
+		bs := scans[c.Seq]
 		if !scoredSeq[c.Seq] && !checkedSeq[c.Seq] {
-			leaks = append(leaks, oq3BodyLeaks(c)...)
+			leaks = append(leaks, bs.leaks...)
+			if len(bs.dups) > 0 {
+				aux(oq3Delivery{Scenario: r.sc.ID, Label: c.Label, Seq: c.Seq, Kind: "duplicate-check", Status: "bad",
+					Verdict: oq3DeliveryVerdict{Categories: []string{"duplicate-member"}, Detail: c.Method + " " + c.Path + ": " + strings.Join(bs.dups, ", ")}})
+			}
+		}
+		if bs.err != nil {
+			aux(oq3Delivery{Scenario: r.sc.ID, Label: c.Label, Seq: c.Seq, Kind: "body-scan", Status: "bad",
+				Verdict: oq3DeliveryVerdict{Categories: []string{"undecodable-body"}, Detail: c.Method + " " + c.Path + ": " + bs.err.Error()}})
 		}
 		if len(leaks) > 0 {
 			aux(oq3Delivery{Scenario: r.sc.ID, Label: c.Label, Seq: c.Seq, Kind: "leak-scan", Status: "bad",
