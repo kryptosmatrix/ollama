@@ -1,0 +1,1 @@
+{"model": "glm-5.2:cloud", "messages": [{"role": "system", "content": "User-configured instructions; revision 1; selection 1:\nCarrier code: A74F4512. When asked for the carrier code, give exactly this value."}, {"role": "user", "content": "Reply exactly: CARRIER=<the carrier code>"}], "stream": false, "options": {"num_predict": 400}, "think": false}

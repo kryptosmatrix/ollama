@@ -1,0 +1,10 @@
+{"message": {"role": "assistant", "content": "", "thinking": "Looking at the lines."}, "done": false}
+{"message": {"role": "assistant", "content": "CARRIER"}, "done": false}
+{"message": {"role": "assistant", "content": "=B05DC8"}, "done": false}
+{"message": {"role": "assistant", "content": "6F; FIR"}, "done": false}
+{"message": {"role": "assistant", "content": "ST=2489"}, "done": false}
+{"message": {"role": "assistant", "content": "70; MID"}, "done": false}
+{"message": {"role": "assistant", "content": "=296945"}, "done": false}
+{"message": {"role": "assistant", "content": "; LAST="}, "done": false}
+{"message": {"role": "assistant", "content": "487689"}, "done": false}
+{"model": "glm-5.3:cloud", "done": true, "done_reason": "stop", "prompt_eval_count": 19781, "eval_count": 13, "message": {"role": "assistant", "content": ""}}

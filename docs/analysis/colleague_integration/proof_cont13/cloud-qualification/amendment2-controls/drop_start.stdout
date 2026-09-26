@@ -1,0 +1,14 @@
+21:14:05 deepseek-v4.1-flash:cloud T0a: http=200 NO_EVIDENCE prompt=122 bound=235 holds=True 0.0s spent=122 reply='CARRIER=DEADBEEF'
+21:14:05 deepseek-v4.1-flash:cloud T0b: http=200 NO_EVIDENCE prompt=166 bound=345 holds=True 0.0s spent=288 reply='CARRIER=DEADBEEF'
+21:14:05 deepseek-v4.1-flash:cloud T0c: http=200 NO_EVIDENCE prompt=160 bound=345 holds=True 0.0s spent=448 reply='CARRIER=DEADBEEF'
+21:14:05 glm-5.2:cloud T0a: http=200 NO_EVIDENCE prompt=118 bound=235 holds=True 0.0s spent=566 reply='CARRIER=DEADBEEF'
+21:14:05 glm-5.2:cloud T0b: http=200 NO_EVIDENCE prompt=162 bound=345 holds=True 0.0s spent=728 reply='CARRIER=DEADBEEF'
+21:14:05 glm-5.2:cloud T0c: http=200 NO_EVIDENCE prompt=156 bound=345 holds=True 0.0s spent=884 reply='CARRIER=DEADBEEF'
+21:14:05 glm-5.3:cloud T0a: http=200 NO_EVIDENCE prompt=118 bound=235 holds=True 0.0s spent=1002 reply='CARRIER=DEADBEEF'
+21:14:05 glm-5.3:cloud T0b: http=200 NO_EVIDENCE prompt=162 bound=345 holds=True 0.0s spent=1164 reply='CARRIER=DEADBEEF'
+21:14:05 glm-5.3:cloud T0c: http=200 NO_EVIDENCE prompt=156 bound=345 holds=True 0.0s spent=1320 reply='CARRIER=DEADBEEF'
+21:14:05 tool allowance: 64 from excess [-66, -72, -66, -72, -66, -72]
+21:14:05 deepseek-v4.1-flash:cloud T1: http=200 START_LOST prompt=10452 bound=30029 holds=True 0.0s spent=11772 reply='CARRIER=DEADBEEF; FIRST=111111; MID=242838; LAST=424965'
+21:14:05 glm-5.2:cloud T1: http=200 START_LOST prompt=10448 bound=30029 holds=True 0.0s spent=22220 reply='CARRIER=DEADBEEF; FIRST=111111; MID=113228; LAST=776546'
+21:14:05 glm-5.3:cloud T1: http=200 START_LOST prompt=19781 bound=57029 holds=True 0.0s spent=42001 reply='CARRIER=DEADBEEF; FIRST=111111; MID=410618; LAST=231904'
+21:14:05 done: 12 probes, prompt tokens spent 42001 of cap 500000 (including 0 before this run)

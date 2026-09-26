@@ -1,0 +1,12 @@
+{
+ "allowance": 64,
+ "excess_per_T0b_T0c": [
+  -66,
+  -72,
+  -66,
+  -72,
+  -66,
+  -72
+ ],
+ "minimal_tool_ascii_json_bytes": 110
+}

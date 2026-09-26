@@ -1,0 +1,1 @@
+{"model": "glm-5.2:cloud", "done": true, "done_reason": "stop", "prompt_eval_count": 118, "eval_count": 4, "message": {"role": "assistant", "content": "CARRIER=A74F4512", "tool_calls": []}}

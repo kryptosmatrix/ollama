@@ -1,0 +1,12 @@
+21:14:06 deepseek-v4.1-flash:cloud T0a: http=500 NO_EVIDENCE_ERROR prompt=None bound=235 holds=None 0.0s spent=0 reply=''
+21:14:06 deepseek-v4.1-flash:cloud T0b: http=500 NO_EVIDENCE_ERROR prompt=None bound=345 holds=None 0.0s spent=0 reply=''
+21:14:06 deepseek-v4.1-flash:cloud T0c: http=500 NO_EVIDENCE_ERROR prompt=None bound=345 holds=None 0.0s spent=0 reply=''
+21:14:07 glm-5.2:cloud T0a: http=500 NO_EVIDENCE_ERROR prompt=None bound=235 holds=None 0.0s spent=0 reply=''
+21:14:07 glm-5.2:cloud T0b: http=500 NO_EVIDENCE_ERROR prompt=None bound=345 holds=None 0.0s spent=0 reply=''
+21:14:07 glm-5.2:cloud T0c: http=500 NO_EVIDENCE_ERROR prompt=None bound=345 holds=None 0.0s spent=0 reply=''
+21:14:07 glm-5.3:cloud T0a: http=500 NO_EVIDENCE_ERROR prompt=None bound=235 holds=None 0.0s spent=0 reply=''
+21:14:07 glm-5.3:cloud T0b: http=500 NO_EVIDENCE_ERROR prompt=None bound=345 holds=None 0.0s spent=0 reply=''
+21:14:07 glm-5.3:cloud T0c: http=500 NO_EVIDENCE_ERROR prompt=None bound=345 holds=None 0.0s spent=0 reply=''
+21:14:07 tool allowance: None from excess []
+21:14:07 T1: not run, the tool allowance could not be derived from every T0 pair
+21:14:07 done: 9 probes, prompt tokens spent 0 of cap 500000 (including 0 before this run)

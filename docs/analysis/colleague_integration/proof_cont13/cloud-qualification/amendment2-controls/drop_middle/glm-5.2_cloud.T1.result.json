@@ -1,0 +1,39 @@
+{
+ "model": "glm-5.2:cloud",
+ "probe": "T1",
+ "lines": 1000,
+ "stream": true,
+ "think": true,
+ "tools": 5,
+ "http_status": 200,
+ "seconds": 0.0,
+ "request_bytes": 31342,
+ "tool_calls_in_history": 1,
+ "tools_ascii_json_bytes": 2197,
+ "tool_allowance": 64,
+ "prompt_bound": 30029,
+ "prompt_eval_count": 10448,
+ "bound_holds": true,
+ "eval_count": 13,
+ "done_reason": "stop",
+ "expected": {
+  "carrier": "C1E59B10",
+  "first": 689548,
+  "mid": 246718,
+  "last": 399859
+ },
+ "reply": "CARRIER=C1E59B10; FIRST=689548; MID=333333; LAST=399859",
+ "thinking_chars": 21,
+ "reply_tool_calls": 0,
+ "ok": {
+  "carrier": true,
+  "first": true,
+  "mid": false,
+  "last": true
+ },
+ "verdict": "MIDDLE_LOST",
+ "error": null,
+ "tries": 1,
+ "request_sha256": "9b35679ab7ebe33a453da0cebf2e21f433d2647b384e4c6931274e3dcb3c4930",
+ "spent_after": 22220
+}

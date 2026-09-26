@@ -1,0 +1,14 @@
+21:14:06 deepseek-v4.1-flash:cloud T0a: http=200 NO_EVIDENCE_TOOL_CALL prompt=122 bound=235 holds=True 0.0s spent=122 reply=''
+21:14:06 deepseek-v4.1-flash:cloud T0b: http=200 NO_EVIDENCE_TOOL_CALL prompt=166 bound=345 holds=True 0.0s spent=288 reply=''
+21:14:06 deepseek-v4.1-flash:cloud T0c: http=200 NO_EVIDENCE_TOOL_CALL prompt=160 bound=345 holds=True 0.0s spent=448 reply=''
+21:14:06 glm-5.2:cloud T0a: http=200 NO_EVIDENCE_TOOL_CALL prompt=118 bound=235 holds=True 0.0s spent=566 reply=''
+21:14:06 glm-5.2:cloud T0b: http=200 NO_EVIDENCE_TOOL_CALL prompt=162 bound=345 holds=True 0.0s spent=728 reply=''
+21:14:06 glm-5.2:cloud T0c: http=200 NO_EVIDENCE_TOOL_CALL prompt=156 bound=345 holds=True 0.0s spent=884 reply=''
+21:14:06 glm-5.3:cloud T0a: http=200 NO_EVIDENCE_TOOL_CALL prompt=118 bound=235 holds=True 0.0s spent=1002 reply=''
+21:14:06 glm-5.3:cloud T0b: http=200 NO_EVIDENCE_TOOL_CALL prompt=162 bound=345 holds=True 0.0s spent=1164 reply=''
+21:14:06 glm-5.3:cloud T0c: http=200 NO_EVIDENCE_TOOL_CALL prompt=156 bound=345 holds=True 0.0s spent=1320 reply=''
+21:14:06 tool allowance: 64 from excess [-66, -72, -66, -72, -66, -72]
+21:14:06 deepseek-v4.1-flash:cloud T1: http=200 NO_EVIDENCE_TOOL_CALL prompt=10452 bound=30029 holds=True 0.0s spent=11772 reply=''
+21:14:06 glm-5.2:cloud T1: http=200 NO_EVIDENCE_TOOL_CALL prompt=10448 bound=30029 holds=True 0.0s spent=22220 reply=''
+21:14:06 glm-5.3:cloud T1: http=200 NO_EVIDENCE_TOOL_CALL prompt=19781 bound=57029 holds=True 0.0s spent=42001 reply=''
+21:14:06 done: 12 probes, prompt tokens spent 42001 of cap 500000 (including 0 before this run)

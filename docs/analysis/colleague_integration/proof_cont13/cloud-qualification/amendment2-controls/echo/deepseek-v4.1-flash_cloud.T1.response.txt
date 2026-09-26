@@ -1,0 +1,10 @@
+{"message": {"role": "assistant", "content": "", "thinking": "Looking at the lines."}, "done": false}
+{"message": {"role": "assistant", "content": "CARRIER"}, "done": false}
+{"message": {"role": "assistant", "content": "=9CE830"}, "done": false}
+{"message": {"role": "assistant", "content": "5A; FIR"}, "done": false}
+{"message": {"role": "assistant", "content": "ST=7011"}, "done": false}
+{"message": {"role": "assistant", "content": "97; MID"}, "done": false}
+{"message": {"role": "assistant", "content": "=226560"}, "done": false}
+{"message": {"role": "assistant", "content": "; LAST="}, "done": false}
+{"message": {"role": "assistant", "content": "445518"}, "done": false}
+{"model": "deepseek-v4.1-flash:cloud", "done": true, "done_reason": "stop", "prompt_eval_count": 10452, "eval_count": 13, "message": {"role": "assistant", "content": ""}}

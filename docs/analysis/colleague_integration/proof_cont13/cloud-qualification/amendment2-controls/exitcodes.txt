@@ -1,0 +1,5 @@
+clean-exit=0
+sabotage-start_lost-exit=1
+sabotage-middle-exit=1
+sabotage-tool_call-exit=1
+sabotage-think_omit-exit=1
