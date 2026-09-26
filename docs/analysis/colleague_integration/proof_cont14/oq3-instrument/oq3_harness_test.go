@@ -250,6 +250,21 @@ type oq3Daemon struct {
 	promptEval map[string]int           // prompt_eval_count reported in the final record
 	toolRounds map[string]int           // number of consecutive tool calls to emit for the label
 	toolsDone  map[string]int
+	completed  map[string]int // /api/chat responses fully written, per label (review finding 8)
+	// noCapability makes /api/version omit chat.admission.v1 (A12), for the required-refusal cases.
+	noCapability bool
+}
+
+func (d *oq3Daemon) completedLabel(label string) int {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	return d.completed[label]
+}
+
+func (d *oq3Daemon) markCompleted(label string) {
+	d.mu.Lock()
+	d.completed[label]++
+	d.mu.Unlock()
 }
 
 const (
@@ -260,7 +275,8 @@ const (
 
 func oq3StartDaemon(t *testing.T) *oq3Daemon {
 	d := &oq3Daemon{t: t, modelSystems: map[string]string{oq3Model: oq3ModelSystem, oq3Model2: oq3Model2System},
-		holds: map[string]chan struct{}{}, fails: map[string]int{}, promptEval: map[string]int{}, toolRounds: map[string]int{}, toolsDone: map[string]int{}}
+		holds: map[string]chan struct{}{}, fails: map[string]int{}, promptEval: map[string]int{}, toolRounds: map[string]int{}, toolsDone: map[string]int{},
+		completed: map[string]int{}}
 	d.srv = httptest.NewServer(http.HandlerFunc(d.serve))
 	t.Cleanup(func() {
 		d.mu.Lock()
@@ -376,7 +392,11 @@ func (d *oq3Daemon) serve(w http.ResponseWriter, r *http.Request) {
 		// to send carrier-bearing requests; the unchanged candidate ignores the field.
 		d.record(r, body, "version")
 		w.Header().Set("Content-Type", "application/json")
-		io.WriteString(w, `{"version":"0.0.0-oq3-fake","capabilities":["chat.admission.v1"]}`)
+		if d.noCapability {
+			io.WriteString(w, `{"version":"0.0.0-oq3-fake-no-admission"}`)
+		} else {
+			io.WriteString(w, `{"version":"0.0.0-oq3-fake","capabilities":["chat.admission.v1"]}`)
+		}
 	case r.URL.Path == "/api/show":
 		d.record(r, body, "show")
 		var req struct {
@@ -486,8 +506,10 @@ func (d *oq3Daemon) serveChat(w http.ResponseWriter, r *http.Request, body []byt
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(failStatus)
 		io.WriteString(w, `{"error":"oq3 fake daemon: injected failure"}`)
+		d.markCompleted(label)
 		return
 	}
+	defer d.markCompleted(label)
 	model := req.Model
 	if model == "" {
 		model = oq3Model

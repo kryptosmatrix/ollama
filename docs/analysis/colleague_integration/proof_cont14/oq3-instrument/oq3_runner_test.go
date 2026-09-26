@@ -80,7 +80,16 @@ func (r *oq3Run) event(i int, st oq3Step, verdict string, outcome any) {
 func (r *oq3Run) execute() {
 	for i, st := range r.sc.Steps {
 		label := oq3Label(r.sc.ID, i, st.Op)
-		r.d.setLabel(label)
+		switch st.Op {
+		case "terminal-await":
+			// Requests caused while a held turn completes (its tool continuations) belong to that
+			// turn, so its label stays active.
+			r.d.setLabel(r.heldLabel("terminal"))
+		case "desktop-await":
+			r.d.setLabel(r.heldLabel(st.Args["conv"]))
+		default:
+			r.d.setLabel(label)
+		}
 		if len(r.invalid) > 0 {
 			r.event(i, st, "not-run", "an earlier harness failure stopped this scenario")
 			continue
@@ -139,7 +148,11 @@ func (r *oq3Run) step(i int, st oq3Step, label string) {
 		body := map[string]any{"expected_revision": st.Args["expected_revision"],
 			"edit": map[string]any{"enabled": st.Args["enabled"] == "true", "text": oq3TextOrEmpty(st.Args["text"]), "binding": nil}}
 		res := r.desk.do(http.MethodPut, "/api/v1/instructions", body)
-		r.event(i, st, oq3ProfileVerdict(res, st.Want), res)
+		verdict := oq3ProfileVerdict(res, st.Want)
+		if verdict == "pass" {
+			verdict = r.storeCommitted(st.Want)
+		}
+		r.event(i, st, verdict, res)
 	case "desktop-draft":
 		res := r.desk.do(http.MethodPost, "/api/v1/create-chat", map[string]any{})
 		var v struct {
@@ -179,10 +192,12 @@ func (r *oq3Run) step(i int, st oq3Step, label string) {
 		res := oq3RunCLINoFatal(r, "instructions", "set", "--file", path, "--expected-revision", st.Args["expected_revision"])
 		verdict := "fail"
 		switch {
-		case res.ExitCode == 0 && st.Want["exit"] == "0":
-			verdict = "pass"
 		case strings.Contains(res.Output, "unknown command"):
 			verdict = "absent"
+		case res.ExitCode == 0:
+			// Blueprint §7 as resolved in continuation 14: `set` saves the file's text as an
+			// enabled profile. Exit 0 counts only when the store shows it committed.
+			verdict = r.storeCommitted(map[string]string{"revision": st.Want["revision"], "enabled": "true", "text": st.Args["text"]})
 		}
 		r.event(i, st, verdict, res)
 	case "terminal-start":
@@ -193,7 +208,7 @@ func (r *oq3Run) step(i int, st oq3Step, label string) {
 		}) || r.term.hasExited() {
 			r.harnessFail("terminal session never preloaded; screen tail %q", tail(r.term.screen(), 1500))
 		}
-		r.term.quiet(700*time.Millisecond, 15*time.Second)
+		r.mustQuiet("after the session started")
 		r.event(i, st, "done", map[string]any{"session": r.termN})
 	case "terminal-stop":
 		r.term.typeLine("/bye")
@@ -258,15 +273,14 @@ func (r *oq3Run) step(i int, st oq3Step, label string) {
 		lbl := r.heldLabel("terminal")
 		mark := r.marks["terminal"]
 		r.d.release(lbl)
-		if !oq3WaitFor(30*time.Second, func() bool { return r.term.screenContainsAfter(mark, "OQ3-REPLY-") }) {
-			r.harnessFail("held terminal turn never rendered its reply")
-		}
-		r.term.quiet(500*time.Millisecond, 10*time.Second)
+		r.finishTerminalTurn(lbl, r.marks["terminal-rounds"], 0, mark)
 		r.event(i, st, "done", nil)
 	case "terminal-slash":
 		r.terminalSlash(i, st, label)
 	case "store-identity":
 		r.event(i, st, r.storeIdentity(st.Want), nil)
+	case "store-events":
+		r.event(i, st, r.storeEvents(), nil)
 	default:
 		r.harnessFail("unknown op %q", st.Op)
 	}
@@ -348,15 +362,24 @@ func (r *oq3Run) terminalTurn(i int, st oq3Step, label string) {
 	}
 	r.term.typeLine(st.Prompt)
 	if !oq3WaitFor(30*time.Second, func() bool { return r.d.countLabel("POST", "/api/chat", label) >= 1 }) {
-		// No request reached the daemon: recorded, and scored as missing required deliveries.
+		// No request reached the daemon: recorded, and scored by the step's class (a missing
+		// required delivery, or a refusal held as required).
+		r.mustQuiet("after a turn that sent no request")
 		r.event(i, st, "no-request", map[string]any{"screen_tail": tail(r.term.screen(), 1200)})
-		r.term.quiet(500*time.Millisecond, 10*time.Second)
 		return
 	}
 	if st.Args["hold"] == "1" {
+		r.marks["terminal-rounds"] = rounds
 		r.event(i, st, "dispatched-held", nil)
 		return
 	}
+	r.finishTerminalTurn(label, rounds, st.Summarisers, mark)
+	r.event(i, st, "done", nil)
+}
+
+// finishTerminalTurn approves each declared tool round, then waits until every response under the
+// label has been fully written by the daemon and the screen has gone quiet (review finding 8).
+func (r *oq3Run) finishTerminalTurn(label string, rounds, summarisers, mark int) {
 	for k := 0; k < rounds; k++ {
 		approvalMark := mark
 		if !oq3WaitFor(30*time.Second, func() bool { return r.term.screenContainsAfter(approvalMark, "Approve once") }) {
@@ -369,18 +392,22 @@ func (r *oq3Run) terminalTurn(i int, st oq3Step, label string) {
 			r.harnessFail("tool round %d: continuation never reached the daemon", k+1)
 		}
 	}
-	if !oq3WaitFor(30*time.Second, func() bool { return r.term.screenContainsAfter(mark, "OQ3-REPLY-") }) {
-		r.harnessFail("terminal never rendered the reply; screen tail %q", tail(r.term.screen(), 1500))
+	if !oq3WaitFor(30*time.Second, func() bool {
+		n := r.d.countLabel("POST", "/api/chat", label)
+		return r.d.countSummaries(label) >= summarisers && r.d.completedLabel(label) >= n
+	}) {
+		r.harnessFail("responses under %s never completed (%d requests, %d completed, %d summaries)", label,
+			r.d.countLabel("POST", "/api/chat", label), r.d.completedLabel(label), r.d.countSummaries(label))
 	}
-	if st.Summarisers > 0 {
-		if !oq3WaitFor(30*time.Second, func() bool { return r.d.countSummaries(label) >= st.Summarisers }) {
-			r.event(i, st, "fail", map[string]any{"summarisers_seen": r.d.countSummaries(label), "screen_tail": tail(r.term.screen(), 1200)})
-			r.term.quiet(500*time.Millisecond, 10*time.Second)
-			return
-		}
+	r.mustQuiet("after the turn completed")
+}
+
+// mustQuiet waits for the terminal to stop producing output; a timeout is a harness failure, never
+// a reason to advance (review finding 8).
+func (r *oq3Run) mustQuiet(when string) {
+	if !r.term.quiet(600*time.Millisecond, 20*time.Second) {
+		r.harnessFail("terminal did not go quiet %s; screen tail %q", when, tail(r.term.screen(), 800))
 	}
-	r.term.quiet(500*time.Millisecond, 10*time.Second)
-	r.event(i, st, "done", nil)
 }
 
 func (r *oq3Run) terminalSlash(i int, st oq3Step, label string) {
@@ -400,25 +427,35 @@ func (r *oq3Run) terminalSlash(i int, st oq3Step, label string) {
 		return
 	}
 	r.term.typeLine(cmd)
+	if st.Class == "required-refusal" {
+		// Sent while a held turn runs: the screen only animates, so nothing on it can show the
+		// refusal. Its effect is judged by the held turn's own continuation, which must keep the
+		// old revision (review finding 1). No wait: the turn is still running.
+		r.event(i, st, "sent-while-running", nil)
+		return
+	}
 	if st.Summarisers > 0 {
-		if !oq3WaitFor(30*time.Second, func() bool { return r.d.countSummaries(label) >= st.Summarisers }) {
+		if !oq3WaitFor(30*time.Second, func() bool {
+			return r.d.countSummaries(label) >= st.Summarisers && r.d.completedLabel(label) >= r.d.countLabel("POST", "/api/chat", label)
+		}) {
+			r.mustQuiet("after a compaction that did not complete")
 			r.event(i, st, "fail", map[string]any{"summarisers_seen": r.d.countSummaries(label), "screen_tail": tail(r.term.screen(), 1200)})
-			r.term.quiet(500*time.Millisecond, 10*time.Second)
 			return
 		}
 	}
-	r.term.quiet(600*time.Millisecond, 15*time.Second)
-	unknown := r.term.screenContainsAfter(mark, "Unknown command")
+	r.mustQuiet("after " + cmd)
+	unknown := r.term.screenContainsAfter(mark, "Unknown command") || r.term.screenContainsAfter(mark, "usage: ")
 	verdict := "done"
 	switch {
-	case unknown:
+	case unknown && strings.HasPrefix(cmd, "/instructions"):
 		verdict = "absent"
-	case st.Class == "required-refusal" || strings.HasPrefix(cmd, "/instructions"):
-		// The blueprint (§7) names no terminal output for /instructions reload or off, for success or
-		// for a refusal while a turn runs, so no positive evidence can be read from the screen. The
-		// absence of an error is not success: while a turn runs the screen only animates. Recorded
-		// as unobserved; acceptance treats it as a failure until the output is specified.
-		verdict = "unobserved"
+	case unknown:
+		// An existing command that printed an error or its usage did not do what the step declares.
+		r.harnessFail("%s was rejected by the terminal; screen tail %q", cmd, tail(oq3ANSI.ReplaceAllString(r.term.rawSince(mark), ""), 600))
+	case strings.HasPrefix(cmd, "/instructions"):
+		// No error was printed. The blueprint (§7) names no success output, so the screen cannot
+		// show success; the delivery after this step decides (review finding 1).
+		verdict = "no-error-seen"
 	}
 	r.event(i, st, verdict, map[string]any{"screen_tail": tail(oq3ANSI.ReplaceAllString(r.term.rawSince(mark), ""), 600)})
 }
@@ -477,6 +514,86 @@ func oq3ReloadVerdict(res oq3HTTPResult, want map[string]string) string {
 	return "pass"
 }
 
+func (r *oq3Run) storePath() string {
+	return filepath.Join(r.s.home, ".ollama", "instructions", "instructions.sqlite")
+}
+
+// storeCommitted reads the designated store's current profile (blueprint §3.1 schema) read-only:
+// "absent" before G1, "pass" when it holds the expected revision, enabled flag and text (review
+// finding 10: an exit status or a response body alone is not a committed save).
+func (r *oq3Run) storeCommitted(want map[string]string) string {
+	if _, err := os.Stat(r.storePath()); err != nil {
+		return "absent"
+	}
+	db, err := sql.Open("sqlite3", "file:"+r.storePath()+"?mode=ro")
+	if err != nil {
+		return "fail"
+	}
+	defer db.Close()
+	var rev int64
+	var enabled int
+	var text string
+	if err := db.QueryRow(`SELECT m.current_revision, r.enabled, r.text FROM metadata m JOIN revisions r ON r.revision = m.current_revision WHERE m.id = 1`).Scan(&rev, &enabled, &text); err != nil {
+		return "fail"
+	}
+	if fmt.Sprint(rev) == want["revision"] && fmt.Sprint(enabled == 1) == want["enabled"] && text == oq3TextOrEmpty(want["text"]) {
+		return "pass"
+	}
+	return "fail"
+}
+
+// storeEvents checks the terminal event sequence of blueprint §3.1: two conversations opened under
+// distinct identities, and one reload recorded under the SECOND identity, from revision 2 to 3 at
+// generation 2 (review finding 11: a new binding the runtime never uses would leave the reload on
+// the first identity).
+func (r *oq3Run) storeEvents() string {
+	if _, err := os.Stat(r.storePath()); err != nil {
+		return "absent"
+	}
+	db, err := sql.Open("sqlite3", "file:"+r.storePath()+"?mode=ro")
+	if err != nil {
+		return "fail"
+	}
+	defer db.Close()
+	rows, err := db.Query(`SELECT conversation_id, generation, kind, COALESCE(from_revision, -1), to_revision FROM events WHERE namespace = 'terminal' ORDER BY rowid`)
+	if err != nil {
+		return "fail"
+	}
+	defer rows.Close()
+	type ev struct {
+		id         string
+		gen        int
+		kind       string
+		from, to   int
+	}
+	var evs []ev
+	for rows.Next() {
+		var e ev
+		if err := rows.Scan(&e.id, &e.gen, &e.kind, &e.from, &e.to); err != nil {
+			return "fail"
+		}
+		evs = append(evs, e)
+	}
+	var opened []ev
+	var reloaded []ev
+	for _, e := range evs {
+		switch e.kind {
+		case "opened":
+			opened = append(opened, e)
+		case "reloaded":
+			reloaded = append(reloaded, e)
+		}
+	}
+	if len(opened) != 2 || len(reloaded) != 1 || opened[0].id == opened[1].id {
+		return "fail"
+	}
+	rl := reloaded[0]
+	if rl.id != opened[1].id || rl.gen != 2 || rl.from != 2 || rl.to != 3 || opened[0].to != 1 || opened[1].to != 2 {
+		return "fail"
+	}
+	return "pass"
+}
+
 // storeIdentity reads the designated instruction store (blueprint §3, §3.1) for distinct terminal
 // conversation identities. Before G1 the store does not exist, which is reported as absent.
 func (r *oq3Run) storeIdentity(want map[string]string) string {
@@ -511,7 +628,8 @@ type oq3Delivery struct {
 	Index    int                `json:"index"`
 	Expect   *oq3Expect         `json:"expect,omitempty"`
 	Seq      int                `json:"capture_seq,omitempty"`
-	Status   string             `json:"status"` // correct | bad | missing | unexpected
+	Kind     string             `json:"kind,omitempty"`   // delivery (default) | summariser | preload | leak-scan
+	Status   string             `json:"status"` // correct | bad | missing | unexpected | refused-as-required
 	Verdict  oq3DeliveryVerdict `json:"verdict"`
 	Golden   string             `json:"golden,omitempty"`
 }
@@ -523,6 +641,7 @@ type oq3ScenarioResult struct {
 	Auxiliary  []oq3Delivery `json:"auxiliary"`
 	Captures   []oq3Capture  `json:"captures"`
 	Invalid    []string      `json:"invalid,omitempty"`
+	NotMeasured []string     `json:"not_measured,omitempty"`
 	Sandbox    string        `json:"sandbox"`
 }
 
@@ -537,50 +656,153 @@ type oq3GoldenFile struct {
 	Label    string    `json:"label"`
 	Trial    string    `json:"trial"`
 	Expect   oq3Expect `json:"expect"`
+	Kind     string    `json:"kind,omitempty"`
 	Request  any       `json:"request"`
 	Source   string    `json:"source"`
 }
 
-// score attributes every captured /api/chat request to the step that caused it and scores it.
+// oq3KnownPaths are the daemon endpoints the entry points are known to call. Anything else is an
+// unclassified request and makes the run invalid (review finding 4).
+var oq3KnownPaths = map[string]bool{"/": true, "/api/version": true, "/api/show": true, "/api/tags": true, "/api/ps": true,
+	"/api/generate": true, "/api/chat": true, "/api/status": true, "/api/me": true, "/api/pull": true,
+	"/api/experimental/model-recommendations": true}
+
+// score attributes every captured request to the step that caused it and scores it.
 // freeze: when a golden is absent, the observed pre-G1 request becomes the golden (baseline only).
 func (r *oq3Run) score(goldenDir string, freeze bool, source string) oq3ScenarioResult {
 	res := oq3ScenarioResult{Scenario: r.sc, Events: r.events, Invalid: append([]string(nil), r.invalid...), Sandbox: r.s.root}
 	caps := r.d.snapshot()
 	res.Captures = caps
-	byLabel := map[string][]oq3Capture{}
-	for _, c := range caps {
-		if c.Method == "POST" && c.Path == "/api/chat" {
-			byLabel[c.Label] = append(byLabel[c.Label], c)
+	notRun := map[int]bool{}
+	lastHeld := -1
+	for _, e := range r.events {
+		if e.Verdict == "dispatched-held" {
+			lastHeld = e.Step
+		}
+		if e.Verdict == "not-run" || e.Verdict == "harness-failed" {
+			notRun[e.Step] = true
+			// A held turn whose completion failed was not measured either.
+			if (e.Op == "terminal-await" || e.Op == "desktop-await") && lastHeld >= 0 {
+				notRun[lastHeld] = true
+			}
 		}
 	}
+	type key struct {
+		label, path string
+	}
+	byKey := map[key][]oq3Capture{}
+	for _, c := range caps {
+		if !oq3KnownPaths[c.Path] {
+			res.Invalid = append(res.Invalid, fmt.Sprintf("unclassified request %s %s under %q", c.Method, c.Path, c.Label))
+		}
+		byKey[key{c.Label, c.Path}] = append(byKey[key{c.Label, c.Path}], c)
+	}
 	known := map[string]bool{}
+	scoredSeq := map[int]bool{} // /api/chat captures scored as conversation deliveries
+	loadOrFreeze := func(gp string, gf oq3GoldenFile, obs any) (any, error) {
+		golden, err := oq3LoadGolden(gp)
+		if err == nil {
+			return golden, nil
+		}
+		if !freeze {
+			return nil, err
+		}
+		gf.Request = obs
+		gf.Source = source
+		if werr := oq3WriteJSON(gp, gf); werr != nil {
+			r.t.Fatalf("write golden: %v", werr)
+		}
+		return obs, nil
+	}
+	aux := func(d oq3Delivery) { res.Auxiliary = append(res.Auxiliary, d) }
 	for i, st := range r.sc.Steps {
 		label := oq3Label(r.sc.ID, i, st.Op)
 		known[label] = true
+		if notRun[i] {
+			res.NotMeasured = append(res.NotMeasured, fmt.Sprintf("%s (%s)", label, st.Trial))
+			continue
+		}
 		var turns, sums []oq3Capture
-		for _, c := range byLabel[label] {
+		for _, c := range byKey[key{label, "/api/chat"}] {
 			if c.Response == "summary" {
 				sums = append(sums, c)
 			} else {
 				turns = append(turns, c)
 			}
 		}
-		// Summariser requests: their own expectation (Q2).
-		for k, c := range sums {
-			obs, err := oq3Normalise(c.Body, r.s.root)
-			d := oq3Delivery{Scenario: r.sc.ID, Step: i, Label: label, Trial: st.Trial, Index: k, Seq: c.Seq}
-			if err != nil {
-				d.Status, d.Verdict = "bad", oq3DeliveryVerdict{Categories: []string{"malformed-capture"}, Detail: err.Error()}
-			} else {
-				d.Verdict = oq3CheckSummariser(obs)
-				d.Status = map[bool]string{true: "correct", false: "bad"}[d.Verdict.Correct]
+		// Summariser requests: allowed only where the step declares them, exactly that many, each
+		// equal to its frozen pre-G1 golden (review findings 2 and 3).
+		if len(sums) != st.Summarisers {
+			if st.Summarisers > 0 && len(sums) < st.Summarisers {
+				res.Invalid = append(res.Invalid, fmt.Sprintf("%s: compaction did not happen (%d summariser requests, %d declared)", label, len(sums), st.Summarisers))
 			}
-			res.Auxiliary = append(res.Auxiliary, d)
+			if len(sums) > st.Summarisers {
+				aux(oq3Delivery{Scenario: r.sc.ID, Step: i, Label: label, Trial: st.Trial, Status: "bad",
+					Verdict: oq3DeliveryVerdict{Categories: []string{"undeclared-summariser"}, Detail: fmt.Sprintf("%d summariser requests, %d declared", len(sums), st.Summarisers)}})
+			}
 		}
-		if st.Summarisers > 0 && len(sums) < st.Summarisers {
-			res.Invalid = append(res.Invalid, fmt.Sprintf("%s: compaction did not happen (%d summariser requests, %d required)", label, len(sums), st.Summarisers))
+		for k, c := range sums {
+			d := oq3Delivery{Scenario: r.sc.ID, Step: i, Label: label, Trial: st.Trial, Index: k, Seq: c.Seq, Kind: "summariser"}
+			obs, err := oq3Normalise(c.Body, r.s.root)
+			if err != nil {
+				d.Status, d.Verdict = "bad", oq3DeliveryVerdict{Categories: []string{"malformed-capture"}}
+				aux(d)
+				continue
+			}
+			gp := filepath.Join(goldenDir, r.sc.ID, fmt.Sprintf("%02d-s%d.json", i, k))
+			d.Golden = gp
+			golden, gerr := loadOrFreeze(gp, oq3GoldenFile{Scenario: r.sc.ID, Step: i, Index: k, Label: label, Trial: st.Trial, Kind: "summariser"}, obs)
+			if gerr != nil {
+				d.Status, d.Verdict = "bad", oq3DeliveryVerdict{Categories: []string{"no-golden"}}
+				res.Invalid = append(res.Invalid, fmt.Sprintf("%s: no summariser golden %s", label, gp))
+				aux(d)
+				continue
+			}
+			d.Verdict = oq3Unchanged(obs, golden)
+			if v := oq3CheckSummariser(obs); !v.Correct {
+				d.Verdict.Correct = false
+				d.Verdict.Categories = append(d.Verdict.Categories, v.Categories...)
+			}
+			d.Status = map[bool]string{true: "correct", false: "bad"}[d.Verdict.Correct]
+			aux(d)
 		}
-		if st.Class != "required-dispatch" {
+		// Preloads: each equal to its frozen pre-G1 golden (review finding 4).
+		for k, c := range byKey[key{label, "/api/generate"}] {
+			d := oq3Delivery{Scenario: r.sc.ID, Step: i, Label: label, Trial: st.Trial, Index: k, Seq: c.Seq, Kind: "preload"}
+			obs, err := oq3Normalise(c.Body, r.s.root)
+			if err != nil {
+				d.Status, d.Verdict = "bad", oq3DeliveryVerdict{Categories: []string{"malformed-capture"}}
+				aux(d)
+				continue
+			}
+			gp := filepath.Join(goldenDir, r.sc.ID, fmt.Sprintf("%02d-g%d.json", i, k))
+			d.Golden = gp
+			golden, gerr := loadOrFreeze(gp, oq3GoldenFile{Scenario: r.sc.ID, Step: i, Index: k, Label: label, Trial: st.Trial, Kind: "preload"}, obs)
+			if gerr != nil {
+				d.Status, d.Verdict = "bad", oq3DeliveryVerdict{Categories: []string{"no-golden"}}
+				res.Invalid = append(res.Invalid, fmt.Sprintf("%s: no preload golden %s", label, gp))
+				aux(d)
+				continue
+			}
+			d.Verdict = oq3Unchanged(obs, golden)
+			d.Status = map[bool]string{true: "correct", false: "bad"}[d.Verdict.Correct]
+			aux(d)
+		}
+		switch st.Class {
+		case "required-no-dispatch":
+			// A refusal is required: any model request under this step is an incorrect delivery.
+			if len(turns) == 0 {
+				res.Deliveries = append(res.Deliveries, oq3Delivery{Scenario: r.sc.ID, Step: i, Label: label, Trial: st.Trial,
+					Status: "refused-as-required", Verdict: oq3DeliveryVerdict{Correct: true}})
+			}
+			for k, c := range turns {
+				scoredSeq[c.Seq] = true
+				res.Deliveries = append(res.Deliveries, oq3Delivery{Scenario: r.sc.ID, Step: i, Label: label, Trial: st.Trial, Index: k, Seq: c.Seq,
+					Status: "bad", Verdict: oq3DeliveryVerdict{Categories: []string{"dispatched-despite-required-refusal"}}})
+			}
+			continue
+		case "required-dispatch":
+		default:
 			if len(turns) > 0 {
 				res.Invalid = append(res.Invalid, fmt.Sprintf("%s: %d unclassified model requests under a non-dispatch step", label, len(turns)))
 			}
@@ -600,6 +822,7 @@ func (r *oq3Run) score(goldenDir string, freeze bool, source string) oq3Scenario
 			}
 			c := turns[k]
 			d.Seq = c.Seq
+			scoredSeq[c.Seq] = true
 			obs, err := oq3Normalise(c.Body, r.s.root)
 			if err != nil {
 				d.Status, d.Verdict = "bad", oq3DeliveryVerdict{Categories: []string{"malformed-capture"}, Detail: err.Error()}
@@ -616,20 +839,20 @@ func (r *oq3Run) score(goldenDir string, freeze bool, source string) oq3Scenario
 			}
 			gp := oq3GoldenPath(goldenDir, r.sc.ID, i, k)
 			d.Golden = gp
-			golden, gerr := oq3LoadGolden(gp)
+			golden, gerr := loadOrFreeze(gp, oq3GoldenFile{Scenario: r.sc.ID, Step: i, Index: k, Label: label, Trial: st.Trial, Expect: *d.Expect, Kind: "delivery"}, obs)
 			if gerr != nil {
-				if !freeze {
-					d.Status = "bad"
-					d.Verdict = oq3DeliveryVerdict{Categories: []string{"no-golden"}, Detail: gerr.Error()}
-					res.Invalid = append(res.Invalid, fmt.Sprintf("%s: no golden %s", label, gp))
-					res.Deliveries = append(res.Deliveries, d)
-					continue
+				d.Status = "bad"
+				d.Verdict = oq3DeliveryVerdict{Categories: []string{"no-golden"}, Detail: gerr.Error()}
+				res.Invalid = append(res.Invalid, fmt.Sprintf("%s: no golden %s", label, gp))
+				res.Deliveries = append(res.Deliveries, d)
+				continue
+			}
+			if k == 0 {
+				// A state-changing step must have reached its declared state in the pre-G1 request
+				// (review finding 5); checked on the golden, which is what every later run is held to.
+				if problem := oq3AssertState(golden, st.Args); problem != "" {
+					res.Invalid = append(res.Invalid, fmt.Sprintf("%s: declared state not reached: %s", label, problem))
 				}
-				gf := oq3GoldenFile{Scenario: r.sc.ID, Step: i, Index: k, Label: label, Trial: st.Trial, Expect: *d.Expect, Request: obs, Source: source}
-				if err := oq3WriteJSON(gp, gf); err != nil {
-					r.t.Fatalf("write golden: %v", err)
-				}
-				golden = obs
 			}
 			exp, terr := oq3Transform(golden, *d.Expect, func(model string) (string, bool) {
 				s, ok := r.d.modelSystems[oq3ModelBase(model)]
@@ -647,15 +870,29 @@ func (r *oq3Run) score(goldenDir string, freeze bool, source string) oq3Scenario
 			res.Deliveries = append(res.Deliveries, d)
 		}
 	}
-	for label, cs := range byLabel {
-		if !known[label] {
-			res.Invalid = append(res.Invalid, fmt.Sprintf("%d model requests under unknown label %q", len(cs), label))
+	// Unknown labels, and a leak scan over every other capture on every path (review finding 4).
+	for _, c := range caps {
+		if !known[c.Label] {
+			res.Invalid = append(res.Invalid, fmt.Sprintf("request %d (%s %s) under unknown label %q", c.Seq, c.Method, c.Path, c.Label))
+			continue
+		}
+		if scoredSeq[c.Seq] || (c.Path == "/api/chat" && c.Response == "summary") || c.Path == "/api/generate" {
+			continue
+		}
+		raw := string(c.Body) + c.RawBody
+		leaked := strings.Contains(raw, "User-configured instructions")
+		for _, s := range oq3AllSentinels {
+			leaked = leaked || strings.Contains(raw, s)
+		}
+		if leaked {
+			aux(oq3Delivery{Scenario: r.sc.ID, Label: c.Label, Seq: c.Seq, Kind: "leak-scan", Status: "bad",
+				Verdict: oq3DeliveryVerdict{Categories: []string{"carries-instructions"}, Detail: c.Method + " " + c.Path}})
 		}
 	}
 	// Compaction must be demonstrable at the request boundary: the first request after a compaction
 	// step carries the summariser's text in its history.
 	for i, st := range r.sc.Steps {
-		if st.Summarisers == 0 || st.Op != "terminal-slash" {
+		if st.Summarisers == 0 || st.Op != "terminal-slash" || notRun[i] {
 			continue
 		}
 		for j := i + 1; j < len(r.sc.Steps); j++ {
@@ -663,14 +900,42 @@ func (r *oq3Run) score(goldenDir string, freeze bool, source string) oq3Scenario
 				continue
 			}
 			nl := oq3Label(r.sc.ID, j, r.sc.Steps[j].Op)
-			cs := byLabel[nl]
+			cs := byKey[key{nl, "/api/chat"}]
 			if len(cs) == 0 || !strings.Contains(string(cs[0].Body), "OQ3-SUMMARY") {
 				res.Invalid = append(res.Invalid, fmt.Sprintf("%s: the next request (%s) does not carry the compacted history", oq3Label(r.sc.ID, i, st.Op), nl))
 			}
 			break
 		}
 	}
+	if len(res.NotMeasured) > 0 {
+		res.Invalid = append(res.Invalid, fmt.Sprintf("%d steps not measured after a harness failure", len(res.NotMeasured)))
+	}
 	return res
+}
+
+// oq3AssertState checks a golden (a pre-G1 request) against the state its step declares:
+// assert_tools ("0" or "some"), assert_model, assert_system ("absent" or "present").
+func oq3AssertState(golden any, args map[string]string) string {
+	m, _ := golden.(map[string]any)
+	if want := args["assert_tools"]; want != "" {
+		tools, _ := m["tools"].([]any)
+		if (want == "0") != (len(tools) == 0) {
+			return fmt.Sprintf("tools: want %s, request has %d", want, len(tools))
+		}
+	}
+	if want := args["assert_model"]; want != "" {
+		if got, _ := m["model"].(string); oq3ModelBase(got) != want {
+			return fmt.Sprintf("model: want %s, request has %s", want, got)
+		}
+	}
+	if want := args["assert_system"]; want != "" {
+		msgs := oq3Messages(golden)
+		has := len(msgs) > 0 && oq3Str(msgs[0], "role") == "system"
+		if (want == "present") != has {
+			return fmt.Sprintf("system message: want %s", want)
+		}
+	}
+	return ""
 }
 
 // scoreDeliveriesOnly scores the requests captured under each dispatch step against that step's
@@ -779,6 +1044,10 @@ type oq3Summary struct {
 	OperationVerdicts     map[string]int `json:"operation_verdicts"`
 	RefusalVerdicts       map[string]int `json:"required_refusal_verdicts"`
 	AuxiliaryChecks       map[string]int `json:"auxiliary_checks"`
+	AuxiliaryBad          int            `json:"auxiliary_bad"`
+	AuxiliaryBadList      []string       `json:"auxiliary_bad_list,omitempty"`
+	RefusalsHeld          int            `json:"required_refusals_held"`
+	NotMeasured           []string       `json:"not_measured,omitempty"`
 	Valid                 bool           `json:"valid"`
 	Invalid               []string       `json:"invalid,omitempty"`
 	ScenariosRun          []string       `json:"scenarios_run"`
@@ -819,14 +1088,21 @@ func oq3Summarise(results []oq3ScenarioResult, mode, source, ledgerSHA string) o
 				s.BadObserved++
 				t.Observed++
 				t.Bad++
+			case "refused-as-required":
+				s.RefusalsHeld++
 			}
 			for _, c := range d.Verdict.Categories {
 				s.CategoryCounts[c]++
 			}
 		}
 		for _, a := range r.Auxiliary {
-			s.AuxiliaryChecks[a.Status]++
+			s.AuxiliaryChecks[a.Kind+":"+a.Status]++
+			if a.Status != "correct" {
+				s.AuxiliaryBad++
+				s.AuxiliaryBadList = append(s.AuxiliaryBadList, fmt.Sprintf("%s %s %v", a.Label, a.Kind, a.Verdict.Categories))
+			}
 		}
+		s.NotMeasured = append(s.NotMeasured, r.NotMeasured...)
 		for _, e := range r.Events {
 			switch e.Class {
 			case "operation":

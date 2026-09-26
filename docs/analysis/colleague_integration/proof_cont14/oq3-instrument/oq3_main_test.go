@@ -104,6 +104,7 @@ func TestOQ3FailureNumber(t *testing.T) {
 	for _, sc := range selected {
 		start := time.Now()
 		d := oq3StartDaemon(t)
+		d.noCapability = sc.NoCapability
 		s := oq3NewSandbox(t, sc.ID)
 		run := oq3NewRun(t, sc, d, s)
 		if strings.HasPrefix(sc.ID, "E") {
@@ -148,20 +149,27 @@ func TestOQ3FailureNumber(t *testing.T) {
 	if !sum.Valid {
 		t.Fatalf("OQ3 run is not valid: %s", strings.Join(sum.Invalid, " | "))
 	}
+	t.Logf("OQ3_AUXILIARY bad=%d refusals_held=%d", sum.AuxiliaryBad, sum.RefusalsHeld)
 	if mode == "accept" {
+		// The failure-number component of G1's combined gate (blueprint §10, G1-R-18): necessary,
+		// not sufficient (review finding 14).
 		if sum.FailureNumerator != 0 {
 			t.Fatalf("OQ3 acceptance: failure number %s", sum.FailureNumber)
 		}
-		// Operations must pass on their own evidence; "done" is accepted only for the existing
-		// terminal commands (/system, /tools, /new, /compact, /model), whose effect is checked by the
-		// deliveries that follow them. "unobserved" and "absent" fail.
+		if sum.AuxiliaryBad != 0 {
+			t.Fatalf("OQ3 acceptance: %d auxiliary failures: %s", sum.AuxiliaryBad, strings.Join(sum.AuxiliaryBadList, " | "))
+		}
+		// Operations pass on their own evidence (saves: response and committed store; reloads:
+		// response). The existing terminal commands report "done" and the /instructions commands
+		// "no-error-seen"; the deliveries after them decide. "absent" and "fail" fail.
 		for k, n := range sum.OperationVerdicts {
-			if !strings.HasSuffix(k, ":pass") && k != "terminal-slash:done" {
+			if !strings.HasSuffix(k, ":pass") && k != "terminal-slash:done" && k != "terminal-slash:no-error-seen" {
 				t.Fatalf("OQ3 acceptance: operation verdict %s x%d", k, n)
 			}
 		}
+		// A terminal refusal during a held turn is judged by that turn's continuation (a delivery).
 		for k, n := range sum.RefusalVerdicts {
-			if !strings.HasSuffix(k, ":pass") {
+			if !strings.HasSuffix(k, ":pass") && k != "terminal-slash:sent-while-running" {
 				t.Fatalf("OQ3 acceptance: required refusal %s x%d", k, n)
 			}
 		}

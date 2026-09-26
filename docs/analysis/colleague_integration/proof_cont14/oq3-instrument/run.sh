@@ -50,15 +50,32 @@ BUILD_EXIT=$?
 [ $BUILD_EXIT -eq 0 ] || fail "go build exited $BUILD_EXIT"
 BIN_SHA="$(shasum -a 256 "$SCRATCH/ollama" | cut -d' ' -f1)"
 say "binary sha256 $BIN_SHA"
+rm -f "$SCRATCH/overlay.json"
+[ ! -e "$SCRATCH/overlay.json" ] || fail "could not remove a stale overlay"
 python3 - "$HERE" "$REPO" "$SCRATCH/overlay.json" <<'PY'
-import json, sys
+import json, os, sys
 here, repo, out = sys.argv[1:4]
 files = ["oq3_harness_test.go", "oq3_smoke_test.go", "oq3_oracle_test.go", "oq3_scenarios_test.go",
          "oq3_runner_test.go", "oq3_main_test.go", "oq3_controls_test.go"]
+for f in files:
+    if not os.path.isfile(os.path.join(here, f)):
+        sys.exit(f"missing instrument file {f}")
 json.dump({"Replace": {f"{repo}/cmd/zz_{f}": f"{here}/{f}" for f in files}}, open(out, "w"), indent=1)
 PY
+OVERLAY_EXIT=$?
+[ $OVERLAY_EXIT -eq 0 ] || fail "overlay generation exited $OVERLAY_EXIT"
+python3 - "$HERE" "$REPO" "$SCRATCH/overlay.json" <<'PY' || fail "overlay does not map exactly the current instrument files"
+import json, os, sys
+here, repo, path = sys.argv[1:4]
+m = json.load(open(path))["Replace"]
+want = sorted(f for f in os.listdir(here) if f.startswith("oq3_") and f.endswith("_test.go"))
+got = sorted(os.path.basename(v) for v in m.values())
+assert got == want, (got, want)
+for k, v in m.items():
+    assert k == f"{repo}/cmd/zz_{os.path.basename(v)}" and os.path.dirname(v) == here, (k, v)
+PY
 cp "$SCRATCH/overlay.json" "$EV/overlay.json"
-shasum -a 256 "$HERE"/oq3_*_test.go > "$EV/instrument.sha256"
+shasum -a 256 "$HERE"/oq3_*_test.go "$HERE/run.sh" "$SCRATCH/overlay.json" > "$EV/instrument.sha256"
 
 go vet -overlay "$SCRATCH/overlay.json" ./cmd > "$EV/vet.log" 2>&1
 VET_EXIT=$?

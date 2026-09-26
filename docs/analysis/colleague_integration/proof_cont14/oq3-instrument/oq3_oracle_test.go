@@ -13,11 +13,34 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"sort"
 	"strings"
 )
+
+// oq3Unchanged is the expectation for auxiliary model traffic that G1 must leave exactly as it was
+// (a compaction summariser request, a preload): equal to its frozen pre-G1 golden. When it is not,
+// it names whether instructions leaked into it.
+func oq3Unchanged(observed, golden any) oq3DeliveryVerdict {
+	if reflect.DeepEqual(observed, golden) {
+		return oq3DeliveryVerdict{Correct: true}
+	}
+	var cats []string
+	b, _ := json.Marshal(observed)
+	if bytes.Contains(b, []byte("User-configured instructions")) {
+		cats = append(cats, "carries-header")
+	}
+	for _, s := range oq3AllSentinels {
+		if bytes.Contains(b, []byte(s)) {
+			cats = append(cats, "carries-profile")
+			break
+		}
+	}
+	cats = append(cats, "request-changed")
+	return oq3DeliveryVerdict{Categories: cats, Detail: oq3FirstDifference(observed, golden)}
+}
 
 // oq3Texts are the contrasting instruction profiles. Each carries sentinels at its start, middle and
 // end, a line break and a non-ASCII character, so truncation, re-encoding or partial loss is visible.
@@ -72,13 +95,51 @@ func oq3Normalise(body []byte, sandboxRoot string) (any, error) {
 	if dec.More() {
 		return nil, fmt.Errorf("more than one JSON value")
 	}
+	// The sandbox is spelt two ways on macOS (/var/... and its resolved /private/var/...); the
+	// resolved spelling is replaced first so no machine-dependent prefix survives (review finding 7).
+	var roots []string
+	if sandboxRoot != "" {
+		if resolved, err := filepath.EvalSymlinks(sandboxRoot); err == nil && resolved != sandboxRoot {
+			roots = append(roots, resolved)
+		}
+		roots = append(roots, sandboxRoot)
+	}
 	return oq3Walk(v, func(s string) string {
 		s = oq3DateRE.ReplaceAllString(s, "Current date: <DATE>.")
-		if sandboxRoot != "" {
-			s = strings.ReplaceAll(s, sandboxRoot, "<SANDBOX>")
+		for _, r := range roots {
+			s = strings.ReplaceAll(s, r, "<SANDBOX>")
 		}
 		return s
 	}), nil
+}
+
+// oq3AdmitReserve accepts an admission object that §6.3 A1-A2 permit for a local request: version
+// 1 and, optionally, a reserve that is non-negative and at most half the effective context (the
+// fixture's context is 32768). It returns false for anything else (review finding 6).
+func oq3AdmitReserve(adm any) bool {
+	m, ok := adm.(map[string]any)
+	if !ok {
+		return false
+	}
+	for k := range m {
+		if k != "version" && k != "reserve" {
+			return false
+		}
+	}
+	if v, ok := m["version"].(json.Number); !ok || v.String() != "1" {
+		return false
+	}
+	if r, ok := m["reserve"]; ok {
+		n, isNum := r.(json.Number)
+		if !isNum {
+			return false
+		}
+		iv, err := n.Int64()
+		if err != nil || iv < 0 || iv > 16384 {
+			return false
+		}
+	}
+	return true
 }
 
 func oq3Walk(v any, f func(string) string) any {
@@ -202,10 +263,27 @@ type oq3DeliveryVerdict struct {
 // differ, names every category of difference it can identify. An observed request that differs is
 // one bad delivery, however many categories it has.
 func oq3Score(observed, expected any, e oq3Expect) oq3DeliveryVerdict {
-	if reflect.DeepEqual(observed, expected) {
+	cats := map[string]bool{}
+	// A permitted reserve in the observed admission object is not a difference (finding 6); an
+	// admission object outside A1-A2 is its own category.
+	if om, ok := observed.(map[string]any); ok {
+		if em, ok := expected.(map[string]any); ok {
+			if oa, has := om["admission"]; has {
+				if _, want := em["admission"]; want {
+					if oq3AdmitReserve(oa) {
+						em = oq3DeepCopy(em).(map[string]any)
+						em["admission"] = oq3DeepCopy(oa)
+						expected = em
+					} else {
+						cats["admission-invalid"] = true
+					}
+				}
+			}
+		}
+	}
+	if len(cats) == 0 && reflect.DeepEqual(observed, expected) {
 		return oq3DeliveryVerdict{Correct: true}
 	}
-	cats := map[string]bool{}
 	var notes []string
 	obsMsgs := oq3Messages(observed)
 	expMsgs := oq3Messages(expected)

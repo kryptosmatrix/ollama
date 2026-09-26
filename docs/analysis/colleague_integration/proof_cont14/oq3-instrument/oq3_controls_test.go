@@ -11,6 +11,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"path/filepath"
 	"reflect"
 	"sort"
 	"strings"
@@ -122,6 +123,37 @@ func TestOQ3ScorerControls(t *testing.T) {
 		t.Logf("control %-36s -> %v", c.name, v.Categories)
 	}
 
+	// 2b. Admission objects (review finding 6): a reserve within A2's bounds is correct; a wrong
+	// version, an out-of-range reserve or an unknown member is its own category.
+	withAdm := func(adm string) string {
+		return `{"model":"oq3-model","messages":[` + sys(ms1+"\n\n"+hA11+A) + `,` + user + `]` + tail + `,"admission":` + adm + `}`
+	}
+	if v := oq3Score(oq3MustNorm(t, withAdm(`{"version":1,"reserve":2048}`)), exp, eD); !v.Correct {
+		t.Fatalf("a permitted reserve scored %+v", v)
+	}
+	for _, bad := range []string{`{"version":2}`, `{"version":1,"reserve":20000}`, `{"version":1,"reserve":-1}`, `{"version":1,"extra":true}`} {
+		v := oq3Score(oq3MustNorm(t, withAdm(bad)), exp, eD)
+		if v.Correct || !strings.Contains(strings.Join(v.Categories, ","), "admission-invalid") {
+			t.Fatalf("admission %s scored %+v", bad, v)
+		}
+	}
+	// 2c. Normalisation removes both spellings of the sandbox path (review finding 7).
+	root := t.TempDir()
+	resolved, err := filepath.EvalSymlinks(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	n, err := oq3Normalise([]byte(`{"a":`+oq3JSONString(resolved+"/work")+`,"b":`+oq3JSONString(root+"/work")+`}`), root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if nm, _ := n.(map[string]any); nm["a"] != "<SANDBOX>/work" || nm["b"] != "<SANDBOX>/work" {
+		t.Fatalf("normalisation left a machine-dependent path: %v (root %s, resolved %s)", nm, root, resolved)
+	}
+	if resolved == root {
+		t.Log("note: the temporary root has no symlinked spelling on this machine; the resolved-path arm is not exercised")
+	}
+
 	// 3. Summariser expectations.
 	clean := `{"model":"oq3-model","messages":[{"role":"system","content":"Summarize the archived part of an Ollama agent conversation. Keep goals."},{"role":"user","content":"archive"}]}`
 	if v := oq3CheckSummariser(oq3MustNorm(t, clean)); !v.Correct {
@@ -198,6 +230,48 @@ func TestOQ3RunnerControls(t *testing.T) {
 	}
 
 	goldens := t.TempDir()
+	// Auxiliary faults (review findings 2-4): each must be reported as an auxiliary failure, which
+	// gates acceptance; an unknown inference endpoint must make the run invalid.
+	for _, fault := range []string{"undeclared-summariser", "leak-in-metadata", "unknown-endpoint"} {
+		d := oq3StartDaemon(t)
+		s := oq3NewSandbox(t, "AUX-"+fault)
+		sc := oq3Scenario{ID: "AUX", Trials: []oq3Trial{{"AUX-X", famSave, "desktop", ""}},
+			Steps: []oq3Step{h("desktop-start"), dTurn("AUX-X", "X", "OQ3 auxiliary control turn.", nD()), h("desktop-stop")}}
+		run := oq3NewRun(t, sc, d, s)
+		run.execute()
+		d.setLabel(oq3Label("AUX", 1, "desktop-turn"))
+		switch fault {
+		case "undeclared-summariser":
+			oq3PostRaw(t, d, []byte(`{"model":"oq3-model","messages":[{"role":"system","content":"`+oq3CompactionSystemPrefix+` extra"},{"role":"user","content":"archive"}]}`))
+		case "leak-in-metadata":
+			resp, err := http.Post(d.srv.URL+"/api/show", "application/json", strings.NewReader(`{"model":"oq3-model","system":"SENTINEL-A-MID-9e41"}`))
+			if err != nil {
+				t.Fatal(err)
+			}
+			resp.Body.Close()
+		case "unknown-endpoint":
+			resp, err := http.Post(d.srv.URL+"/api/embed", "application/json", strings.NewReader(`{"model":"oq3-model","input":"x"}`))
+			if err != nil {
+				t.Fatal(err)
+			}
+			resp.Body.Close()
+		}
+		res := run.score(goldens, true, "auxiliary control")
+		sum := oq3Summarise([]oq3ScenarioResult{res}, "control", "auxiliary control", "none")
+		switch fault {
+		case "unknown-endpoint":
+			if len(res.Invalid) == 0 {
+				t.Fatalf("an unknown inference endpoint did not make the run invalid")
+			}
+			t.Logf("auxiliary fault %-22s -> invalid: %v", fault, res.Invalid)
+		default:
+			if sum.AuxiliaryBad == 0 {
+				t.Fatalf("auxiliary fault %s was not reported", fault)
+			}
+			t.Logf("auxiliary fault %-22s -> %v", fault, sum.AuxiliaryBadList)
+		}
+	}
+
 	// Harness faults on a real desktop scenario: each must make the run invalid, not change the number.
 	for _, fault := range []string{"malformed-capture", "extra-request", "unknown-label", "none"} {
 		d := oq3StartDaemon(t)
@@ -243,7 +317,11 @@ func TestOQ3RunnerControls(t *testing.T) {
 	if len(res.Invalid) == 0 {
 		t.Fatal("a failing child process did not make the run invalid")
 	}
-	t.Logf("failing child -> invalid: %v", res.Invalid)
+	// Review finding 12: steps not run after a harness failure are not measured, never missing.
+	if sum := oq3Summarise([]oq3ScenarioResult{res}, "control", "failing child", "none"); sum.FailureNumerator != 0 || len(sum.NotMeasured) == 0 {
+		t.Fatalf("a failing child changed the number: numerator %d, not measured %v", sum.FailureNumerator, sum.NotMeasured)
+	}
+	t.Logf("failing child -> invalid: %v; not measured: %v", res.Invalid, res.NotMeasured)
 }
 
 func oq3TrialIn(sc oq3Scenario, id string) bool {

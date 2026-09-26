@@ -38,6 +38,8 @@ type oq3Scenario struct {
 	Title  string     `json:"title"`
 	Trials []oq3Trial `json:"trials"`
 	Steps  []oq3Step  `json:"steps"`
+	// NoCapability runs the scenario against a daemon that does not advertise chat.admission.v1.
+	NoCapability bool `json:"no_capability,omitempty"`
 }
 
 // The six families named by the failure number (blueprint line 18).
@@ -74,10 +76,12 @@ func dSave(expected int, enabled bool, text string, wantRev int) oq3Step {
 		Want: map[string]string{"revision": fmt.Sprint(wantRev), "enabled": fmt.Sprint(enabled), "text": text}}
 }
 
-// cliSet saves through the designated terminal CLI (`ollama instructions set`, §7).
+// cliSet saves through the designated terminal CLI (`ollama instructions set`, §7), which saves the
+// file's text as an enabled profile (blueprint §7, resolved in continuation 14); every save in the
+// ledger changes the content, so it commits revision expected+1.
 func cliSet(expected int, text string) oq3Step {
 	return oq3Step{Op: "cli-set", Class: "operation", Args: map[string]string{"expected_revision": fmt.Sprint(expected), "text": text},
-		Want: map[string]string{"exit": "0"}}
+		Want: map[string]string{"exit": "0", "revision": fmt.Sprint(expected + 1)}}
 }
 
 func dTurn(trial, conv, prompt string, ex ...oq3Expect) oq3Step {
@@ -117,7 +121,7 @@ func oq3AllScenarios() []oq3Scenario {
 				dTurn("D0-C", "C", "OQ3 D0 turn 1: a plain question.", nD()),
 				with(dTurn("D0-C", "C", "OQ3 D0 turn 2: with thinking requested.", nD()), "think", "true"),
 				with(dTurn("D0-C", "C", "OQ3 D0 turn 3: with a text attachment.", nD()), "attachment", "notes.txt"),
-				with(dTurn("D0-C", "C", "OQ3 D0 turn 4: with web search enabled.", nD()), "web_search", "true"),
+				with(dTurn("D0-C", "C", "OQ3 D0 turn 4: with web search enabled.", nD()), "web_search", "true", "assert_tools", "some"),
 				h("desktop-stop")}},
 		{ID: "D1", Title: "desktop save, restart, new conversation",
 			Trials: []oq3Trial{{"D1-X", famSave, "desktop", ""}},
@@ -211,21 +215,21 @@ func oq3AllScenarios() []oq3Scenario {
 			Steps: []oq3Step{h("desktop-start"), dSave(0, true, "A", 1),
 				dTurn("D10-X", "X", "OQ3 D10 turn 1.", cD(1, 1, "A")),
 				dSave(1, true, "B", 2),
-				with(dTurn("D10-X", "X", "OQ3 D10 turn 2 with web search.", cD(1, 1, "A")), "web_search", "true"),
-				with(dTurn("D10-X", "X", "OQ3 D10 turn 3 on another model.", cD(1, 1, "A")), "model", oq3Model2),
+				with(dTurn("D10-X", "X", "OQ3 D10 turn 2 with web search.", cD(1, 1, "A")), "web_search", "true", "assert_tools", "some"),
+				with(dTurn("D10-X", "X", "OQ3 D10 turn 3 on another model.", cD(1, 1, "A")), "model", oq3Model2, "assert_model", oq3Model2),
 				h("desktop-stop")}},
 
 		// ------------------------------------------------------------------ terminal, launch-function arm
-		{ID: "T0", Title: "terminal unconfigured compatibility control (/system off and on, /tools off)",
+		{ID: "T0", Title: "terminal unconfigured compatibility control (/system off and on, /tools toggled off)",
 			Trials: []oq3Trial{{"T0-X", famDisable, "terminal", "unconfigured control"}},
 			Steps: []oq3Step{h("terminal-start"),
 				tTurn("T0-X", "OQ3 T0 turn 1.", nT()),
 				tSlash("/system off"),
-				tTurn("T0-X", "OQ3 T0 turn 2, built-in prompt off.", nT()),
+				with(tTurn("T0-X", "OQ3 T0 turn 2, built-in prompt off.", nT()), "assert_system", "absent"),
 				tSlash("/system on"),
-				tTurn("T0-X", "OQ3 T0 turn 3, built-in prompt on.", nT()),
-				tSlash("/tools off"),
-				tTurn("T0-X", "OQ3 T0 turn 4, tools off.", nT()),
+				with(tTurn("T0-X", "OQ3 T0 turn 3, built-in prompt on.", nT()), "assert_system", "present"),
+				tSlash("/tools"),
+				with(tTurn("T0-X", "OQ3 T0 turn 4, tools toggled off.", nT()), "assert_tools", "0"),
 				h("terminal-stop")}},
 		{ID: "T1", Title: "terminal save, new process, two tool rounds",
 			Trials: []oq3Trial{{"T1-X", famSave, "terminal", "every tool continuation carries the carrier"}},
@@ -241,8 +245,12 @@ func oq3AllScenarios() []oq3Scenario {
 				tTurn("T2-X", "OQ3 T2 X turn 2.", cT(1, 1, "A")),
 				tSlash("/new"),
 				tTurn("T2-Y", "OQ3 T2 Y turn 1.", cT(2, 1, "B")),
+				cliSet(2, "A"),
+				tSlash("/instructions reload"),
+				tTurn("T2-Y", "OQ3 T2 Y turn 2, after a reload inside the new conversation.", cT(3, 2, "A")),
 				h("terminal-stop"),
-				{Op: "store-identity", Class: "operation", Want: map[string]string{"min_terminal": "2"}}}},
+				{Op: "store-identity", Class: "operation", Want: map[string]string{"min_terminal": "2"}},
+				{Op: "store-events", Class: "operation"}}},
 		{ID: "T3", Title: "terminal explicit reload",
 			Trials: []oq3Trial{{"T3-X", famReload, "terminal", ""}},
 			Steps: []oq3Step{cliSet(0, "A"), h("terminal-start"),
@@ -262,9 +270,11 @@ func oq3AllScenarios() []oq3Scenario {
 				h("terminal-stop"),
 				{Op: "store-identity", Class: "operation", Want: map[string]string{"min_terminal": "2"}}}},
 		{ID: "T5", Title: "terminal binding timing: a session idle at A binds A before its first prompt",
-			Trials: []oq3Trial{{"T5-X", famSave, "terminal", "B saved while idle before the first prompt"}},
+			Trials: []oq3Trial{{"T5-X", famSave, "terminal", "B saved while idle before the first prompt"}, {"T5-Y", famSave, "terminal", "the save took effect for a new conversation"}},
 			Steps: []oq3Step{cliSet(0, "A"), h("terminal-start"), cliSet(1, "B"),
 				tTurn("T5-X", "OQ3 T5 first prompt.", cT(1, 1, "A")),
+				tSlash("/new"),
+				tTurn("T5-Y", "OQ3 T5 new conversation.", cT(2, 1, "B")),
 				h("terminal-stop")}},
 		{ID: "T6", Title: "terminal compaction: manual, repeated, after reload, automatic",
 			Trials: []oq3Trial{{"T6-X", famCompact, "terminal", ""}},
@@ -289,15 +299,15 @@ func oq3AllScenarios() []oq3Scenario {
 			Trials: []oq3Trial{{"T7-X", famEdit, "terminal", "/system off then on"}},
 			Steps: []oq3Step{cliSet(0, "A"), h("terminal-start"),
 				tSlash("/system off"),
-				tTurn("T7-X", "OQ3 T7 turn 1, built-in prompt off.", cT(1, 1, "A")),
+				with(tTurn("T7-X", "OQ3 T7 turn 1, built-in prompt off.", cT(1, 1, "A")), "assert_system", "absent"),
 				tSlash("/system on"),
-				tTurn("T7-X", "OQ3 T7 turn 2, built-in prompt on.", cT(1, 1, "A")),
+				with(tTurn("T7-X", "OQ3 T7 turn 2, built-in prompt on.", cT(1, 1, "A")), "assert_system", "present"),
 				h("terminal-stop")}},
 		{ID: "T8", Title: "terminal held turn: a save from another process completes, a reload is refused, then reload at idle",
 			Trials: []oq3Trial{{"T8-X", famReload, "terminal", ""}},
 			Steps: []oq3Step{cliSet(0, "A"), h("terminal-start"),
 				tTurn("T8-X", "OQ3 T8 turn 1.", cT(1, 1, "A")),
-				with(tTurn("T8-X", "OQ3 T8 turn 2, held by the daemon.", cT(1, 1, "A")), "hold", "1"),
+				with(tTurn("T8-X", "OQ3 T8 turn 2 "+oq3ToolTrigger+" held by the daemon; its continuation must keep revision 1.", cT(1, 1, "A"), cT(1, 1, "A")), "hold", "1", "tool_rounds", "1"),
 				cliSet(1, "B"),
 				{Op: "terminal-slash", Class: "required-refusal", Args: map[string]string{"cmd": "/instructions reload"}, Want: map[string]string{"refused": "true"}},
 				h("terminal-await"),
@@ -305,15 +315,27 @@ func oq3AllScenarios() []oq3Scenario {
 				tTurn("T8-X", "OQ3 T8 turn 3.", cT(2, 2, "B")),
 				h("terminal-stop")}},
 		{ID: "T9", Title: "terminal tools and model switches keep the pinned revision",
-			Trials: []oq3Trial{{"T9-X", famEdit, "terminal", "/tools off, /tools on, /model"}},
+			Trials: []oq3Trial{{"T9-X", famEdit, "terminal", "/tools toggled off and on, /model"}},
 			Steps: []oq3Step{cliSet(0, "A"), h("terminal-start"),
 				tTurn("T9-X", "OQ3 T9 turn 1.", cT(1, 1, "A")),
 				cliSet(1, "B"),
-				tSlash("/tools off"),
-				tTurn("T9-X", "OQ3 T9 turn 2, tools off.", cT(1, 1, "A")),
-				tSlash("/tools on"),
+				tSlash("/tools"),
+				with(tTurn("T9-X", "OQ3 T9 turn 2, tools toggled off.", cT(1, 1, "A")), "assert_tools", "0"),
+				tSlash("/tools"),
 				with(tSlash("/model"), "pick", oq3Model2),
-				tTurn("T9-X", "OQ3 T9 turn 3, on another model.", cT(1, 1, "A")),
+				with(tTurn("T9-X", "OQ3 T9 turn 3, tools back on, another model.", cT(1, 1, "A")), "assert_tools", "some", "assert_model", oq3Model2),
+				h("terminal-stop")}},
+
+		// ------------------------------------------------------------------ capability-less daemon (A12)
+		{ID: "D11", Title: "desktop against a daemon without chat.admission.v1: no carrier-bearing request may be sent",
+			Trials: []oq3Trial{{"D11-X", famSave, "desktop", "required refusal (A12)"}}, NoCapability: true,
+			Steps: []oq3Step{h("desktop-start"), dSave(0, true, "A", 1),
+				{Op: "desktop-turn", Class: "required-no-dispatch", Trial: "D11-X", Conv: "X", Prompt: "OQ3 D11 turn 1.", Args: map[string]string{}},
+				h("desktop-stop")}},
+		{ID: "T10", Title: "terminal against a daemon without chat.admission.v1: no carrier-bearing request may be sent",
+			Trials: []oq3Trial{{"T10-X", famSave, "terminal", "required refusal (A12)"}}, NoCapability: true,
+			Steps: []oq3Step{cliSet(0, "A"), h("terminal-start"),
+				{Op: "terminal-turn", Class: "required-no-dispatch", Trial: "T10-X", Prompt: "OQ3 T10 turn 1.", Args: map[string]string{}},
 				h("terminal-stop")}},
 
 		// ------------------------------------------------------------------ entry arm (built binary)
