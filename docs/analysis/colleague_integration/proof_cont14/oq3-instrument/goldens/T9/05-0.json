@@ -1,0 +1,38 @@
+{
+  "scenario": "T9",
+  "step": 5,
+  "index": 0,
+  "label": "T9/05/terminal-turn",
+  "trial": "T9-X",
+  "expect": {
+    "carrier": true,
+    "revision": 1,
+    "generation": 1,
+    "text": "A",
+    "adapter": "terminal"
+  },
+  "kind": "delivery",
+  "request": {
+    "messages": [
+      {
+        "content": "You are running in Ollama, in a harness to help the user accomplish tasks, and the model is oq3-model.\n\nCurrent date: \u003cDATE\u003e.\n\nBe concise, practical, and action-oriented. Use tools when they materially help. Verify current or fast-changing facts with web tools when available; otherwise state uncertainty.\n\nUse bash carefully. Prefer read-only inspection first. Stay within the current working directory unless explicitly asked. Surface intent before risky actions such as writes, deletes, moves, installs, git state changes, service changes, sudo, secrets access, network scripts, or commands outside the working directory. Request approval when required and do not work around denied approvals.\n\nTell the user about meaningful changes, verification, failures, blockers, assumptions, and risks. Summarize routine tool output instead of dumping it.\nCurrent working directory: \"\u003cSANDBOX\u003e/work\".\n\nOQ3 model-system text for oq3-model: SENTINEL-MS1-7f3a.",
+        "role": "system"
+      },
+      {
+        "content": "OQ3 T9 turn 1.",
+        "role": "user"
+      },
+      {
+        "content": "OQ3-REPLY-001",
+        "role": "assistant"
+      },
+      {
+        "content": "OQ3 T9 turn 2, tools toggled off.",
+        "role": "user"
+      }
+    ],
+    "model": "oq3-model",
+    "options": {}
+  },
+  "source": "e23aeb5d71ee7e6babc03c6137c13b1d2928d3a4 binary 0a882f5598d4c82c7dda0794cb99ca13b0489ff2e0ad1c586c9704b2a1f010f1"
+}

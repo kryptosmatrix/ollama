@@ -1,0 +1,2775 @@
+[
+  {
+    "id": "D0",
+    "title": "desktop unconfigured compatibility control (tools, thinking, attachment)",
+    "trials": [
+      {
+        "id": "D0-C",
+        "family": "disable",
+        "adapter": "desktop",
+        "note": "unconfigured control"
+      }
+    ],
+    "steps": [
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "auth-control",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D0-C",
+        "conv": "C",
+        "prompt": "OQ3 D0 turn 1: a plain question.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D0-C",
+        "conv": "C",
+        "prompt": "OQ3 D0 turn 2: with thinking requested.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ],
+        "args": {
+          "think": "true"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D0-C",
+        "conv": "C",
+        "prompt": "OQ3 D0 turn 3: with a text attachment.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ],
+        "args": {
+          "attachment": "notes.txt"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D0-C",
+        "conv": "C",
+        "prompt": "OQ3 D0 turn 4: with web search enabled.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ],
+        "args": {
+          "assert_tools": "some",
+          "web_search": "true"
+        }
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "D1",
+    "title": "desktop save, restart, new conversation",
+    "trials": [
+      {
+        "id": "D1-X",
+        "family": "save/restart/new",
+        "adapter": "desktop"
+      }
+    ],
+    "steps": [
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "1",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D1-X",
+        "conv": "X",
+        "prompt": "OQ3 D1 turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D1-X",
+        "conv": "X",
+        "prompt": "OQ3 D1 turn 2.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "D2",
+    "title": "desktop edit while a conversation continues",
+    "trials": [
+      {
+        "id": "D2-X",
+        "family": "edit/continue",
+        "adapter": "desktop"
+      },
+      {
+        "id": "D2-Y",
+        "family": "save/restart/new",
+        "adapter": "desktop"
+      }
+    ],
+    "steps": [
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "1",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D2-X",
+        "conv": "X",
+        "prompt": "OQ3 D2 X turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "2",
+          "text": "B"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "1",
+          "text": "B"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D2-X",
+        "conv": "X",
+        "prompt": "OQ3 D2 X turn 2.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D2-X",
+        "conv": "X",
+        "prompt": "OQ3 D2 X turn 3.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D2-Y",
+        "conv": "Y",
+        "prompt": "OQ3 D2 Y turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 2,
+            "generation": 1,
+            "text": "B",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "D3",
+    "title": "desktop explicit reload, then an idempotent reload",
+    "trials": [
+      {
+        "id": "D3-X",
+        "family": "explicit reload",
+        "adapter": "desktop"
+      }
+    ],
+    "steps": [
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "1",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D3-X",
+        "conv": "X",
+        "prompt": "OQ3 D3 turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "2",
+          "text": "B"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "1",
+          "text": "B"
+        }
+      },
+      {
+        "op": "desktop-reload",
+        "class": "operation",
+        "conv": "X",
+        "want": {
+          "generation": "2",
+          "revision": "2",
+          "status": "200"
+        },
+        "args": {
+          "expected_generation": "1",
+          "expected_target_revision": "2"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D3-X",
+        "conv": "X",
+        "prompt": "OQ3 D3 turn 2.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 2,
+            "generation": 2,
+            "text": "B",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-reload",
+        "class": "operation",
+        "conv": "X",
+        "want": {
+          "generation": "2",
+          "revision": "2",
+          "status": "200"
+        },
+        "args": {
+          "expected_generation": "2",
+          "expected_target_revision": "2"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D3-X",
+        "conv": "X",
+        "prompt": "OQ3 D3 turn 3.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 2,
+            "generation": 2,
+            "text": "B",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "D4",
+    "title": "desktop disable, restart while disabled, restore, reset",
+    "trials": [
+      {
+        "id": "D4-X",
+        "family": "disable",
+        "adapter": "desktop",
+        "note": "active conversation keeps A after a global disable, then adopts it"
+      },
+      {
+        "id": "D4-Z",
+        "family": "disable",
+        "adapter": "desktop"
+      },
+      {
+        "id": "D4-W",
+        "family": "disable",
+        "adapter": "desktop",
+        "note": "restart while disabled"
+      },
+      {
+        "id": "D4-V",
+        "family": "save/restart/new",
+        "adapter": "desktop",
+        "note": "restored text"
+      },
+      {
+        "id": "D4-U",
+        "family": "disable",
+        "adapter": "desktop",
+        "note": "reset"
+      }
+    ],
+    "steps": [
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "1",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D4-X",
+        "conv": "X",
+        "prompt": "OQ3 D4 X turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "false",
+          "revision": "2",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "false",
+          "expected_revision": "1",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D4-X",
+        "conv": "X",
+        "prompt": "OQ3 D4 X turn 2.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D4-Z",
+        "conv": "Z",
+        "prompt": "OQ3 D4 Z turn 1.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-reload",
+        "class": "operation",
+        "conv": "X",
+        "want": {
+          "generation": "2",
+          "revision": "2",
+          "status": "200"
+        },
+        "args": {
+          "expected_generation": "1",
+          "expected_target_revision": "2"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D4-X",
+        "conv": "X",
+        "prompt": "OQ3 D4 X turn 3.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D4-W",
+        "conv": "W",
+        "prompt": "OQ3 D4 W turn 1.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "3",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "2",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D4-V",
+        "conv": "V",
+        "prompt": "OQ3 D4 V turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 3,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "false",
+          "revision": "4",
+          "text": ""
+        },
+        "args": {
+          "enabled": "false",
+          "expected_revision": "3",
+          "text": ""
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D4-U",
+        "conv": "U",
+        "prompt": "OQ3 D4 U turn 1.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "D5",
+    "title": "desktop legacy transcript: revision zero, then explicit adoption",
+    "trials": [
+      {
+        "id": "D5-L",
+        "family": "explicit reload",
+        "adapter": "desktop",
+        "note": "legacy transcript written before G1"
+      }
+    ],
+    "steps": [
+      {
+        "op": "legacy-fixture",
+        "class": "harness",
+        "args": {
+          "conv": "L"
+        }
+      },
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "1",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D5-L",
+        "conv": "L",
+        "prompt": "OQ3 D5 legacy turn 2.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-reload",
+        "class": "operation",
+        "conv": "L",
+        "want": {
+          "generation": "2",
+          "revision": "1",
+          "status": "200"
+        },
+        "args": {
+          "expected_generation": "1",
+          "expected_target_revision": "1"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D5-L",
+        "conv": "L",
+        "prompt": "OQ3 D5 legacy turn 3.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 2,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "D6",
+    "title": "desktop restart and reopen a pinned conversation",
+    "trials": [
+      {
+        "id": "D6-X",
+        "family": "edit/continue",
+        "adapter": "desktop",
+        "note": "pinned across restart"
+      },
+      {
+        "id": "D6-Y",
+        "family": "save/restart/new",
+        "adapter": "desktop"
+      }
+    ],
+    "steps": [
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "1",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D6-X",
+        "conv": "X",
+        "prompt": "OQ3 D6 X turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "2",
+          "text": "B"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "1",
+          "text": "B"
+        }
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D6-X",
+        "conv": "X",
+        "prompt": "OQ3 D6 X turn 2.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D6-Y",
+        "conv": "Y",
+        "prompt": "OQ3 D6 Y turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 2,
+            "generation": 1,
+            "text": "B",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "D7",
+    "title": "desktop binding timing: an ID allocated before a save binds at its first turn",
+    "trials": [
+      {
+        "id": "D7-Q",
+        "family": "save/restart/new",
+        "adapter": "desktop",
+        "note": "draft allocated at A, first turn after B"
+      }
+    ],
+    "steps": [
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "1",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-draft",
+        "class": "operation",
+        "conv": "Q",
+        "want": {
+          "status": "200"
+        }
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "2",
+          "text": "B"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "1",
+          "text": "B"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D7-Q",
+        "conv": "Q",
+        "prompt": "OQ3 D7 first turn.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 2,
+            "generation": 1,
+            "text": "B",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "D8",
+    "title": "desktop failed first turn, retry under the same ID, then a new ID",
+    "trials": [
+      {
+        "id": "D8-F",
+        "family": "save/restart/new",
+        "adapter": "desktop",
+        "note": "reserved revision survives a failed first turn"
+      },
+      {
+        "id": "D8-G",
+        "family": "save/restart/new",
+        "adapter": "desktop"
+      }
+    ],
+    "steps": [
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "1",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D8-F",
+        "conv": "F",
+        "prompt": "OQ3 D8 first turn, answered with an injected failure.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ],
+        "args": {
+          "fail": "500"
+        }
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "2",
+          "text": "B"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "1",
+          "text": "B"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D8-F",
+        "conv": "F",
+        "prompt": "OQ3 D8 retry under the same ID.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D8-G",
+        "conv": "G",
+        "prompt": "OQ3 D8 new conversation.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 2,
+            "generation": 1,
+            "text": "B",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "D9",
+    "title": "desktop held turn: a save from another process completes, a reload is refused, then reload at idle",
+    "trials": [
+      {
+        "id": "D9-X",
+        "family": "explicit reload",
+        "adapter": "desktop"
+      }
+    ],
+    "steps": [
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "1",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D9-X",
+        "conv": "X",
+        "prompt": "OQ3 D9 turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D9-X",
+        "conv": "X",
+        "prompt": "OQ3 D9 turn 2, held by the daemon.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ],
+        "args": {
+          "hold": "1"
+        }
+      },
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "2"
+        },
+        "args": {
+          "expected_revision": "1",
+          "text": "B"
+        }
+      },
+      {
+        "op": "desktop-reload",
+        "class": "required-refusal",
+        "conv": "X",
+        "want": {
+          "code": "conversation_busy",
+          "status": "409"
+        },
+        "args": {
+          "expected_generation": "1",
+          "expected_target_revision": "2"
+        }
+      },
+      {
+        "op": "desktop-await",
+        "class": "harness",
+        "args": {
+          "conv": "X"
+        }
+      },
+      {
+        "op": "desktop-reload",
+        "class": "operation",
+        "conv": "X",
+        "want": {
+          "generation": "2",
+          "revision": "2",
+          "status": "200"
+        },
+        "args": {
+          "expected_generation": "1",
+          "expected_target_revision": "2"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D9-X",
+        "conv": "X",
+        "prompt": "OQ3 D9 turn 3.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 2,
+            "generation": 2,
+            "text": "B",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "D10",
+    "title": "desktop tool and model change keep the pinned revision",
+    "trials": [
+      {
+        "id": "D10-X",
+        "family": "edit/continue",
+        "adapter": "desktop",
+        "note": "web search on, then another model"
+      }
+    ],
+    "steps": [
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "1",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D10-X",
+        "conv": "X",
+        "prompt": "OQ3 D10 turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "2",
+          "text": "B"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "1",
+          "text": "B"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D10-X",
+        "conv": "X",
+        "prompt": "OQ3 D10 turn 2 with web search.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ],
+        "args": {
+          "assert_tools": "some",
+          "web_search": "true"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D10-X",
+        "conv": "X",
+        "prompt": "OQ3 D10 turn 3 on another model.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ],
+        "args": {
+          "assert_model": "oq3-model-2",
+          "model": "oq3-model-2"
+        }
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "T0",
+    "title": "terminal unconfigured compatibility control (/system off and on, /tools toggled off)",
+    "trials": [
+      {
+        "id": "T0-X",
+        "family": "disable",
+        "adapter": "terminal",
+        "note": "unconfigured control"
+      }
+    ],
+    "steps": [
+      {
+        "op": "terminal-start",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T0-X",
+        "prompt": "OQ3 T0 turn 1.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/system off"
+        }
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T0-X",
+        "prompt": "OQ3 T0 turn 2, built-in prompt off.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "terminal"
+          }
+        ],
+        "args": {
+          "assert_system": "absent"
+        }
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/system on"
+        }
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T0-X",
+        "prompt": "OQ3 T0 turn 3, built-in prompt on.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "terminal"
+          }
+        ],
+        "args": {
+          "assert_system": "present"
+        }
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/tools"
+        }
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T0-X",
+        "prompt": "OQ3 T0 turn 4, tools toggled off.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "terminal"
+          }
+        ],
+        "args": {
+          "assert_tools": "0"
+        }
+      },
+      {
+        "op": "terminal-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "T1",
+    "title": "terminal save, new process, two tool rounds",
+    "trials": [
+      {
+        "id": "T1-X",
+        "family": "save/restart/new",
+        "adapter": "terminal",
+        "note": "every tool continuation carries the carrier"
+      }
+    ],
+    "steps": [
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "1"
+        },
+        "args": {
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "terminal-start",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T1-X",
+        "prompt": "OQ3 T1 turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T1-X",
+        "prompt": "OQ3 T1 turn 2 [[OQ3-TOOLCALL]] read the fixture twice.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          },
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          },
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ],
+        "args": {
+          "tool_rounds": "2"
+        }
+      },
+      {
+        "op": "terminal-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "T2",
+    "title": "terminal edit while continuing, then /new",
+    "trials": [
+      {
+        "id": "T2-X",
+        "family": "edit/continue",
+        "adapter": "terminal"
+      },
+      {
+        "id": "T2-Y",
+        "family": "terminal reset",
+        "adapter": "terminal",
+        "note": "/new"
+      }
+    ],
+    "steps": [
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "1"
+        },
+        "args": {
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "terminal-start",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T2-X",
+        "prompt": "OQ3 T2 X turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "2"
+        },
+        "args": {
+          "expected_revision": "1",
+          "text": "B"
+        }
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T2-X",
+        "prompt": "OQ3 T2 X turn 2.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/new"
+        }
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T2-Y",
+        "prompt": "OQ3 T2 Y turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 2,
+            "generation": 1,
+            "text": "B",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "3"
+        },
+        "args": {
+          "expected_revision": "2",
+          "text": "A"
+        }
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/instructions reload"
+        }
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T2-Y",
+        "prompt": "OQ3 T2 Y turn 2, after a reload inside the new conversation.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 3,
+            "generation": 2,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-stop",
+        "class": "harness"
+      },
+      {
+        "op": "store-identity",
+        "class": "operation",
+        "want": {
+          "min_terminal": "2"
+        }
+      },
+      {
+        "op": "store-events",
+        "class": "operation"
+      }
+    ]
+  },
+  {
+    "id": "T3",
+    "title": "terminal explicit reload",
+    "trials": [
+      {
+        "id": "T3-X",
+        "family": "explicit reload",
+        "adapter": "terminal"
+      }
+    ],
+    "steps": [
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "1"
+        },
+        "args": {
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "terminal-start",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T3-X",
+        "prompt": "OQ3 T3 turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "2"
+        },
+        "args": {
+          "expected_revision": "1",
+          "text": "B"
+        }
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/instructions reload"
+        }
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T3-X",
+        "prompt": "OQ3 T3 turn 2.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 2,
+            "generation": 2,
+            "text": "B",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "T4",
+    "title": "terminal disable, then a new process while disabled",
+    "trials": [
+      {
+        "id": "T4-X",
+        "family": "disable",
+        "adapter": "terminal"
+      },
+      {
+        "id": "T4-Y",
+        "family": "disable",
+        "adapter": "terminal",
+        "note": "new process after disable"
+      }
+    ],
+    "steps": [
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "1"
+        },
+        "args": {
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "terminal-start",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T4-X",
+        "prompt": "OQ3 T4 X turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/instructions off"
+        }
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T4-X",
+        "prompt": "OQ3 T4 X turn 2.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-stop",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-start",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T4-Y",
+        "prompt": "OQ3 T4 Y turn 1.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-stop",
+        "class": "harness"
+      },
+      {
+        "op": "store-identity",
+        "class": "operation",
+        "want": {
+          "min_terminal": "2"
+        }
+      }
+    ]
+  },
+  {
+    "id": "T5",
+    "title": "terminal binding timing: a session idle at A binds A before its first prompt",
+    "trials": [
+      {
+        "id": "T5-X",
+        "family": "save/restart/new",
+        "adapter": "terminal",
+        "note": "B saved while idle before the first prompt"
+      },
+      {
+        "id": "T5-Y",
+        "family": "save/restart/new",
+        "adapter": "terminal",
+        "note": "the save took effect for a new conversation"
+      }
+    ],
+    "steps": [
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "1"
+        },
+        "args": {
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "terminal-start",
+        "class": "harness"
+      },
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "2"
+        },
+        "args": {
+          "expected_revision": "1",
+          "text": "B"
+        }
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T5-X",
+        "prompt": "OQ3 T5 first prompt.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/new"
+        }
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T5-Y",
+        "prompt": "OQ3 T5 new conversation.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 2,
+            "generation": 1,
+            "text": "B",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "T6",
+    "title": "terminal compaction: manual, repeated, after reload, automatic",
+    "trials": [
+      {
+        "id": "T6-X",
+        "family": "compaction",
+        "adapter": "terminal"
+      }
+    ],
+    "steps": [
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "1"
+        },
+        "args": {
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "terminal-start",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T6-X",
+        "prompt": "OQ3 T6 turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T6-X",
+        "prompt": "OQ3 T6 turn 2.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T6-X",
+        "prompt": "OQ3 T6 turn 3.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T6-X",
+        "prompt": "OQ3 T6 turn 4.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "2"
+        },
+        "args": {
+          "expected_revision": "1",
+          "text": "B"
+        }
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/compact"
+        },
+        "summarisers": 1
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T6-X",
+        "prompt": "OQ3 T6 turn 5, after compaction.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/compact"
+        },
+        "summarisers": 1
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T6-X",
+        "prompt": "OQ3 T6 turn 6, after a second compaction.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/instructions reload"
+        }
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T6-X",
+        "prompt": "OQ3 T6 turn 7, after reload.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 2,
+            "generation": 2,
+            "text": "B",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/compact"
+        },
+        "summarisers": 1
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T6-X",
+        "prompt": "OQ3 T6 turn 8, after compacting the reloaded conversation.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 2,
+            "generation": 2,
+            "text": "B",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T6-X",
+        "prompt": "OQ3 T6 turn 9, near the context limit.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 2,
+            "generation": 2,
+            "text": "B",
+            "adapter": "terminal"
+          }
+        ],
+        "args": {
+          "auto_compact": "1"
+        },
+        "summarisers": 1
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T6-X",
+        "prompt": "OQ3 T6 turn 10, after automatic compaction.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 2,
+            "generation": 2,
+            "text": "B",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "T7",
+    "title": "terminal built-in prompt off keeps the custom instructions",
+    "trials": [
+      {
+        "id": "T7-X",
+        "family": "edit/continue",
+        "adapter": "terminal",
+        "note": "/system off then on"
+      }
+    ],
+    "steps": [
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "1"
+        },
+        "args": {
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "terminal-start",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/system off"
+        }
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T7-X",
+        "prompt": "OQ3 T7 turn 1, built-in prompt off.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ],
+        "args": {
+          "assert_system": "absent"
+        }
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/system on"
+        }
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T7-X",
+        "prompt": "OQ3 T7 turn 2, built-in prompt on.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ],
+        "args": {
+          "assert_system": "present"
+        }
+      },
+      {
+        "op": "terminal-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "T8",
+    "title": "terminal held turn: a save from another process completes, a reload is refused, then reload at idle",
+    "trials": [
+      {
+        "id": "T8-X",
+        "family": "explicit reload",
+        "adapter": "terminal"
+      }
+    ],
+    "steps": [
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "1"
+        },
+        "args": {
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "terminal-start",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T8-X",
+        "prompt": "OQ3 T8 turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T8-X",
+        "prompt": "OQ3 T8 turn 2 [[OQ3-TOOLCALL]] held by the daemon; its continuation must keep revision 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          },
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ],
+        "args": {
+          "hold": "1",
+          "tool_rounds": "1"
+        }
+      },
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "2"
+        },
+        "args": {
+          "expected_revision": "1",
+          "text": "B"
+        }
+      },
+      {
+        "op": "terminal-slash",
+        "class": "required-refusal",
+        "want": {
+          "refused": "true"
+        },
+        "args": {
+          "cmd": "/instructions reload"
+        }
+      },
+      {
+        "op": "terminal-await",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/instructions reload"
+        }
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T8-X",
+        "prompt": "OQ3 T8 turn 3.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 2,
+            "generation": 2,
+            "text": "B",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "T9",
+    "title": "terminal tools and model switches keep the pinned revision",
+    "trials": [
+      {
+        "id": "T9-X",
+        "family": "edit/continue",
+        "adapter": "terminal",
+        "note": "/tools toggled off and on, /model"
+      }
+    ],
+    "steps": [
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "1"
+        },
+        "args": {
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "terminal-start",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T9-X",
+        "prompt": "OQ3 T9 turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "2"
+        },
+        "args": {
+          "expected_revision": "1",
+          "text": "B"
+        }
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/tools"
+        }
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T9-X",
+        "prompt": "OQ3 T9 turn 2, tools toggled off.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ],
+        "args": {
+          "assert_tools": "0"
+        }
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/tools"
+        }
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/model",
+          "pick": "oq3-model-2"
+        }
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "T9-X",
+        "prompt": "OQ3 T9 turn 3, tools back on, another model.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ],
+        "args": {
+          "assert_model": "oq3-model-2",
+          "assert_tools": "some"
+        }
+      },
+      {
+        "op": "terminal-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "D11",
+    "title": "desktop against a daemon without chat.admission.v1: no carrier-bearing request may be sent",
+    "trials": [
+      {
+        "id": "D11-X",
+        "family": "save/restart/new",
+        "adapter": "desktop",
+        "note": "required refusal (A12)"
+      }
+    ],
+    "steps": [
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "1",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-no-dispatch",
+        "trial": "D11-X",
+        "conv": "X",
+        "prompt": "OQ3 D11 turn 1."
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ],
+    "no_capability": true
+  },
+  {
+    "id": "T10",
+    "title": "terminal against a daemon without chat.admission.v1: no carrier-bearing request may be sent",
+    "trials": [
+      {
+        "id": "T10-X",
+        "family": "save/restart/new",
+        "adapter": "terminal",
+        "note": "required refusal (A12)"
+      }
+    ],
+    "steps": [
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "1"
+        },
+        "args": {
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "terminal-start",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-no-dispatch",
+        "trial": "T10-X",
+        "prompt": "OQ3 T10 turn 1."
+      },
+      {
+        "op": "terminal-stop",
+        "class": "harness"
+      }
+    ],
+    "no_capability": true
+  },
+  {
+    "id": "E1",
+    "title": "entry: the built binary's CLI saves; its launcher reaches a new terminal conversation",
+    "trials": [
+      {
+        "id": "E1-X",
+        "family": "save/restart/new",
+        "adapter": "terminal",
+        "note": "built binary, launcher menu, model picker"
+      }
+    ],
+    "steps": [
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "1"
+        },
+        "args": {
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "entry-start",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "E1-X",
+        "prompt": "OQ3 E1 turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "entry-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "X1",
+    "title": "cross-adapter: saved in the desktop, used by a new terminal",
+    "trials": [
+      {
+        "id": "X1-T",
+        "family": "save/restart/new",
+        "adapter": "terminal"
+      }
+    ],
+    "steps": [
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "1",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-start",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "X1-T",
+        "prompt": "OQ3 X1 terminal turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "X2",
+    "title": "cross-adapter: saved by the CLI, used by a new desktop conversation",
+    "trials": [
+      {
+        "id": "X2-D",
+        "family": "save/restart/new",
+        "adapter": "desktop"
+      }
+    ],
+    "steps": [
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "1"
+        },
+        "args": {
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "X2-D",
+        "conv": "Y",
+        "prompt": "OQ3 X2 desktop turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  {
+    "id": "X3",
+    "title": "cross-adapter: disabled in the terminal; new desktop conversations follow, a bound one does not",
+    "trials": [
+      {
+        "id": "X3-DC",
+        "family": "disable",
+        "adapter": "desktop",
+        "note": "bound before the disable"
+      },
+      {
+        "id": "X3-TX",
+        "family": "disable",
+        "adapter": "terminal"
+      },
+      {
+        "id": "X3-DE",
+        "family": "disable",
+        "adapter": "desktop",
+        "note": "new after the disable"
+      }
+    ],
+    "steps": [
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "1"
+        },
+        "args": {
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "X3-DC",
+        "conv": "C",
+        "prompt": "OQ3 X3 desktop C turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "terminal-start",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "X3-TX",
+        "prompt": "OQ3 X3 terminal turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "terminal-slash",
+        "class": "operation",
+        "args": {
+          "cmd": "/instructions off"
+        }
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-dispatch",
+        "trial": "X3-TX",
+        "prompt": "OQ3 X3 terminal turn 2.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "terminal"
+          }
+        ]
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "X3-DE",
+        "conv": "E",
+        "prompt": "OQ3 X3 desktop E turn 1.",
+        "expect": [
+          {
+            "carrier": false,
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "X3-DC",
+        "conv": "C",
+        "prompt": "OQ3 X3 desktop C turn 2.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "terminal-stop",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  }
+]

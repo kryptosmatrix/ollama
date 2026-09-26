@@ -1,0 +1,195 @@
+{
+  "scenario": {
+    "id": "X2",
+    "title": "cross-adapter: saved by the CLI, used by a new desktop conversation",
+    "trials": [
+      {
+        "id": "X2-D",
+        "family": "save/restart/new",
+        "adapter": "desktop"
+      }
+    ],
+    "steps": [
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "1"
+        },
+        "args": {
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "X2-D",
+        "conv": "Y",
+        "prompt": "OQ3 X2 desktop turn 1.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 1,
+            "generation": 1,
+            "text": "A",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  "events": [
+    {
+      "scenario": "X2",
+      "step": 0,
+      "op": "cli-set",
+      "class": "operation",
+      "label": "X2/00/cli-set",
+      "verdict": "absent",
+      "outcome": {
+        "args": [
+          "instructions",
+          "set",
+          "--file",
+          "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/TestOQ3FailureNumber2946033871/026/X2/tmp/instructions-X2-00.txt",
+          "--expected-revision",
+          "0"
+        ],
+        "exit_code": 1,
+        "output": "Error: unknown command \"instructions\" for \"ollama\"\n"
+      },
+      "at": "2026-09-26T23:40:51.175945+10:00"
+    },
+    {
+      "scenario": "X2",
+      "step": 1,
+      "op": "desktop-start",
+      "class": "harness",
+      "label": "X2/01/desktop-start",
+      "verdict": "done",
+      "outcome": {
+        "life": 1
+      },
+      "at": "2026-09-26T23:40:51.394939+10:00"
+    },
+    {
+      "scenario": "X2",
+      "step": 2,
+      "op": "desktop-turn",
+      "class": "required-dispatch",
+      "label": "X2/02/desktop-turn",
+      "trial": "X2-D",
+      "verdict": "done",
+      "outcome": {
+        "chat_id": "01a0ddf2-7c43-7910-b46b-90aa3463c7a4",
+        "status": 200,
+        "stream_tail": "{\"eventName\":\"chat_created\",\"chatId\":\"01a0ddf2-7c43-7910-b46b-90aa3463c7a4\"}\n{\"eventName\":\"chat\",\"content\":\"OQ3-REPLY-001\"}\n{\"eventName\":\"done\"}\n"
+      },
+      "at": "2026-09-26T23:40:51.448912+10:00"
+    },
+    {
+      "scenario": "X2",
+      "step": 3,
+      "op": "desktop-stop",
+      "class": "harness",
+      "label": "X2/03/desktop-stop",
+      "verdict": "done",
+      "outcome": {
+        "exited": true,
+        "life": 1
+      },
+      "at": "2026-09-26T23:40:51.451712+10:00"
+    }
+  ],
+  "deliveries": [
+    {
+      "scenario": "X2",
+      "step": 2,
+      "label": "X2/02/desktop-turn",
+      "trial": "X2-D",
+      "index": 0,
+      "expect": {
+        "carrier": true,
+        "revision": 1,
+        "generation": 1,
+        "text": "A",
+        "adapter": "desktop"
+      },
+      "capture_seq": 3,
+      "status": "bad",
+      "verdict": {
+        "correct": false,
+        "categories": [
+          "admission-missing",
+          "missing"
+        ]
+      },
+      "golden": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/goldens/X2/02-0.json"
+    }
+  ],
+  "auxiliary": null,
+  "captures": [
+    {
+      "seq": 1,
+      "at": "2026-09-26T23:40:51.447343+10:00",
+      "method": "POST",
+      "path": "/api/show",
+      "label": "X2/02/desktop-turn",
+      "body": {
+        "model": "oq3-model",
+        "system": "",
+        "template": "",
+        "verbose": false,
+        "options": null,
+        "name": ""
+      },
+      "response_kind": "show"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-26T23:40:51.44767+10:00",
+      "method": "POST",
+      "path": "/api/show",
+      "label": "X2/02/desktop-turn",
+      "body": {
+        "model": "oq3-model",
+        "system": "",
+        "template": "",
+        "verbose": false,
+        "options": null,
+        "name": ""
+      },
+      "response_kind": "show"
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-26T23:40:51.447906+10:00",
+      "method": "POST",
+      "path": "/api/chat",
+      "label": "X2/02/desktop-turn",
+      "body": {
+        "model": "oq3-model",
+        "messages": [
+          {
+            "role": "user",
+            "content": "OQ3 X2 desktop turn 1."
+          }
+        ],
+        "stream": true,
+        "options": null
+      },
+      "response_kind": "reply"
+    }
+  ],
+  "sandbox": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/TestOQ3FailureNumber2946033871/026/X2"
+}

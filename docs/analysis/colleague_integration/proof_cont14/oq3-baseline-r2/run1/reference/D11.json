@@ -1,0 +1,51 @@
+{
+  "scenario": {
+    "id": "D11",
+    "title": "desktop against a daemon without chat.admission.v1: no carrier-bearing request may be sent",
+    "trials": [
+      {
+        "id": "D11-X",
+        "family": "save/restart/new",
+        "adapter": "desktop",
+        "note": "required refusal (A12)"
+      }
+    ],
+    "steps": [
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "1",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-no-dispatch",
+        "trial": "D11-X",
+        "conv": "X",
+        "prompt": "OQ3 D11 turn 1."
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ],
+    "no_capability": true
+  },
+  "events": null,
+  "deliveries": null,
+  "auxiliary": null,
+  "captures": null,
+  "sandbox": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/TestOQ3FailureNumber561032096/022/D11"
+}

@@ -1,0 +1,48 @@
+{
+  "scenario": {
+    "id": "T10",
+    "title": "terminal against a daemon without chat.admission.v1: no carrier-bearing request may be sent",
+    "trials": [
+      {
+        "id": "T10-X",
+        "family": "save/restart/new",
+        "adapter": "terminal",
+        "note": "required refusal (A12)"
+      }
+    ],
+    "steps": [
+      {
+        "op": "cli-set",
+        "class": "operation",
+        "want": {
+          "exit": "0",
+          "revision": "1"
+        },
+        "args": {
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "terminal-start",
+        "class": "harness"
+      },
+      {
+        "op": "terminal-turn",
+        "class": "required-no-dispatch",
+        "trial": "T10-X",
+        "prompt": "OQ3 T10 turn 1."
+      },
+      {
+        "op": "terminal-stop",
+        "class": "harness"
+      }
+    ],
+    "no_capability": true
+  },
+  "events": null,
+  "deliveries": null,
+  "auxiliary": null,
+  "captures": null,
+  "sandbox": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/TestOQ3FailureNumber561032096/023/T10"
+}

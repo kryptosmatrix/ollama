@@ -1,0 +1,9 @@
+{
+  "mode": "baseline",
+  "head": "e23aeb5d71ee7e6babc03c6137c13b1d2928d3a4",
+  "branch": "letterlock/g1-failure-number-20260926",
+  "go": "go version go1.26.5 darwin/arm64",
+  "uname": "Darwin Kryptos-MBP 25.6.0 Darwin Kernel Version 25.6.0: Fri Jul 31 19:18:53 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T6031 arm64",
+  "started": "2026-09-26T23:36:06+1000",
+  "go_mod_sha256": "afdaa0389e35bcf8497ffd0898b3f4ea936c523ae8526964f7b41d7c7f5d094f"
+}

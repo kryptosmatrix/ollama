@@ -1,0 +1,27 @@
+{
+  "scenario": "T6",
+  "step": 13,
+  "index": 0,
+  "label": "T6/13/terminal-slash",
+  "trial": "",
+  "expect": {
+    "carrier": false,
+    "adapter": ""
+  },
+  "kind": "summariser",
+  "request": {
+    "messages": [
+      {
+        "content": "Summarize the archived part of an Ollama agent conversation. Preserve user goals, decisions, files, commands, tool results, and unresolved tasks needed to continue. Omit private reasoning and return only the summary.",
+        "role": "system"
+      },
+      {
+        "content": "Previous summary:\nOQ3-SUMMARY: earlier turns were exchanged.\n\nMessages to archive as JSON:\n[\n  {\n    \"role\": \"user\",\n    \"content\": \"OQ3 T6 turn 3.\"\n  },\n  {\n    \"role\": \"assistant\",\n    \"content\": \"OQ3-REPLY-003\"\n  },\n  {\n    \"role\": \"user\",\n    \"content\": \"OQ3 T6 turn 4.\"\n  },\n  {\n    \"role\": \"assistant\",\n    \"content\": \"OQ3-REPLY-004\"\n  }\n]",
+        "role": "user"
+      }
+    ],
+    "model": "oq3-model",
+    "options": {}
+  },
+  "source": "e23aeb5d71ee7e6babc03c6137c13b1d2928d3a4 binary 0a882f5598d4c82c7dda0794cb99ca13b0489ff2e0ad1c586c9704b2a1f010f1"
+}

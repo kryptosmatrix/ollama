@@ -1,0 +1,21 @@
+{
+  "scenario": "T4",
+  "step": 6,
+  "index": 0,
+  "label": "T4/06/terminal-start",
+  "trial": "",
+  "expect": {
+    "carrier": false,
+    "adapter": ""
+  },
+  "kind": "preload",
+  "request": {
+    "model": "oq3-model",
+    "options": {},
+    "prompt": "",
+    "suffix": "",
+    "system": "",
+    "template": ""
+  },
+  "source": "e23aeb5d71ee7e6babc03c6137c13b1d2928d3a4 binary 0a882f5598d4c82c7dda0794cb99ca13b0489ff2e0ad1c586c9704b2a1f010f1"
+}

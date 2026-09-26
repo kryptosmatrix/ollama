@@ -1,0 +1,248 @@
+{
+  "scenario": {
+    "id": "D7",
+    "title": "desktop binding timing: an ID allocated before a save binds at its first turn",
+    "trials": [
+      {
+        "id": "D7-Q",
+        "family": "save/restart/new",
+        "adapter": "desktop",
+        "note": "draft allocated at A, first turn after B"
+      }
+    ],
+    "steps": [
+      {
+        "op": "desktop-start",
+        "class": "harness"
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "1",
+          "text": "A"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "0",
+          "text": "A"
+        }
+      },
+      {
+        "op": "desktop-draft",
+        "class": "operation",
+        "conv": "Q",
+        "want": {
+          "status": "200"
+        }
+      },
+      {
+        "op": "desktop-save",
+        "class": "operation",
+        "want": {
+          "enabled": "true",
+          "revision": "2",
+          "text": "B"
+        },
+        "args": {
+          "enabled": "true",
+          "expected_revision": "1",
+          "text": "B"
+        }
+      },
+      {
+        "op": "desktop-turn",
+        "class": "required-dispatch",
+        "trial": "D7-Q",
+        "conv": "Q",
+        "prompt": "OQ3 D7 first turn.",
+        "expect": [
+          {
+            "carrier": true,
+            "revision": 2,
+            "generation": 1,
+            "text": "B",
+            "adapter": "desktop"
+          }
+        ]
+      },
+      {
+        "op": "desktop-stop",
+        "class": "harness"
+      }
+    ]
+  },
+  "events": [
+    {
+      "scenario": "D7",
+      "step": 0,
+      "op": "desktop-start",
+      "class": "harness",
+      "label": "D7/00/desktop-start",
+      "verdict": "done",
+      "outcome": {
+        "life": 1
+      },
+      "at": "2026-09-26T23:38:05.37604+10:00"
+    },
+    {
+      "scenario": "D7",
+      "step": 1,
+      "op": "desktop-save",
+      "class": "operation",
+      "label": "D7/01/desktop-save",
+      "verdict": "absent",
+      "outcome": {
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body": "\u003c!doctype html\u003e\n\u003chtml lang=\"en\" style=\"overflow: hidden\"\u003e\n  \u003chead\u003e\n    \u003cmeta charset=\"UTF-8\" /\u003e\n    \u003clink rel=\"icon\" type=\"image/svg+xml\" href=\"/vite.svg\" /\u003e\n    \u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" /\u003e\n    \u003ctitle\u003eOllama\u003c/title\u003e\n    \u003cscript type=\"module\" crossorigin src=\"/assets/index-D_pjlvRX.js\"\u003e\u003c/script\u003e\n    \u003clink rel=\"stylesheet\" crossorigin href=\"/assets/index-Bg1Rnfpl.css\"\u003e\n  \u003c/head\u003e\n  \u003cbody class=\"dark:bg-neutral-900 select-text\"\u003e\n    \u003cdiv id=\"root\"\u003e\u003c/div\u003e\n    \u003cscript\u003e\n      // Add selectFiles method if available\n      if (typeof window.selectFiles === \"function\") {\n        window.webview = window.webview || {};\n\n        // Single file selection (returns first file or null)\n        window.webview.selectFile = function () {\n          return new Promise((resolve) =\u003e {\n            window.__selectFilesCallback = (data) =\u003e {\n              window.__selectFilesCallback = null;\n              // For single file, return first file or null\n              resolve(data \u0026\u0026 data.length \u003e 0 ? data[0] : null);\n            };\n            window.selectFiles();\n          });\n        };\n\n        // Multiple file selection (returns array or null)\n        window.webview.selectMultipleFiles = function () {\n          return new Promise((resolve) =\u003e {\n            window.__selectFilesCallback = (data) =\u003e {\n              window.__selectFilesCallback = null;\n              resolve(data); // Returns array of files or null if cancelled\n            };\n            window.selectFiles();\n          });\n        };\n      }\n\n      // Add directory selection methods if available\n      if (typeof window.selectModelsDirectory === \"function\") {\n        window.webview = window.webview || {};\n        window.webview.selectModelsDirectory = function () {\n          return new Promise((resolve) =\u003e {\n            window.__selectModelsDirectoryCallback = (path) =\u003e {\n              window.__selectModelsDirectoryCallback = null;\n              resolve(path); // Returns directory path or null if cancelled\n            };\n            window.selectModelsDirectory();\n          });\n        };\n      }\n\n      if (typeof window.selectWorkingDirectory === \"function\") {\n        window.webview = window.webview || {};\n        window.webview.selectWorkingDirectory = function () {\n          return new Promise((resolve) =\u003e {\n            window.__selectWorkingDirectoryCallback = (path) =\u003e {\n              window.__selectWorkingDirectoryCallback = null;\n              resolve(path); // Returns directory path or null if cancelled\n            };\n            window.selectWorkingDirectory();\n          });\n        };\n      }\n\n      if (typeof window.ready === \"function\") {\n        const callReady = () =\u003e setTimeout(window.ready, 100);\n        if (document.readyState === \"complete\") {\n          callReady();\n        } else {\n          window.addEventListener(\"load\", callReady);\n        }\n      }\n\n      if (typeof window.resize === \"function\") {\n        window.addEventListener(\"resize\", function () {\n          window.resize(window.innerWidth, window.innerHeight);\n        });\n      }\n\n      document.addEventListener(\"keydown\", function (e) {\n        if (\n          e.key === \"Backspace\" \u0026\u0026\n          !e.target.matches(\"input, textarea, [contenteditable], select\")\n        ) {\n          e.preventDefault();\n        }\n\n        // Only prevent navigation shortcuts when not in editable fields\n        if (!e.target.matches(\"input, textarea, [contenteditable], select\")) {\n          // Prevent Cmd/Ctrl + Left/Right arrow navigation\n          if (\n            (e.ctrlKey || e.metaKey) \u0026\u0026\n            (e.key === \"ArrowLeft\" || e.key === \"ArrowRight\")\n          ) {\n            e.preventDefault();\n            return false;\n          }\n\n          // Prevent Alt + Left/Right arrow navigation (Windows/Linux)\n          if (e.altKey \u0026\u0026 (e.key === \"ArrowLeft\" || e.key === \"ArrowRight\")) {\n            e.preventDefault();\n            return false;\n          }\n        }\n\n        // Always prevent F5 refresh\n        if (e.key === \"F5\") {\n          e.preventDefault();\n          return false;\n        }\n\n        // Always prevent Ctrl/Cmd + Shift + R (hard refresh)\n        if ((e.ctrlKey || e.metaKey) \u0026\u0026 e.shiftKey \u0026\u0026 e.key === \"r\") {\n          e.preventDefault();\n          return false;\n        }\n      });\n\n      // Prevent mouse button navigation (back/forward buttons)\n      document.addEventListener(\"mousedown\", function (e) {\n        // Mouse button 3 is back, button 4 is forward\n        if (e.button === 3 || e.button === 4) {\n          e.preventDefault();\n          return false;\n        }\n      });\n\n      // Prevent drag and drop navigation\n      document.addEventListener(\"dragover\", function (e) {\n        e.preventDefault();\n        return false;\n      });\n\n      document.addEventListener(\"drop\", function (e) {\n        e.preventDefault();\n        return false;\n      });\n\n      // TODO (jmorganca): this is a way for different components to elect\n      // to show custom context menu items on top of the default one\n      // we should integrate this better since it's confusing to follow\n      document.addEventListener(\n        \"contextmenu\",\n        function (e) {\n          window.setContextMenuItems([]);\n          let target = e.target;\n          while (target \u0026\u0026 target !== document) {\n            if (\n              target.classList \u0026\u0026\n              target.classList.contains(\"allow-context-menu\")\n            ) {\n              return true;\n            }\n            target = target.parentElement;\n          }\n          e.preventDefault();\n          return false;\n        },\n        true,\n      );\n\n      let pendingMenuItems = [];\n      let menuPromiseResolve = null;\n      let menuPromiseReject = null;\n\n      window.menu = function (items) {\n        return new Promise((resolve, reject) =\u003e {\n          pendingMenuItems = items;\n          menuPromiseResolve = resolve;\n          menuPromiseReject = reject;\n          window.setContextMenuItems(items);\n        });\n      };\n\n      window.handleContextMenuResult = function (selected) {\n        if (menuPromiseResolve) {\n          menuPromiseResolve(selected);\n          menuPromiseResolve = null;\n          menuPromiseReject = null;\n        }\n        pendingMenuItems = [];\n      };\n    \u003c/script\u003e\n  \u003c/body\u003e\n\u003c/html\u003e\n"
+      },
+      "at": "2026-09-26T23:38:05.377983+10:00"
+    },
+    {
+      "scenario": "D7",
+      "step": 2,
+      "op": "desktop-draft",
+      "class": "operation",
+      "label": "D7/02/desktop-draft",
+      "verdict": "pass",
+      "outcome": {
+        "chat_id": "01a0ddef-f3c2-7f0b-99d7-8a85c9151325",
+        "status": 200
+      },
+      "at": "2026-09-26T23:38:05.379383+10:00"
+    },
+    {
+      "scenario": "D7",
+      "step": 3,
+      "op": "desktop-save",
+      "class": "operation",
+      "label": "D7/03/desktop-save",
+      "verdict": "absent",
+      "outcome": {
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "body": "\u003c!doctype html\u003e\n\u003chtml lang=\"en\" style=\"overflow: hidden\"\u003e\n  \u003chead\u003e\n    \u003cmeta charset=\"UTF-8\" /\u003e\n    \u003clink rel=\"icon\" type=\"image/svg+xml\" href=\"/vite.svg\" /\u003e\n    \u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" /\u003e\n    \u003ctitle\u003eOllama\u003c/title\u003e\n    \u003cscript type=\"module\" crossorigin src=\"/assets/index-D_pjlvRX.js\"\u003e\u003c/script\u003e\n    \u003clink rel=\"stylesheet\" crossorigin href=\"/assets/index-Bg1Rnfpl.css\"\u003e\n  \u003c/head\u003e\n  \u003cbody class=\"dark:bg-neutral-900 select-text\"\u003e\n    \u003cdiv id=\"root\"\u003e\u003c/div\u003e\n    \u003cscript\u003e\n      // Add selectFiles method if available\n      if (typeof window.selectFiles === \"function\") {\n        window.webview = window.webview || {};\n\n        // Single file selection (returns first file or null)\n        window.webview.selectFile = function () {\n          return new Promise((resolve) =\u003e {\n            window.__selectFilesCallback = (data) =\u003e {\n              window.__selectFilesCallback = null;\n              // For single file, return first file or null\n              resolve(data \u0026\u0026 data.length \u003e 0 ? data[0] : null);\n            };\n            window.selectFiles();\n          });\n        };\n\n        // Multiple file selection (returns array or null)\n        window.webview.selectMultipleFiles = function () {\n          return new Promise((resolve) =\u003e {\n            window.__selectFilesCallback = (data) =\u003e {\n              window.__selectFilesCallback = null;\n              resolve(data); // Returns array of files or null if cancelled\n            };\n            window.selectFiles();\n          });\n        };\n      }\n\n      // Add directory selection methods if available\n      if (typeof window.selectModelsDirectory === \"function\") {\n        window.webview = window.webview || {};\n        window.webview.selectModelsDirectory = function () {\n          return new Promise((resolve) =\u003e {\n            window.__selectModelsDirectoryCallback = (path) =\u003e {\n              window.__selectModelsDirectoryCallback = null;\n              resolve(path); // Returns directory path or null if cancelled\n            };\n            window.selectModelsDirectory();\n          });\n        };\n      }\n\n      if (typeof window.selectWorkingDirectory === \"function\") {\n        window.webview = window.webview || {};\n        window.webview.selectWorkingDirectory = function () {\n          return new Promise((resolve) =\u003e {\n            window.__selectWorkingDirectoryCallback = (path) =\u003e {\n              window.__selectWorkingDirectoryCallback = null;\n              resolve(path); // Returns directory path or null if cancelled\n            };\n            window.selectWorkingDirectory();\n          });\n        };\n      }\n\n      if (typeof window.ready === \"function\") {\n        const callReady = () =\u003e setTimeout(window.ready, 100);\n        if (document.readyState === \"complete\") {\n          callReady();\n        } else {\n          window.addEventListener(\"load\", callReady);\n        }\n      }\n\n      if (typeof window.resize === \"function\") {\n        window.addEventListener(\"resize\", function () {\n          window.resize(window.innerWidth, window.innerHeight);\n        });\n      }\n\n      document.addEventListener(\"keydown\", function (e) {\n        if (\n          e.key === \"Backspace\" \u0026\u0026\n          !e.target.matches(\"input, textarea, [contenteditable], select\")\n        ) {\n          e.preventDefault();\n        }\n\n        // Only prevent navigation shortcuts when not in editable fields\n        if (!e.target.matches(\"input, textarea, [contenteditable], select\")) {\n          // Prevent Cmd/Ctrl + Left/Right arrow navigation\n          if (\n            (e.ctrlKey || e.metaKey) \u0026\u0026\n            (e.key === \"ArrowLeft\" || e.key === \"ArrowRight\")\n          ) {\n            e.preventDefault();\n            return false;\n          }\n\n          // Prevent Alt + Left/Right arrow navigation (Windows/Linux)\n          if (e.altKey \u0026\u0026 (e.key === \"ArrowLeft\" || e.key === \"ArrowRight\")) {\n            e.preventDefault();\n            return false;\n          }\n        }\n\n        // Always prevent F5 refresh\n        if (e.key === \"F5\") {\n          e.preventDefault();\n          return false;\n        }\n\n        // Always prevent Ctrl/Cmd + Shift + R (hard refresh)\n        if ((e.ctrlKey || e.metaKey) \u0026\u0026 e.shiftKey \u0026\u0026 e.key === \"r\") {\n          e.preventDefault();\n          return false;\n        }\n      });\n\n      // Prevent mouse button navigation (back/forward buttons)\n      document.addEventListener(\"mousedown\", function (e) {\n        // Mouse button 3 is back, button 4 is forward\n        if (e.button === 3 || e.button === 4) {\n          e.preventDefault();\n          return false;\n        }\n      });\n\n      // Prevent drag and drop navigation\n      document.addEventListener(\"dragover\", function (e) {\n        e.preventDefault();\n        return false;\n      });\n\n      document.addEventListener(\"drop\", function (e) {\n        e.preventDefault();\n        return false;\n      });\n\n      // TODO (jmorganca): this is a way for different components to elect\n      // to show custom context menu items on top of the default one\n      // we should integrate this better since it's confusing to follow\n      document.addEventListener(\n        \"contextmenu\",\n        function (e) {\n          window.setContextMenuItems([]);\n          let target = e.target;\n          while (target \u0026\u0026 target !== document) {\n            if (\n              target.classList \u0026\u0026\n              target.classList.contains(\"allow-context-menu\")\n            ) {\n              return true;\n            }\n            target = target.parentElement;\n          }\n          e.preventDefault();\n          return false;\n        },\n        true,\n      );\n\n      let pendingMenuItems = [];\n      let menuPromiseResolve = null;\n      let menuPromiseReject = null;\n\n      window.menu = function (items) {\n        return new Promise((resolve, reject) =\u003e {\n          pendingMenuItems = items;\n          menuPromiseResolve = resolve;\n          menuPromiseReject = reject;\n          window.setContextMenuItems(items);\n        });\n      };\n\n      window.handleContextMenuResult = function (selected) {\n        if (menuPromiseResolve) {\n          menuPromiseResolve(selected);\n          menuPromiseResolve = null;\n          menuPromiseReject = null;\n        }\n        pendingMenuItems = [];\n      };\n    \u003c/script\u003e\n  \u003c/body\u003e\n\u003c/html\u003e\n"
+      },
+      "at": "2026-09-26T23:38:05.379777+10:00"
+    },
+    {
+      "scenario": "D7",
+      "step": 4,
+      "op": "desktop-turn",
+      "class": "required-dispatch",
+      "label": "D7/04/desktop-turn",
+      "trial": "D7-Q",
+      "verdict": "done",
+      "outcome": {
+        "chat_id": "01a0ddef-f3c2-7f0b-99d7-8a85c9151325",
+        "status": 200,
+        "stream_tail": "{\"eventName\":\"chat\",\"content\":\"OQ3-REPLY-001\"}\n{\"eventName\":\"done\"}\n"
+      },
+      "at": "2026-09-26T23:38:05.437709+10:00"
+    },
+    {
+      "scenario": "D7",
+      "step": 5,
+      "op": "desktop-stop",
+      "class": "harness",
+      "label": "D7/05/desktop-stop",
+      "verdict": "done",
+      "outcome": {
+        "exited": true,
+        "life": 1
+      },
+      "at": "2026-09-26T23:38:05.439996+10:00"
+    }
+  ],
+  "deliveries": [
+    {
+      "scenario": "D7",
+      "step": 4,
+      "label": "D7/04/desktop-turn",
+      "trial": "D7-Q",
+      "index": 0,
+      "expect": {
+        "carrier": true,
+        "revision": 2,
+        "generation": 1,
+        "text": "B",
+        "adapter": "desktop"
+      },
+      "capture_seq": 4,
+      "status": "bad",
+      "verdict": {
+        "correct": false,
+        "categories": [
+          "admission-missing",
+          "missing"
+        ]
+      },
+      "golden": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/docs/analysis/colleague_integration/proof_cont14/oq3-instrument/goldens/D7/04-0.json"
+    }
+  ],
+  "auxiliary": null,
+  "captures": [
+    {
+      "seq": 1,
+      "at": "2026-09-26T23:38:05.378787+10:00",
+      "method": "GET",
+      "path": "/api/version",
+      "label": "D7/02/desktop-draft",
+      "response_kind": "version"
+    },
+    {
+      "seq": 2,
+      "at": "2026-09-26T23:38:05.435918+10:00",
+      "method": "POST",
+      "path": "/api/show",
+      "label": "D7/04/desktop-turn",
+      "body": {
+        "model": "oq3-model",
+        "system": "",
+        "template": "",
+        "verbose": false,
+        "options": null,
+        "name": ""
+      },
+      "response_kind": "show"
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-26T23:38:05.436205+10:00",
+      "method": "POST",
+      "path": "/api/show",
+      "label": "D7/04/desktop-turn",
+      "body": {
+        "model": "oq3-model",
+        "system": "",
+        "template": "",
+        "verbose": false,
+        "options": null,
+        "name": ""
+      },
+      "response_kind": "show"
+    },
+    {
+      "seq": 4,
+      "at": "2026-09-26T23:38:05.436439+10:00",
+      "method": "POST",
+      "path": "/api/chat",
+      "label": "D7/04/desktop-turn",
+      "body": {
+        "model": "oq3-model",
+        "messages": [
+          {
+            "role": "user",
+            "content": "OQ3 D7 first turn."
+          }
+        ],
+        "stream": true,
+        "options": null
+      },
+      "response_kind": "reply"
+    }
+  ],
+  "sandbox": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/TestOQ3FailureNumber561032096/008/D7"
+}

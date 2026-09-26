@@ -1,0 +1,27 @@
+{
+  "scenario": "D7",
+  "step": 4,
+  "index": 0,
+  "label": "D7/04/desktop-turn",
+  "trial": "D7-Q",
+  "expect": {
+    "carrier": true,
+    "revision": 2,
+    "generation": 1,
+    "text": "B",
+    "adapter": "desktop"
+  },
+  "kind": "delivery",
+  "request": {
+    "messages": [
+      {
+        "content": "OQ3 D7 first turn.",
+        "role": "user"
+      }
+    ],
+    "model": "oq3-model",
+    "options": null,
+    "stream": true
+  },
+  "source": "e23aeb5d71ee7e6babc03c6137c13b1d2928d3a4 binary 0a882f5598d4c82c7dda0794cb99ca13b0489ff2e0ad1c586c9704b2a1f010f1"
+}
