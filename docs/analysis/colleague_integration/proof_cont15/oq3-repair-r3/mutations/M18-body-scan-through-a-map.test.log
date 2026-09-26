@@ -1,0 +1,14 @@
+=== RUN   TestOQ3RunnerControls
+    zz_oq3_controls_test.go:304: ledger: 27 scenarios, 39 trials
+    zz_oq3_controls_test.go:445: auxiliary fault undeclared-summariser    -> [AUX/01/desktop-turn  [undeclared-summariser]]
+    zz_oq3_controls_test.go:445: auxiliary fault leak-in-metadata         -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:435: auxiliary fault unknown-endpoint         -> invalid: [unclassified request POST /api/embed under "AUX/01/desktop-turn"]
+    zz_oq3_controls_test.go:445: auxiliary fault leak-escaped-sentinel    -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:445: auxiliary fault leak-escaped-header-text -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:443: auxiliary fault leak-nested-json was not reported
+--- FAIL: TestOQ3RunnerControls (0.22s)
+FAIL
+FAIL	github.com/ollama/ollama/cmd	0.947s
+FAIL
+# github.com/ollama/ollama/cmd.test
+ld: warning: ignoring duplicate libraries: '-lobjc'

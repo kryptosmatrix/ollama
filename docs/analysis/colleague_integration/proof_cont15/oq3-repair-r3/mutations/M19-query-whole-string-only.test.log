@@ -1,0 +1,23 @@
+=== RUN   TestOQ3RunnerControls
+    zz_oq3_controls_test.go:304: ledger: 27 scenarios, 39 trials
+    zz_oq3_controls_test.go:445: auxiliary fault undeclared-summariser    -> [AUX/01/desktop-turn  [undeclared-summariser]]
+    zz_oq3_controls_test.go:445: auxiliary fault leak-in-metadata         -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:435: auxiliary fault unknown-endpoint         -> invalid: [unclassified request POST /api/embed under "AUX/01/desktop-turn"]
+    zz_oq3_controls_test.go:445: auxiliary fault leak-escaped-sentinel    -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:445: auxiliary fault leak-escaped-header-text -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:445: auxiliary fault leak-nested-json         -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:445: auxiliary fault leak-in-key              -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:445: auxiliary fault leak-in-header           -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:445: auxiliary fault leak-in-query            -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:445: auxiliary fault metadata-wrong-method    -> [AUX/01/desktop-turn method-check [method-not-allowed]]
+    zz_oq3_controls_test.go:440: auxiliary control clean-metadata         -> nothing reported
+    zz_oq3_controls_test.go:445: auxiliary fault leak-duplicate-member    -> [AUX/01/desktop-turn duplicate-check [duplicate-member] AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:445: auxiliary fault leak-duplicate-escaped   -> [AUX/01/desktop-turn duplicate-check [duplicate-member] AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:445: auxiliary fault leak-big-number          -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:443: auxiliary fault leak-query-partial was not reported
+--- FAIL: TestOQ3RunnerControls (0.54s)
+FAIL
+FAIL	github.com/ollama/ollama/cmd	1.610s
+FAIL
+# github.com/ollama/ollama/cmd.test
+ld: warning: ignoring duplicate libraries: '-lobjc'

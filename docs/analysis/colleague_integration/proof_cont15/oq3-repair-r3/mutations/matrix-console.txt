@@ -1,0 +1,26 @@
+tree ffe0423d48f72d5966969369cd8e1ca0b533c0b6 instrument-commit a88ee4f2 clean-tracked=0
+M01-leak-scan-raw-bytes AS-EXPECTED exit 1 msg True 8.5s gomod-ok
+M02-no-envelope-header-scan AS-EXPECTED exit 1 msg True 11.0s gomod-ok
+M03-no-query-scan AS-EXPECTED exit 1 msg True 11.5s gomod-ok
+M04-fake-serves-any-method AS-EXPECTED exit 1 msg True 15.4s gomod-ok
+M05-scorer-ignores-method AS-EXPECTED exit 1 msg True 6.5s gomod-ok
+M06-probe-always-idle AS-EXPECTED exit 1 msg True 19.2s gomod-ok
+M07-runner-trusts-quiet AS-EXPECTED exit 1 msg True 53.9s gomod-ok
+M08-no-startup-refusal-path AS-EXPECTED exit 1 msg True 62.7s gomod-ok
+M09-exit-without-report-accepted AS-EXPECTED exit 1 msg True 72.6s gomod-ok
+M10-t8-inserted-turn-expects-reload AS-EXPECTED exit 1 msg True 3.9s gomod-ok
+M11-probe-keeps-input AS-EXPECTED exit 0 msg False 99.4s gomod-ok
+M12-typeline-keeps-input AS-EXPECTED exit 0 msg False 97.4s gomod-ok
+M13-no-preload-barrier-on-switch AS-EXPECTED exit 1 msg True 15.7s gomod-ok
+M14-refusal-by-version-only AS-EXPECTED exit 1 msg True 75.4s gomod-ok
+M15-refusal-must-reach-idle-chat AS-EXPECTED exit 1 msg True 93.2s gomod-ok
+M16-no-held-command-marker AS-EXPECTED exit 1 msg True 28.5s gomod-ok
+M17-duplicates-ignored AS-EXPECTED exit 1 msg True 30.6s gomod-ok
+M18-body-scan-through-a-map AS-EXPECTED exit 1 msg True 5.6s gomod-ok
+M19-query-whole-string-only AS-EXPECTED exit 1 msg True 4.1s gomod-ok
+M20-header-values-not-decoded AS-EXPECTED exit 1 msg True 4.1s gomod-ok
+M21-trailers-not-scanned AS-EXPECTED exit 1 msg True 4.0s gomod-ok
+M22-host-not-scanned AS-EXPECTED exit 1 msg True 4.0s gomod-ok
+M23-no-preload-barrier-at-start AS-EXPECTED exit 0 msg False 97.6s gomod-ok
+MATRIX ALL AS EXPECTED (23 mutations)
+matrix-exit=0

@@ -1,0 +1,20 @@
+=== RUN   TestOQ3ScorerControls
+    zz_oq3_controls_test.go:126: control missing carrier                      -> [admission-missing missing]
+    zz_oq3_controls_test.go:126: control wrong revision                       -> [wrong-revision]
+    zz_oq3_controls_test.go:126: control wrong generation                     -> [wrong-revision]
+    zz_oq3_controls_test.go:126: control duplicated                           -> [duplicated leaked request-changed]
+    zz_oq3_controls_test.go:126: control altered text                         -> [altered]
+    zz_oq3_controls_test.go:126: control base lost                            -> [base-lost]
+    zz_oq3_controls_test.go:126: control misplaced in the user message        -> [base-lost misplaced request-changed]
+    zz_oq3_controls_test.go:126: control admission missing only               -> [admission-missing]
+    zz_oq3_controls_test.go:126: control history changed                      -> [request-changed]
+    zz_oq3_controls_test.go:126: control unexpected carrier                   -> [leaked unexpected-admission unexpected-carrier]
+    zz_oq3_controls_test.go:126: control multi-defect                         -> [admission-missing base-lost wrong-revision]
+    zz_oq3_controls_test.go:126: control extra field on the carrier message   -> [other]
+    zz_oq3_controls_test.go:271: T8 control: busy-committing adapter 0/5 bad now, 0/4 under the round-2 ledger (want >0 and 0); correct adapter 1 now, 0 then (want 0, 0)
+--- FAIL: TestOQ3ScorerControls (0.00s)
+FAIL
+FAIL	github.com/ollama/ollama/cmd	1.220s
+FAIL
+# github.com/ollama/ollama/cmd.test
+ld: warning: ignoring duplicate libraries: '-lobjc'
