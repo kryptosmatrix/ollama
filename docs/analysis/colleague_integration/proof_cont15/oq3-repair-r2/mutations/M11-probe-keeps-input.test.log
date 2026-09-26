@@ -1,0 +1,28 @@
+=== RUN   TestOQ3RunnerControls
+    zz_oq3_controls_test.go:302: ledger: 27 scenarios, 39 trials
+    zz_oq3_controls_test.go:393: auxiliary fault undeclared-summariser    -> [AUX/01/desktop-turn  [undeclared-summariser]]
+    zz_oq3_controls_test.go:393: auxiliary fault leak-in-metadata         -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:383: auxiliary fault unknown-endpoint         -> invalid: [unclassified request POST /api/embed under "AUX/01/desktop-turn"]
+    zz_oq3_controls_test.go:393: auxiliary fault leak-escaped-sentinel    -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:393: auxiliary fault leak-escaped-header-text -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:393: auxiliary fault leak-nested-json         -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:393: auxiliary fault leak-in-key              -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:393: auxiliary fault leak-in-header           -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:393: auxiliary fault leak-in-query            -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:393: auxiliary fault metadata-wrong-method    -> [AUX/01/desktop-turn method-check [method-not-allowed]]
+    zz_oq3_controls_test.go:388: auxiliary control clean-metadata         -> nothing reported
+    zz_oq3_controls_test.go:438: method control PUT  -> HTTP 405, delivery bad [wrong-method]
+    zz_oq3_controls_test.go:438: method control POST -> HTTP 200, delivery correct []
+    zz_oq3_controls_test.go:527: idle control: idle at rest; not idle at an approval prompt after the daemon finished, nor during a held turn; a busy command kept as input did not reach the next turn
+    zz_oq3_controls_test.go:553: runner idle control -> turn harness-failed; invalid: [RCB step 1 terminal-turn: terminal never proved idle after the turn completed; screen tail "...─────────────────────────────────────────────╮\r\n│                                                                                                                                                              │\r\n╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯\r\n  oq3-model\r" 2 steps not measured after a harness failure]
+    zz_oq3_controls_test.go:586: refusal control terminal-refuse-at-start   -> invalid []; deliveries 1
+    zz_oq3_controls_test.go:586: refusal control terminal-exit-silently     -> invalid [RCR step 0 terminal-start: terminal session exited at start-up without reporting the daemon's version 0.0.0-oq3-fake-no-admission; screen tail "" 3 steps not measured after a harness failure]; deliveries 0
+    zz_oq3_controls_test.go:619: harness fault malformed-capture  -> invalid: [RC/01/desktop-turn: malformed capture 4]
+    zz_oq3_controls_test.go:619: harness fault extra-request      -> invalid: [RC/01/desktop-turn: more model requests than declared (2 > 1)]
+    zz_oq3_controls_test.go:619: harness fault unknown-label      -> invalid: [request 4 (POST /api/chat) under unknown label "RC/99/nowhere"]
+    zz_oq3_controls_test.go:638: failing child -> invalid: [RCC step 0 terminal-start: terminal session never preloaded; screen tail "\r\nError: 404 Not Found: oq3 fake daemon: unsupported endpoint\r\n" 3 steps not measured after a harness failure]; not measured: [RCC/00/terminal-start () RCC/01/terminal-turn (RCC-X) RCC/02/terminal-stop ()]
+--- PASS: TestOQ3RunnerControls (50.46s)
+PASS
+ok  	github.com/ollama/ollama/cmd	51.309s
+# github.com/ollama/ollama/cmd.test
+ld: warning: ignoring duplicate libraries: '-lobjc'

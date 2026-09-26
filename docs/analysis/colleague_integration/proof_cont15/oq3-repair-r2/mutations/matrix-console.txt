@@ -1,0 +1,15 @@
+tree a12e28d95599b5df5eebef8d4d944375d42106e2 clean-tracked=0
+M01-leak-scan-raw-bytes AS-EXPECTED exit 1 msg True 5.1s gomod-ok
+M02-no-header-scan AS-EXPECTED exit 1 msg True 4.8s gomod-ok
+M03-no-query-scan AS-EXPECTED exit 1 msg True 4.7s gomod-ok
+M04-fake-serves-any-method AS-EXPECTED exit 1 msg True 4.2s gomod-ok
+M05-scorer-ignores-method AS-EXPECTED exit 1 msg True 4.6s gomod-ok
+M06-probe-always-idle AS-EXPECTED exit 1 msg True 5.3s gomod-ok
+M07-runner-trusts-quiet AS-EXPECTED exit 1 msg True 37.4s gomod-ok
+M08-no-startup-refusal-path AS-EXPECTED exit 1 msg True 47.4s gomod-ok
+M09-exit-without-report-accepted AS-EXPECTED exit 1 msg True 51.7s gomod-ok
+M10-t8-inserted-turn-expects-reload AS-EXPECTED exit 1 msg True 13.1s gomod-ok
+M11-probe-keeps-input AS-EXPECTED exit 0 msg False 70.7s gomod-ok
+M12-typeline-keeps-input AS-EXPECTED exit 0 msg False 53.4s gomod-ok
+MATRIX ALL AS EXPECTED (12 mutations)
+matrix-exit=0

@@ -1,0 +1,20 @@
+=== RUN   TestOQ3RunnerControls
+    zz_oq3_controls_test.go:302: ledger: 27 scenarios, 39 trials
+    zz_oq3_controls_test.go:393: auxiliary fault undeclared-summariser    -> [AUX/01/desktop-turn  [undeclared-summariser]]
+    zz_oq3_controls_test.go:393: auxiliary fault leak-in-metadata         -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:383: auxiliary fault unknown-endpoint         -> invalid: [unclassified request POST /api/embed under "AUX/01/desktop-turn"]
+    zz_oq3_controls_test.go:393: auxiliary fault leak-escaped-sentinel    -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:393: auxiliary fault leak-escaped-header-text -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:393: auxiliary fault leak-nested-json         -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:393: auxiliary fault leak-in-key              -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:393: auxiliary fault leak-in-header           -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:393: auxiliary fault leak-in-query            -> [AUX/01/desktop-turn leak-scan [carries-instructions]]
+    zz_oq3_controls_test.go:393: auxiliary fault metadata-wrong-method    -> [AUX/01/desktop-turn method-check [method-not-allowed]]
+    zz_oq3_controls_test.go:388: auxiliary control clean-metadata         -> nothing reported
+    zz_oq3_controls_test.go:431: PUT replay: status 405, delivery {Scenario:RM Step:1 Label:RM/01/desktop-turn Trial:RM-X Index:0 Expect:0x568a2bf987c0 Seq:1 Kind: Status:correct Verdict:{Correct:true Categories:[] Detail:} Golden:/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/TestOQ3RunnerControls2721588157/001/RM/01-0.json}
+--- FAIL: TestOQ3RunnerControls (0.50s)
+FAIL
+FAIL	github.com/ollama/ollama/cmd	1.464s
+FAIL
+# github.com/ollama/ollama/cmd.test
+ld: warning: ignoring duplicate libraries: '-lobjc'
