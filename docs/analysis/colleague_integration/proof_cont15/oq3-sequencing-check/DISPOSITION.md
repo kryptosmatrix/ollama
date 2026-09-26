@@ -1,0 +1,33 @@
+# Disposition of the options check on the order of G1's OQ-3 work
+
+Continuation 15, Treadle (Claude Opus 5.5), 27 September 2026. Frozen packet `PACKET.md` (SHA-256 `daa33121132c8ac226fbf69f168fe03eca7205bbbf44edca627ca0350d0c3482`), committed at `8c084bae` before dispatch; Codex CLI 0.153.4, `gpt-6-astra`, read-only sandbox, whole repository readable, on `HEAD` `8c084bae`. It ran 09:40:56–09:47:25 AEST, exit 0 (`reviews/codex/started.txt`, `exit.txt`). Answer: `reviews/codex/last_message.md`. The worktree was not modified while it ran. Disclosure (KANON 21.3): the packet and the repository at that commit; a scan of the returned files for credential-shaped strings found none.
+
+**Not blind.** The commit that registered this check (`8c084bae`) calls it blind. The packet lists the four options without a preference, but its evidence includes the round-4 dispositions, whose closing section ("Why this loop stops here", line 22 onwards) states my recommended order, OQ-4 first; the answer cites that section (line 24). The check therefore knew my view before it chose, and its agreement is weaker evidence than a blind choice would be. What it added beyond my text is its own and is recorded below.
+
+**Order of deciding.** The recommendation was written into the round-4 dispositions (`7d977346`) before this check ran; KANON 25.3 asks for the outside check before the decision. Nothing was acted on in between: no revision 5 and no OQ-4 work exist. This shortfall is disclosed here and to Ash. The same shortfall applies to revision 3's repair choices, where its record states it (`../oq3-repair-r2/REPAIR.md`, line 25), and to revision 4's: the preload barrier and the refusal vocabulary were decided from the source before any outside check, which `../oq3-repair-r3/REPAIR.md` ("How the choices were checked") does not say; this record does.
+
+## The answer
+
+Codex chose **option 2, specify first**: OQ-4, then revision 5 of the instrument against the stated text with the other round-4 repairs, a fresh baseline and round 5. That is the recommended order. On convergence it judged "local progress, but no demonstrated convergence to a qualified acceptance gate": the counts (14, 6, 8, 11) establish neither convergence nor divergence, round 2 confirmed ten earlier repairs, and the kinds of findings in rounds 3 and 4 (an unexercised busy reload, a lost regression, refusal classification that passes and fails wrongly, a barrier that overclaims completion, mutation evidence that does not show its repair) are substantive acceptance and evidence problems, none of which needs a deliberately evasive encoding.
+
+## Its claims, checked against the files
+
+Each factual claim was read at its source. A12 (`docs/_design/G1_PERSISTED_INSTRUCTIONS.md:253`) already requires both halves: with the capability absent the adapters "send no carrier-bearing request and report `context_unavailable` naming the daemon's version (G1-R-14)". Confirmed. I-14 (`:350`) lists "report skipped" among the failures it must catch. Confirmed. `DESIGN.md:52` places the rest of I-14, adapter behaviour for each daemon error, outside the instrument. Confirmed. Gap 3 is resolved in the blueprint: confirmed, at `DESIGN.md:60`; the answer cites line 58, which is gap 1. Round 2 confirmed ten of round 1's fourteen repairs (`proof_cont14/oq3-instrument-review-r2/DISPOSITIONS_CODEX.md:5`) and accepted a refusal at start-up as held (`:16`). Confirmed. The revision-4 baseline's T10 session took the ordinary path, so no start-up refusal was observed (`../oq3-baseline-r4/BASELINE.md:9`), and the baseline does not establish fitness as the gate (`:26`). Confirmed. The blueprint's promotion obligation (`:35`) and its census statement (`:329`): confirmed.
+
+## What it changes, adopted
+
+**The refusal question is narrower than the round-4 dispositions put it.** G1 already requires the report; OQ-4 does not decide whether a refusal must be reported. It decides two things: the report's observable form in the terminal, stated as a contract an instrument can check without necessarily fixing a whole sentence verbatim, and which evidence checks it, the failure number's no-dispatch trials or I-14, with reporting, dispatch and trial-validity evidence each allocated explicitly. A3's wording in the round-4 dispositions ("whether the failure number's no-dispatch trials require A12's report") is to be read in that sense: a question of allocation, not of requirement.
+
+**OQ-4 is the whole census, not the refusal wording.** It must complete the independently derived closure census with explicit closure outputs, and it must not ratify the present harness: the instrument's accepted vocabulary (`context_unavailable`, "context unavailable", `chat.admission.v1`) is a guess that A1 and A2 show fails in both directions, not a default for adoption.
+
+**The mechanical repairs stay owed whatever OQ-4 states.** B1–B3, C1, C2, D1, D2, E1 and F are defects in capture, barriers, scoring and mutation evidence; a clearer specification fixes none of them. Revision 5 carries them all.
+
+## When to revisit
+
+The answer names its own conditions, kept here for whoever holds the next seat. Towards option 1 (repair now): authoritative, independently adjudicated text already settles the report and its scoring. Towards option 3 (split): OQ-4 is shown to be delayed, and the eight mechanical repairs can be verified under either eventual specification; accepted then as provisional progress. Towards option 4 (narrow the instrument): the census assigns all report verification to I-14 and defines valid no-dispatch trials, including compliant early refusals, without recreating round 2's rejection of a compliant early refusal (finding 6).
+
+## My reasoning
+
+Option 1 makes the instrument choose an unstated requirement; A1 and A2 show that any text rule chosen now is either too loose or too strict, so its review round would be spent re-judging the guess. Option 3 verifies the mechanical repairs sooner at the price of two further review rounds instead of one, and part of it would be reworked after OQ-4: B2's capability-less handling depends on how a refusal is recognised. Option 4 is plausible, but it pre-empts the allocation OQ-4 has to make; if OQ-4 chooses it, revision 5 narrows then. Option 2 delays understood repairs, which is acceptable because OQ-4 is on G1's critical path in any case (blueprint line 35: no build pack starts with it open) and the instrument cannot serve as the gate before G1 is built.
+
+**The strongest case against.** The census is large and may stall, leaving known mechanism defects unrepaired and the instrument unqualified for a long time. The trigger for revisiting is the answer's option-3 condition: a concrete sign that OQ-4 is delayed.
