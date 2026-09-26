@@ -643,10 +643,10 @@ func (r *oq3Run) storeEvents() string {
 	}
 	defer rows.Close()
 	type ev struct {
-		id         string
-		gen        int
-		kind       string
-		from, to   int
+		id       string
+		gen      int
+		kind     string
+		from, to int
 	}
 	var evs []ev
 	for rows.Next() {
@@ -710,21 +710,21 @@ type oq3Delivery struct {
 	Index    int                `json:"index"`
 	Expect   *oq3Expect         `json:"expect,omitempty"`
 	Seq      int                `json:"capture_seq,omitempty"`
-	Kind     string             `json:"kind,omitempty"`   // delivery (default) | summariser | preload | leak-scan
-	Status   string             `json:"status"` // correct | bad | missing | unexpected | refused-as-required
+	Kind     string             `json:"kind,omitempty"` // delivery (default) | summariser | preload | leak-scan
+	Status   string             `json:"status"`         // correct | bad | missing | unexpected | refused-as-required
 	Verdict  oq3DeliveryVerdict `json:"verdict"`
 	Golden   string             `json:"golden,omitempty"`
 }
 
 type oq3ScenarioResult struct {
-	Scenario   oq3Scenario   `json:"scenario"`
-	Events     []oq3Event    `json:"events"`
-	Deliveries []oq3Delivery `json:"deliveries"`
-	Auxiliary  []oq3Delivery `json:"auxiliary"`
-	Captures   []oq3Capture  `json:"captures"`
-	Invalid    []string      `json:"invalid,omitempty"`
-	NotMeasured []string     `json:"not_measured,omitempty"`
-	Sandbox    string        `json:"sandbox"`
+	Scenario    oq3Scenario   `json:"scenario"`
+	Events      []oq3Event    `json:"events"`
+	Deliveries  []oq3Delivery `json:"deliveries"`
+	Auxiliary   []oq3Delivery `json:"auxiliary"`
+	Captures    []oq3Capture  `json:"captures"`
+	Invalid     []string      `json:"invalid,omitempty"`
+	NotMeasured []string      `json:"not_measured,omitempty"`
+	Sandbox     string        `json:"sandbox"`
 }
 
 func oq3GoldenPath(dir, sc string, step, idx int) string {
@@ -1253,29 +1253,29 @@ func oq3WriteJSON(path string, v any) error {
 // Summary and the number.
 
 type oq3Summary struct {
-	Mode                  string         `json:"mode"`
-	Source                string         `json:"source"`
-	Trials                int            `json:"controlled_conversation_trials"`
-	ObservedDeliveries    int            `json:"observed_deliveries"`
-	BadObserved           int            `json:"bad_observed_deliveries"`
-	MissingRequired       int            `json:"missing_required_deliveries"`
-	Unexpected            int            `json:"unexpected_requests"`
-	FailureNumber         string         `json:"failure_number"`
-	FailureNumerator      int            `json:"failure_numerator"`
-	CategoryCounts        map[string]int `json:"category_counts_overlapping"`
-	PerFamily             map[string]any `json:"per_family"`
-	PerTrial              map[string]any `json:"per_trial"`
-	OperationVerdicts     map[string]int `json:"operation_verdicts"`
-	RefusalVerdicts       map[string]int `json:"required_refusal_verdicts"`
-	AuxiliaryChecks       map[string]int `json:"auxiliary_checks"`
-	AuxiliaryBad          int            `json:"auxiliary_bad"`
-	AuxiliaryBadList      []string       `json:"auxiliary_bad_list,omitempty"`
-	RefusalsHeld          int            `json:"required_refusals_held"`
-	NotMeasured           []string       `json:"not_measured,omitempty"`
-	Valid                 bool           `json:"valid"`
-	Invalid               []string       `json:"invalid,omitempty"`
-	ScenariosRun          []string       `json:"scenarios_run"`
-	LedgerSHA256          string         `json:"ledger_sha256"`
+	Mode               string         `json:"mode"`
+	Source             string         `json:"source"`
+	Trials             int            `json:"controlled_conversation_trials"`
+	ObservedDeliveries int            `json:"observed_deliveries"`
+	BadObserved        int            `json:"bad_observed_deliveries"`
+	MissingRequired    int            `json:"missing_required_deliveries"`
+	Unexpected         int            `json:"unexpected_requests"`
+	FailureNumber      string         `json:"failure_number"`
+	FailureNumerator   int            `json:"failure_numerator"`
+	CategoryCounts     map[string]int `json:"category_counts_overlapping"`
+	PerFamily          map[string]any `json:"per_family"`
+	PerTrial           map[string]any `json:"per_trial"`
+	OperationVerdicts  map[string]int `json:"operation_verdicts"`
+	RefusalVerdicts    map[string]int `json:"required_refusal_verdicts"`
+	AuxiliaryChecks    map[string]int `json:"auxiliary_checks"`
+	AuxiliaryBad       int            `json:"auxiliary_bad"`
+	AuxiliaryBadList   []string       `json:"auxiliary_bad_list,omitempty"`
+	RefusalsHeld       int            `json:"required_refusals_held"`
+	NotMeasured        []string       `json:"not_measured,omitempty"`
+	Valid              bool           `json:"valid"`
+	Invalid            []string       `json:"invalid,omitempty"`
+	ScenariosRun       []string       `json:"scenarios_run"`
+	LedgerSHA256       string         `json:"ledger_sha256"`
 }
 
 func oq3Summarise(results []oq3ScenarioResult, mode, source, ledgerSHA string) oq3Summary {
