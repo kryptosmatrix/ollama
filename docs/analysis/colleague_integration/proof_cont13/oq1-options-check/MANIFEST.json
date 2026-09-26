@@ -1,0 +1,264 @@
+{
+  "candidate_commit": "04009c432e313eef65172293e75feb038ebe476b",
+  "native_commit": "b4d6c7d8ff69c2e05e4e8ee7e6e710a08abd7b45",
+  "sources": [
+    {
+      "label": "G1 frozen requirements",
+      "path": "docs/_design/G1_PERSISTED_INSTRUCTIONS.md",
+      "commit": "04009c432e313eef65172293e75feb038ebe476b"
+    },
+    {
+      "label": "Commission R3 section 0.7, the context-budget direction",
+      "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+      "lines": [
+        146,
+        146
+      ],
+      "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec"
+    },
+    {
+      "label": "Commission R3, OI-04 (the request-path item G1 closes)",
+      "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+      "lines": [
+        296,
+        299
+      ],
+      "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec"
+    },
+    {
+      "label": "Commission R3, OI-27 implementation obligations (a later item)",
+      "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+      "lines": [
+        410,
+        410
+      ],
+      "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec"
+    },
+    {
+      "label": "measurement run1/native/shift_default_long",
+      "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-26_cont13/oq1-measurements/run1/native/shift_default_long.result.json",
+      "file_sha256": "72d79167c084e1310623ae1cff2bf83b702f708553c20d48c4321db6b09fab64"
+    },
+    {
+      "label": "measurement run1/native/shift_false_long",
+      "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-26_cont13/oq1-measurements/run1/native/shift_false_long.result.json",
+      "file_sha256": "dceef636d6fd594430bb4dc3711d6f68b63d4ca476508e42e12004a9e9b225d7"
+    },
+    {
+      "label": "measurement run1/native/oversize_default",
+      "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-26_cont13/oq1-measurements/run1/native/oversize_default.result.json",
+      "file_sha256": "2dd9e89476ddda05a321274c388cabae5b6491b5839f27c30984d262982a4ab6"
+    },
+    {
+      "label": "measurement run1/native/oversize_shift_false",
+      "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-26_cont13/oq1-measurements/run1/native/oversize_shift_false.result.json",
+      "file_sha256": "5d0e42b2d7c13e1beb8a9b2146b80eb3656d0104ae7ce4c0e18e056c2cf37d90"
+    },
+    {
+      "label": "measurement run2/native/keep_all_long",
+      "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-26_cont13/oq1-measurements/run2/native/keep_all_long.result.json",
+      "file_sha256": "a5860137cae8a48f22bf85aaf835e7bca8aeff8a0288d8dc775ef3bd67ae4a0c"
+    },
+    {
+      "label": "measurement run2/native/keep_all_oversize",
+      "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-26_cont13/oq1-measurements/run2/native/keep_all_oversize.result.json",
+      "file_sha256": "613a782fc3e3038bd35f48d92731c8747fc6cb79fda16b0d0b324896b4a96227"
+    },
+    {
+      "label": "measurement run2/native/reload_sequence",
+      "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-26_cont13/oq1-measurements/run2/native/reload_sequence.result.json",
+      "file_sha256": "32fdc146081e0c616ac42e8e50516fa7ac7360de263ab466fa8dc2316f73b089"
+    },
+    {
+      "label": "measurement run1/rendered/shift_default_long",
+      "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-26_cont13/oq1-measurements/run1/rendered/shift_default_long.result.json",
+      "file_sha256": "a09494316ce1fe70edaf122d562f17a79b4cc0ddf7edb2bab584ab727e8d89f9"
+    },
+    {
+      "label": "measurement run1/rendered/shift_false_long",
+      "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-26_cont13/oq1-measurements/run1/rendered/shift_false_long.result.json",
+      "file_sha256": "03acc2f3280cc6f748beebb60e30893140c3f61a65be66807be685178abe5910"
+    },
+    {
+      "label": "measurement run1/rendered/oversize_default",
+      "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-26_cont13/oq1-measurements/run1/rendered/oversize_default.result.json",
+      "file_sha256": "ea3db0616b556d7def3c564938bb666c113fcd0ebc6faa94ce0384608b157d76"
+    },
+    {
+      "label": "measurement run1/rendered/oversize_shift_false",
+      "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-26_cont13/oq1-measurements/run1/rendered/oversize_shift_false.result.json",
+      "file_sha256": "90b5b517e4061ef5cef32dcd2732de82bcd8103a3d27ef301c1fbd8e05324276"
+    },
+    {
+      "label": "measurement run2/rendered/keep_all_long",
+      "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-26_cont13/oq1-measurements/run2/rendered/keep_all_long.result.json",
+      "file_sha256": "4693c3e00315a206acf87747ae94183ab88905bc5aa67f6da21dac19978f1374"
+    },
+    {
+      "label": "measurement run2/rendered/keep_all_oversize",
+      "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-26_cont13/oq1-measurements/run2/rendered/keep_all_oversize.result.json",
+      "file_sha256": "99e930aa2e8d12a0870894eef029cdb11798bd8ee051c53e50e9836df75cb464"
+    },
+    {
+      "label": "measurement run2/rendered/reload_sequence",
+      "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-26_cont13/oq1-measurements/run2/rendered/reload_sequence.result.json",
+      "file_sha256": "c0e276936a2dbe793cfbe9941ed76bb553e908d526bac9c602e2f524881cb3f5"
+    },
+    {
+      "label": "Rendered-route prompt truncation in the Go runner",
+      "repo": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "commit": "04009c432e313eef65172293e75feb038ebe476b",
+      "path": "llm/llama_server.go",
+      "lines": [
+        276,
+        328
+      ],
+      "file_sha256": "eb6b90eab5122a509a841b54c57fb08ce91a000591d6abd18bd51cda625db46e"
+    },
+    {
+      "label": "Context shift is a llama-server launch argument",
+      "repo": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "commit": "04009c432e313eef65172293e75feb038ebe476b",
+      "path": "llm/llama_server.go",
+      "lines": [
+        781,
+        792
+      ],
+      "file_sha256": "eb6b90eab5122a509a841b54c57fb08ce91a000591d6abd18bd51cda625db46e"
+    },
+    {
+      "label": "Per-request fields Ollama sends to llama-server chat",
+      "repo": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "commit": "04009c432e313eef65172293e75feb038ebe476b",
+      "path": "llm/llama_server.go",
+      "lines": [
+        2106,
+        2118
+      ],
+      "file_sha256": "eb6b90eab5122a509a841b54c57fb08ce91a000591d6abd18bd51cda625db46e"
+    },
+    {
+      "label": "Default request options",
+      "repo": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "commit": "04009c432e313eef65172293e75feb038ebe476b",
+      "path": "api/types.go",
+      "lines": [
+        1096,
+        1104
+      ],
+      "file_sha256": "2155658af3cdb27fc0f44d772ce94a7b52f8da1b51d7b26aa0d158d08ee5791d"
+    },
+    {
+      "label": "A shift mismatch forces a runner reload",
+      "repo": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "commit": "04009c432e313eef65172293e75feb038ebe476b",
+      "path": "server/sched.go",
+      "lines": [
+        1409,
+        1419
+      ],
+      "file_sha256": "e4058db54c61b1af1a0c1799836731adbbf855d59c78757cce81d9d7dca3a07b"
+    },
+    {
+      "label": "Go history truncation on the rendered route keeps system messages",
+      "repo": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "commit": "04009c432e313eef65172293e75feb038ebe476b",
+      "path": "server/prompt.go",
+      "lines": [
+        20,
+        74
+      ],
+      "file_sha256": "79411c4e15ff27fb8bac4dcd96076407e035ec407c0ab1a1840035f9668b4654"
+    },
+    {
+      "label": "Go history truncation on the native route keeps system messages",
+      "repo": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "commit": "04009c432e313eef65172293e75feb038ebe476b",
+      "path": "server/routes.go",
+      "lines": [
+        3010,
+        3067
+      ],
+      "file_sha256": "47b8e89a73ef76d118c89c101dbd9f74b0a63777ba3cbac153b46002b5397ec2"
+    },
+    {
+      "label": "Explicit cloud models are proxied without local checks",
+      "repo": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "commit": "04009c432e313eef65172293e75feb038ebe476b",
+      "path": "server/routes.go",
+      "lines": [
+        2440,
+        2448
+      ],
+      "file_sha256": "47b8e89a73ef76d118c89c101dbd9f74b0a63777ba3cbac153b46002b5397ec2"
+    },
+    {
+      "label": "Remote-host stub models: Modelfile system prompt added only if the first message is not system",
+      "repo": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "commit": "04009c432e313eef65172293e75feb038ebe476b",
+      "path": "server/routes.go",
+      "lines": [
+        2515,
+        2535
+      ],
+      "file_sha256": "47b8e89a73ef76d118c89c101dbd9f74b0a63777ba3cbac153b46002b5397ec2"
+    },
+    {
+      "label": "Local routes: Modelfile system prompt added only if the first message is not system",
+      "repo": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "commit": "04009c432e313eef65172293e75feb038ebe476b",
+      "path": "server/routes.go",
+      "lines": [
+        2633,
+        2637
+      ],
+      "file_sha256": "47b8e89a73ef76d118c89c101dbd9f74b0a63777ba3cbac153b46002b5397ec2"
+    },
+    {
+      "label": "MLX runner admission and generation cap",
+      "repo": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "commit": "04009c432e313eef65172293e75feb038ebe476b",
+      "path": "x/mlxrunner/pipeline.go",
+      "lines": [
+        44,
+        58
+      ],
+      "file_sha256": "021d6ad6f945dfce17c8ad686fd78f6d1fd82d822d8e81f445dce086e507f7aa"
+    },
+    {
+      "label": "Native: with context shift disabled, generation stops at the context limit",
+      "repo": "/Users/krypto/GitHub/ollama/build/darwin-sources/_deps/llama_cpp-src",
+      "commit": "b4d6c7d8ff69c2e05e4e8ee7e6e710a08abd7b45",
+      "path": "tools/server/server-context.cpp",
+      "lines": [
+        1856,
+        1864
+      ],
+      "file_sha256": "69ad37830dfc6d8ae25dbba6f2c7128b4df209bafb6b47ace2fb6aa0c8fdbe48"
+    },
+    {
+      "label": "Native: context shift keeps n_keep tokens and discards half of the rest",
+      "repo": "/Users/krypto/GitHub/ollama/build/darwin-sources/_deps/llama_cpp-src",
+      "commit": "b4d6c7d8ff69c2e05e4e8ee7e6e710a08abd7b45",
+      "path": "tools/server/server-context.cpp",
+      "lines": [
+        2866,
+        2886
+      ],
+      "file_sha256": "69ad37830dfc6d8ae25dbba6f2c7128b4df209bafb6b47ace2fb6aa0c8fdbe48"
+    },
+    {
+      "label": "Native: a prompt at or above the slot context is rejected",
+      "repo": "/Users/krypto/GitHub/ollama/build/darwin-sources/_deps/llama_cpp-src",
+      "commit": "b4d6c7d8ff69c2e05e4e8ee7e6e710a08abd7b45",
+      "path": "tools/server/server-context.cpp",
+      "lines": [
+        3134,
+        3143
+      ],
+      "file_sha256": "69ad37830dfc6d8ae25dbba6f2c7128b4df209bafb6b47ace2fb6aa0c8fdbe48"
+    }
+  ],
+  "packet_sha256": "8631e33176d8e78fdf209fcb3defcc298d92f7c5a93634492698b6c2ee028a51",
+  "packet_bytes": 42010
+}

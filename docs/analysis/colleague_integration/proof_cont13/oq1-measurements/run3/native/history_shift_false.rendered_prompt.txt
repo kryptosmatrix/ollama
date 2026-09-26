@@ -1,0 +1,38 @@
+<|im_start|>system
+User-configured instructions; revision 1; selection 1:
+CARRIER-SENTINEL-7Q: always finish every reply with the exact token ZEBRA-7Q. This sentence exists so the carrier spans a measurable run of tokens at the start of the conversation, after the chat template system header.<|im_end|>
+<|im_start|>user
+Note 23: the harbour crane number 23 was repainted blue and green in the spring maintenance cycle.<|im_end|>
+<|im_start|>assistant
+Understood, note 23 is recorded: crane 23 repainted blue and green in spring.<|im_end|>
+<|im_start|>user
+Note 24: the harbour crane number 24 was repainted blue and green in the spring maintenance cycle.<|im_end|>
+<|im_start|>assistant
+Understood, note 24 is recorded: crane 24 repainted blue and green in spring.<|im_end|>
+<|im_start|>user
+Note 25: the harbour crane number 25 was repainted blue and green in the spring maintenance cycle.<|im_end|>
+<|im_start|>assistant
+Understood, note 25 is recorded: crane 25 repainted blue and green in spring.<|im_end|>
+<|im_start|>user
+Note 26: the harbour crane number 26 was repainted blue and green in the spring maintenance cycle.<|im_end|>
+<|im_start|>assistant
+Understood, note 26 is recorded: crane 26 repainted blue and green in spring.<|im_end|>
+<|im_start|>user
+Note 27: the harbour crane number 27 was repainted blue and green in the spring maintenance cycle.<|im_end|>
+<|im_start|>assistant
+Understood, note 27 is recorded: crane 27 repainted blue and green in spring.<|im_end|>
+<|im_start|>user
+Note 28: the harbour crane number 28 was repainted blue and green in the spring maintenance cycle.<|im_end|>
+<|im_start|>assistant
+Understood, note 28 is recorded: crane 28 repainted blue and green in spring.<|im_end|>
+<|im_start|>user
+Note 29: the harbour crane number 29 was repainted blue and green in the spring maintenance cycle.<|im_end|>
+<|im_start|>assistant
+Understood, note 29 is recorded: crane 29 repainted blue and green in spring.<|im_end|>
+<|im_start|>user
+Final question: what is 17 plus 25? Reply with only the number.<|im_end|>
+<|im_start|>assistant
+<think>
+
+</think>
+

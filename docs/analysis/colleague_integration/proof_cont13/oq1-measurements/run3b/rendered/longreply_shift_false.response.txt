@@ -1,0 +1,1 @@
+{"model":"qwen3:8b","created_at":"2026-09-26T10:16:13.13815Z","message":{"role":"assistant","content":"Crane 23: blue, green  \nCrane 2"},"done":true,"done_reason":"length","total_duration":1624898875,"load_duration":304097500,"prompt_eval_count":498,"prompt_eval_duration":739973000,"eval_count":14,"eval_duration":342771000}

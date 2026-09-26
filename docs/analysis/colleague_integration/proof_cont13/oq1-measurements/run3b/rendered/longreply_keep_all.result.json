@@ -1,0 +1,297 @@
+{
+  "arm": "rendered",
+  "probe": "longreply_keep_all",
+  "request": {
+    "model": "qwen3:8b",
+    "messages": [
+      {
+        "role": "system",
+        "content": "User-configured instructions; revision 1; selection 1:\nCARRIER-SENTINEL-7Q: always finish every reply with the exact token ZEBRA-7Q. This sentence exists so the carrier spans a measurable run of tokens at the start of the conversation, after the chat template system header."
+      },
+      {
+        "role": "user",
+        "content": "Note 00: the harbour crane number 00 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 00 is recorded: crane 00 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 01: the harbour crane number 01 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 01 is recorded: crane 01 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 02: the harbour crane number 02 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 02 is recorded: crane 02 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 03: the harbour crane number 03 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 03 is recorded: crane 03 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 04: the harbour crane number 04 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 04 is recorded: crane 04 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 05: the harbour crane number 05 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 05 is recorded: crane 05 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 06: the harbour crane number 06 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 06 is recorded: crane 06 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 07: the harbour crane number 07 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 07 is recorded: crane 07 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 08: the harbour crane number 08 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 08 is recorded: crane 08 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 09: the harbour crane number 09 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 09 is recorded: crane 09 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 10: the harbour crane number 10 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 10 is recorded: crane 10 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 11: the harbour crane number 11 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 11 is recorded: crane 11 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 12: the harbour crane number 12 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 12 is recorded: crane 12 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 13: the harbour crane number 13 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 13 is recorded: crane 13 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 14: the harbour crane number 14 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 14 is recorded: crane 14 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 15: the harbour crane number 15 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 15 is recorded: crane 15 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 16: the harbour crane number 16 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 16 is recorded: crane 16 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 17: the harbour crane number 17 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 17 is recorded: crane 17 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 18: the harbour crane number 18 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 18 is recorded: crane 18 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 19: the harbour crane number 19 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 19 is recorded: crane 19 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 20: the harbour crane number 20 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 20 is recorded: crane 20 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 21: the harbour crane number 21 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 21 is recorded: crane 21 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 22: the harbour crane number 22 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 22 is recorded: crane 22 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 23: the harbour crane number 23 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 23 is recorded: crane 23 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 24: the harbour crane number 24 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 24 is recorded: crane 24 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 25: the harbour crane number 25 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 25 is recorded: crane 25 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 26: the harbour crane number 26 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 26 is recorded: crane 26 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 27: the harbour crane number 27 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 27 is recorded: crane 27 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 28: the harbour crane number 28 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 28 is recorded: crane 28 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Note 29: the harbour crane number 29 was repainted blue and green in the spring maintenance cycle."
+      },
+      {
+        "role": "assistant",
+        "content": "Understood, note 29 is recorded: crane 29 repainted blue and green in spring."
+      },
+      {
+        "role": "user",
+        "content": "Final request: list every crane number mentioned above, one per line, each followed by its two colours."
+      }
+    ],
+    "stream": false,
+    "think": false,
+    "options": {
+      "num_ctx": 512,
+      "num_predict": 300,
+      "num_keep": -1
+    }
+  },
+  "render_status": 200,
+  "rendered_prompt_chars": 2139,
+  "http_status": 200,
+  "seconds": 2.38,
+  "done_reason": "stop",
+  "prompt_eval_count": 498,
+  "eval_count": 62,
+  "error": null,
+  "reply_tail": "Crane 23: blue and green  \nCrane 24: blue and green  \n25: blue and green  \n26: blue and green  \n27: blue and green  \n28: blue and green  \n29: blue and green  \nZEBRA-7Q",
+  "native_log_lines": [
+    "time=2026-09-26T20:16:18.616+10:00 level=DEBUG source=prompt.go:77 msg=\"truncating input messages which exceed context length\" truncated=15",
+    "slot   operator(): id  0 | task 0 | slot context shift, n_keep = 498, n_left = 13, n_discard = 6",
+    "slot   operator(): id  0 | task 0 | slot context shift, n_keep = 498, n_left = 13, n_discard = 6",
+    "slot   operator(): id  0 | task 0 | slot context shift, n_keep = 498, n_left = 13, n_discard = 6",
+    "slot   operator(): id  0 | task 0 | slot context shift, n_keep = 498, n_left = 13, n_discard = 6",
+    "slot   operator(): id  0 | task 0 | slot context shift, n_keep = 498, n_left = 13, n_discard = 6",
+    "slot   operator(): id  0 | task 0 | slot context shift, n_keep = 498, n_left = 13, n_discard = 6",
+    "slot   operator(): id  0 | task 0 | slot context shift, n_keep = 498, n_left = 13, n_discard = 6",
+    "slot   operator(): id  0 | task 0 | slot context shift, n_keep = 498, n_left = 13, n_discard = 6"
+  ],
+  "launch_lines": [
+    "time=2026-09-26T20:16:16.741+10:00 level=INFO source=llama_server.go:442 msg=\"starting llama-server\" cmd=\"/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/llama-server --model /private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-a3de86cd1c132c822487ededd47a324c50491393e6565cd14bafa40d0b8e686f --port 58746 --host 127.0.0.1 --no-webui --offline -c 512 -np 1 --log-verbosity 4 --no-log-prefix --no-log-timestamps --no-jinja --chat-template chatml --flash-attn auto -b 512 -ub 512 --context-shift\""
+  ],
+  "runner_props": {
+    "n_ctx": 512,
+    "total_slots": 1
+  },
+  "carrier_span": {
+    "carrier_first_token_index": 16,
+    "carrier_end_token_index": 67,
+    "prompt_tokens_runner_count": 498
+  },
+  "api_ps": "{\"models\":[{\"name\":\"qwen3:8b\",\"model\":\"qwen3:8b\",\"size\":5387719802,\"digest\":\"500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41\",\"details\":{\"parent_model\":\"\",\"format\":\"gguf\",\"family\":\"qwen3\",\"families\":[\"qwen3\"],\"parameter_size\":\"8.2B\",\"quantization_level\":\"Q4_K_M\"},\"expires_at\":\"2026-09-26T20:26:20.619734+10:00\",\"size_vram\":5387719802,\"context_length\":512}]}"
+}

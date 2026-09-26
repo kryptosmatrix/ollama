@@ -1,0 +1,19 @@
+20:13:47 [native] history_default: starting fresh daemon
+20:13:55 [native] history_default: http=200 done=stop prompt=492 eval=9 shift_lines=0 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 492}
+20:13:57 teardown: no sandbox process left
+20:13:57 [native] history_shift_false: starting fresh daemon
+20:14:02 [native] history_shift_false: http=200 done=stop prompt=492 eval=9 shift_lines=0 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 492}
+20:14:04 teardown: no sandbox process left
+20:14:04 [native] history_keep_all: starting fresh daemon
+20:14:09 [native] history_keep_all: http=200 done=stop prompt=492 eval=9 shift_lines=0 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 492}
+20:14:11 teardown: no sandbox process left
+20:14:11 [rendered] history_default: starting fresh daemon
+20:14:15 [rendered] history_default: http=200 done=stop prompt=496 eval=9 shift_lines=1 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 496}
+20:14:17 teardown: no sandbox process left
+20:14:17 [rendered] history_shift_false: starting fresh daemon
+20:14:21 [rendered] history_shift_false: http=200 done=stop prompt=496 eval=9 shift_lines=1 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 496}
+20:14:24 teardown: no sandbox process left
+20:14:24 [rendered] history_keep_all: starting fresh daemon
+20:14:28 [rendered] history_keep_all: http=200 done=stop prompt=496 eval=9 shift_lines=1 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 496}
+20:14:30 teardown: no sandbox process left
+20:14:30 done: 6 probe records
