@@ -1,0 +1,28 @@
+{
+  "case": "no-citations",
+  "head": "d559da25a4db89fa9369d8be4106100803e82a58",
+  "baseline": "d559da25a4db89fa9369d8be4106100803e82a58",
+  "controller_sha256": "76f9e131b609191188acbd20af9397577cf24e61a9e55660323ea326975d0ae6",
+  "environment_overrides": {
+    "PATH": "/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "CI": "true"
+  },
+  "scope": "Real Node SSR renderer, Shiki, remark; not browser styling, app launch or live services",
+  "fault": {
+    "case": "no-citations",
+    "file": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-3-no-citations/frontend/src/components/StreamingMarkdownContent.tsx",
+    "edits": [
+      [
+        "import remarkCitationParser from \"@/utils/remarkCitationParser\";\n",
+        ""
+      ],
+      [
+        "        remarkCitationParser,\n",
+        ""
+      ]
+    ],
+    "before_sha256": "983e3aa6e4273b861623a97ae5fe5bf9782294a1d0bcb4449e67f808ac7d32a0",
+    "after_sha256": "c2a43438831aeee05c1aab8786046583184b5736fd8ffad0b282bf16150cc579",
+    "required_failure_title": "uses the citation cursor to select the correct upstream page"
+  }
+}

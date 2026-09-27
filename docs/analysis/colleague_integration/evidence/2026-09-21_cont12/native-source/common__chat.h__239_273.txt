@@ -1,0 +1,35 @@
+239: 
+240: 
+241: // Continuation method provided via `continue_final_message`
+242: enum common_chat_continuation {
+243:     COMMON_CHAT_CONTINUATION_NONE,
+244:     COMMON_CHAT_CONTINUATION_AUTO,
+245:     COMMON_CHAT_CONTINUATION_REASONING,
+246:     COMMON_CHAT_CONTINUATION_CONTENT,
+247: };
+248: 
+249: struct common_chat_templates_inputs {
+250:     std::vector<common_chat_msg>          messages;
+251:     std::string                           grammar;
+252:     std::string                           json_schema;
+253:     bool                                  add_generation_prompt  = true;
+254:     common_chat_continuation              continue_final_message = COMMON_CHAT_CONTINUATION_NONE;
+255:     bool                                  use_jinja              = true;
+256:     // Parameters below only supported when use_jinja is true
+257:     std::vector<common_chat_tool>         tools;
+258:     common_chat_tool_choice               tool_choice         = COMMON_CHAT_TOOL_CHOICE_AUTO;
+259:     bool                                  parallel_tool_calls = false;
+260:     common_reasoning_format               reasoning_format    = COMMON_REASONING_FORMAT_NONE; // TODO: refactor this to "bool enable_thinking"
+261:     bool                                  enable_thinking     = true;
+262:     std::chrono::system_clock::time_point now                 = std::chrono::system_clock::now();
+263:     std::map<std::string, std::string>    chat_template_kwargs;
+264:     bool                                  add_bos = false;
+265:     bool                                  add_eos = false;
+266:     bool                                  force_pure_content = false;
+267: };
+268: 
+269: struct common_chat_params {
+270:     common_chat_format                  format = COMMON_CHAT_FORMAT_CONTENT_ONLY;
+271:     std::string                         prompt;
+272:     std::string                         grammar;
+273:     bool                                grammar_lazy         = false;

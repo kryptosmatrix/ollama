@@ -1,0 +1,68 @@
+[
+  {
+    "path": "cmd/tui/chat/chat.go",
+    "file_sha256": "361d7650d71f162870f6a06e863d0f032d6d3b421fb341c1f628625a6ebfe96f",
+    "ranges": [
+      [
+        1,
+        285
+      ]
+    ],
+    "total_lines": 1246
+  },
+  {
+    "path": "cmd/tui/chat/compaction.go",
+    "file_sha256": "d31cabf34e80f4ae23c772be65bd019aef644a3fa6b1d53428c68c0ebff8b693",
+    "ranges": [
+      [
+        1,
+        101
+      ]
+    ],
+    "total_lines": 101
+  },
+  {
+    "path": "cmd/tui/chat/events.go",
+    "file_sha256": "95c8d6a6e0daccc639b82e6ba99795a0209563a1cb8c8be7349314b1a7c6372e",
+    "ranges": [
+      [
+        1,
+        371
+      ]
+    ],
+    "total_lines": 371
+  },
+  {
+    "path": "cmd/tui/chat/input.go",
+    "file_sha256": "308fae49f0144cab8f4d2fafbd81795ee31f5bb3a28c39e9201fa918a1baa930",
+    "ranges": [
+      [
+        1,
+        180
+      ]
+    ],
+    "total_lines": 1728
+  },
+  {
+    "path": "app/ui/ui.go",
+    "file_sha256": "8d6ebf9482c618cd09243d1fde9dc765d8c7934a7de8644bce59b8d9dbd0d68c",
+    "ranges": [
+      [
+        668,
+        850
+      ]
+    ],
+    "total_lines": 2004
+  },
+  {
+    "path": "app/ui/ui.go",
+    "file_sha256": "8d6ebf9482c618cd09243d1fde9dc765d8c7934a7de8644bce59b8d9dbd0d68c",
+    "ranges": [
+      [
+        280,
+        400
+      ]
+    ],
+    "total_lines": 2004
+  }
+]

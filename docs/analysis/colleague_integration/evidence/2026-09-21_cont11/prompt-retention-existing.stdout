@@ -1,0 +1,12 @@
+{"Time":"2026-09-21T18:10:08.583299+10:00","Action":"start","Package":"github.com/ollama/ollama/server"}
+{"Time":"2026-09-21T18:10:09.376935+10:00","Action":"run","Package":"github.com/ollama/ollama/server","Test":"TestChatPrompt"}
+{"Time":"2026-09-21T18:10:09.377041+10:00","Action":"output","Package":"github.com/ollama/ollama/server","Test":"TestChatPrompt","Output":"=== RUN   TestChatPrompt\n"}
+{"Time":"2026-09-21T18:10:09.378398+10:00","Action":"run","Package":"github.com/ollama/ollama/server","Test":"TestChatPrompt/no_truncate_with_limit_exceeded"}
+{"Time":"2026-09-21T18:10:09.378444+10:00","Action":"output","Package":"github.com/ollama/ollama/server","Test":"TestChatPrompt/no_truncate_with_limit_exceeded","Output":"=== RUN   TestChatPrompt/no_truncate_with_limit_exceeded\n"}
+{"Time":"2026-09-21T18:10:09.38037+10:00","Action":"output","Package":"github.com/ollama/ollama/server","Test":"TestChatPrompt/no_truncate_with_limit_exceeded","Output":"--- PASS: TestChatPrompt/no_truncate_with_limit_exceeded (0.00s)\n"}
+{"Time":"2026-09-21T18:10:09.380393+10:00","Action":"pass","Package":"github.com/ollama/ollama/server","Test":"TestChatPrompt/no_truncate_with_limit_exceeded","Elapsed":0}
+{"Time":"2026-09-21T18:10:09.380417+10:00","Action":"output","Package":"github.com/ollama/ollama/server","Test":"TestChatPrompt","Output":"--- PASS: TestChatPrompt (0.00s)\n"}
+{"Time":"2026-09-21T18:10:09.380445+10:00","Action":"pass","Package":"github.com/ollama/ollama/server","Test":"TestChatPrompt","Elapsed":0}
+{"Time":"2026-09-21T18:10:09.380999+10:00","Action":"output","Package":"github.com/ollama/ollama/server","Output":"PASS\n"}
+{"Time":"2026-09-21T18:10:09.383713+10:00","Action":"output","Package":"github.com/ollama/ollama/server","Output":"ok  \tgithub.com/ollama/ollama/server\t0.800s\n"}
+{"Time":"2026-09-21T18:10:09.38376+10:00","Action":"pass","Package":"github.com/ollama/ollama/server","Elapsed":0.8}

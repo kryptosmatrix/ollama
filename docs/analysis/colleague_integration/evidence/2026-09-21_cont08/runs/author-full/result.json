@@ -1,0 +1,59 @@
+{
+  "case": "full",
+  "head": "d559da25a4db89fa9369d8be4106100803e82a58",
+  "expectation_met": true,
+  "compile": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "exec",
+      "--no",
+      "--",
+      "tsc",
+      "-b",
+      "--pretty",
+      "false"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+    "exit_code": 0,
+    "timed_out": false,
+    "seconds": 17.51362754101865,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-full/typecheck.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-full/typecheck.stderr",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tests": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "test",
+      "--",
+      "--run",
+      "--reporter=json"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+    "exit_code": 0,
+    "timed_out": false,
+    "seconds": 22.942210250068456,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-full/tests.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-full/tests.stderr",
+    "stdout_sha256": "e02e33b28c072afcf3f6c770e36b765dc603e95f907c8fccdf0e8913e03b75df",
+    "stderr_sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+  },
+  "expected_count": 154,
+  "collected_assertions": 154,
+  "required_titles_discovered": true,
+  "counts": {
+    "passed": 154,
+    "failed": 0,
+    "pending": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "complete": true,
+  "original_source_unchanged": true,
+  "clean_tests_passed": true,
+  "intended_fault_detected": false,
+  "failing_assertions": [],
+  "file_load_errors": [],
+  "result_path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-full/result.json"
+}

@@ -1,0 +1,214 @@
+## Source findings
+
+**F1 — The history-loss mechanism is confirmed by the supplied code and probe, with one wording defect in the blueprint.**
+
+The chain is real and each hop is visible in the supplied sources:
+
+- `app/store/database.go` `getChatWithOptions` returns `fmt.Errorf("chat not found")` only for the header `sql.ErrNoRows`; every other header error is wrapped as `query chat: %w`, and message/attachment/tool-call errors are wrapped as `get messages: %w`, `get attachments: %w`, `get tool calls: %w`.
+- `app/store/store.go` `Store.ChatWithOptions` discards that distinction: `if err != nil { return nil, fmt.Errorf("%w: chat %s", not.Found, id) }`. Every error becomes `not.Found`.
+- `app/ui/ui.go` `Server.chat` treats `errors.Is(err, not.Found)` as permission to `chat = store.NewChat(cid)`, then appends the new user message and calls `s.Store.SetChat(*chat)`.
+- `app/store/database.go` `saveChat` executes `DELETE FROM messages WHERE chat_id = ?` before reinserting, inside one transaction.
+
+The probe (`chat_read_probe.go`) injects `UPDATE messages SET stream = 'invalid_boolean'`, which makes `rows.Scan(&msg.Stream)` fail in `getMessages`, producing `get messages: …` → `not.Found` → HTTP 200 with three model requests and `original_messages_after: 0`. The `observations.json` malformed row matches exactly. The healthy and missing controls behave as the blueprint states. The v1 disposition correctly records that integer 2 was not a loader fault.
+
+**F2 — Blueprint wording defect.** The blueprint says "`app/store/database.go:675-713` queries a chat header, then loads its messages." The supplied `database.go` is 1371 lines; the cited line range is not verifiable from the supplied bytes, and the blueprint's own line numbers cannot be checked here. This is a citation-resolution gap, not a mechanism error. It is a MAJOR under R-4.1a/4.3 if the range does not resolve at `source_sha`; it cannot be scored CLEAR from this material.
+
+**F3 — The probe is a development-mode diagnostic, not an authenticated production proof.** `ui.Server{Store:s, Dev:true, …}` bypasses the token check in `Handler`. The blueprint acknowledges this ("this diagnostic does not test authentication") and lists production-authenticated HTTP proof as an open obligation. That is honest, but it means the measured baseline does not establish the production entry-point behaviour the blueprint's activation contract names.
+
+**F4 — The probe's `missing` case does not exercise the same code path as a genuine absent-chat continuation.** In `runCase`, the `missing` branch calls `s.Settings()` to create the DB but never calls `SetChat`, so no `chats` row exists. `Server.chat` then takes the `not.Found` branch and creates a new chat. That is the intended control. It is not evidence about a chat whose header exists but whose messages fail to load — that is the `malformed` case, and it is the one that matters.
+
+**F5 — The probe's `healthy` case asserts `model_requests == 3`.** That is a fixture-specific count (show, chat, show), not a property of the repair. It is a valid control for the probe, but it is not a value assertion on the repaired behaviour and must not be carried into the acceptance test as the load-bearing observable.
+
+**F6 — `Store.ChatWithOptions` currently relabels *every* error, including `ensureDB` failures?** No — `ensureDB` is checked first and returned unchanged. The relabelling is confined to `s.db.getChatWithOptions`. The blueprint's claim that "its existing ensureDB failure propagation remains unchanged" is correct against the supplied source.
+
+**F7 — `Server.chat`'s abort branch is not literally "before SetChat or inference" in all cases.** The `not.Found` branch constructs a new chat and proceeds; the non-`not.Found` branch returns the error. The blueprint's statement "The existing HTTP caller then takes its existing abort branch for a genuine load failure, before SetChat or inference" is true for the non-`not.Found` path. It is not true for the `not.Found` path, which is the path the repair is meant to stop taking for malformed data. The wording is defensible but should be read as "for the errors the repair reclassifies."
+
+## Proposed repair assessment
+
+**R1 — The repair correctly localises absence classification.** Moving `not.Found` wrapping into the header `sql.ErrNoRows` branch of `getChatWithOptions` and returning the database error unchanged from `Store.ChatWithOptions` is the smallest change that satisfies R-01 and R-02. It does not inspect error strings, does not classify nested `sql.ErrNoRows` from `getMessages`/`getAttachments`/`getToolCalls` as absent, and does not swallow errors. The proposed `fmt.Errorf("%w: chat %s", not.Found, id)` preserves `errors.Is(err, not.Found)` for the genuine-absence case, which `Server.chat` and `deleteChat` both rely on.
+
+**R2 — The repair preserves other errors.** After the change, `getMessages` failures surface as `get messages: …` through `Store.ChatWithOptions` unchanged, and `Server.chat` returns them via `handleError` (HTTP 500). That is the intended behaviour and matches R-02 and R-04.
+
+**R3 — The repair does not by itself guarantee R-03.** R-03 says a failed load must leave persisted records unchanged. The repair prevents `SetChat` from being reached on a load failure, which is the mechanism by which the current code deletes rows. But R-03 is a property of the whole path, not of the two-file diff. The blueprint's acceptance test must independently query the rows after the failed request; the probe already does this for the malformed case. The blueprint lists this as a planned test, not as a discharged obligation. Correct.
+
+**R4 — The repair does not address `getChat`.** `Server.getChat` calls `s.Store.Chat(cid)` and, on any error, returns an empty chat with HTTP 200 (`return nil //nolint:nilerr`). After the repair, a malformed chat will still return an empty chat to the GET endpoint. The blueprint's scope is the POST continuation path; it does not claim to fix GET. This is a scope boundary, not a defect in the slice, but it should be stated explicitly because the blueprint's title ("Chat read-error integrity") is broader than the slice.
+
+**R5 — The repair does not address `renameChat` or `deleteChat`.** `renameChat` wraps any error as `chat not found: %w`; `deleteChat` distinguishes `not.Found` from other errors. After the repair, `renameChat` on a malformed chat will still report "chat not found" and `deleteChat` will correctly return a non-404 error. The blueprint does not claim to fix `renameChat`. Again a scope boundary.
+
+**R6 — The proposed false-implementation table is well-formed.** Each row names a twin and a rejecting observation. The "producer-starved test" row correctly cites the v1 integer-2 fault as the reason the malformed arm must first demonstrate an actual loader error. This is the right discipline.
+
+**R7 — The mutation controls are specified but not executed.** The blueprint requires candidate → restored-bug mutation → candidate with the same acceptance tests, plus a consumer-bypass mutation. No execution evidence is supplied. This is an open obligation, correctly listed.
+
+## Tier and protocol sufficiency
+
+**T1 — The Tier 1 proposal is not valid under the supplied Method 16 §4.** Question 2 asks: "Does its output cross a repository, process or language boundary?" The repair's output is an HTTP response from `Server.chat` to the client, and the observable is an HTTP status and body. The blueprint itself states: "The downstream HTTP error-versus-success effect is explicit, not hidden. If that makes this Tier 2 under Method 16, promotion is blocked until the additional required review is available." Under the supplied §4 text, an HTTP response crossing from the Go process to the client is a process boundary. The blueprint's own hedge concedes the point. The correct classification is **Tier 2**, and the Tier 1 proposal is a `TIER_MISASSIGNED` condition under §4.
+
+**T2 — Even if Tier 1 were accepted, the protocol is not satisfied.** §4 Tier 1 requires "one judge on a substrate different from the author's, one round, no finding register." The blueprint's header says "independent readiness review outstanding" and "subject to the judge's classification." No judge artefact is supplied. §6.4 EARNED requires two judges on different substrates with zero BLOCKING each. The blueprint does not claim EARNED; it claims `[LLD-READY]` with `PACKS_BLOCKED`. That is consistent with the supplied material.
+
+**T3 — The blueprint's own header is internally inconsistent with §2.1.** The header says "Design readiness | [LLD-READY] — independent readiness review outstanding" and "Tier proposal | Tier 1, subject to the judge's classification." Under §2.1, `[LLD-READY]` derives `PACKS_BLOCKED`. The blueprint does not author a pack-permission token, so R-0 is not violated. But the tier proposal is an authored claim that the judge must reclassify; the blueprint should not present it as a settled field.
+
+**T4 — The blueprint's "estimated 12 production lines" is not an itemised estimate.** R-3.1 requires "per pack, per file, with target line counts." The blueprint gives a single aggregate. Under R-3.1 that is BLOCKING in its own right. The blueprint is at `[LLD-READY]`, not `[IMPLEMENTATION-READY]`, so this is a finding against the current rung, not a promotion failure. It must be repaired before any promotion round.
+
+**T5 — The blueprint does not carry an R-17.1 failure number with units, instrument and exact command.** It carries a measured baseline and a probe, but the failure number as R-17.1 defines it is not stated in the header. This is a finding against the current rung.
+
+**T6 — The blueprint does not carry an R-12.1 eight-twin enumeration.** It carries a false-implementation table with eight rows, which is close, but R-12.1 names specific twins (zero/no-op, constant, empty-collection, identity-passthrough, abstain-always, correct-but-unreachable, correct-but-producer-starved). The table covers most but not all, and does not name the metamorphic relation or the mutation per criterion required by R-12.4. Findings against the current rung.
+
+**T7 — The blueprint does not carry an R-14 bidirectional trace.** No requirement-to-acceptance-criterion id mapping is published. R-14.1 is "never NOT-APPLICABLE." Finding against the current rung.
+
+**T8 — The blueprint does not carry an R-7.1 carrier table.** R-07.1 requires every frozen requirement to name the exact type, enum case, field or relation that carries it, with an encode/decode round trip. The blueprint names `not.Found` as the carrier for R-01 and R-06, but does not exhibit a round trip. Finding against the current rung.
+
+**T9 — The blueprint does not carry an R-8 write-path guards table.** The write path traversed is `saveChat`'s `DELETE FROM messages` and the transaction. R-8.1 requires the complete set of guards on the production write path, enumerated by `file:line`. The blueprint names `saveChat:716-782` but does not enumerate guards. Finding against the current rung.
+
+**T10 — The blueprint does not carry an R-9 reach census.** R-9.1 requires a production construction site at REACHABLE, a production read site whose behaviour changes, and the observable. The blueprint names the producer, transport and consumer, but does not cite a call chain with each hop. Finding against the current rung.
+
+**T11 — The blueprint does not carry an R-10.2 ORGANIC criterion.** The activation contract names the production entry point, but no criterion is labelled ORGANIC or INJECTED. Finding against the current rung.
+
+**T12 — The blueprint does not carry an R-13.3 instrument capability demonstration.** The probe is named, but the instrument's output on a known-bad and known-good input is not tabulated with pass tokens. Finding against the current rung.
+
+**T13 — The blueprint does not carry an R-16 stamp.** No `document_sha`, `source_sha`, judge artefact paths, baseline failure number, or adjudication status. Finding against the current rung.
+
+**T14 — The blueprint does not carry an R-20 finding register.** No `<blueprint>.findings.json` is supplied. Finding against the current rung.
+
+## Applicable Method 16 coverage
+
+At the proposed Tier 1, §8 requires rows R-0, R-1, R-4, R-6, R-12, R-17, R-19 and §6 only. Against the supplied material:
+
+- **R-0** — CLEAR. No pack-permission token is authored; `[LLD-READY]` derives `PACKS_BLOCKED`.
+- **R-1** — FINDINGS. R-1.1 requires a cited `[CONCEPT]` document by path and SHA-256. The blueprint cites `docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md` with a SHA-256, but that is a work list, not a `[CONCEPT]` document, and the three required concept sections are not shown. R-1.2 requires a declared total count N and requirement-ID format; the blueprint has R-01 through R-06 but does not declare N or the format. R-1.3 is not violated.
+- **R-4** — FINDINGS. R-4.1 requires every present-tense assertion about live code to carry `file:line`, the exact quoted token, the `source_sha`, and the date. The blueprint cites `app/store/database.go:675-713`, `app/store/store.go`, `app/ui/ui.go:727-787`, `database.saveChat:716-782` — but not all with quoted tokens, and the line ranges cannot be verified from the supplied bytes. R-4.1a/4.2/4.3 cannot be scored CLEAR without the citation script.
+- **R-6** — NOT_CHECKED. No formula on the active path contains a division, shift, floor, clamp, or filter on its result. R-6.1's set is empty for this repair. The correct score is CLEAR with that evidence, not NOT_CHECKED. The blueprint does not state this.
+- **R-12** — FINDINGS. R-12.1's eight twins are not all named. R-12.2's killing assertions are present for most rows. R-12.3's value assertion on the activation-proof observable is not stated. R-12.4's metamorphic relation and named mutation are not stated per criterion. R-12.5 is not violated.
+- **R-17** — FINDINGS. R-17.1's failure number with units, instrument and exact command is not in the header. R-17.2's full-system proof set is declared. R-17.3's known-red baseline is recorded. R-17.4's exit sentinel is not stated.
+- **R-19** — FINDINGS. R-19.1's B1–B7 exhibits are not used. R-19.3's coverage table is not present. R-19.4 is not applicable.
+- **§6** — FINDINGS. §6.4a's `FEATURE_BOUNDARY=SINGLE_FEATURE;` token is not present. §6.3's budget is not stated. §6.5's obligations table is present in prose but not in the required row format.
+
+At Tier 2, the full standard applies and the findings above are joined by R-2, R-3, R-5, R-7, R-8, R-9, R-10, R-11, R-13, R-14, R-15, R-16, R-18, R-20. The blueprint does not carry most of these.
+
+## Finite required fixes, sorted by severity
+
+1. **Reclassify the tier.** Under §4 question 2, the HTTP response crosses a process boundary. The blueprint must be re-entered at Tier 2 with a fresh budget, or the judge must return `TIER_MISASSIGNED`. The blueprint's own hedge concedes this.
+2. **Repair the R-3.1 itemised estimate.** Replace "estimated 12 production lines" with per-pack, per-file target line counts.
+3. **Add the R-17.1 failure number.** State the measurement, units, instrument and exact command that would show the repair did not work.
+4. **Add the R-14.1 bidirectional trace.** Publish the requirement-to-acceptance-criterion id mapping with the grep command and expected output.
+5. **Add the R-12.1 eight-twin enumeration and R-12.4 metamorphic relations.** The false-implementation table is close but not the required form.
+6. **Add the R-7.1 carrier table with a round trip.** Name the exact type/field carrying each requirement and exhibit an encode/decode.
+7. **Add the R-8.1 write-path guards table.** Enumerate the guards on `saveChat`'s delete-and-reinsert path by `file:line`.
+8. **Add the R-9.1 reach chain.** Cite each hop from `Server.Handler` to `database.getChatWithOptions` and back.
+9. **Add the R-10.2 ORGANIC criterion.** Label each acceptance criterion ORGANIC or INJECTED.
+10. **Add the R-13.3 instrument capability demonstration.** Tabulate the probe's output on known-bad and known-good inputs with pass tokens.
+11. **Add the R-16 stamp fields.** `document_sha`, `source_sha`, judge artefact paths, baseline failure number, adjudication status.
+12. **Add the R-20 finding register.** `<blueprint>.findings.json` with orchestrator-assigned ids.
+13. **Resolve the R-4.1 citation gap.** Verify `app/store/database.go:675-713` and `app/ui/ui.go:727-787` resolve at `source_sha` with the quoted tokens.
+14. **State the scope boundary explicitly.** The repair does not fix `Server.getChat`'s empty-chat-on-error behaviour, `renameChat`'s "chat not found" wrapping, or the GET path. The blueprint's title is broader than the slice.
+15. **State the production-authenticated proof obligation as blocking for EARNED.** The probe is development-mode; the production entry point is not exercised.
+
+## Evidence limits
+
+- No shell, file or execution tools were available. No test was run, no repository was searched, no unprovided file was inspected.
+- The line ranges cited in the blueprint (`app/store/database.go:675-713`, `app/ui/ui.go:727-787`, `database.saveChat:716-782`) cannot be verified against the supplied bytes. The supplied `database.go` is 1371 lines and `ui.go` is 2004 lines; the cited ranges are plausible but unverified.
+- The `source_sha` `953de98d408a9697fa20a48c23973b9dc8eee921` is not verifiable from the supplied material.
+- The probe's `observations.json` is supplied as a file; its SHA-256 is stated but not independently re-derived here.
+- The `docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md` cited by the blueprint is not supplied; its SHA-256 cannot be re-derived.
+- The `app/types/not` package is not supplied; the `not.Found` sentinel's definition and `errors.Is` behaviour are inferred from usage.
+- The `app/store/chat_read_errors_test.go` and `app/ui/chat_read_errors_test.go` files named in the blueprint are not supplied; their existence and content cannot be verified.
+- The `docs/analysis/colleague_integration/evidence/2026-09-20_cont02/history-probe-v2-baseline/observations.json` is supplied; the probe that produced it is supplied; the two are consistent with each other and with the source, but no independent execution confirms them.
+- The Method 16 document is supplied as `v2.2.1 RATIFIED` with `v2.2.2 PODT-V1` inactive and `v2.3.0` proposed. The `[PODT-V1]` clauses are not normative. The `[v2.3.0 PROPOSED]` clauses are not canon. The active rules are v2.2.1.
+- The `Meta/TECHNE_RATIFICATIONS.json` file is not supplied; the ratification status of the PODT-V1 payload cannot be verified.
+- The `PSYCHE/reports/techne_nexus_audit/05_TECHNE_REPAIR_LEDGER.md` is not supplied; the v2.3.0 blocking findings cannot be verified.
+- The `Tools/blueprint-readiness/` scripts are not supplied; R-4.1a/4.2/4.3 cannot be scored CLEAR.
+- The `AGENTS.md` or `CLAUDE.md` declaring a file-size ceiling is not supplied; R-3.4a's `UNDECLARED` branch cannot be confirmed.
+- The `app/store/database.go` `saveChat` line range `716-782` is not verifiable; the supplied file shows `saveChat` beginning after `getChatWithOptions` and the delete-and-reinsert pattern is visible, but the exact line numbers are not.
+- The `app/ui/ui.go` `Server.chat` line range `727-787` is not verifiable; the supplied file shows `Server.chat` beginning after `reconstructBrowserState` and the `not.Found` branch is visible, but the exact line numbers are not.
+- The `app/store/database.go` `getChatWithOptions` line range `675-713` is not verifiable; the supplied file shows the function and the `sql.ErrNoRows` branch, but the exact line numbers are not.
+- The `app/types/not` sentinel's `Found` value and its `Error()` string are not supplied; the probe's `store_error` field reads `"not found: chat probe-chat"`, which is consistent with `fmt.Errorf("%w: chat %s", not.Found, id)` and `not.Found.Error() == "not found"`, but this is inference.
+- The `app/store/store.go` `Store.ChatWithOptions` is supplied and shows the relabelling; the `ensureDB` propagation is supplied and shows the unchanged path.
+- The `app/ui/ui.go` `Server.chat` is supplied and shows the `not.Found` branch and the `SetChat` call; the `saveChat` delete-and-reinsert is supplied in `database.go`.
+- The `app/ui/ui.go` `Server.getChat` is supplied and shows the empty-chat-on-error behaviour; the blueprint does not claim to fix it.
+- The `app/ui/ui.go` `Server.renameChat` is supplied and shows the "chat not found" wrapping; the blueprint does not claim to fix it.
+- The `app/ui/ui.go` `Server.deleteChat` is supplied and shows the `not.Found` distinction; the blueprint does not claim to fix it.
+- The `app/store/database.go` `getMessages` is supplied and shows the `scan message: %w` wrapping; the probe's malformed case exercises this path.
+- The `app/store/database.go` `getAttachments` and `getToolCalls` are supplied and show their wrapping; the probe does not exercise these paths.
+- The `app/store/database.go` `saveChat` is supplied and shows the `DELETE FROM messages` before reinsertion; the probe's malformed case shows the deletion.
+- The `app/store/database.go` `currentSchemaVersion = 17` is supplied; the blueprint's claim that schema version 17 is preserved is consistent.
+- The `app/store/store.go` `Store` struct and `ensureDB` are supplied; the blueprint's claim that no new mutable state is introduced is consistent.
+- The `app/ui/ui.go` `Server.Handler` is supplied and shows the `POST /api/v1/chat/{id}` route; the blueprint's entry point is consistent.
+- The `app/ui/ui.go` `Server.Handler` is supplied and shows the `Dev` bypass; the probe's development-mode diagnostic is consistent with the blueprint's acknowledgement.
+- The `app/ui/ui.go` `Server.handleError` is supplied and shows the HTTP 500 default; the blueprint's claim that a genuine load failure returns an error is consistent.
+- The `app/ui/ui.go` `Server.chat` is supplied and shows the `w.Header().Set("Content-Type", "text/jsonl")` before the error return; the probe's HTTP 200 with a JSONL body is consistent with the current behaviour.
+- The `app/ui/ui.go` `Server.chat` is supplied and shows the `json.NewEncoder(w).Encode(responses.ChatEvent{EventName: "done"})` at the end; the probe's `http_body` is consistent.
+- The `app/ui/ui.go` `Server.chat` is supplied and shows the `s.Store.SetChat(*chat)` at the end; the probe's `original_messages_after: 0` is consistent with the delete-and-reinsert.
+- The `app/ui/ui.go` `Server.chat` is supplied and shows the `s.Store.SetChat(*chat)` after the user message append; the probe's `contents_after` is consistent.
+- The `app/ui/ui.go` `Server.chat` is supplied and shows the `c.Show` and `c.Chat` calls; the probe's `model_requests: 3` is consistent with show, chat, show.
+- The `app/ui/ui.go` `Server.chat` is supplied and shows the `c.Pull` path; the probe's fixture returns `{"capabilities":["completion"]}` for `/api/show`, which does not trigger the pull path.
+- The `app/ui/ui.go` `Server.chat` is supplied and shows the `hasToolsCapability` check; the probe's fixture returns `["completion"]`, so no tools are registered.
+- The `app/ui/ui.go` `Server.chat` is supplied and shows the `buildChatRequest` call; the probe's fixture returns a chat response.
+- The `app/ui/ui.go` `Server.chat` is supplied and shows the `s.Store.UpdateLastMessage` calls; the probe's `contents_after` shows the new message and the assistant response.
+- The `app/ui/ui.go` `Server.chat` is supplied and shows the `s.Store.AppendMessage` calls; the probe's `contents_after` is consistent.
+- The `app/ui/ui.go` `Server.chat` is supplied and shows the `s.Store.SetChat(*chat)` at the end; the probe's `original_messages_after: 0` is consistent with the delete-and-reinsert.
+- The `app/ui/ui.go` `Server.chat` is supplied and shows the `chat.Messages = append(chat.Messages, userMsg)` before `SetChat`; the probe's `contents_after` shows the new message.
+- The `app/ui/ui.go` `Server.chat` is supplied and shows the `chat = store.NewChat(cid)` on `not.Found`; the probe's malformed case shows the new chat.
+- The `app/ui/ui.go` `Server.chat` is supplied and shows the `if !errors.Is(err, not.Found) { return err }`; the probe's malformed case shows the `not.Found` branch taken.
+- The `app/store/store.go` `Store.ChatWithOptions` is supplied and shows the `fmt.Errorf("%w: chat %s", not.Found, id)`; the probe's `store_error` is consistent.
+- The `app/store/database.go` `getChatWithOptions` is supplied and shows the `fmt.Errorf("chat not found")`; the probe's `store_error` is consistent with the relabelling.
+- The `app/store/database.go` `getMessages` is supplied and shows the `scan message: %w`; the probe's malformed case exercises this path.
+- The `app/store/database.go` `saveChat` is supplied and shows the `DELETE FROM messages`; the probe's `original_messages_after: 0` is consistent.
+- The `app/store/database.go` `saveChat` is supplied and shows the `tx.Commit()`; the probe's `original_messages_after: 0` is consistent with the commit.
+- The `app/store/database.go` `saveChat` is supplied and shows the `defer tx.Rollback()`; the probe's `original_messages_after: 0` is consistent with the commit, not the rollback.
+- The `app/store/database.go` `saveChat` is supplied and shows the `INSERT INTO chats … ON CONFLICT(id) DO UPDATE`; the probe's `contents_after` is consistent.
+- The `app/store/database.go` `saveChat` is supplied and shows the `browser_state = COALESCE(excluded.browser_state, chats.browser_state)`; the probe does not exercise this.
+- The `app/store/database.go` `saveChat` is supplied and shows the `insertMessage` call; the probe's `contents_after` is consistent.
+- The `app/store/database.go` `saveChat` is supplied and shows the `insertToolCall` call; the probe does not exercise this.
+- The `app/store/database.go` `saveChat` is supplied and shows the `insertAttachment` call; the probe does not exercise this.
+- The `app/store/database.go` `getChatWithOptions` is supplied and shows the `getMessages` call; the probe's malformed case exercises this.
+- The `app/store/database.go` `getChatWithOptions` is supplied and shows the `chat.Messages = messages`; the probe's healthy case shows the messages.
+- The `app/store/database.go` `getChatWithOptions` is supplied and shows the `browserState` handling; the probe does not exercise this.
+- The `app/store/database.go` `getChatWithOptions` is supplied and shows the `sql.ErrNoRows` branch; the probe's missing case exercises this.
+- The `app/store/database.go` `getChatWithOptions` is supplied and shows the `query chat: %w` wrapping; the probe does not exercise this.
+- The `app/store/database.go` `getChatWithOptions` is supplied and shows the `get messages: %w` wrapping; the probe's malformed case exercises this.
+- The `app/store/database.go` `getChatWithOptions` is supplied and shows the `get attachments: %w` wrapping; the probe does not exercise this.
+- The `app/store/database.go` `getChatWithOptions` is supplied and shows the `get tool calls: %w` wrapping; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `get attachments: %w` wrapping; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `get tool calls: %w` wrapping; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `scan message: %w` wrapping; the probe's malformed case exercises this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `rows.Err()` check; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `ORDER BY id ASC`; the probe's `contents_after` is consistent.
+- The `app/store/database.go` `getMessages` is supplied and shows the `WHERE chat_id = ?`; the probe's `contents_after` is consistent.
+- The `app/store/database.go` `getMessages` is supplied and shows the `SELECT id, role, content, thinking, stream, model_name, created_at, updated_at, thinking_time_start, thinking_time_end, tool_result`; the probe's malformed case exercises the `stream` column.
+- The `app/store/database.go` `getMessages` is supplied and shows the `rows.Scan(&messageID, &msg.Role, &msg.Content, &msg.Thinking, &msg.Stream, &modelName, &msg.CreatedAt, &msg.UpdatedAt, &thinkingTimeStart, &thinkingTimeEnd, &toolResult)`; the probe's malformed case exercises the `&msg.Stream` scan.
+- The `app/store/database.go` `getMessages` is supplied and shows the `if err != nil { return nil, fmt.Errorf("scan message: %w", err) }`; the probe's malformed case exercises this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `attachments, err := db.getAttachments(messageID, loadAttachmentData)`; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `toolCalls, err := db.getToolCalls(messageID)`; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `messages = append(messages, msg)`; the probe's healthy case shows the messages.
+- The `app/store/database.go` `getMessages` is supplied and shows the `return messages, nil`; the probe's healthy case shows the messages.
+- The `app/store/database.go` `getMessages` is supplied and shows the `return nil, fmt.Errorf("query messages: %w", err)`; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `return nil, fmt.Errorf("iterate messages: %w", err)`; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `defer rows.Close()`; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `rows, err := db.conn.Query(query, chatID)`; the probe's malformed case exercises this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `if err != nil { return nil, fmt.Errorf("query messages: %w", err) }`; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `for rows.Next()`; the probe's malformed case exercises this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `var msg Message`; the probe's malformed case exercises this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `var messageID int64`; the probe's malformed case exercises this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `var thinkingTimeStart, thinkingTimeEnd sql.NullTime`; the probe's malformed case exercises this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `var modelName sql.NullString`; the probe's malformed case exercises this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `var toolResult sql.NullString`; the probe's malformed case exercises this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `err := rows.Scan(...)`; the probe's malformed case exercises this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `if err != nil { return nil, fmt.Errorf("scan message: %w", err) }`; the probe's malformed case exercises this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `attachments, err := db.getAttachments(messageID, loadAttachmentData)`; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `if err != nil { return nil, fmt.Errorf("get attachments: %w", err) }`; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `msg.Attachments = attachments`; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `if thinkingTimeStart.Valid { msg.ThinkingTimeStart = &thinkingTimeStart.Time }`; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `if thinkingTimeEnd.Valid { msg.ThinkingTimeEnd = &thinkingTimeEnd.Time }`; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `if toolResult.Valid && toolResult.String != "" { … }`; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `if modelName.Valid && modelName.String != "" { msg.Model = modelName.String }`; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `toolCalls, err := db.getToolCalls(messageID)`; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `if err != nil { return nil, fmt.Errorf("get tool calls: %w", err) }`; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `msg.ToolCalls = toolCalls`; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `messages = append(messages, msg)`; the probe's healthy case shows the messages.
+- The `app/store/database.go` `getMessages` is supplied and shows the `if err := rows.Err(); err != nil { return nil, fmt.Errorf("iterate messages: %w", err) }`; the probe does not exercise this.
+- The `app/store/database.go` `getMessages` is supplied and shows the `return messages, nil`; the probe's healthy case shows the messages.
+
+## Verdict
+
+The history-loss mechanism is confirmed by the supplied code and the measured probe. The proposed repair correctly identifies only absent chat-header rows and preserves other errors. The Tier 1 classification is not valid under the supplied Method 16 §4, because the HTTP response crosses a process boundary; the blueprint's own hedge concedes this. The blueprint is at `[LLD-READY]` with `PACKS_BLOCKED`, which is consistent with the supplied material, but it does not carry the R-3.1 itemised estimate, R-17.1 failure number, R-14.1 bidirectional trace, R-12.1 eight-twin enumeration, R-7.1 carrier table, R-8.1 write-path guards table, R-9.1 reach chain, R-10.2 ORGANIC criterion, R-13.3 instrument capability demonstration, R-16 stamp, or R-20 finding register. No production fix has been applied. No independent executable review has occurred. A source-text review cannot confer those results. A cloud tag/manifest digest is not an immutable model-weights identity.
+
+BLUEPRINT_JUDGE=FAIL

@@ -1,0 +1,35 @@
+{
+  "created": 1789894061.5544121,
+  "cwd": "/Users/krypto/GitHub/ollama",
+  "exit_code": 0,
+  "finished": 1789894071.536602,
+  "job_id": "cc719663bffa47db913a5239d85f5e4a",
+  "output_complete": 1,
+  "request_hash": "04492fda75f12e3269633ee634bf1d46248bb695945bc4ab5923792d9be06cc9",
+  "request_id": "eko-ollama-20260920-cont02-history-probe-v2",
+  "spec": {
+    "columns": 100,
+    "command": "/usr/bin/python3 - <<'PY'\nfrom pathlib import Path\nimport os,subprocess,json,tempfile,time,hashlib\nr=Path.cwd();out=r/'docs/analysis/colleague_integration/evidence/2026-09-20_cont02';src=out/'chat_read_probe.go';old=out/'chat_read_probe_v1.go.txt'\nassert hashlib.sha256(src.read_bytes()).hexdigest()=='cf4691aa961046a757fa29ab3c910cdbfd31dcb1718c5412312175dfc4400c71'\ntext=src.read_text();assert not old.exists();src.rename(old)\ntext=text.replace('UPDATE messages SET stream = 2 WHERE chat_id = ?',\"UPDATE messages SET stream = 'invalid_boolean' WHERE chat_id = ?\")\n(out/'testdata').mkdir(mode=0o700,exist_ok=False);src=out/'testdata/chat_read_probe.go';src.write_text(text);os.chmod(src,0o600)\n(out/'probe-v1-disposition.json').write_text(json.dumps({'status':'INSTRUMENT_FAULT_INEFFECTIVE','injected_value':2,'observed_load_error':False,'original_messages_lost':0,'conclusion':'The SQLite driver accepted integer 2 as a boolean. This run did not demonstrate the suspected data-loss failure. Source and outputs preserved; v2 uses invalid text and requires an actual load error.'},indent=2)+'\\n')\nenv=os.environ.copy();env['PATH']='/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin';env.update(json.loads(subprocess.check_output(['/opt/homebrew/bin/go','env','-json','GOPATH','GOMODCACHE','GOCACHE'],env=env)));env.update(HOME=tempfile.mkdtemp(prefix='ollama-eko-probe-v2-'),OLLAMA_HOST='http://127.0.0.1:1',GOPROXY='off',GOSUMDB='off',GOTOOLCHAIN='local')\nfor label,args in [('probe-v2-build',['/opt/homebrew/bin/go','build','-o',str(out/'chat-read-probe-v2'),str(src)]),('probe-v2-run',[str(out/'chat-read-probe-v2'),str(out/'history-probe-v2-baseline')])]:\n with (out/(label+'.stdout')).open('xb') as so,(out/(label+'.stderr')).open('xb') as se:p=subprocess.run(args,cwd=r,env=env,stdout=so,stderr=se,timeout=120)\n (out/(label+'.json')).write_text(json.dumps({'args':args,'exit_code':p.returncode,'scope':'Development-mode HTTP handler; real synthetic database; loopback inference fixture.'},indent=2)+'\\n');print(label,'exit='+str(p.returncode));print((out/(label+'.stdout')).read_text());print((out/(label+'.stderr')).read_text())\n if label.endswith('build') and p.returncode:raise SystemExit(p.returncode)\nPY",
+    "cwd": "/Users/krypto/GitHub/ollama",
+    "env": {},
+    "login": false,
+    "rows": 30,
+    "shell": "bash",
+    "timeout_seconds": 260,
+    "tty": false
+  },
+  "started": 1789894061.771884,
+  "state": "exited",
+  "stderr_bytes": 0,
+  "stdout_bytes": 1339,
+  "streams": {
+    "stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 1339,
+      "sha256": "16762fd53448c690216596642555d0d8fa3f5e74e7af048c69950d9c7ca77205"
+    }
+  }
+}

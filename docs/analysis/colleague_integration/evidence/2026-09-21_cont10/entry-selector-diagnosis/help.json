@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/go",
+    "help",
+    "generate"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+  "exit_code": 0,
+  "timed_out": false,
+  "seconds": 0.19751012499909848,
+  "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/entry-selector-diagnosis/help.stdout",
+  "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/entry-selector-diagnosis/help.stderr",
+  "stdout_sha256": "b04757ba91cbeb2f85803674a1fa714d0d95fd266b0faac785a71fe0a075227b",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

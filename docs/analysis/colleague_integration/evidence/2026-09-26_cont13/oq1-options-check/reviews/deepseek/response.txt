@@ -1,0 +1,63 @@
+## Q1 — Stopping silent carrier loss
+
+**Choice: P4, with P2's daemon repair as a required companion.**
+
+P4 is the only option that satisfies G1-R-07 and the §0.7 direction at the point where the failure actually occurs. The measurements show the carrier is *not* the thing at risk from context shift: in every long probe the carrier span (tokens 16–67) sits inside `n_keep` (4 or 106/110), so shift discards history, not the carrier. The real silent-loss path is the rendered route's Go truncation: `oversize_default` returns HTTP 200 with `truncated=1`, `limit=258`, `prompt=4289`, and a reply that is visibly garbage ("filler-0660…"). That is a silent discard of mandatory input under a 200. P4's `truncate:false` + `shift:false` + client-side selection is the only option that makes the client the authority on what is sent, which is what OI-04 line 298 demands ("Trace and extend the existing `SystemPrompt` path… report an overflow instead of silently trimming required material").
+
+**Objections to each:**
+- **P1:** `shift:false` alone does not stop the rendered-route truncation. `oversize_shift_false` (rendered) still logs `truncating input messages` and returns 400 only because the *post-truncation* prompt then exceeded the slot; a slightly smaller oversize would return 200 with the carrier cut. P1 also forces a runner reload on every shift toggle (`sched.go` 1417), which the reload_sequence shows costs ~1.3 s per flip.
+- **P2:** `num_keep:-1` is honoured by llama-server (`keep_all_long` shows `n_keep=106`), but on the rendered route the Go layer truncates *before* llama-server sees it (`keep_all_oversize` shows `limit=511, keep=511, new=511` — the prompt was already cut to 511 by Go, then llama-server kept all 511). So P2 without the repair is worse than P1: it looks safe and isn't. With the repair it is sound but still leaves the client unable to guarantee the carrier survives a future daemon change.
+- **P3:** Correct in spirit but changes daemon behaviour for *all* requests, violating G1-R-15 (unconfigured/disabled-mode behaviour) and G1-R-06 (existing semantics). It also cannot know which leading system messages are "mandatory" versus a Modelfile default; `routes.go` 2633–2637 shows the daemon already merges Modelfile system prompts, so P3 would over-protect.
+- **P4:** The strongest objection is that it duplicates token accounting the daemon already does, and a client estimate that disagrees with the daemon's tokenizer produces a *new* silent failure mode (client thinks it fits, daemon truncates). This is why P4 must be paired with P2's repair: the client's `truncate:false` is only safe if the daemon refuses rather than cuts when the client is wrong.
+
+## Q2 — Output allowance
+
+**Choice: R1, with R3's preflight as a non-blocking diagnostic.**
+
+R1 is correct because the evidence shows the failure mode is already visible: `done_reason:"length"` appears in every long probe, and the oversize probes return explicit 400s. G1's job is to *report* capacity, not to invent a reservation policy that OI-27 line 410 explicitly owns ("reserve room for output/tools"). R3 as a hard refusal would fail G1-R-15 for unconfigured requests and would duplicate OI-27.
+
+**Objections:**
+- **R1:** "Surfaced in diagnostics" is not the same as "not silently discarded." A user who never opens diagnostics still gets a truncated reply. The counter is that `done_reason:"length"` is a protocol-level signal, not a silent drop, and the blueprint's failure number is *incorrect instruction deliveries*, not *short replies*.
+- **R2:** The capability-handshake requirement is real (Go ignores unknown JSON fields), but the deeper problem is that a daemon-side reserve cannot know the client's output intent; `num_predict:-1` (default, `api/types.go` 1099) means "unbounded," so any R is arbitrary. It also changes daemon semantics, risking G1-R-06.
+- **R3:** A client preflight that *refuses* is a behaviour change for ordinary requests (G1-R-15). A preflight that only *warns* is R1 with extra steps.
+
+## Q3 — Version skew
+
+**Choice: V2, capability handshake.**
+
+V1's version gate is brittle: the terminal agent talks to "whatever daemon is running," and version strings do not map cleanly to feature presence (the candidate commit is a fork; version numbers may not be monotonic). V2 lets the client ask "do you honour `truncate:false` and refuse-on-oversize?" and degrade explicitly. This is the only option that makes P4 safe across the terminal/desktop split.
+
+**Objections:**
+- **V1:** Fails when a daemon is patched without a version bump, or when a newer daemon drops a field. It also cannot express *partial* capability (e.g. honours `shift:false` but not `truncate:false`).
+- **V2:** Adds a round-trip and a new daemon surface, which is scope creep for G1. The counter is that the handshake can be a single `/api/version`-style probe already present, extended with a capability list; the cost is one request at session start, not per-request.
+
+## Q4 — Cloud and remote-host stubs
+
+**Choice: K1, allow and label.**
+
+K2 refuses a working path on the basis of unmeasured fear, violating G1-R-15's spirit (ordinary behaviour preserved) and blocking a feature the operator may legitimately want. K3's client estimate is exactly the kind of unverified local check that `routes.go` 2440–2448 shows the daemon deliberately skips for cloud models. K1 is honest: it labels capacity as provider-managed and maps recognisable overflow errors, which is the same contract the local path uses (explicit error, not silent drop).
+
+**Objections:**
+- **K1:** "Provider-managed, not verified locally" is a label, not a guarantee; a provider that silently truncates would still produce incorrect deliveries. The mitigation is that the provider's error surface is the only authority, and the bounded probe is deferred — which is a real gap.
+- **K2:** Refusing until qualified is safe but blocks a path the daemon already supports; it also cannot be tested without the probe it defers.
+- **K3:** The client cannot know the provider's real context length (it varies by model and plan), so the estimate is a guess dressed as a check.
+
+## Missing option
+
+A materially better option for Q1 is **P4 + P2 + a daemon-side "refuse if carrier span would be truncated" assertion**: the daemon, when it sees a request with `truncate:false`, verifies the leading system-message span fits and returns the explicit 400 from `llama_server.go` 293–296 rather than the Go truncation at 308–315. This is P2's repair generalised to the native route, and it closes the gap where `truncateNativeChatMessages` (routes.go 3010–3067) could still drop a system message if the client's estimate is wrong. None of P1–P4 states this explicitly.
+
+## Facts that look wrong or insufficient
+
+- **§2 `oversize_default` (rendered) is the load-bearing evidence for P2/P4, and it is a 200 with a garbage reply.** The result file shows `prompt_eval_count:258` against a 4289-token prompt, with `truncated=1`. This is the silent-discard failure the feature must prevent, and it is *not* fixed by `shift:false` alone (see `oversize_shift_false` rendered, which only 400s because the truncated prompt still exceeded the slot). Any option relying on "the daemon already errors on oversize" is contradicted by this run.
+- **§2 `keep_all_oversize` (rendered) shows `num_keep:-1` does not protect the carrier on the rendered route.** The Go layer truncates to 511 before llama-server sees the prompt (`limit=511, keep=511, new=511`), so P2's "keep the whole prompt" is false on the default route for this model. P2's daemon repair is therefore not optional.
+- **§3 `server/prompt.go` 20–74 and `server/routes.go` 3010–3067 both claim to "always include system messages," but the rendered-route truncation at `llama_server.go` 308–315 operates on a flat token slice after rendering, with no system-message awareness.** The comment at prompt.go 21–22 is therefore misleading for the rendered route; the system-message preservation happens in `chatPrompt`, but the *second* truncation in `completionPromptForRequest` can still cut inside the carrier if `nKeep` is small. The measurements confirm this: `oversize_default` rendered has `n_keep=4` and the carrier span 16–67 is *outside* the kept prefix, so the carrier is in the discarded region.
+- **§2 `reload_sequence` shows every `shift` toggle forces a runner reload (~1.3 s).** This is evidence *against* P1 (which toggles shift per request) and *for* P4 (which sets `shift:false` once per session). The option text does not mention this cost.
+- **§3 `server/routes.go` 2515–2535 and 2633–2637 show the daemon adds the Modelfile system prompt only if the first message is not system.** A client that sends its carrier as the first system message therefore *suppresses* the Modelfile system prompt. This is a semantic change under G1-R-06 that none of the options addresses; P4's client-side assembly must decide whether to merge or replace the Modelfile prompt, and the evidence does not say which is correct.
+
+## Tests that would expose a facade
+
+1. **Carrier-span survival test:** send a carrier-bearing request whose total prompt is just under `num_ctx`, with a long history that forces shift; assert the carrier span (by token index) is byte-identical in the request-boundary capture and in the runner's prompt. Run on both native and rendered arms, with `shift` default and `false`.
+2. **Oversize refusal test:** send a carrier-bearing request whose prompt exceeds `num_ctx` by 1 token; assert HTTP 400 with the explicit capacity error, not 200 with `truncated=1`. Run on rendered route with `truncate:false` and `num_keep:-1`.
+3. **Version-skew test:** run the terminal agent against a daemon built from the parent commit (no `truncate:false` support); assert the client refuses or degrades explicitly, and does not send a carrier-bearing request that the daemon will silently truncate.
+4. **Cloud label test:** send a carrier-bearing request to a cloud model; assert the diagnostics label says "provider-managed, not verified locally" and that a provider overflow error maps to the feature's context error, not a generic 500.
+5. **Modelfile-merge test:** send a carrier as the first system message to a model with a Modelfile system prompt; assert the effective prompt contains both, or that the client explicitly documents replacement.

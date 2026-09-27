@@ -1,0 +1,303 @@
+probe-build exit=0
+
+
+probe-run exit=1
+[
+  {
+    "case": "healthy",
+    "store_error": "",
+    "classified_not_found": false,
+    "http_status": 200,
+    "http_body": "{\"eventName\":\"chat\",\"content\":\"acknowledged\"}\n{\"eventName\":\"done\"}\n",
+    "original_messages_before": 2,
+    "original_messages_after": 2,
+    "model_requests": 3,
+    "contents_after": [
+      "original user message",
+      "original assistant message",
+      "new message",
+      "acknowledged"
+    ]
+  },
+  {
+    "case": "malformed",
+    "store_error": "",
+    "classified_not_found": false,
+    "http_status": 200,
+    "http_body": "{\"eventName\":\"chat\",\"content\":\"acknowledged\"}\n{\"eventName\":\"done\"}\n",
+    "original_messages_before": 2,
+    "original_messages_after": 2,
+    "model_requests": 3,
+    "contents_after": [
+      "original user message",
+      "original assistant message",
+      "new message",
+      "acknowledged"
+    ]
+  },
+  {
+    "case": "missing",
+    "store_error": "not found: chat probe-chat",
+    "classified_not_found": true,
+    "http_status": 200,
+    "http_body": "{\"eventName\":\"chat\",\"content\":\"acknowledged\"}\n{\"eventName\":\"done\"}\n",
+    "original_messages_before": 0,
+    "original_messages_after": 0,
+    "model_requests": 3,
+    "contents_after": [
+      "new message",
+      "acknowledged"
+    ]
+  }
+]
+
+CHAT_READ_INTEGRITY=FAIL
+
+
+BASELINE_DIAGNOSTICS
+ui-test.stdout
+
+> app@0.0.0 test
+> vitest --run
+
+
+️  Generating routes...
+ Processed routes in 306ms
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90m/Users/krypto/GitHub/ollama/app/ui/app[39m
+
+ [32m✓[39m src/utils/clipboard.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 68[2mms[22m[39m
+ [32m✓[39m src/utils/toolApproval.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 95[2mms[22m[39m
+ [32m✓[39m src/utils/fileValidation.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/utils/vram.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32m✓[39m src/utils/mcpRegistry.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 43[2mms[22m[39m
+ [32m✓[39m src/utils/mcpServers.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+ [32m✓[39m src/api.tts.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m src/api.approval.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m src/components/SpeakButton.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 235[2mms[22m[39m
+ [32m✓[39m src/utils/mcpDiscovery.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 112[2mms[22m[39m
+ [32m✓[39m src/lib/speakSession.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/components/MCPLocalDiscovery.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 118[2mms[22m[39m
+ [32m✓[39m src/components/MCPRegistryBrowse.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[32m 191[2mms[22m[39m
+ [32m✓[39m src/utils/model.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m src/utils/messageToolbar.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32m✓[39m src/utils/mcpPanels.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/components/ToolApprovalSetting.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 221[2mms[22m[39m
+ [32m✓[39m src/components/ToolApproval.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[32m 192[2mms[22m[39m
+ [32m✓[39m src/components/StreamingMarkdownContent.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 69[2mms[22m[39m
+ [32m✓[39m src/components/MCPServers.test.tsx [2m([22m[2m16 tests[22m[2m)[22m[32m 168[2mms[22m[39m
+ [32m✓[39m src/components/SpeechSettings.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m21 passed[39m[22m[90m (21)[39m
+[2m      Tests [22m [1m[32m143 passed[39m[22m[90m (143)[39m
+[2m   Start at [22m 18:44:01
+[2m   Duration [22m 14.57s[2m (transform 8.12s, setup 0ms, collect 60.32s, tests 1.77s, environment 33ms, prepare 27.94s)[22m
+
+
+ui-test.stderr
+Browserslist: browsers data (caniuse-lite) is 16 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[90mstderr[2m | src/utils/clipboard.test.ts[2m > [22m[2mcopyTextToClipboard[2m > [22m[2mfalls back to execCommand when Clipboard API fails
+[22m[39mClipboard API failed, falling back to execCommand Error: not allowed
+    at [90m/Users/krypto/GitHub/ollama/app/ui/app/[39msrc/utils/clipboard.test.ts:24:49
+    at [90mfile:///Users/krypto/GitHub/ollama/app/ui/app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:155:11
+    at [90mfile:///Users/krypto/GitHub/ollama/app/ui/app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:26
+    at [90mfile:///Users/krypto/GitHub/ollama/app/ui/app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/krypto/GitHub/ollama/app/ui/app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Users/krypto/GitHub/ollama/app/ui/app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at runSuite [90m(file:///Users/krypto/GitHub/ollama/app/ui/app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Users/krypto/GitHub/ollama/app/ui/app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1729:8[90m)[39m
+
+
+ui-lint.stdout
+
+> app@0.0.0 lint
+> eslint .
+
+
+/Users/krypto/GitHub/ollama/app/ui/app/codegen/gotypes.gen.ts
+   11:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   23:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   28:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   28:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   28:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   33:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   49:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   57:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   59:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   70:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   76:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   76:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   76:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   81:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   98:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  120:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  138:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  138:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  138:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  143:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  163:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  172:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  172:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  172:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  177:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  193:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  198:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  198:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  198:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  203:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  221:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  228:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  228:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  228:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  233:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  249:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  254:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  254:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  254:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  259:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  280:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  294:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  300:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  300:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  300:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  305:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  321:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  336:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  340:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  341:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  343:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  362:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  362:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  362:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  367:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  386:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  400:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  427:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  451:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  456:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  456:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  456:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  461:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  477:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  492:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  508:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  522:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  524:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  536:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  536:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  536:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  541:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  557:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  566:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  580:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  590:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  590:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  590:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  595:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  613:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  625:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  635:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  659:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  679:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  679:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  679:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  684:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  700:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  705:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  705:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  705:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  710:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  743:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  770:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  777:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  777:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  777:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  782:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  810:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  832:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  839:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  839:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  839:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  844:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/krypto/GitHub/ollama/app/ui/app/src/components/Chat.tsx
+  132:6  warning  React Hook useLayoutEffect has a missing dependency: 'containerRef'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/krypto/GitHub/ollama/app/ui/app/src/components/ChatForm.tsx
+  129:34  error    Unexpected any. Specify a different type                                                                                                                                  @typescript-eslint/no-explicit-any
+  131:34  error    Unexpected any. Specify a different type                                                                                                                                  @typescript-eslint/no-explicit-any
+  139:42  error    Unexpected any. Specify a different type                                                                                                                                  @typescript-eslint/no-explicit-any
+  141:42  error    Unexpected any. Specify a different type                                                                                                                                  @typescript-eslint/no-explicit-any
+  364:5   warning  React Hook useCallback has a missing dependency: 'modelSupportsThinkingLevels'. Either include it or remove the dependency array                                          react-hooks/exhaustive-deps
+  469:6   warning  React Hook useEffect has missing dependencies: 'handleCancel', 'handleCancelEdit', and 'modelSupportsThinkingLevels'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/krypto/GitHub/ollama/app/ui/app/src/components/ChatSidebar.tsx
+  170:6  warning  React Hook useMemo has a missing dependency: 'isThisWeek'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/krypto/GitHub/ollama/app/ui/app/src/components/Message.tsx
+  268:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  269:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  269:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  326:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  327:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  343:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  344:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  605:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  606:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/krypto/GitHub/ollama/app/ui/app/src/components/MessageList.tsx
+  26:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  57:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  57:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  58:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  59:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/krypto/GitHub/ollama/app/ui/app/src/components/ModelPicker.tsx
+  92:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/krypto/GitHub/ollama/app/ui/app/src/components/SpeechSettings.tsx
+  18:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/krypto/GitHub/ollama/app/ui/app/src/components/StreamingMarkdownContent.tsx
+   16:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   25:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   57:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   61:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   88:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   90:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  110:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  112:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/krypto/GitHub/ollama/app/ui/app/src/components/ThinkButton.tsx
+  49:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/krypto/GitHub/ollama/app/ui/app/src/components/ui/slider.tsx
+  76:8  warning  React Hook React.useEffect has missing dependencies: 'handleMouseMove' and 'handleMouseUp'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/krypto/GitHub/ollama/app/ui/app/src/contexts/StreamingContext.tsx
+  60:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/krypto/GitHub/ollama/app/ui/app/src/hooks/useChats.ts
+  571:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  572:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  573:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/krypto/GitHub/ollama/app/ui/app/src/hooks/useSelectedModel.ts
+   37:9  warning  The 'inferenceComputes' logical expression could make the dependencies of useMemo Hook (at line 41) change on every render. To fix this, wrap the initialization of 'inferenceComputes' in its own useMemo() Hook  react-hooks/exhaustive-deps
+  100:6  warning  React Hook useMemo has a missing dependency: 'settings.turboEnabled'. Either include it or remove the dependency array                                                                                             react-hooks/exhaustive-deps
+  125:6  warning  React Hook useEffect has missing dependencies: 'setSettings' and 'settings.turboEnabled'. Either include them or remove the dependency array                                                                       react-hooks/exhaustive-deps
+  191:6  warning  React Hook useEffect has missing dependencies: 'models', 'recommendedModel', and 'setSettings'. Either include them or remove the dependency array                                                                 react-hooks/exhaustive-deps
+
+/Users/krypto/GitHub/ollama/app/ui/app/src/utils/remarkCitationParser.ts
+  86:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  87:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 148 problems (137 errors, 11 warnings)
+
+
+SKIPS [{"Time": "2026-09-20T18:43:14.086812+10:00", "Action": "skip", "Package": "github.com/ollama/ollama/agent/tools", "Test": "TestNormalizeBashWorkingDirWindowsDriveLetter", "Elapsed": 0}]
+FAILING_TEST_OUTPUT_EXPECTED_FOR_CURRENT_DEFECT; no production files modified

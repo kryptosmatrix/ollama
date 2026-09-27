@@ -1,0 +1,16 @@
+385: func (s *Session) chatRound(ctx context.Context, runID string, opts RunOptions, messages []api.Message, latest *api.ChatResponse) (api.Message, []api.ToolCall, bool, error) {
+386: 	meta := newEventMetadata(runID, opts)
+387: 	var tools api.Tools
+388: 	if !s.DisableTools {
+389: 		tools = s.availableTools()
+390: 	}
+391: 	req := buildChatRequest(opts, messages, tools)
+392: 
+393: 	assistant := api.Message{Role: "assistant"}
+394: 	var pendingToolCalls []api.ToolCall
+395: 
+396: 	err := s.Client.Chat(ctx, &req, func(response api.ChatResponse) error {
+397: 		if response.Message.Role != "" {
+398: 			assistant.Role = response.Message.Role
+399: 		}
+400: 

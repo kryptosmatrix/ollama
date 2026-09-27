@@ -1,0 +1,70 @@
+4680:             req,
+4681:             SERVER_TASK_TYPE_COMPLETION,
+4682:             body,
+4683:             files,
+4684:             TASK_RESPONSE_TYPE_OAI_CMPL);
+4685:     };
+4686: 
+4687:     this->post_chat_completions = [this](const server_http_req & req) {
+4688:         auto res = create_response();
+4689:         std::vector<raw_buffer> files;
+4690:         json body = json::parse(req.body);
+4691:         json body_parsed = oaicompat_chat_params_parse(
+4692:             body,
+4693:             meta->chat_params,
+4694:             files);
+4695:         return handle_completions_impl(
+4696:             req,
+4697:             SERVER_TASK_TYPE_COMPLETION,
+4698:             body_parsed,
+4699:             files,
+4700:             TASK_RESPONSE_TYPE_OAI_CHAT);
+4701:     };
+4702: 
+4703:     this->post_chat_completions_tok = [this](const server_http_req & req) {
+4704:         return handle_count_tokens(ctx_server.vocab, ctx_server.mctx, req, TASK_RESPONSE_TYPE_OAI_CHAT);
+4705:     };
+4706: 
+4707:     this->post_control = [this](const server_http_req & req) {
+4708:         auto res = create_response();
+4709:         const json body = json::parse(req.body);
+4710: 
+4711:         const std::string cmpl_id = json_value(body, "id", std::string());
+4712:         const std::string action  = json_value(body, "action", std::string());
+4713:         if (cmpl_id.empty()) {
+4714:             res->error(format_error_response("missing completion id", ERROR_TYPE_INVALID_REQUEST));
+4715:             return res;
+4716:         }
+4717:         if (action != "reasoning_end") {
+4718:             res->error(format_error_response("unknown control action", ERROR_TYPE_INVALID_REQUEST));
+4719:             return res;
+4720:         }
+4721: 
+4722:         auto & rd = res->rd;
+4723:         {
+4724:             server_task task(SERVER_TASK_TYPE_CONTROL);
+4725:             task.id              = rd.get_new_id();
+4726:             task.params.control_cmpl_id = cmpl_id;
+4727:             task.params.control_action  = action;
+4728:             rd.post_task(std::move(task));
+4729:         }
+4730: 
+4731:         auto result = rd.next(req.should_stop);
+4732:         if (!result) {
+4733:             GGML_ASSERT(req.should_stop());
+4734:             return res;
+4735:         }
+4736:         if (result->is_error()) {
+4737:             res->error(result->to_json());
+4738:             return res;
+4739:         }
+4740:         res->ok(result->to_json());
+4741:         return res;
+4742:     };
+4743: 
+4744:     this->post_responses_oai = [this](const server_http_req & req) {
+4745:         auto res = create_response();
+4746:         std::vector<raw_buffer> files;
+4747:         json body = server_chat_convert_responses_to_chatcmpl(json::parse(req.body));
+4748:         SRV_DBG("%s\n", "Request converted: OpenAI Responses -> OpenAI Chat Completions");
+4749:         SRV_DBG("converted request: %s\n", body.dump().c_str());

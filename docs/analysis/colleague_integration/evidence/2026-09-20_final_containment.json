@@ -1,0 +1,13 @@
+{
+  "checkpoint_json": "pass",
+  "recorded_file_hashes": "pass",
+  "git_diff_check": "pass",
+  "tracked_changes": 0,
+  "untracked_files": 25,
+  "state_sha256": "07212201db3a07bb4a3d465a196202442f8830d7f322e90f275312daba7faa27",
+  "retired_records": 33,
+  "retained_jobs_including_this_verifier": 232,
+  "retained_job_limit": 256,
+  "only_running_job": "this verifier",
+  "git_status": "?? docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md\n?? docs/OLLAMA_CROSS_MODEL_COLLEAGUES_AND_CAPABILITY_ROUTING_HANDOFF.md\n?? docs/analysis/colleague_integration/BLOCKERS.md\n?? docs/analysis/colleague_integration/BRIDGE_MAINTENANCE_2026-09-20.md\n?? docs/analysis/colleague_integration/DECISIONS.md\n?? docs/analysis/colleague_integration/HANDOFF.md\n?? docs/analysis/colleague_integration/REQUIREMENTS.md\n?? docs/analysis/colleague_integration/SOURCE_MAP.md\n?? docs/analysis/colleague_integration/STATE.json\n?? docs/analysis/colleague_integration/evidence/2026-09-20_baseline_environment.json\n?? docs/analysis/colleague_integration/evidence/2026-09-20_bridge_batch_backup.json\n?? docs/analysis/colleague_integration/evidence/2026-09-20_bridge_bootstrap_archive.json\n?? docs/analysis/colleague_integration/evidence/2026-09-20_bridge_maintenance_result.json\n?? docs/analysis/colleague_integration/evidence/2026-09-20_bridge_retirement_receipts.jsonl\n?? docs/analysis/colleague_integration/evidence/2026-09-20_bridge_verified_execution.json\n?? docs/analysis/colleague_integration/evidence/2026-09-20_eko_execution_blocker.json\n?? docs/analysis/colleague_integration/evidence/2026-09-20_eko_execution_recheck.json\n?? docs/analysis/colleague_integration/evidence/2026-09-20_request_baseline.jsonl\n?? docs/analysis/colleague_integration/evidence/2026-09-20_request_baseline.stderr.txt\n?? docs/analysis/colleague_integration/evidence/2026-09-20_request_baseline_result.json\n?? docs/analysis/colleague_integration/evidence/bridge_archive_backup_20260920.py\n?? docs/analysis/colleague_integration/evidence/initial_checkpoint_before_archive_maintenance/BLOCKERS.md\n?? docs/analysis/colleague_integration/evidence/initial_checkpoint_before_archive_maintenance/DECISIONS.md\n?? docs/analysis/colleague_integration/evidence/initial_checkpoint_before_archive_maintenance/HANDOFF.md\n?? docs/analysis/colleague_integration/evidence/initial_checkpoint_before_archive_maintenance/STATE.json\n"
+}

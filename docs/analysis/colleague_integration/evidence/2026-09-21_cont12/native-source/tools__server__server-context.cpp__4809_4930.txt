@@ -1,0 +1,122 @@
+4809:             TASK_RESPONSE_TYPE_ANTHROPIC);
+4810:     };
+4811: 
+4812:     this->post_anthropic_count_tokens = [this](const server_http_req & req) {
+4813:         return handle_count_tokens(ctx_server.vocab, ctx_server.mctx, req, TASK_RESPONSE_TYPE_ANTHROPIC);
+4814:     };
+4815: 
+4816:     // same with handle_chat_completions, but without inference part
+4817:     this->post_apply_template = [this](const server_http_req & req) {
+4818:         auto res = create_response();
+4819:         std::vector<raw_buffer> files; // dummy, unused
+4820:         json body = json::parse(req.body);
+4821:         json data = oaicompat_chat_params_parse(
+4822:             body,
+4823:             meta->chat_params,
+4824:             files);
+4825:         res->ok({{ "prompt", std::move(data.at("prompt")) }});
+4826:         return res;
+4827:     };
+4828: 
+4829:     this->get_models = [this](const server_http_req &) {
+4830:         auto res = create_response(true);
+4831: 
+4832:         // this endpoint can be accessed during sleeping
+4833:         // the next LOC is to avoid someone accidentally use ctx_server
+4834:         bool ctx_server; // do NOT delete this line
+4835:         GGML_UNUSED(ctx_server);
+4836: 
+4837:         json models = {
+4838:             {"models", {
+4839:                 {
+4840:                     {"name",  meta->model_name},
+4841:                     {"model", meta->model_name},
+4842:                     {"modified_at", ""},
+4843:                     {"size", ""},
+4844:                     {"digest", ""}, // dummy value, llama.cpp does not support managing model file's hash
+4845:                     {"type", "model"},
+4846:                     {"description", ""},
+4847:                     {"tags", {""}},
+4848:                     {"capabilities", meta->has_mtmd ? json({"completion","multimodal"}) : json({"completion"})},
+4849:                     {"parameters", ""},
+4850:                     {"details", {
+4851:                         {"parent_model", ""},
+4852:                         {"format", "gguf"},
+4853:                         {"family", ""},
+4854:                         {"families", {""}},
+4855:                         {"parameter_size", ""},
+4856:                         {"quantization_level", ""}
+4857:                     }}
+4858:                 }
+4859:             }},
+4860:             {"object", "list"},
+4861:             {"data", {
+4862:                 get_model_info(),
+4863:             }}
+4864:         };
+4865: 
+4866:         res->ok(models);
+4867:         return res;
+4868:     };
+4869: 
+4870:     this->post_tokenize = [this](const server_http_req & req) {
+4871:         auto res = create_response();
+4872:         const json body = json::parse(req.body);
+4873:         json tokens_response = json::array();
+4874:         if (body.count("content") != 0) {
+4875:             const bool add_special = json_value(body, "add_special", false);
+4876:             const bool parse_special = json_value(body, "parse_special", true);
+4877:             const bool with_pieces = json_value(body, "with_pieces", false);
+4878: 
+4879:             llama_tokens tokens = tokenize_mixed(ctx_server.vocab, body.at("content"), add_special, parse_special);
+4880: 
+4881:             if (with_pieces) {
+4882:                 for (const auto& token : tokens) {
+4883:                     std::string piece = common_token_to_piece(ctx_server.vocab, token);
+4884:                     json piece_json;
+4885: 
+4886:                     // Check if the piece is valid UTF-8
+4887:                     if (is_valid_utf8(piece)) {
+4888:                         piece_json = piece;
+4889:                     } else {
+4890:                         // If not valid UTF-8, store as array of byte values
+4891:                         piece_json = json::array();
+4892:                         for (unsigned char c : piece) {
+4893:                             piece_json.push_back(static_cast<int>(c));
+4894:                         }
+4895:                     }
+4896: 
+4897:                     tokens_response.push_back({
+4898:                         {"id", token},
+4899:                         {"piece", piece_json}
+4900:                     });
+4901:                 }
+4902:             } else {
+4903:                 tokens_response = tokens;
+4904:             }
+4905:         }
+4906: 
+4907:         res->ok(json{{"tokens", std::move(tokens_response)}});
+4908:         return res;
+4909:     };
+4910: 
+4911:     this->post_detokenize = [this](const server_http_req & req) {
+4912:         auto res = create_response();
+4913:         const json body = json::parse(req.body);
+4914: 
+4915:         std::string content;
+4916:         if (body.count("tokens") != 0) {
+4917:             const llama_tokens tokens = body.at("tokens");
+4918:             content = tokens_to_str(ctx_server.vocab, tokens);
+4919:         }
+4920: 
+4921:         res->ok(json{{"content", std::move(content)}});
+4922:         return res;
+4923:     };
+4924: 
+4925:     this->post_embeddings = [this](const server_http_req & req) {
+4926:         return handle_embeddings_impl(req, TASK_RESPONSE_TYPE_NONE);
+4927:     };
+4928: 
+4929:     this->post_embeddings_oai = [this](const server_http_req & req) {
+4930:         return handle_embeddings_impl(req, TASK_RESPONSE_TYPE_OAI_EMBD);

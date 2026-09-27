@@ -1,0 +1,106 @@
+2040: 
+2041: type llamaServerToolCallAccumulator struct {
+2042: 	index     int
+2043: 	id        string
+2044: 	name      string
+2045: 	arguments string
+2046: }
+2047: 
+2048: type llamaServerChatToolCall struct {
+2049: 	ID       string `json:"id,omitempty"`
+2050: 	Index    int    `json:"index"`
+2051: 	Type     string `json:"type"`
+2052: 	Function struct {
+2053: 		Name      string `json:"name"`
+2054: 		Arguments string `json:"arguments"`
+2055: 	} `json:"function"`
+2056: }
+2057: 
+2058: func accumulatedToolCalls(accs map[int]*llamaServerToolCallAccumulator) ([]api.ToolCall, error) {
+2059: 	if len(accs) == 0 {
+2060: 		return nil, nil
+2061: 	}
+2062: 
+2063: 	maxIndex := 0
+2064: 	for index := range accs {
+2065: 		maxIndex = max(maxIndex, index)
+2066: 	}
+2067: 
+2068: 	toolCalls := make([]api.ToolCall, 0, len(accs))
+2069: 	for index := 0; index <= maxIndex; index++ {
+2070: 		acc := accs[index]
+2071: 		if acc == nil {
+2072: 			continue
+2073: 		}
+2074: 
+2075: 		var args api.ToolCallFunctionArguments
+2076: 		if strings.TrimSpace(acc.arguments) != "" {
+2077: 			if err := json.Unmarshal([]byte(acc.arguments), &args); err != nil {
+2078: 				return nil, fmt.Errorf("llama-server returned invalid tool call arguments for %q: %w", acc.name, err)
+2079: 			}
+2080: 		}
+2081: 
+2082: 		toolCalls = append(toolCalls, api.ToolCall{
+2083: 			ID: acc.id,
+2084: 			Function: api.ToolCallFunction{
+2085: 				Index:     acc.index,
+2086: 				Name:      acc.name,
+2087: 				Arguments: args,
+2088: 			},
+2089: 		})
+2090: 	}
+2091: 
+2092: 	return toolCalls, nil
+2093: }
+2094: 
+2095: func (s *llamaServerRunner) llamaServerChatRequest(req ChatRequest, stream bool) (map[string]any, error) {
+2096: 	if req.Options == nil {
+2097: 		opts := api.DefaultOptions()
+2098: 		req.Options = &opts
+2099: 	}
+2100: 
+2101: 	messages := make([]map[string]any, 0, len(req.Messages))
+2102: 	for _, msg := range req.Messages {
+2103: 		converted, err := llamaServerChatMessage(MessageFromAPI(msg))
+2104: 		if err != nil {
+2105: 			return nil, err
+2106: 		}
+2107: 		messages = append(messages, converted)
+2108: 	}
+2109: 
+2110: 	body := map[string]any{
+2111: 		"messages":          messages,
+2112: 		"stream":            stream,
+2113: 		"cache_prompt":      true,
+2114: 		"n_predict":         req.Options.NumPredict,
+2115: 		"n_keep":            req.Options.NumKeep,
+2116: 		"temperature":       req.Options.Temperature,
+2117: 		"top_k":             req.Options.TopK,
+2118: 		"top_p":             req.Options.TopP,
+2119: 		"min_p":             req.Options.MinP,
+2120: 		"stop":              req.Options.Stop,
+2121: 		"repeat_penalty":    req.Options.RepeatPenalty,
+2122: 		"repeat_last_n":     req.Options.RepeatLastN,
+2123: 		"frequency_penalty": req.Options.FrequencyPenalty,
+2124: 		"presence_penalty":  req.Options.PresencePenalty,
+2125: 		"typical_p":         req.Options.TypicalP,
+2126: 		"seed":              req.Options.Seed,
+2127: 	}
+2128: 	if len(req.Tools) > 0 {
+2129: 		body["tools"] = req.Tools
+2130: 	}
+2131: 	if req.Logprobs {
+2132: 		body["logprobs"] = true
+2133: 		body["top_logprobs"] = max(req.TopLogprobs, 1)
+2134: 	}
+2135: 	if kwargs := llamaServerChatTemplateKwargs(req.Think); kwargs != nil {
+2136: 		body["chat_template_kwargs"] = kwargs
+2137: 	}
+2138: 	if format, err := llamaServerChatResponseFormat(req.Format); err != nil {
+2139: 		return nil, err
+2140: 	} else if format != nil {
+2141: 		body["response_format"] = format
+2142: 	}
+2143: 
+2144: 	return body, nil
+2145: }

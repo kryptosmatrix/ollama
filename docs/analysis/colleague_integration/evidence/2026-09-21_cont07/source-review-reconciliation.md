@@ -1,0 +1,10 @@
+# Frontend source-review reconciliation
+
+The first source-only review is preserved, including incorrect objections; it is not implementation acceptance.
+
+1. Existing cursor annotation mismatch: confirmed as an earlier declared limitation, not caused by this diff. It existed before this slice, the same consumer suppression already existed, and the type-only change emits identical JavaScript. The maintenance boundary expressly does not convert string payloads or repair unrelated renderer semantics. Keep it visible as deferred rather than force an undisclosed runtime change.
+2. Registry keys need not equal the discriminant: rejected. The installed mdast source defines RootContent = RootContentMap[keyof RootContentMap] and PhrasingContent analogously; it unions VALUES. The key spelling is not used as the node discriminant. An executed static compiler-host counterexample shows zero diagnostics with customCitation registration; removing only the registration produces exact custom-citation assignability, comparison and never.data errors. This refutes the claim that the registration is decorative or fails narrowing. No frontend runtime code was run.
+3. Required data is valid: rejected. The node producer always supplies data; a required field is a structurally valid subtype of an optional base field. The complete TypeScript check passes, with no cast introduced to evade this. Weakening it to optional would misdescribe the produced nodes.
+4. The color assertion objection is false: the review's own example style="color:#..." contains color:. Do not replace the meaningful color assertion with mere style presence. A literal substring check confirms this; it does not claim the renderer tests executed.
+
+The eleven added tests remain UNEXECUTED. The native reviewer also wrote that only object-output paths differed: its independent run additionally used distinct working directories with the same relative input path, compiler and flags. The emitted objects still matched; the raw invocation records, not that abbreviated prose, describe the environment precisely. No native runtime behaviour beyond the recorded scope is promoted.

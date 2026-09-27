@@ -1,0 +1,550 @@
+{
+  "record_type": "ollama_colleague_integration_control_state",
+  "current_candidate": {
+    "continuation": 7,
+    "owner": "Eko",
+    "worktree": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+    "branch": "eko/chat-read-integrity-20260920",
+    "commit": "d559da25a4db89fa9369d8be4106100803e82a58",
+    "parent": "281dcaa06c7cd8b299c6045a248dd6b6ac85f954",
+    "worktree_clean_after_commit": true,
+    "precode_contract": "evidence/2026-09-21_cont07/maintenance-contract.md",
+    "precode_contract_sha256": "ca4b3516779718de84cb5262d9fccff69700b1c2f8638b7a60e7d54cc9f5c2aa",
+    "precode_review": "evidence/2026-09-21_cont07/precode-review-r2.md",
+    "precode_response_sha256": "a3657c6a63171987aa14e8683d53a8ff0b48aee1516c1ac8143e3e150747bec1",
+    "report": "CONTINUATION_07_REPORT.md",
+    "source_files_changed": [
+      "app/webview/webview.h",
+      "app/ui/app/src/components/StreamingMarkdownContent.tsx",
+      "app/ui/app/src/components/MessageList.tsx",
+      "app/ui/app/src/utils/remarkCitationParser.ts",
+      "app/ui/app/src/lib/highlighter.ts"
+    ],
+    "test_files_added": [
+      "app/ui/app/src/utils/remarkCitationParser.test.ts",
+      "app/ui/app/src/components/StreamingMarkdownContent.integration.test.tsx"
+    ],
+    "source_sha256": {
+      "app/webview/webview.h": "60b93d50eefa841c61a37e2c9425107dc720fbb2b112455129776547c2e8eef0",
+      "app/ui/app/src/components/StreamingMarkdownContent.tsx": "983e3aa6e4273b861623a97ae5fe5bf9782294a1d0bcb4449e67f808ac7d32a0",
+      "app/ui/app/src/components/MessageList.tsx": "98fb52e407dab24248f3635bec515e6ace897f779a159d649ea6664af149d02e",
+      "app/ui/app/src/utils/remarkCitationParser.ts": "fda18778386aecda5aac3d49d1cb36bc9593500761dd29f1fb3e9a80011af92c",
+      "app/ui/app/src/lib/highlighter.ts": "e9975a7555a435cd3e899bf4f344cb6fc7f29b10cee8ed2bd2904f53c87848aa",
+      "app/ui/app/src/utils/remarkCitationParser.test.ts": "26981cfea4df53329e5f70933173f006c8b866de2986b9dcbff9101b1cd74cc5",
+      "app/ui/app/src/components/StreamingMarkdownContent.integration.test.tsx": "0cd48db543a398ce45a4978772562c9497e3988d5c044640e7a61c3ebf1e619a"
+    },
+    "compiled": true,
+    "tests_executed": true,
+    "fault_controls_executed": true,
+    "independent_execution_runs": 1,
+    "accepted": false,
+    "merged": false,
+    "installed": false,
+    "pushed": true,
+    "remote_tip_verified": true,
+    "execution_restriction": "Frontend test input blocked before execution; not rerouted. Keychain restrictions remain.",
+    "shell_session": "1dd284e91e084a1cbf36aa6e16187f97",
+    "shell_closed": true,
+    "shell_exit_code": 0,
+    "shell_exit_is_test_evidence": false,
+    "disposition": "PARKED",
+    "scope_note": "Compilation/tests/controls flags are bounded to native compiler checks and four app-assembly tests. Frontend production types checked and emission compared; frontend runtime tests NOT RUN. Independent count: one native verification batch, not frontend or programme acceptance.",
+    "source_commit": "acd8bb3de93ea01d43dd8783bbeff036113f9ab9",
+    "frontend_runtime_tests_executed": false
+  },
+  "operator_authority": {
+    "decision_id": "ash-eko-standing-preapproval-2026-09-20",
+    "source": "Ash's direct message in the active conversation, recorded verbatim in DECISIONS.md: Standing authority — 20 September 2026",
+    "status": "granted",
+    "condition": "Reason that the change is necessary and tell Ash what will change and why before acting; no further routine approval required.",
+    "excluded": "Deleting unrecoverable material; preserve an established recovery path for potentially destructive edits, overwrites and migrations.",
+    "repair_maintenance_exception": "authorised for the two-function chat-history preservation correction; formal Method 16 promotion and dependent Method 03 readiness gate not required for this slice",
+    "technical_proof_and_independent_review": "unchanged and still required",
+    "earned_implementation_ready_claimed": false,
+    "applied_date_brisbane": "2026-09-20",
+    "supersedes": "Earlier pending-authority statements in DECISION_REQUEST_CHAT_READ_REPAIR.md, HANDOFF.md, BLOCKERS.md and the prior STATE progress/next_action.",
+    "previous_authority_state": "No explicit maintenance exception; next action requested an explicit bounded operator decision. Preserved as history in CONTINUATION_03_REPORT.md and the retained sections of HANDOFF.md and BLOCKERS.md."
+  },
+  "checkpoint_date_brisbane": "2026-09-21",
+  "task_id": "eko-ollama-20260920-initial-recon",
+  "controller": {
+    "name": "Eko",
+    "model": "GPT-6 Astra Pro",
+    "host": "ChatGPT",
+    "is_founded_ollama_colleague": false,
+    "background_execution": false
+  },
+  "commission": {
+    "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+    "revision": "R3",
+    "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec",
+    "read_complete": true,
+    "read_ranges": [
+      [
+        1,
+        492
+      ],
+      [
+        490,
+        590
+      ]
+    ],
+    "partial_final_line_recovered_by_overlap": true,
+    "required_item_count": 31,
+    "accepted_item_count": 0,
+    "index": "REQUIREMENTS.md"
+  },
+  "progress": {
+    "active_item": "OI-01",
+    "phase": "native repair independently passed; frontend statically verified, runtime execution blocked",
+    "status": "blocked",
+    "disposition": "PARKED",
+    "stop_token": "GATE=FAIL",
+    "blocker_id": "frontend-execution-lint-keychain-root-and-integration",
+    "recon_complete": false,
+    "design_readiness": "[SPEC-DRAFT]",
+    "active_blueprint": "docs/_design/CHAT_READ_ERROR_INTEGRITY.md",
+    "active_implementation_pack": null,
+    "runtime_features_delivered": [],
+    "runtime_files_changed": [
+      "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/store/database.go",
+      "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/store/store.go"
+    ],
+    "test_files_changed": [
+      "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/store/chat_read_errors_test.go",
+      "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/chat_read_errors_test.go"
+    ],
+    "disposition_reason": "Native scope has independent execution. Frontend runtime tests were refused before execution; remaining lint, Keychain, root and integration gates are not waived.",
+    "diagnostic_test_files_created": [
+      "docs/analysis/colleague_integration/evidence/2026-09-20_cont03/testdata/chat_read_errors_test.go",
+      "docs/analysis/colleague_integration/evidence/2026-09-20_cont03/testdata/store_chat_read_errors_test.go"
+    ],
+    "bounded_repair_review": "REPAIR_REVIEW=PASS",
+    "tested_candidate": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+    "recovered_existing_source_and_test_files": [
+      "app/ui/app/src/components/MCPLocalDiscovery.tsx",
+      "app/ui/app/src/components/MCPLocalDiscovery.test.tsx",
+      "app/ui/app/src/utils/mcpDiscovery.ts",
+      "app/ui/app/src/utils/mcpDiscovery.test.ts",
+      "app/ui/mcp_discover.go",
+      "app/ui/mcp_discover_test.go"
+    ],
+    "configuration_files_changed": [
+      "app/.gitignore"
+    ],
+    "latest_source_checkpoint": "acd8bb3de93ea01d43dd8783bbeff036113f9ab9",
+    "maintenance_source_files_changed": [
+      "app/webview/webview.h",
+      "app/ui/app/src/components/StreamingMarkdownContent.tsx",
+      "app/ui/app/src/components/MessageList.tsx",
+      "app/ui/app/src/utils/remarkCitationParser.ts",
+      "app/ui/app/src/lib/highlighter.ts"
+    ],
+    "maintenance_test_files_added": [
+      "app/ui/app/src/utils/remarkCitationParser.test.ts",
+      "app/ui/app/src/components/StreamingMarkdownContent.integration.test.tsx"
+    ]
+  },
+  "repository": {
+    "root": "/Users/krypto/GitHub/ollama",
+    "observed_head": "953de98d408a9697fa20a48c23973b9dc8eee921",
+    "observed_branch": "main",
+    "local_tracking_upstream": "origin/main",
+    "remote_fetched": false,
+    "verified_remote_tip": null,
+    "exclusive_checkout_ownership_verified": false,
+    "task_branch_created": "eko/chat-read-integrity-20260920",
+    "task_worktree_created": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+    "commits_created": [
+      "927fcb5dd706ffd741612a4ab124646aa22a60cb",
+      "1916ee940c1f479f5ce60da8555976f03b8a8401",
+      "ea3ba51e93fddf048a516e0ad9d9e680dab83254",
+      "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+      "13139f8d36ec5f447c67ad634c8ad65b713a49db",
+      "85c69f45e7c0fa731dcb18058c24c2b0a6d03d12",
+      "281dcaa06c7cd8b299c6045a248dd6b6ac85f954",
+      "abeb2e5e29d838f7252b271f25c3b40d1bdff41c",
+      "acd8bb3de93ea01d43dd8783bbeff036113f9ab9",
+      "d559da25a4db89fa9369d8be4106100803e82a58"
+    ],
+    "pushes_performed": 5,
+    "checkpoint_custody": "Source and curated continuation-07 proof committed and remote verified; raw logs remain local. No main merge or installation.",
+    "preserved_external_untracked_files": [
+      "docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+      "docs/OLLAMA_CROSS_MODEL_COLLEAGUES_AND_CAPABILITY_ROUTING_HANDOFF.md"
+    ],
+    "concurrent_handoff_read": true,
+    "installed_or_running_app_identity": {
+      "path": "/Applications/Ollama.app",
+      "reported_version": "0.32.5-47-geb8c93d",
+      "resource_binary_revision": "eb8c93da6ab20b980449226029a9bf5cf40a6306",
+      "resource_binary_modified": false,
+      "matches_checkout": false,
+      "installed_candidate_acceptance": false
+    },
+    "companion_handoff_sha256": "24da38b49da7c628a874d96e1d100e7f269315ba591d9bea745c10ba0d07ddcf",
+    "candidate_source_commit": "acd8bb3de93ea01d43dd8783bbeff036113f9ab9",
+    "documentation_checkpoint": "d559da25a4db89fa9369d8be4106100803e82a58",
+    "verified_task_remote_tip": "d559da25a4db89fa9369d8be4106100803e82a58"
+  },
+  "execution": {
+    "bridge_profile": "Eko Write Bridge",
+    "bridge_version": "0.3.0",
+    "execution_state_id": "dfbd69b42df2453aae7bfa1c5a7af704",
+    "command_admission": "Continuation 05 execution worked after one previously backed-up completed Eko review record was retired. Candidate validation, model-directed validation, selected regressions, builds and branch backup completed; lint remains a failing gate.",
+    "attempted_request_ids": [
+      "eko-ollama-20260920-arrival-01",
+      "eko-ollama-20260920-execution-recheck-01"
+    ],
+    "accepted_job_ids": [
+      "81838f447a5e4575924e70d1560951a4",
+      "f066bb69db834fa280d8d8497ecce8e4",
+      "23b09e55888343ae868cfd1a56adb23d",
+      "f69a3539cb4f42309e57240231e29de4",
+      "86ab9302ee424746b2d8b23f202ee575",
+      "025cbb5a846246bb91c80f4d6a8619b2",
+      "a62675c9ea914b769db928933edf6629",
+      "af8112db875c4c438b3cce0457299f5e"
+    ],
+    "task_commands_in_flight": [],
+    "continuation_07_session_closeout": {
+      "job_id": "1dd284e91e084a1cbf36aa6e16187f97",
+      "state": "exited",
+      "exit_code": 0,
+      "output_complete": true,
+      "eof_delivered": true,
+      "shell_exit_is_test_evidence": false,
+      "evidence": "evidence/2026-09-21_cont07/session-closeout.json"
+    },
+    "continuation_06_session_closeout": {
+      "job_id": "b261d7be2bf44a19a2797fce7a232177",
+      "state": "exited",
+      "exit_code": 0,
+      "output_complete": true,
+      "receipt": "evidence/2026-09-20_cont06/session-closeout.json",
+      "scope": "Shell lifecycle only; app and lint child failures remain unchanged."
+    },
+    "checkpoint_writer_completion": {
+      "job_id": "af8112db875c4c438b3cce0457299f5e",
+      "state": "exited",
+      "exit_code": 0,
+      "output_complete": 1,
+      "stdout_chunk_sha256": "446bebaec823c671c089088784d962569d0756a33db037b18c2f47262f086f10",
+      "evidence_hashes_verified": true
+    },
+    "retired_request_replay_check": {
+      "job_id": "f68fa53d7c8c4fbaa57ba6fef20f86b2",
+      "state": "forgotten",
+      "replayed": true,
+      "original_timestamps_unchanged": true,
+      "new_execution": false
+    },
+    "retained_job_count_last_observed": null,
+    "retained_job_limit": 256,
+    "builds_run": 3,
+    "test_runs": 5,
+    "discovered_test_count": null,
+    "passed_test_count": null,
+    "failed_test_count": null,
+    "skipped_test_count": null,
+    "warning_baseline": "Frontend lint exit 1: 137 errors and 11 warnings before code edits; Browserslist warning; one Windows-only Go skip.",
+    "git_diff_check_run": true,
+    "archive_maintenance_authorised_in_this_task": true,
+    "jobs_forgotten": 41,
+    "service_configuration_changed": false,
+    "build_scope_note": "Historical standalone core build is in continuation_02. Continuation_03 used only compiler-overlaid diagnostic tests; one first-attempt test compilation failed.",
+    "maintenance_report": "BRIDGE_MAINTENANCE_2026-09-20.md",
+    "test_scope": "Per-continuation records govern: new process-separated authenticated and Store-cause diagnostics against unchanged source, no candidate or independent execution.",
+    "archive_maintenance_authorisation": "Ash: Please do, in response to the explicit preservation-first maintenance request, 20 September 2026.",
+    "historical_admission_failures": [
+      "eko-ollama-20260920-arrival-01",
+      "eko-ollama-20260920-execution-recheck-01",
+      "eko-archive-maintenance-20260920-preflight-01"
+    ],
+    "count_scope_note": "No aggregate test count across parent/subtests, frontend cases and diagnostic programs. See exact per-command results.",
+    "continuation_02": {
+      "baseline": "docs/analysis/colleague_integration/evidence/2026-09-20_cont02/baseline-results.json",
+      "go_named_test_subtest_records": {
+        "pass": 593,
+        "fail": 0,
+        "skip": 1
+      },
+      "frontend_test_cases": 143,
+      "frontend_test_files": 21,
+      "frontend_lint_errors": 137,
+      "frontend_lint_warnings": 11,
+      "diagnostic_child_exits": {
+        "integer_2_ineffective_fault": 1,
+        "invalid_text_reproduced_loss": 1
+      },
+      "diagnostic_builds": 2,
+      "core_go_builds": 1,
+      "typescript_checks": 1,
+      "jobs_forgotten": 0,
+      "production_changes": 0,
+      "full_repository_suite_run": false
+    },
+    "aggregate_counter_scope_note": "builds_run and test_runs are retained historical continuation-02 counters, not current totals. Use continuation_03 run population rather than mixing compilations, parent/subtests and process phases.",
+    "continuation_03": {
+      "run_population": "docs/analysis/colleague_integration/evidence/2026-09-20_cont03/diagnostic-run-population.json",
+      "go_diagnostic_invocations": 4,
+      "invocations_with_test_execution": 3,
+      "diagnostic_compile_failures": 1,
+      "production_source_changes": 0,
+      "default_test_files_added": 0,
+      "jobs_forgotten": 6,
+      "full_affected_suite_run": false,
+      "independent_execution_runs": 0
+    },
+    "continuation_05": {
+      "focused_proof_runs": 14,
+      "focused_setup_failures": 2,
+      "author_mutant_runs": 4,
+      "independent_mutant_runs": 4,
+      "selected_go_regression_pass_records": 603,
+      "selected_go_regression_skip_records": 1,
+      "frontend_tests_passed": 143,
+      "lint_errors": 137,
+      "lint_warnings": 11,
+      "core_build_passed": true,
+      "full_app_suite_run": false,
+      "full_root_suite_run": false,
+      "evidence_root": "evidence/2026-09-20_cont05/",
+      "session_job_id": "a6aa410f9266449f8ae223aab8fb32f2",
+      "session_lifecycle": "Validation and checkpoint commands completed; final shell status recorded separately in session-closeout.json."
+    },
+    "continuation_07": {
+      "native_tests_per_run": {
+        "pass": 4,
+        "fail": 0,
+        "skip": 0,
+        "unfinished": 0
+      },
+      "author_native_run": "evidence/2026-09-21_cont07/native-results.json",
+      "independent_native_run": "evidence/2026-09-21_cont07/independent-native-review/fresh-native/result.json",
+      "frontend_typecheck_exit": 0,
+      "frontend_js_files_byte_identical": 4,
+      "frontend_runtime_tests_executed": false,
+      "frontend_cases_written": 11,
+      "frontend_cases_executed": 0,
+      "frontend_blocked_input": "eko-cont07-frontend-baseline",
+      "lint_errors": 122,
+      "lint_warnings": 11,
+      "critical_source_containment": "evidence/2026-09-21_cont07/containment.json"
+    },
+    "warning_baseline_cont07_note": "Three native literal warnings resolved; duplicate -lobjc remains. Current frontend lint: 122 errors and 11 warnings. Prior baseline fields remain historical."
+  },
+  "review": {
+    "independent_colleagues_invoked": 2,
+    "reviewed_candidate": "26673e6296d6d541a0a97d69bbe4adae72040a2d1ca191b12b0919ed333d4bb9",
+    "blueprint_judge_verdict": "BLUEPRINT_JUDGE=FAIL",
+    "code_judge_verdict": null,
+    "reality_gate_verdict": null,
+    "notes": "Continuation 05: DeepSeek independently requested six fresh bounded validation runs and returned REPAIR_REVIEW=PASS for the chat-read mechanism/test scope. Independent broader regression and release acceptance remain open. Earlier nested review records retain their historical scope.",
+    "continuation_04": {
+      "source_review_calls": 2,
+      "final_precode_verdict": "APPROVE; design only",
+      "final_precode_report": "/Users/krypto/GitHub/TECHNE/Tools/ollama/_runs/2026-09-20T11-19-41Z_eko-chat-read-precode-cont04-r2_74j29e2d/response.txt",
+      "actual_candidate_code_acceptance": null,
+      "independent_execution_runs": 0
+    },
+    "primary_requested_model": "deepseek-v4.1-flash:cloud",
+    "served_model": "deepseek-v4.1-flash",
+    "model_request_attempts": 6,
+    "completed_source_reviews": 4,
+    "qualifying_promotion_rounds": 0,
+    "independent_execution_runs": 6,
+    "continuation_03": {
+      "primary_report": "evidence/2026-09-20_cont03/deepseek-routing-review/response.txt",
+      "primary_response_sha256": "ee18a1c46704fa8e7e4814e6715d41fe2496ff803e27e2756c141c40a3a4988e",
+      "primary_scope": "advisory routing/proof source review, not a promotion round",
+      "routing_verdict_accepted": false,
+      "supplementary_codex_result": "evidence/2026-09-20_cont03/codex-routing-review/result.json",
+      "supplementary_codex_completed": false,
+      "independent_execution_runs": 0
+    },
+    "bounded_repair_review": {
+      "verdict": "REPAIR_REVIEW=PASS",
+      "candidate": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+      "independent_execution_runs": 6,
+      "source": "evidence/2026-09-20_cont05/judge/review01/result.json",
+      "full_regression_or_release_approval": false
+    },
+    "continuation_07": {
+      "primary_model": "deepseek-v4.1-flash:cloud",
+      "native_verdict": "NATIVE_DECLARATION_REVIEW=PASS",
+      "native_independently_executed": true,
+      "frontend_source_verdict": "SOURCE_REVIEW=APPROVE",
+      "frontend_runtime_review": "NOT_RUN",
+      "evidence": "evidence/2026-09-21_cont07"
+    }
+  },
+  "routing_receipt": {
+    "routes_used": [
+      "RECON",
+      "DOCS",
+      "GIT",
+      "HANDOFF",
+      "TEST",
+      "PANEL"
+    ],
+    "read_ledger": "SOURCE_MAP.md",
+    "full_arrival_reads_recorded": true,
+    "source_read_scope": "Bounded excerpts only; exact file ranges and hashes in SOURCE_MAP.md.",
+    "not_completed": [
+      "Complete OI-01 source/test/design-corpus reconciliation",
+      "Full-root and complete app/native/package baseline with safe Keychain isolation",
+      "Independent bounded repair-contract review under the authorised maintenance exception; ordinary readiness gates still apply to other programme work",
+      "Independent executable code/proof review",
+      "Lineage registration and predecessor observation",
+      "LETHE document-pointer recording",
+      "Git checkpoint and remote closeout"
+    ],
+    "continuation_03_sources": "Source/read ranges in the retained Bridge commands and evidence/2026-09-20_cont03/routing-review-manifest.json; full source/proof limits in CONTINUATION_03_REPORT.md."
+  },
+  "records": {
+    "handoff": "HANDOFF.md",
+    "requirements": "REQUIREMENTS.md",
+    "decisions": "DECISIONS.md",
+    "source_map": "SOURCE_MAP.md",
+    "blockers": "BLOCKERS.md",
+    "evidence": [
+      "evidence/2026-09-20_eko_execution_blocker.json",
+      "evidence/2026-09-20_eko_execution_recheck.json",
+      "evidence/2026-09-20_baseline_environment.json",
+      "evidence/2026-09-20_bridge_batch_backup.json",
+      "evidence/2026-09-20_bridge_bootstrap_archive.json",
+      "evidence/2026-09-20_bridge_maintenance_result.json",
+      "evidence/2026-09-20_bridge_retirement_receipts.jsonl",
+      "evidence/2026-09-20_bridge_verified_execution.json",
+      "evidence/2026-09-20_request_baseline.jsonl",
+      "evidence/2026-09-20_request_baseline.stderr.txt",
+      "evidence/2026-09-20_request_baseline_result.json"
+    ],
+    "maintenance": "BRIDGE_MAINTENANCE_2026-09-20.md",
+    "continuation_02_report": "CONTINUATION_02_REPORT.md",
+    "judge_reconciliation": "JUDGE_RECONCILIATION_02.md",
+    "continuation_04_report": "CONTINUATION_04_REPORT.md",
+    "continuation_03_report": "CONTINUATION_03_REPORT.md",
+    "continuation_03_evidence": "evidence/2026-09-20_cont03/",
+    "continuation_05_report": "CONTINUATION_05_REPORT.md",
+    "continuation_05_evidence": "evidence/2026-09-20_cont05/",
+    "continuation_06_report": "CONTINUATION_06_REPORT.md",
+    "continuation_06_evidence": "evidence/2026-09-20_cont06/",
+    "continuation_06_closeout": "evidence/2026-09-20_cont06/git-closeout.json",
+    "continuation_07_report": "CONTINUATION_07_REPORT.md",
+    "continuation_07_evidence": "evidence/2026-09-21_cont07",
+    "continuation_07_closeout": "evidence/2026-09-21_cont07/git-closeout.json"
+  },
+  "record_file_sha256": {
+    "HANDOFF.md": "779c5dfb5ce1ec78585b37aaedfa971335790ca61834377e9c0fe5cf0eddb835",
+    "REQUIREMENTS.md": "a8e35a5b772fde807700d53d1c7b78ddd32fb9b49c3f36a7f89ef039707d7719",
+    "DECISIONS.md": "9c5bd00f75a0b78adb08e937308004b10eb2e3bae7354928ab57cc7a440e98d0",
+    "SOURCE_MAP.md": "b9e46576895492f5af1264afad6f080487a09d1e0a1b5a1b033f005d11e70e0d",
+    "BLOCKERS.md": "19ee467bbb39898d0aa96e5eab7e40c1aa5931b5bb98edb97b5ea202b2569d26",
+    "CONTINUATION_04_REPORT.md": "fb1b6584881a04130eaafb58635af8742a0259c8bf04db81c169203947822e2f",
+    "evidence/2026-09-20_eko_execution_blocker.json": "4b01ac2aac752589e0cbc0599d0ae941b9a6cd46969ff20bcef3ab1044806e8d",
+    "evidence/2026-09-20_eko_execution_recheck.json": "0129cdcb20852a8e2890b8a15621590336a6938b341f26443ddf6c469d085e0e",
+    "BRIDGE_MAINTENANCE_2026-09-20.md": "841c00264acd820f3a6c8d029868ede08ad27c5ea46ff441037a64c17672f07e",
+    "evidence/2026-09-20_baseline_environment.json": "ab0b121c822e94a1ac56f29249812fd902cff541b01dd9e5c8f651b9209fe18b",
+    "evidence/2026-09-20_bridge_batch_backup.json": "ae92b5166ecb62b93f7af7c5d94a4e04dc8411a31283a2d0dad6370271839282",
+    "evidence/2026-09-20_bridge_bootstrap_archive.json": "d56215ee4a138c6d4e52f9770e24e9020bb52eb598fbde1dda5bfb36697f2e07",
+    "evidence/2026-09-20_bridge_maintenance_result.json": "ec54a4c048938eea980a03682cba19705e28e740502f88793d082f1c4b1f8f31",
+    "evidence/2026-09-20_bridge_retirement_receipts.jsonl": "6c8371aa6a9ed705229114505cc5880ba58e8908d19c7fc5bf277bd318ce896c",
+    "evidence/2026-09-20_bridge_verified_execution.json": "b2d26b1ff80d0aa9272ff8121e2cecb08bc59988c5ce643453d1426b2c4cab6c",
+    "evidence/2026-09-20_request_baseline.jsonl": "ddff080c1638fb3d134f1be8893f8bf00fd9d7a69bdbae7f17f702e080fc85a2",
+    "evidence/2026-09-20_request_baseline.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "evidence/2026-09-20_request_baseline_result.json": "908dc9f5c74f3cd3c631a17017933f24824c66e86d5114b0c1d775ba46bce766",
+    "CONTINUATION_02_REPORT.md": "facc4fa8994ac7a04f108fa01022faa0848f224fb11d5122e5f9b00cdf416bf2",
+    "JUDGE_RECONCILIATION_02.md": "12c0e34388b144731d1ab2079e2f56f4d7df21a6c1826f46bd8a590933f85a15",
+    "CONTINUATION_03_REPORT.md": "391a31d2a7821ed8a6284b5c5b03c6df3362d399e544e18c7d4519d18ab19e28",
+    "CONTINUATION_05_REPORT.md": "1e9881bffc92cb99b3e6024b268cdb84ef4ddcd6300b3c4f0f67fdd9ecf49ad6",
+    "CONTINUATION_06_REPORT.md": "2bfc519b04fe1ade3ee0c271f28a592e3b77cf2fe454b717aeb7f607c3fdf97a",
+    "CONTINUATION_07_REPORT.md": "8e1fedd1685761109f3b781334ec54d391e95c7ff5895bb868d9986d0bd6e258"
+  },
+  "post_write_containment": {
+    "tool": "Eko_Write_Bridge.git_status",
+    "request_id": "007bcd26e41b4f5db682380d4a5eb49b",
+    "head_commit": "953de98d408a9697fa20a48c23973b9dc8eee921",
+    "branch": "main",
+    "staged": 0,
+    "unstaged": 0,
+    "conflicted": 0,
+    "untracked_total": 10,
+    "pre_existing_or_concurrent_untracked": 2,
+    "new_task_report_files": 8,
+    "truncated": false,
+    "original_work_list_hash_recheck_request": "80bd2a8eee22430b88b472b6a176ccb3",
+    "original_work_list_hash_unchanged": true,
+    "scope_note": "Historical early checkpoint below; current continuation-07 containment is in evidence/2026-09-21_cont07/containment.json"
+  },
+  "next_action": {
+    "title": "Close frontend runtime proof through permitted execution before further acceptance",
+    "first_dependency": "The two new test files, full frontend suite, relevant fault controls and independent executable review need permitted execution. Do not reroute the denied input or treat static checks as runtime acceptance.",
+    "then": "Continue bounded generator/handwritten lint repairs; retain duplicate-linker, supervised Keychain, root-isolation and combined/package gates. Preserve earned native and history-repair results.",
+    "revisit_trigger": "Next active continuation with the applicable execution boundary resolved; no background task scheduled."
+  },
+  "checkpoint_updated_brisbane": "2026-09-21T11:04:53.938089+10:00",
+  "diagnosed_prerequisite": {
+    "id": "chat-continuation-load-error-data-loss",
+    "status": "implemented_and_independently_validated_not_integrated",
+    "unit": "original messages lost in one injected-fault continuation",
+    "baseline_value": 2,
+    "target_value": 0,
+    "scope": "Real temporary default-path Store across fresh processes and actual authenticated HTTP Handler; simulated external inference only. Original messages, attachment/tool records and title lost; native error identity also discarded. No installed-app or post-repair proof.",
+    "observations": "docs/analysis/colleague_integration/evidence/2026-09-20_cont03/authenticated-baseline.stdout",
+    "error_cause_observations": "docs/analysis/colleague_integration/evidence/2026-09-20_cont03/store-baseline-v2.stdout"
+  },
+  "blueprint_file_sha256": "b691c8004ed82674c82ebcde3a2f876cd85f65cb5f8167ffadc5e3fd6e6e0570",
+  "continuation_02_custody": {
+    "retained_commands_index": "docs/analysis/colleague_integration/evidence/2026-09-20_cont02/bridge-commands/INDEX.json",
+    "binary_custody": "docs/analysis/colleague_integration/evidence/2026-09-20_cont02/binary-custody.json",
+    "original_checkpoint": "docs/analysis/colleague_integration/evidence/2026-09-20_cont02/checkpoint_before_cont02_closeout",
+    "full_report_write_timeout_reconciled_by_read_request": "a8e4b7558d30411889df2813a032aaff"
+  },
+  "continuation_06": {
+    "source_commit": "85c69f45e7c0fa731dcb18058c24c2b0a6d03d12",
+    "documentation_commit": "281dcaa06c7cd8b299c6045a248dd6b6ac85f954",
+    "evidence": "evidence/2026-09-20_cont06/",
+    "report": "CONTINUATION_06_REPORT.md",
+    "ignore_review": "GITIGNORE_REVIEW=PASS",
+    "independent_ignore_execution": true,
+    "integration_gate": "BLOCKED",
+    "app_suite": {
+      "exit_code": 1,
+      "pass_records": 300,
+      "fail_records": 1,
+      "skip_records": 0,
+      "unfinished": 0,
+      "failed_test": "TestKeychainRoundTripUsesNamedServiceNotMCP",
+      "reason": "macOS reported authorisation cancelled",
+      "retries": 0
+    },
+    "lint": {
+      "main_exit": 1,
+      "candidate_exit": 1,
+      "errors": 137,
+      "warnings": 11,
+      "messages_identical": true,
+      "affected_source_bytes_identical": true
+    },
+    "native_warnings": 4,
+    "root_suite_executed": false,
+    "keychain_fixture_edit_applied": false,
+    "denied_edit_request": "d9b6769e0c6d4bbd9327a91f7161d401",
+    "retired_owned_job": "0356010d95a44e55832f4fa2cefa7f2e",
+    "session_job": "b261d7be2bf44a19a2797fce7a232177"
+  },
+  "continuation_07": {
+    "source_commit": "acd8bb3de93ea01d43dd8783bbeff036113f9ab9",
+    "documentation_commit": "d559da25a4db89fa9369d8be4106100803e82a58",
+    "report": "CONTINUATION_07_REPORT.md",
+    "evidence": "evidence/2026-09-21_cont07",
+    "native_review": "NATIVE_DECLARATION_REVIEW=PASS",
+    "frontend_source_review": "SOURCE_REVIEW=APPROVE",
+    "frontend_runtime_tests": false,
+    "accepted": false,
+    "session_job": "1dd284e91e084a1cbf36aa6e16187f97",
+    "retired_own_job": "76f6c3466291456db6a333330d4be1b4"
+  }
+}

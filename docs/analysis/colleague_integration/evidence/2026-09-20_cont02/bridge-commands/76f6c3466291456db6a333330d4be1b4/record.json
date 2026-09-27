@@ -1,0 +1,35 @@
+{
+  "created": 1789893950.951116,
+  "cwd": "/Users/krypto/GitHub/ollama",
+  "exit_code": 0,
+  "finished": 1789893966.137602,
+  "job_id": "76f6c3466291456db6a333330d4be1b4",
+  "output_complete": 1,
+  "request_hash": "cf8372da6ae8c1b0cd8cadf7a2ee078380c4fa4711abc1facf5c5b652a81d89d",
+  "request_id": "eko-ollama-20260920-cont02-history-probe",
+  "spec": {
+    "columns": 100,
+    "command": "/usr/bin/python3 - <<'PY'\nimport os,subprocess,json,hashlib,tempfile,time\nfrom pathlib import Path\nroot=Path.cwd();out=root/'docs/analysis/colleague_integration/evidence/2026-09-20_cont02'\nenv=os.environ.copy();env['PATH']='/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin'\ninfo=json.loads(subprocess.check_output(['/opt/homebrew/bin/go','env','-json','GOPATH','GOMODCACHE','GOCACHE'],env=env));env.update(info);env.update(HOME=tempfile.mkdtemp(prefix='ollama-eko-probe-'),OLLAMA_HOST='http://127.0.0.1:1',GOPROXY='off',GOSUMDB='off',GOTOOLCHAIN='local')\nfor label,args in [('probe-build',['/opt/homebrew/bin/go','build','-o',str(out/'chat-read-probe'),str(out/'chat_read_probe.go')]),('probe-run',[str(out/'chat-read-probe'),str(out/'history-probe-baseline')])]:\n start=time.monotonic()\n with (out/(label+'.stdout')).open('xb') as so,(out/(label+'.stderr')).open('xb') as se:p=subprocess.run(args,cwd=root,env=env,stdout=so,stderr=se,timeout=120)\n meta={'args':args,'exit_code':p.returncode,'seconds':time.monotonic()-start,'home':env['HOME'],'scope':'Development-mode production HTTP handler, real temporary SQLite, injected invalid stream value, simulated loopback inference. Authentication and installed application are not under test.'}\n (out/(label+'.json')).write_text(json.dumps(meta,indent=2)+'\\n');print(label,'exit='+str(p.returncode));print((out/(label+'.stdout')).read_text());print((out/(label+'.stderr')).read_text())\n if label=='probe-build' and p.returncode:raise SystemExit(p.returncode)\nprint('\\nBASELINE_DIAGNOSTICS')\nfor name in ['ui-test.stdout','ui-test.stderr','ui-lint.stdout']:\n print(name);print((out/name).read_text())\nevents=[json.loads(l) for l in (out/'go-affected.stdout').read_text().splitlines() if l.startswith('{')]\nprint('SKIPS',json.dumps([e for e in events if e['Action']=='skip']))\nprint('FAILING_TEST_OUTPUT_EXPECTED_FOR_CURRENT_DEFECT; no production files modified')\nPY",
+    "cwd": "/Users/krypto/GitHub/ollama",
+    "env": {},
+    "login": false,
+    "rows": 30,
+    "shell": "bash",
+    "timeout_seconds": 270,
+    "tty": false
+  },
+  "started": 1789893951.273908,
+  "state": "exited",
+  "stderr_bytes": 0,
+  "stdout_bytes": 22950,
+  "streams": {
+    "stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 22950,
+      "sha256": "96f4bb438ed2a42fa13d5e91789596e5bd81d0913337e6ac8c8c24bb70f96f4c"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "created_at": "2026-09-21T06:31:52.849583007Z",
+  "message": {
+    "role": "assistant",
+    "content": "Let me read the raw-generator lint stdout to confirm the ESLint rule actually fired, and the full lint delta.",
+    "tool_calls": [
+      {
+        "id": "call_begcmlwy",
+        "function": {
+          "index": 0,
+          "name": "read_run_output",
+          "arguments": {
+            "ordinal": 4,
+            "stream": "stderr",
+            "offset": 0,
+            "count": 400
+          }
+        }
+      },
+      {
+        "id": "call_jt9c7wh0",
+        "function": {
+          "index": 1,
+          "name": "read_run_output",
+          "arguments": {
+            "ordinal": 7,
+            "stream": "stderr",
+            "offset": 0,
+            "count": 400
+          }
+        }
+      }
+    ]
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 1524280687,
+  "prompt_eval_count": 41976,
+  "prompt_eval_cached_count": 41096,
+  "eval_count": 191
+}

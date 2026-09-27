@@ -1,0 +1,23 @@
+{
+  "scope": "Unbound/null-binding canonical-profile fixtures only. Reference serialization proof, not an implemented store, request, or persistence test.",
+  "vectors": [
+    {
+      "name": "zero",
+      "bytes": 76,
+      "sha256": "157826516a6fd8d118dc84113f5d5635604ba0fd871d98412816611627e43b36",
+      "literal_utf8": "{\"schema_version\":1,\"revision\":\"0\",\"enabled\":false,\"text\":\"\",\"binding\":null}"
+    },
+    {
+      "name": "unicode",
+      "bytes": 103,
+      "sha256": "bf623f85cbc81809c618dbe0fa0767901ea22449804e2dc392079d22d27ac984",
+      "literal_utf8": "{\"schema_version\":1,\"revision\":\"2\",\"enabled\":true,\"text\":\"line one\\nline two — café\",\"binding\":null}"
+    },
+    {
+      "name": "escapes",
+      "bytes": 111,
+      "sha256": "d11cedadb67f8a65b05ee10f15fe6d7342218530dd2b93e13ff7f4accfa4d104",
+      "literal_utf8": "{\"schema_version\":1,\"revision\":\"3\",\"enabled\":true,\"text\":\"line one\\r\\n\\u003c\\u0026\\u003e\\u2028\",\"binding\":null}"
+    }
+  ]
+}

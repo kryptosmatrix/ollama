@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "git",
+    "grep",
+    "-n",
+    "-E",
+    "n_prompt_tokens.*n_ctx|n_ctx.*n_prompt_tokens|n_ctx_slot|prompt.*too long|context.*shift|n_predict.*n_ctx",
+    "--",
+    "tools/server/server-context.cpp"
+  ],
+  "exit_code": 0,
+  "stdout": "tools/server/server-context.cpp:429:        //       also, need to leave space for 1 extra token to allow context shifts\ntools/server/server-context.cpp:1252:        int n_ctx_slot = llama_n_ctx_seq(ctx_tgt);\ntools/server/server-context.cpp:1253:        if (n_ctx_slot > n_ctx_train) {\ntools/server/server-context.cpp:1254:            SRV_WRN(\"the slot context (%d) exceeds the training context of the model (%d) - capping\\n\", n_ctx_slot, n_ctx_train);\ntools/server/server-context.cpp:1255:            n_ctx_slot = n_ctx_train;\ntools/server/server-context.cpp:1270:        SRV_INF(\"initializing, n_slots = %d, n_ctx_slot = %d, kv_unified = '%s'\\n\",\ntools/server/server-context.cpp:1271:                params_base.n_parallel, n_ctx_slot, params_base.kv_unified ? \"true\" : \"false\");\ntools/server/server-context.cpp:1306:            slot.n_ctx   = n_ctx_slot;\ntools/server/server-context.cpp:1858:        // if context shifting is disabled, make sure that we don't run out of context\ntools/server/server-context.cpp:2002:    void send_error(const int id_task, const std::string & error, const enum error_type type = ERROR_TYPE_SERVER, const int32_t n_prompt_tokens = 0, const int32_t n_ctx = 0) {\ntools/server/server-context.cpp:2006:            GGML_ASSERT(n_ctx > 0 && n_prompt_tokens > 0);\ntools/server/server-context.cpp:2843:        // apply context-shift if needed\ntools/server/server-context.cpp:2850:                    send_error(slot, \"context shift is disabled\", ERROR_TYPE_SERVER);\ntools/server/server-context.cpp:2862:                    send_error(slot, \"context shift cannot be used for shared prompt\", ERROR_TYPE_SERVER);\ntools/server/server-context.cpp:2882:                SLT_WRN(slot, \"slot context shift, n_keep = %d, n_left = %d, n_discard = %d\\n\", n_keep, n_left, n_discard);\ntools/server/server-context.cpp:3082:                        SLT_TRC(slot, \"new prompt, n_ctx_slot = %d, n_keep = %d, task.n_tokens = %d\\n\",\ntools/server/server-context.cpp:3205:                                            common_context_seq_add(ctx_tgt, slot.id, head_c, head_c + n_match, kv_shift);\ntools/server/server-context.cpp:3209:                                                common_context_seq_add(ctx_dft, slot.id, head_c, head_c + n_match, kv_shift);\n",
+  "stderr": ""
+}

@@ -1,0 +1,13 @@
+{
+  "case": "fixed-content",
+  "path": "codegen/gotypes.gen.ts",
+  "edits": [
+    {
+      "old": "this.content = (source as Record<string, unknown>)[\"content\"] as Message[\"content\"];",
+      "new": "this.content = \"constant fault\" as Message[\"content\"];"
+    }
+  ],
+  "before_sha256": "e42678b57046bcbfbb50bb9b1d71aab9a917d06a2cb3ca4dd6ac4d49302c26b5",
+  "after_sha256": "13d61de14972cd62a4ae58e2f52a6b10a135d28fd1dfe15f428e0d8644d903c4",
+  "required_failure_title": "delivers distinct decoded content to the real Markdown renderer"
+}

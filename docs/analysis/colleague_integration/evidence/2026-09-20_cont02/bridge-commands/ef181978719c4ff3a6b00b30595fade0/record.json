@@ -1,0 +1,35 @@
+{
+  "created": 1789893662.811285,
+  "cwd": "/Users/krypto/GitHub/ollama",
+  "exit_code": 0,
+  "finished": 1789893669.015677,
+  "job_id": "ef181978719c4ff3a6b00b30595fade0",
+  "output_complete": 1,
+  "request_hash": "22714bd65542fe9a8c24f841f2ea32c429a6d1843b4c6a9d5c60188978d7a232",
+  "request_id": "eko-ollama-20260920-cont02-review-sources",
+  "spec": {
+    "columns": 100,
+    "command": "/usr/bin/python3 - <<'PY'\nfrom pathlib import Path\nimport hashlib,subprocess,json\nr=Path.cwd()\nreads=[('../TECHNE/Method/16_Implementation_Ready_Standard.md',525,600),('../TECHNE/Method/05_Agent_Orchestration_Method.md',1,600),('../TECHNE/Guides/MODEL_INTEGRITY_AWARENESS.md',1,600),('../TECHNE/Tools/ollama/ollama_review.py',1,1200),('app/ui/ui.go',30,110),('app/ui/ui.go',630,835),('cmd/tui/chat/input.go',1710,1780)]\nfor file,start,end in reads:\n p=r/file;b=p.read_bytes();lines=b.decode().splitlines();end=min(end,len(lines));print('\\nFILE',file,'SHA256',hashlib.sha256(b).hexdigest(),'RANGE',start,end,'TOTAL',len(lines));print('\\n'.join(f'{i+1}: {lines[i]}' for i in range(start-1,end)))\nprint('\\nINSTALLED_GO_BINARY')\np=subprocess.run(['/opt/homebrew/bin/go','version','-m','/Applications/Ollama.app/Contents/Resources/ollama'],capture_output=True,text=True);print(p.stdout,p.stderr,'exit='+str(p.returncode))\nprint('\\nSOURCE_ERROR_CALLERS')\np=subprocess.run(['git','grep','-n','-E',r'ChatWithOptions|\\.Chat\\(|Handle.*chat|chat.*Handler','--','app/ui/ui.go','app/store/store_test.go'],capture_output=True,text=True);print(p.stdout)\nPY",
+    "cwd": "/Users/krypto/GitHub/ollama",
+    "env": {},
+    "login": false,
+    "rows": 30,
+    "shell": "bash",
+    "timeout_seconds": 45,
+    "tty": false
+  },
+  "started": 1789893666.589267,
+  "state": "exited",
+  "stderr_bytes": 0,
+  "stdout_bytes": 111102,
+  "streams": {
+    "stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 111102,
+      "sha256": "4899929cc3a7a5c0739afe0a6e0b53fbae44f87ed1bdc3d5a49aa3bf44f7dd07"
+    }
+  }
+}

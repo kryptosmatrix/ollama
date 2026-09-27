@@ -1,0 +1,261 @@
+2450: 	name := modelRef.Name
+2451: 
+2452: 	name, err = getExistingName(name)
+2453: 	if err != nil {
+2454: 		c.JSON(http.StatusBadRequest, gin.H{"error": "model is required"})
+2455: 		return
+2456: 	}
+2457: 
+2458: 	m, err := GetModel(name.String())
+2459: 	if err != nil {
+2460: 		switch {
+2461: 		case os.IsNotExist(err):
+2462: 			c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("model '%s' not found", req.Model)})
+2463: 		case err.Error() == errtypes.InvalidModelNameErrMsg:
+2464: 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+2465: 		default:
+2466: 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+2467: 		}
+2468: 		return
+2469: 	}
+2470: 
+2471: 	if req.TopLogprobs < 0 || req.TopLogprobs > 20 {
+2472: 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "top_logprobs must be between 0 and 20"})
+2473: 		return
+2474: 	}
+2475: 
+2476: 	if modelRef.Source == modelSourceLocal && m.Config.RemoteHost != "" && m.Config.RemoteModel != "" {
+2477: 		c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("model '%s' not found", req.Model)})
+2478: 		return
+2479: 	}
+2480: 
+2481: 	// expire the runner
+2482: 	if len(req.Messages) == 0 && req.KeepAlive != nil && req.KeepAlive.Duration == 0 {
+2483: 		s.sched.expireRunner(m)
+2484: 
+2485: 		c.JSON(http.StatusOK, api.ChatResponse{
+2486: 			Model:      req.Model,
+2487: 			CreatedAt:  time.Now().UTC(),
+2488: 			Message:    api.Message{Role: "assistant"},
+2489: 			Done:       true,
+2490: 			DoneReason: "unload",
+2491: 		})
+2492: 		return
+2493: 	}
+2494: 
+2495: 	if m.Config.RemoteHost != "" && m.Config.RemoteModel != "" {
+2496: 		if disabled, _ := internalcloud.Status(); disabled {
+2497: 			c.JSON(http.StatusForbidden, gin.H{"error": internalcloud.DisabledError(cloudErrRemoteInferenceUnavailable)})
+2498: 			return
+2499: 		}
+2500: 
+2501: 		origModel := req.Model
+2502: 
+2503: 		remoteURL, err := url.Parse(m.Config.RemoteHost)
+2504: 		if err != nil {
+2505: 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+2506: 			return
+2507: 		}
+2508: 
+2509: 		if !slices.Contains(envconfig.Remotes(), remoteURL.Hostname()) {
+2510: 			slog.Info("remote model", "remotes", envconfig.Remotes(), "remoteURL", m.Config.RemoteHost, "hostname", remoteURL.Hostname())
+2511: 			c.JSON(http.StatusBadRequest, gin.H{"error": "this server cannot run this remote model"})
+2512: 			return
+2513: 		}
+2514: 
+2515: 		req.Model = m.Config.RemoteModel
+2516: 		if req.Options == nil {
+2517: 			req.Options = map[string]any{}
+2518: 		}
+2519: 
+2520: 		var msgs []api.Message
+2521: 		if len(req.Messages) > 0 {
+2522: 			msgs = append(m.Messages, req.Messages...)
+2523: 			if req.Messages[0].Role != "system" && m.System != "" {
+2524: 				msgs = append([]api.Message{{Role: "system", Content: m.System}}, msgs...)
+2525: 			}
+2526: 		}
+2527: 
+2528: 		msgs = filterThinkTags(msgs, m)
+2529: 		req.Messages = msgs
+2530: 
+2531: 		for k, v := range m.Options {
+2532: 			if _, ok := req.Options[k]; !ok {
+2533: 				req.Options[k] = v
+2534: 			}
+2535: 		}
+2536: 
+2537: 		contentType := "application/x-ndjson"
+2538: 		if req.Stream != nil && !*req.Stream {
+2539: 			contentType = "application/json; charset=utf-8"
+2540: 		}
+2541: 		c.Header("Content-Type", contentType)
+2542: 
+2543: 		fn := func(resp api.ChatResponse) error {
+2544: 			resp.Model = origModel
+2545: 			resp.RemoteModel = m.Config.RemoteModel
+2546: 			resp.RemoteHost = m.Config.RemoteHost
+2547: 
+2548: 			data, err := json.Marshal(resp)
+2549: 			if err != nil {
+2550: 				return err
+2551: 			}
+2552: 
+2553: 			if _, err = c.Writer.Write(append(data, '\n')); err != nil {
+2554: 				return err
+2555: 			}
+2556: 			c.Writer.Flush()
+2557: 			return nil
+2558: 		}
+2559: 
+2560: 		client := api.NewClient(remoteURL, http.DefaultClient)
+2561: 		err = client.Chat(c, &req, fn)
+2562: 		if err != nil {
+2563: 			var authError api.AuthorizationError
+2564: 			if errors.As(err, &authError) {
+2565: 				sURL, sErr := signinURL()
+2566: 				if sErr != nil {
+2567: 					slog.Error(sErr.Error())
+2568: 					c.JSON(http.StatusInternalServerError, gin.H{"error": "error getting authorization details"})
+2569: 					return
+2570: 				}
+2571: 
+2572: 				c.JSON(authError.StatusCode, gin.H{"error": "unauthorized", "signin_url": sURL})
+2573: 				return
+2574: 			}
+2575: 			var apiError api.StatusError
+2576: 			if errors.As(err, &apiError) {
+2577: 				c.JSON(apiError.StatusCode, apiError)
+2578: 				return
+2579: 			}
+2580: 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+2581: 			return
+2582: 		}
+2583: 
+2584: 		return
+2585: 	}
+2586: 
+2587: 	caps := []model.Capability{model.CapabilityCompletion}
+2588: 	if len(req.Tools) > 0 {
+2589: 		caps = append(caps, model.CapabilityTools)
+2590: 	}
+2591: 
+2592: 	modelCaps := m.Capabilities()
+2593: 	if slices.Contains(modelCaps, model.CapabilityThinking) {
+2594: 		caps = append(caps, model.CapabilityThinking)
+2595: 		if req.Think == nil {
+2596: 			req.Think = &api.ThinkValue{Value: true}
+2597: 		}
+2598: 	} else {
+2599: 		if req.Think != nil && req.Think.Bool() {
+2600: 			// Set think to nil when being used with Anthropic API to connect to tools like claude code
+2601: 			if _, ok := c.Get("relax_thinking"); ok {
+2602: 				slog.Warn("model does not support thinking, relaxing thinking to nil", "model", req.Model)
+2603: 				req.Think = nil
+2604: 			} else {
+2605: 				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%q does not support thinking", req.Model)})
+2606: 				return
+2607: 			}
+2608: 		}
+2609: 	}
+2610: 
+2611: 	r, m, opts, err := s.scheduleRunner(c.Request.Context(), name.String(), caps, req.Options, req.KeepAlive, req.Shift)
+2612: 	if errors.Is(err, errCapabilityCompletion) {
+2613: 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%q does not support chat", req.Model)})
+2614: 		return
+2615: 	} else if err != nil {
+2616: 		handleScheduleError(c, req.Model, err)
+2617: 		return
+2618: 	}
+2619: 
+2620: 	checkpointLoaded := time.Now()
+2621: 
+2622: 	if len(req.Messages) == 0 {
+2623: 		c.JSON(http.StatusOK, api.ChatResponse{
+2624: 			Model:      req.Model,
+2625: 			CreatedAt:  time.Now().UTC(),
+2626: 			Message:    api.Message{Role: "assistant"},
+2627: 			Done:       true,
+2628: 			DoneReason: "load",
+2629: 		})
+2630: 		return
+2631: 	}
+2632: 
+2633: 	msgs := append(m.Messages, req.Messages...)
+2634: 	if req.Messages[0].Role != "system" && m.System != "" {
+2635: 		msgs = append([]api.Message{{Role: "system", Content: m.System}}, msgs...)
+2636: 	}
+2637: 	msgs = filterThinkTags(msgs, m)
+2638: 
+2639: 	if shouldUseHarmony(m) {
+2640: 		// harmony's Reasoning field only understands low/medium/high; map "max" to "high"
+2641: 		if req.Think != nil {
+2642: 			if s, ok := req.Think.Value.(string); ok && s == "max" {
+2643: 				req.Think.Value = "high"
+2644: 			}
+2645: 		}
+2646: 		if m.Config.Parser == "" {
+2647: 			m.Config.Parser = "harmony"
+2648: 		}
+2649: 	}
+2650: 
+2651: 	if chatModeForModel(m) == chatExecutionModeNative {
+2652: 		s.handleNativeChat(c, req, m, r, opts, msgs, checkpointStart, checkpointLoaded)
+2653: 		return
+2654: 	}
+2655: 
+2656: 	var builtinParser parsers.Parser
+2657: 	processedTools := req.Tools
+2658: 
+2659: 	if m.Config.Parser != "" {
+2660: 		builtinParser = parsers.ParserForName(m.Config.Parser)
+2661: 		if builtinParser != nil {
+2662: 			// Determine last message for chat prefill
+2663: 			var lastMessage *api.Message
+2664: 			if len(msgs) > 0 {
+2665: 				lastMessage = &msgs[len(msgs)-1]
+2666: 			}
+2667: 			// Initialize parser and get processed tools
+2668: 			processedTools = builtinParser.Init(req.Tools, lastMessage, req.Think)
+2669: 		}
+2670: 	}
+2671: 
+2672: 	truncate := req.Truncate == nil || *req.Truncate
+2673: 	if m.IsMLX() {
+2674: 		truncate = false
+2675: 	}
+2676: 	promptOpts := optionsForPrompt(opts, r)
+2677: 	prompt, media, err := chatPrompt(c.Request.Context(), m, r.Tokenize, promptOpts, msgs, processedTools, req.Think, truncate)
+2678: 	if err != nil {
+2679: 		slog.Error("chat prompt error", "error", err)
+2680: 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+2681: 		return
+2682: 	}
+2683: 
+2684: 	// If debug mode is enabled, return the rendered template instead of calling the model
+2685: 	if req.DebugRenderOnly {
+2686: 		c.JSON(http.StatusOK, api.ChatResponse{
+2687: 			Model:     req.Model,
+2688: 			CreatedAt: time.Now().UTC(),
+2689: 			DebugInfo: &api.DebugInfo{
+2690: 				RenderedTemplate: prompt,
+2691: 				ImageCount:       len(media),
+2692: 			},
+2693: 		})
+2694: 		return
+2695: 	}
+2696: 
+2697: 	var thinkingState *thinking.Parser
+2698: 	openingTag, closingTag := thinking.InferTags(m.Template.Template)
+2699: 	if req.Think != nil && req.Think.Bool() && openingTag != "" && closingTag != "" {
+2700: 		thinkingState = &thinking.Parser{
+2701: 			OpeningTag: openingTag,
+2702: 			ClosingTag: closingTag,
+2703: 		}
+2704: 
+2705: 		if strings.HasSuffix(strings.TrimSpace(prompt), openingTag) {
+2706: 			thinkingState.AddContent(openingTag)
+2707: 		}
+2708: 	}
+2709: 
+2710: 	var toolParser *tools.Parser

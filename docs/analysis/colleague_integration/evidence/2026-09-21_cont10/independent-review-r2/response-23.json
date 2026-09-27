@@ -1,0 +1,42 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "created_at": "2026-09-21T06:31:57.317676473Z",
+  "message": {
+    "role": "assistant",
+    "content": "The raw-generator lint stdout is a distinct file. Let me read the raw-lint stdout and the full lint stdout.",
+    "tool_calls": [
+      {
+        "id": "call_1obvgst8",
+        "function": {
+          "index": 0,
+          "name": "read_run_output",
+          "arguments": {
+            "ordinal": 4,
+            "stream": "stdout",
+            "offset": 0,
+            "count": 200
+          }
+        }
+      },
+      {
+        "id": "call_r7gqke5q",
+        "function": {
+          "index": 1,
+          "name": "read_run_output",
+          "arguments": {
+            "ordinal": 7,
+            "stream": "stdout",
+            "offset": 0,
+            "count": 200
+          }
+        }
+      }
+    ]
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 1590039575,
+  "prompt_eval_count": 44440,
+  "prompt_eval_cached_count": 42494,
+  "eval_count": 192
+}

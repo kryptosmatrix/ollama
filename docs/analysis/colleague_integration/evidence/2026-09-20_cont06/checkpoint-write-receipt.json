@@ -1,0 +1,18 @@
+{
+  "updated": {
+    "HANDOFF.md": "aea19934952fba20c9567c2d896a461ea6b471770a28fa86cce2024c4912ba99",
+    "BLOCKERS.md": "d552aaab8dba4f0ee9cb74d25ea7bc6d1274496a6ae01317607128a24662b04d",
+    "DECISIONS.md": "dc5438e711ec2c138b1fb815762b2cc5999cbbfb0fa7b7058495c8114012790f",
+    "STATE.json": "264e474ddf756dc6ce2a7181805c0b2abad948ca116ebae776f86f72e37a0d1a"
+  },
+  "previous_bytes": {
+    "STATE.json": "c601c5f96544fb346998e7e03bda024794d65054595686acb317482b8c4a3fc4",
+    "HANDOFF.md": "1b148c8dc264913a55914c7db97a4eb0e793a0c46547c0b9c888190c73ba73a1",
+    "BLOCKERS.md": "702019fe70e6aa29edce504074ca587250292aa63326af552b4cabaa0ff3aa18",
+    "DECISIONS.md": "f9408bc9fc45bffcb4ec1a44788d8df911fb3f988bf7b923475fa952ae21140b"
+  },
+  "backup": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont06/checkpoint_before_cont06",
+  "verified_task_remote_tip": "281dcaa06c7cd8b299c6045a248dd6b6ac85f954",
+  "installed": false,
+  "main_merged": false
+}

@@ -1,0 +1,178 @@
+2898: 				// model continue thinking or ending thinking and outputting the final message.
+2899: 				// TODO(parthsareen): consider adding prefill disambiguation logic to the renderer for structured outputs.
+2900: 				if shouldUseHarmony(m) || (builtinParser != nil && m.Config.Parser == "harmony") {
+2901: 					prompt += "<|end|><|start|>assistant<|channel|>final<|message|>"
+2902: 				}
+2903: 				continue
+2904: 			}
+2905: 
+2906: 			break
+2907: 		}
+2908: 	}()
+2909: 
+2910: 	writeChatResponse(c, req, ch)
+2911: }
+2912: 
+2913: func prepareNativeChatRequest(ctx context.Context, m *Model, r llm.LlamaServer, opts *api.Options, nativeReq llm.ChatRequest, truncate bool) (llm.ChatRequest, error) {
+2914: 	var err error
+2915: 	nativeReq.Messages, err = truncateNativeChatMessages(ctx, m, r, optionsForPrompt(opts, r), nativeReq, truncate)
+2916: 	return nativeReq, err
+2917: }
+2918: 
+2919: func (s *Server) handleNativeChat(c *gin.Context, req api.ChatRequest, m *Model, r llm.LlamaServer, opts *api.Options, msgs []api.Message, checkpointStart, checkpointLoaded time.Time) {
+2920: 	truncate := req.Truncate == nil || *req.Truncate
+2921: 	nativeReq, err := prepareNativeChatRequest(c.Request.Context(), m, r, opts, llm.ChatRequest{
+2922: 		Messages:    msgs,
+2923: 		Tools:       req.Tools,
+2924: 		Format:      req.Format,
+2925: 		Options:     opts,
+2926: 		Think:       req.Think,
+2927: 		Shift:       req.Shift == nil || *req.Shift,
+2928: 		Logprobs:    req.Logprobs,
+2929: 		TopLogprobs: req.TopLogprobs,
+2930: 	}, truncate)
+2931: 	if err != nil {
+2932: 		slog.Error("chat template prompt error", "error", err)
+2933: 		var serr api.StatusError
+2934: 		if errors.As(err, &serr) {
+2935: 			c.JSON(serr.StatusCode, gin.H{"error": serr.ErrorMessage})
+2936: 		} else {
+2937: 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+2938: 		}
+2939: 		return
+2940: 	}
+2941: 
+2942: 	if req.DebugRenderOnly {
+2943: 		prompt, err := r.ApplyChatTemplate(c.Request.Context(), nativeReq)
+2944: 		if err != nil {
+2945: 			var serr api.StatusError
+2946: 			if errors.As(err, &serr) {
+2947: 				c.JSON(serr.StatusCode, gin.H{"error": serr.ErrorMessage})
+2948: 			} else {
+2949: 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+2950: 			}
+2951: 			return
+2952: 		}
+2953: 
+2954: 		c.JSON(http.StatusOK, api.ChatResponse{
+2955: 			Model:     req.Model,
+2956: 			CreatedAt: time.Now().UTC(),
+2957: 			DebugInfo: &api.DebugInfo{
+2958: 				RenderedTemplate: prompt,
+2959: 				ImageCount:       countChatImages(msgs),
+2960: 			},
+2961: 		})
+2962: 		return
+2963: 	}
+2964: 
+2965: 	ch := make(chan any)
+2966: 	go func() {
+2967: 		defer close(ch)
+2968: 
+2969: 		err := r.Chat(c.Request.Context(), nativeReq, func(r llm.ChatResponse) {
+2970: 			res := api.ChatResponse{
+2971: 				Model:     req.Model,
+2972: 				CreatedAt: time.Now().UTC(),
+2973: 				Message:   r.Message,
+2974: 				Done:      r.Done,
+2975: 				Metrics: api.Metrics{
+2976: 					PromptEvalCount:    r.PromptEvalCount,
+2977: 					PromptEvalDuration: r.PromptEvalDuration,
+2978: 					EvalCount:          r.EvalCount,
+2979: 					EvalDuration:       r.EvalDuration,
+2980: 				},
+2981: 				Logprobs: toAPILogprobs(r.Logprobs),
+2982: 			}
+2983: 
+2984: 			if res.Message.Role == "" {
+2985: 				res.Message.Role = "assistant"
+2986: 			}
+2987: 
+2988: 			if r.Done {
+2989: 				res.DoneReason = r.DoneReason.String()
+2990: 				res.TotalDuration = time.Since(checkpointStart)
+2991: 				res.LoadDuration = checkpointLoaded.Sub(checkpointStart)
+2992: 			}
+2993: 
+2994: 			ch <- res
+2995: 		})
+2996: 		if err != nil {
+2997: 			s.sched.expireRunnersForRuntimeOOM(m, err)
+2998: 			var serr api.StatusError
+2999: 			if errors.As(err, &serr) {
+3000: 				ch <- gin.H{"error": serr.ErrorMessage, "status": serr.StatusCode}
+3001: 			} else {
+3002: 				ch <- gin.H{"error": err.Error()}
+3003: 			}
+3004: 		}
+3005: 	}()
+3006: 
+3007: 	writeChatResponse(c, req, ch)
+3008: }
+3009: 
+3010: func truncateNativeChatMessages(ctx context.Context, m *Model, r llm.LlamaServer, opts *api.Options, req llm.ChatRequest, truncate bool) ([]api.Message, error) {
+3011: 	if !truncate || opts == nil || opts.NumCtx <= 0 || len(req.Messages) <= 1 {
+3012: 		return req.Messages, nil
+3013: 	}
+3014: 
+3015: 	lastMsgIdx := len(req.Messages) - 1
+3016: 	currMsgIdx := 0
+3017: 	var system []api.Message
+3018: 
+3019: 	for i := 0; i <= lastMsgIdx; i++ {
+3020: 		system = system[:0]
+3021: 		for j := range i {
+3022: 			if req.Messages[j].Role == "system" {
+3023: 				system = append(system, req.Messages[j])
+3024: 			}
+3025: 		}
+3026: 
+3027: 		renderReq := req
+3028: 		renderReq.Messages = append(slices.Clone(system), req.Messages[i:]...)
+3029: 		prompt, err := r.ApplyChatTemplate(ctx, renderReq)
+3030: 		if err != nil {
+3031: 			return nil, err
+3032: 		}
+3033: 
+3034: 		tokens, err := r.Tokenize(ctx, prompt)
+3035: 		if err != nil {
+3036: 			return nil, err
+3037: 		}
+3038: 
+3039: 		ctxLen := len(tokens)
+3040: 		if m != nil && m.ProjectorPaths != nil {
+3041: 			for _, msg := range renderReq.Messages {
+3042: 				ctxLen += 768 * len(msg.Images)
+3043: 			}
+3044: 		}
+3045: 
+3046: 		if ctxLen <= opts.NumCtx {
+3047: 			currMsgIdx = i
+3048: 			break
+3049: 		}
+3050: 		if i == lastMsgIdx {
+3051: 			currMsgIdx = lastMsgIdx
+3052: 			break
+3053: 		}
+3054: 	}
+3055: 
+3056: 	if currMsgIdx > 0 {
+3057: 		slog.Debug("truncating native chat messages which exceed context length", "truncated", currMsgIdx)
+3058: 	}
+3059: 
+3060: 	system = system[:0]
+3061: 	for j := range currMsgIdx {
+3062: 		if req.Messages[j].Role == "system" {
+3063: 			system = append(system, req.Messages[j])
+3064: 		}
+3065: 	}
+3066: 	return append(slices.Clone(system), req.Messages[currMsgIdx:]...), nil
+3067: }
+3068: 
+3069: func countChatImages(msgs []api.Message) int {
+3070: 	var count int
+3071: 	for _, msg := range msgs {
+3072: 		count += len(msg.Images)
+3073: 	}
+3074: 	return count
+3075: }

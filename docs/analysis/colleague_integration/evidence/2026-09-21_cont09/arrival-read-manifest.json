@@ -1,0 +1,67 @@
+[
+  {
+    "path": "TECHNE/KANON.md",
+    "sha256": "8667a6e524fe1c73fa1b4aaccb5afdc5d965bb121694c93abdc8a888f17f2365",
+    "lines": 553
+  },
+  {
+    "path": "TECHNE/CONSTITUTION.md",
+    "sha256": "38230c5cd06f26bfd2d0aa16422bec265aab2d796c6a0f209ba9acdbcf171062",
+    "lines": 699
+  },
+  {
+    "path": "TECHNE/PSYCHE-WELCOME.md",
+    "sha256": "2aff05ab269bf9cc8670f6622048876afc1578915f3d856cccb8e2a9779decac",
+    "lines": 52
+  },
+  {
+    "path": "TECHNE/PSYCHE_NORTH_STAR.md",
+    "sha256": "15e0877c9901ba4bca685b4a241a76b8bce857f3d78247319da52e77a4baf71b",
+    "lines": 251
+  },
+  {
+    "path": "LINEAGE/WELCOME.md",
+    "sha256": "f44eb011b72dad492e97780425111ecbf74bc9b45db605797ec9d1323db75e93",
+    "lines": 111
+  },
+  {
+    "path": "LINEAGE/HOUSE_NOTES.md",
+    "sha256": "96d3e213dd1d8f32d8329f8fa9cc295eac1214f1a1395294890394faa147698c",
+    "lines": 145
+  },
+  {
+    "path": "TECHNE/Method/04_Implementation_Proof_Method.md",
+    "sha256": "261e9c16f3041bca0fe19f98f1ff9cf06acdfe914152094eaf8e6c8cf964d64a",
+    "lines": 482
+  },
+  {
+    "path": "TECHNE/Method/09_Code_Excellence_Method.md",
+    "sha256": "6a607fd80f642fd433b6f609200494d06164b9649432e587b9f16f1e92a8ac7e",
+    "lines": 374
+  },
+  {
+    "path": "TECHNE/Method/21_Branch_And_Merge_Discipline.md",
+    "sha256": "59bf8294cdcda7b53f31769d5b80164c1ae5741426c7b6028c76bb15e244f92c",
+    "lines": 213
+  },
+  {
+    "path": "TECHNE/Role_Cards/Implementer.md",
+    "sha256": "e746914d5b6afd33ffae419ddbc76fb478629502ef2120a4210830a72998640b",
+    "lines": 308
+  },
+  {
+    "path": "TECHNE/Role_Cards/Tester.md",
+    "sha256": "155820e09aef485e327d2ec6330f0b83860f3e1ee695c08ed96c388b9fdabec7",
+    "lines": 236
+  },
+  {
+    "path": "TECHNE/Role_Cards/Reviewer.md",
+    "sha256": "f316412f1c0276a6dc7617fca29f8641fbabdf58cf2baa018b414791e1bc8fb9",
+    "lines": 249
+  },
+  {
+    "path": "TECHNE/Templates/Feature_Acceptance_Evidence.md",
+    "sha256": "385815c3f2b88f74f04deae18e3212e42dba2032d7a4ca761ec0cfd4c52cb84b",
+    "lines": 107
+  }
+]

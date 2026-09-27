@@ -1,0 +1,146 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/go",
+    "test",
+    "-count=1",
+    "-json",
+    "-timeout=150s",
+    "-run=^TestChatRead",
+    "-overlay",
+    "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/consumer-bypass/overlay.json",
+    "./app/store",
+    "./app/ui"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+  "exit_code": 1,
+  "timed_out": false,
+  "elapsed_seconds": 3.77262325,
+  "stdout_sha256": "3caeb9d2d6457cc6dbb22b23adf56e8171b737ee78ea022c4c4619486a3498a5",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment_overrides": {
+    "HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-_w67jrs1",
+    "USERPROFILE": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-_w67jrs1",
+    "LOCALAPPDATA": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-_w67jrs1",
+    "OLLAMA_HOST": "http://127.0.0.1:1",
+    "GOTOOLCHAIN": "local",
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "CI": "true",
+    "OLLAMA_MCP_CONFIG": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-_w67jrs1/mcp.json",
+    "OLLAMA_MCP_APPROVALS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-_w67jrs1/approvals.json",
+    "OLLAMA_MCP_TOKENS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-_w67jrs1/mcp-tokens.json"
+  },
+  "cache_locations": {
+    "GOCACHE": "/Users/krypto/Library/Caches/go-build",
+    "GOMODCACHE": "/Users/krypto/go/pkg/mod",
+    "GOPATH": "/Users/krypto/go"
+  },
+  "source_head": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+  "runner_sha256": "8a1f06496c6e25e43fe7a0e46cc00c971f1d0df3c965ced2210ad90c31b67e0f",
+  "overlay": {
+    "file": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/consumer-bypass/overlay.json",
+    "sha256": "9cb6e99289502953bc95f70aefc01256cc14708be2546b37b1e2a5c8ab590a96",
+    "replacements": {
+      "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/ui.go": {
+        "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/consumer-bypass/ui.go",
+        "sha256": "f45b25e29c608f4f5dcca4d0b8eef382bcdfaeadc762491f4d0650def8410124"
+      }
+    }
+  },
+  "source_unchanged_during_run": true,
+  "test_results": {
+    "started": [
+      "TestChatReadInitialisationFailureIsNotAbsence",
+      "TestChatReadIntegrityAcrossProcesses",
+      "TestChatReadIntegrityAcrossProcesses/fault",
+      "TestChatReadIntegrityAcrossProcesses/positive",
+      "TestChatReadIntegrityAcrossProcesses/recover",
+      "TestChatReadIntegrityAcrossProcesses/seed",
+      "TestChatReadMissingHeaderIsNotFound",
+      "TestChatReadPreservesDatabaseErrorCause",
+      "TestChatReadRejectsMalformedMessage",
+      "TestChatReadValidEmptyAndPopulated"
+    ],
+    "finished": {
+      "TestChatReadMissingHeaderIsNotFound": "pass",
+      "TestChatReadValidEmptyAndPopulated": "pass",
+      "TestChatReadRejectsMalformedMessage": "pass",
+      "TestChatReadInitialisationFailureIsNotAbsence": "pass",
+      "TestChatReadPreservesDatabaseErrorCause": "pass",
+      "TestChatReadIntegrityAcrossProcesses/seed": "pass",
+      "TestChatReadIntegrityAcrossProcesses/fault": "fail",
+      "TestChatReadIntegrityAcrossProcesses/recover": "fail",
+      "TestChatReadIntegrityAcrossProcesses/positive": "pass",
+      "TestChatReadIntegrityAcrossProcesses": "fail"
+    },
+    "missing": [],
+    "unfinished": [],
+    "counts": {
+      "pass": 7,
+      "fail": 3,
+      "skip": 0
+    },
+    "build_failures": []
+  },
+  "expectation": "baseline-failure",
+  "expectation_met": true
+}
+=== RUN   TestChatReadMissingHeaderIsNotFound
+--- PASS: TestChatReadMissingHeaderIsNotFound (0.01s)
+=== RUN   TestChatReadValidEmptyAndPopulated
+--- PASS: TestChatReadValidEmptyAndPopulated (0.01s)
+=== RUN   TestChatReadRejectsMalformedMessage
+--- PASS: TestChatReadRejectsMalformedMessage (0.01s)
+=== RUN   TestChatReadInitialisationFailureIsNotAbsence
+--- PASS: TestChatReadInitialisationFailureIsNotAbsence (0.01s)
+=== RUN   TestChatReadPreservesDatabaseErrorCause
+--- PASS: TestChatReadPreservesDatabaseErrorCause (0.02s)
+PASS
+ok  	github.com/ollama/ollama/app/store	0.486s
+=== RUN   TestChatReadIntegrityAcrossProcesses
+=== RUN   TestChatReadIntegrityAcrossProcesses/seed
+    chat_read_errors_test.go:54: phase=seed
+        === RUN   TestChatReadIntegrityAcrossProcesses
+        CHAT_READ_PHASE=seed
+        --- PASS: TestChatReadIntegrityAcrossProcesses (0.01s)
+        PASS
+--- PASS: TestChatReadIntegrityAcrossProcesses/seed (0.03s)
+=== RUN   TestChatReadIntegrityAcrossProcesses/fault
+    chat_read_errors_test.go:54: phase=fault
+        === RUN   TestChatReadIntegrityAcrossProcesses
+            chat_read_errors_test.go:36: R-04: status=200 body={"eventName":"chat","content":"reply:must not replace history"}
+                {"eventName":"done"}
+                ; want 500
+            chat_read_errors_test.go:36: R-04: missing explicit error response: {"eventName":"chat","content":"reply:must not replace history"}
+                {"eventName":"done"}
+            chat_read_errors_test.go:36: R-04: inference reached 3 times after failed load
+            chat_read_errors_test.go:36: R-03: fixture table attachments unexpectedly empty
+            chat_read_errors_test.go:36: R-03: fixture table tool_calls unexpectedly empty
+            chat_read_errors_test.go:36: R-03: persisted records changed after failed read
+                before={"attachments":[[1,1,"evidence.txt","b3JpZ2luYWwgYXR0YWNobWVudApzZWNvbmQgbGluZQo="]],"chats":[["preserved-chat","Saved conversation — not a replacement","2026-09-20T21:58:33.050445+10:00","{\"saved\":\"retained\"}"]],"messages":[[1,"preserved-chat","user","original user — café","","invalid_boolean",null,null,null,"2026-09-20T21:58:33.050465+10:00","2026-09-20T21:58:33.050465+10:00",null,null,null],[2,"preserved-chat","assistant","original assistant","",false,"storage-contract-model",null,null,"2026-09-20T21:58:33.050511+10:00","2026-09-20T21:58:33.050511+10:00",null,null,null]],"tool_calls":[[1,2,"function","retained_tool","{\"query\":\"retained\"}","{\"value\":\"retained result\"}"]]}
+                after={"chats":[["preserved-chat","","2026-09-20T21:58:33.050445+10:00","{\"saved\":\"retained\"}"]],"messages":[[5,"preserved-chat","user","must not replace history","",false,null,null,null,"2026-09-20T21:58:33.1289+10:00","2026-09-20T21:58:33.1289+10:00",null,null,null],[6,"preserved-chat","assistant","reply:must not replace history","",false,"storage-contract-model",null,null,"2026-09-20T21:58:33.133678+10:00","2026-09-20T21:58:33.134445+10:00",null,null,null]]}
+            chat_read_errors_test.go:36: R-03/R-04: http=200 model_requests=3 all_records_unchanged=false
+        --- FAIL: TestChatReadIntegrityAcrossProcesses (0.05s)
+        FAIL
+    chat_read_errors_test.go:56: phase fault failed: exit status 1
+--- FAIL: TestChatReadIntegrityAcrossProcesses/fault (0.08s)
+=== RUN   TestChatReadIntegrityAcrossProcesses/recover
+    chat_read_errors_test.go:54: phase=recover
+        === RUN   TestChatReadIntegrityAcrossProcesses
+            chat_read_errors_test.go:36: R-03: original malformed row did not survive: rows=0 err=<nil>
+        --- FAIL: TestChatReadIntegrityAcrossProcesses (0.04s)
+        FAIL
+    chat_read_errors_test.go:56: phase recover failed: exit status 1
+--- FAIL: TestChatReadIntegrityAcrossProcesses/recover (0.06s)
+=== RUN   TestChatReadIntegrityAcrossProcesses/positive
+    chat_read_errors_test.go:54: phase=positive
+        === RUN   TestChatReadIntegrityAcrossProcesses
+        CHAT_READ_PHASE=positive
+        --- PASS: TestChatReadIntegrityAcrossProcesses (0.05s)
+        PASS
+--- PASS: TestChatReadIntegrityAcrossProcesses/positive (0.08s)
+--- FAIL: TestChatReadIntegrityAcrossProcesses (0.25s)
+FAIL
+FAIL	github.com/ollama/ollama/app/ui	0.865s
+
+EKO_PROOF_EXPECTATION=PASS

@@ -1,0 +1,25 @@
+{
+  "already_retired_before_this_command": 6,
+  "archive": "/Users/krypto/Library/Application Support/EkoWriteBridge/maintenance/20260920-ac311451e3bc41618f5db07392348f06",
+  "archived_outputs_verified_after_retirement": true,
+  "at_brisbane": "2026-09-20T17:37:47.468851+10:00",
+  "backup_integrity": "ok",
+  "batch_retired": 32,
+  "counts_during_verifier": {
+    "cancelled": 3,
+    "exited": 216,
+    "forgotten": 154,
+    "running": 1,
+    "timed_out": 6
+  },
+  "manifest_sha256": "f6ca527ec23b51f73866eebe3efd5a9d74fe77a29a1e0ca20ea0a17e4ebc6058",
+  "raw_payloads_sent_outside_host": false,
+  "receipts_sha256": "6c8371aa6a9ed705229114505cc5880ba58e8908d19c7fc5bf277bd318ce896c",
+  "retained_count_during_verifier": 226,
+  "retired_by_this_command": 26,
+  "retirement_receipts": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_bridge_retirement_receipts.jsonl",
+  "retirement_route": "existing authenticated loopback MCP forget_command; no direct database mutation",
+  "service_configuration_changed": false,
+  "service_restart": false,
+  "tombstones_preserved": true
+}

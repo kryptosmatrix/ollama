@@ -1,0 +1,30 @@
+{"ImportPath":"github.com/ollama/ollama/app/ui","Action":"build-output","Output":"# github.com/ollama/ollama/app/ui\n"}
+{"ImportPath":"github.com/ollama/ollama/app/ui","Action":"build-output","Output":"app/ui/app.go:15:12: pattern app/dist: no matching files found\n"}
+{"ImportPath":"github.com/ollama/ollama/app/ui","Action":"build-fail"}
+{"Time":"2026-09-20T21:40:49.856945+10:00","Action":"start","Package":"github.com/ollama/ollama/app/ui"}
+{"Time":"2026-09-20T21:40:49.857044+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Output":"FAIL\tgithub.com/ollama/ollama/app/ui [setup failed]\n"}
+{"Time":"2026-09-20T21:40:49.857081+10:00","Action":"fail","Package":"github.com/ollama/ollama/app/ui","Elapsed":0,"FailedBuild":"github.com/ollama/ollama/app/ui"}
+{"Time":"2026-09-20T21:40:56.454298+10:00","Action":"start","Package":"github.com/ollama/ollama/app/store"}
+{"Time":"2026-09-20T21:40:57.415787+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadMissingHeaderIsNotFound"}
+{"Time":"2026-09-20T21:40:57.415992+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadMissingHeaderIsNotFound","Output":"=== RUN   TestChatReadMissingHeaderIsNotFound\n"}
+{"Time":"2026-09-20T21:40:57.428037+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadMissingHeaderIsNotFound","Output":"--- PASS: TestChatReadMissingHeaderIsNotFound (0.01s)\n"}
+{"Time":"2026-09-20T21:40:57.428102+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadMissingHeaderIsNotFound","Elapsed":0.01}
+{"Time":"2026-09-20T21:40:57.428161+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadValidEmptyAndPopulated"}
+{"Time":"2026-09-20T21:40:57.428176+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadValidEmptyAndPopulated","Output":"=== RUN   TestChatReadValidEmptyAndPopulated\n"}
+{"Time":"2026-09-20T21:40:57.439217+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadValidEmptyAndPopulated","Output":"--- PASS: TestChatReadValidEmptyAndPopulated (0.01s)\n"}
+{"Time":"2026-09-20T21:40:57.439302+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadValidEmptyAndPopulated","Elapsed":0.01}
+{"Time":"2026-09-20T21:40:57.439335+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadRejectsMalformedMessage"}
+{"Time":"2026-09-20T21:40:57.439361+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadRejectsMalformedMessage","Output":"=== RUN   TestChatReadRejectsMalformedMessage\n"}
+{"Time":"2026-09-20T21:40:57.45323+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadRejectsMalformedMessage","Output":"--- PASS: TestChatReadRejectsMalformedMessage (0.01s)\n"}
+{"Time":"2026-09-20T21:40:57.453297+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadRejectsMalformedMessage","Elapsed":0.01}
+{"Time":"2026-09-20T21:40:57.45332+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadInitialisationFailureIsNotAbsence"}
+{"Time":"2026-09-20T21:40:57.453339+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadInitialisationFailureIsNotAbsence","Output":"=== RUN   TestChatReadInitialisationFailureIsNotAbsence\n"}
+{"Time":"2026-09-20T21:40:57.455532+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadInitialisationFailureIsNotAbsence","Output":"--- PASS: TestChatReadInitialisationFailureIsNotAbsence (0.00s)\n"}
+{"Time":"2026-09-20T21:40:57.455594+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadInitialisationFailureIsNotAbsence","Elapsed":0}
+{"Time":"2026-09-20T21:40:57.455616+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause"}
+{"Time":"2026-09-20T21:40:57.455648+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause","Output":"=== RUN   TestChatReadPreservesDatabaseErrorCause\n"}
+{"Time":"2026-09-20T21:40:57.462865+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause","Output":"--- PASS: TestChatReadPreservesDatabaseErrorCause (0.01s)\n"}
+{"Time":"2026-09-20T21:40:57.462966+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause","Elapsed":0.01}
+{"Time":"2026-09-20T21:40:57.463448+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Output":"PASS\n"}
+{"Time":"2026-09-20T21:40:57.464064+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Output":"ok  \tgithub.com/ollama/ollama/app/store\t1.009s\n"}
+{"Time":"2026-09-20T21:40:57.464114+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Elapsed":1.01}

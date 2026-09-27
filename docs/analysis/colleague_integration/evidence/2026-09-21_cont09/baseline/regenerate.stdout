@@ -1,0 +1,215 @@
+Parsing: responses/types.go
+go run /var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/typescriptify_2629235702.go
+Converting type responses.ChatInfo
+- simple field ChatInfo.ID
+- simple field ChatInfo.Title
+- simple field ChatInfo.UserExcerpt
+- simple field ChatInfo.CreatedAt
+- simple field ChatInfo.UpdatedAt
+Converting type responses.ChatsResponse
+- struct slice ChatsResponse.ChatInfos ([]responses.ChatInfo)
+Converting type responses.ChatResponse
+- struct ChatResponse.Chat (store.Chat)
+   Converting type store.Chat
+   - simple field Chat.ID
+   - struct slice Chat.Messages ([]store.Message)
+      Converting type store.Message
+      - simple field Message.Role
+      - simple field Message.Content
+      - simple field Message.Thinking
+      - simple field Message.Stream
+      - simple field Message.Model
+      - struct slice Message.Attachments ([]store.File)
+         Converting type store.File
+         - simple field File.Filename
+         - slice field File.Data
+      - struct slice Message.ToolCalls ([]store.ToolCall)
+         Converting type store.ToolCall
+         - simple field ToolCall.Type
+         - struct ToolCall.Function (store.ToolFunction)
+            Converting type store.ToolFunction
+            - simple field ToolFunction.Name
+            - simple field ToolFunction.Arguments
+            - simple field ToolFunction.Result
+      - struct Message.ToolCall (store.ToolCall)
+      - simple field Message.ToolName
+      - slice field Message.ToolResult
+      - struct Message.CreatedAt (time.Time)
+         Converting type time.Time
+      - struct Message.UpdatedAt (time.Time)
+      - simple field Message.ThinkingTimeStart
+      - simple field Message.ThinkingTimeEnd
+   - simple field Chat.Title
+   - struct Chat.CreatedAt (time.Time)
+   - simple field Chat.BrowserState
+Converting type responses.Model
+- simple field Model.Model
+- simple field Model.Digest
+- struct Model.ModifiedAt (time.Time)
+Converting type responses.ModelsResponse
+- struct slice ModelsResponse.Models ([]responses.Model)
+Converting type responses.InferenceCompute
+- simple field InferenceCompute.Library
+- simple field InferenceCompute.Variant
+- simple field InferenceCompute.Compute
+- simple field InferenceCompute.Driver
+- simple field InferenceCompute.Name
+- simple field InferenceCompute.VRAM
+Converting type responses.InferenceComputeResponse
+- struct slice InferenceComputeResponse.InferenceComputes ([]responses.InferenceCompute)
+- simple field InferenceComputeResponse.DefaultContextLength
+Converting type responses.ModelCapabilitiesResponse
+- slice field ModelCapabilitiesResponse.Capabilities
+Converting type responses.ChatEvent
+- simple field ChatEvent.EventName
+- simple field ChatEvent.Content
+- simple field ChatEvent.Thinking
+- simple field ChatEvent.ThinkingTimeStart
+- simple field ChatEvent.ThinkingTimeEnd
+- struct slice ChatEvent.ToolCalls ([]store.ToolCall)
+- struct ChatEvent.ToolCall (store.ToolCall)
+- simple field ChatEvent.ToolName
+- simple field ChatEvent.ToolResult
+- simple field ChatEvent.ToolResultData
+- simple field ChatEvent.ChatID
+- simple field ChatEvent.ApprovalID
+- simple field ChatEvent.ApprovalScope
+- map field ChatEvent.ApprovalArgs
+- simple field ChatEvent.ToolState
+Converting type responses.DownloadEvent
+- simple field DownloadEvent.EventName
+- simple field DownloadEvent.Total
+- simple field DownloadEvent.Completed
+- simple field DownloadEvent.Done
+Converting type responses.ErrorEvent
+- simple field ErrorEvent.EventName
+- simple field ErrorEvent.Error
+- simple field ErrorEvent.Code
+- simple field ErrorEvent.Details
+Converting type responses.SettingsResponse
+- struct SettingsResponse.Settings (store.Settings)
+   Converting type store.Settings
+   - simple field Settings.Expose
+   - simple field Settings.Browser
+   - simple field Settings.Survey
+   - simple field Settings.Models
+   - simple field Settings.Agent
+   - simple field Settings.Tools
+   - simple field Settings.WorkingDir
+   - simple field Settings.ContextLength
+   - simple field Settings.TurboEnabled
+   - simple field Settings.WebSearchEnabled
+   - simple field Settings.ThinkEnabled
+   - simple field Settings.ThinkLevel
+   - simple field Settings.SelectedModel
+   - simple field Settings.SidebarOpen
+   - simple field Settings.LastHomeView
+   - simple field Settings.AutoUpdateEnabled
+   - simple field Settings.AutoApproveTools
+Converting type responses.HealthResponse
+- simple field HealthResponse.Healthy
+Converting type responses.User
+- simple field User.ID
+- simple field User.Email
+- simple field User.Name
+- simple field User.Bio
+- simple field User.AvatarURL
+- simple field User.FirstName
+- simple field User.LastName
+- simple field User.Plan
+Converting type responses.Attachment
+- simple field Attachment.Filename
+- simple field Attachment.Data
+Converting type responses.ChatRequest
+- simple field ChatRequest.Model
+- simple field ChatRequest.Prompt
+- simple field ChatRequest.Index
+- struct slice ChatRequest.Attachments ([]responses.Attachment)
+- simple field ChatRequest.WebSearch
+- simple field ChatRequest.FileTools
+- simple field ChatRequest.ForceUpdate
+- simple field ChatRequest.Think
+Converting type responses.Error
+- simple field Error.Error
+Converting type responses.ModelUpstreamResponse
+- simple field ModelUpstreamResponse.Stale
+- simple field ModelUpstreamResponse.Error
+Converting type responses.BrowserStateData
+- slice field BrowserStateData.PageStack
+- simple field BrowserStateData.ViewTokens
+- map field BrowserStateData.URLToPage
+   Converting type responses.Page
+   - simple field Page.URL
+   - simple field Page.Title
+   - simple field Page.Text
+   - slice field Page.Lines
+   - simple field Page.Links
+   - struct Page.FetchedAt (time.Time)
+Converting type responses.MCPTool
+- simple field MCPTool.Name
+- simple field MCPTool.Description
+Converting type responses.MCPSkippedTool
+- simple field MCPSkippedTool.Name
+- simple field MCPSkippedTool.Reason
+Converting type responses.MCPServer
+- simple field MCPServer.Name
+- simple field MCPServer.Status
+- simple field MCPServer.Transport
+- simple field MCPServer.Runs
+- simple field MCPServer.Enabled
+- simple field MCPServer.Approved
+- simple field MCPServer.Changed
+- simple field MCPServer.PreviouslyRan
+- simple field MCPServer.Error
+- struct slice MCPServer.Tools ([]responses.MCPTool)
+- struct slice MCPServer.Skipped ([]responses.MCPSkippedTool)
+- simple field MCPServer.CanSignIn
+- simple field MCPServer.SignedIn
+- simple field MCPServer.SigningIn
+- slice field MCPServer.Warnings
+- simple field MCPServer.TokenStore
+Converting type responses.MCPServersResponse
+- struct slice MCPServersResponse.Servers ([]responses.MCPServer)
+Converting type responses.MCPRegistryEntry
+- simple field MCPRegistryEntry.Name
+- simple field MCPRegistryEntry.Title
+- simple field MCPRegistryEntry.Description
+- simple field MCPRegistryEntry.Version
+- simple field MCPRegistryEntry.Publisher
+- simple field MCPRegistryEntry.Repository
+- simple field MCPRegistryEntry.WebsiteURL
+- simple field MCPRegistryEntry.Installable
+- simple field MCPRegistryEntry.Reason
+- simple field MCPRegistryEntry.Transport
+- simple field MCPRegistryEntry.Runs
+- simple field MCPRegistryEntry.SuggestedName
+- simple field MCPRegistryEntry.Command
+- slice field MCPRegistryEntry.Args
+- map field MCPRegistryEntry.Env
+- simple field MCPRegistryEntry.URL
+- map field MCPRegistryEntry.Headers
+- slice field MCPRegistryEntry.Variables
+Converting type responses.MCPRegistryResponse
+- struct slice MCPRegistryResponse.Entries ([]responses.MCPRegistryEntry)
+- simple field MCPRegistryResponse.NextCursor
+- simple field MCPRegistryResponse.NotVetted
+Converting type responses.MCPDiscoveredServer
+- simple field MCPDiscoveredServer.Name
+- slice field MCPDiscoveredServer.Sources
+- slice field MCPDiscoveredServer.Paths
+- simple field MCPDiscoveredServer.Runs
+- simple field MCPDiscoveredServer.Origin
+- slice field MCPDiscoveredServer.Notes
+- simple field MCPDiscoveredServer.Problem
+- simple field MCPDiscoveredServer.Command
+- slice field MCPDiscoveredServer.Args
+- map field MCPDiscoveredServer.Env
+- simple field MCPDiscoveredServer.URL
+- map field MCPDiscoveredServer.Headers
+- simple field MCPDiscoveredServer.Disabled
+Converting type responses.MCPDiscoveryResponse
+- struct slice MCPDiscoveryResponse.Servers ([]responses.MCPDiscoveredServer)
+- slice field MCPDiscoveryResponse.Searched
+- simple field MCPDiscoveryResponse.Error
+OK
+

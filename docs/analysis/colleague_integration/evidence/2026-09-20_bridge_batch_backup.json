@@ -1,0 +1,147 @@
+{
+  "archive": "/Users/krypto/Library/Application Support/EkoWriteBridge/maintenance/20260920-ac311451e3bc41618f5db07392348f06",
+  "batch_size": 32,
+  "counts": {
+    "cancelled": 4,
+    "exited": 244,
+    "forgotten": 122,
+    "running": 1,
+    "timed_out": 7
+  },
+  "credentials_read": false,
+  "jobs": [
+    {
+      "job_id": "2224ddfd745d4b46be26272967ff4456",
+      "request_hash": "de462d7c315cb0390ec066cf57bcd21a5219fc06011ede4bc68d0bc3d4e55105"
+    },
+    {
+      "job_id": "f3e7151f91f94cc4a62e7e14aaf9ac8f",
+      "request_hash": "6182920b895b0b2aac1955422cc106cb7bcef17a9ad7181f365b6998420857ef"
+    },
+    {
+      "job_id": "09134afe67bb44588bd66eedd1ea8074",
+      "request_hash": "5f1f20d6b73a25babc1b2feaf2633f91ea1a64448712b589ef3c3dacfab133fa"
+    },
+    {
+      "job_id": "2f7daff15d254301b247a2acfc3981da",
+      "request_hash": "51a1a02802f6a89baf697dde6166a2d5be13887ffc6718a3b92d5e95b65da220"
+    },
+    {
+      "job_id": "052ceef3d7b04290bbeb7acc913956df",
+      "request_hash": "dce3835d4a408ac3f0971671ee46fd24134759377eed9b62ea3c46ca81306326"
+    },
+    {
+      "job_id": "8f420e8ae20542e7a01bb66164e18965",
+      "request_hash": "663c2cad25ce71ed95ae2dc73b4dfbc87a80832ef0ffcae2b4784c1c4f704ca4"
+    },
+    {
+      "job_id": "1b2e6d37b9d447aeb50be6fe86290fc9",
+      "request_hash": "2e87aa6b24cd0d17fae40574c402cc254d4aeff9da7d84f34ca178dd8525aa8d"
+    },
+    {
+      "job_id": "fac84c0ede164354a1df64e4c9f290d2",
+      "request_hash": "0d3db55976a24299f7011c23528479415977b00b18dd1d3cc8f7584beba9b513"
+    },
+    {
+      "job_id": "ff1b367aa7a940108ba636ed6e86e19e",
+      "request_hash": "7ef214839bbb4474f67fd0d1acdbdcc1876869763e3fdcee377bf7a0d38f6b47"
+    },
+    {
+      "job_id": "758bbf36eba94529be93250631bcbf99",
+      "request_hash": "c969fa0d8b1c3aaddfe47528c7c81491cac384fd778633f5189f27e48c37bedd"
+    },
+    {
+      "job_id": "5e24c2f0a458406d9b7f1cc13bd1514e",
+      "request_hash": "0b67006d934a933b84dd8da47d136b91eb5e72e5198168ef77bf62c5106d5aa4"
+    },
+    {
+      "job_id": "e30ced27174d46afa3d3cc2a7c25e085",
+      "request_hash": "943a4ff9a5f296a11a897b1c10271c614fa35f9d0d4764fa82558fdfba26b652"
+    },
+    {
+      "job_id": "35913405fb094c7886dca2648a7fad47",
+      "request_hash": "f9a2eff543db9f60696cd974e2f45c12ad78722822f26b9bcf49e9009e0c390a"
+    },
+    {
+      "job_id": "0d160233b0714f0bb50dd9cdb80eeb01",
+      "request_hash": "f686ba693541ae9d99f020a41b4d6870e3c6b63265390294859012fe944b0fc0"
+    },
+    {
+      "job_id": "51b2a49601454875a575f91e36d86fd6",
+      "request_hash": "a25e73b120c6cb694a85dcac56e7e65af505da0ac1b34529fb8d3b0e6013ada9"
+    },
+    {
+      "job_id": "15faf94c185a4b66ad1fbf7783a4388b",
+      "request_hash": "83bfbd8a4a5a7aed6579851fc9711e775293365102fbc04cd7ce55c01689d46b"
+    },
+    {
+      "job_id": "c98bda20b0e3420a9b87934f3c00a217",
+      "request_hash": "0b2de0cbfbe2c151932c0d9a682c550c30d0807743619e350493917a2eea63b6"
+    },
+    {
+      "job_id": "9979027df7864ff6ba5344c59cb89519",
+      "request_hash": "7fef3ddc16232640bee135548331cdbd03e1366c22a2d89a836f719175da5ad2"
+    },
+    {
+      "job_id": "04446115a2024d03a2ac514f1f08e33a",
+      "request_hash": "3a3e88c84842e2afbf54a45abb473df47398cdf6addd4bc8e0bc9d4a7f72d351"
+    },
+    {
+      "job_id": "059e781898714129a5daea2c5ee99ca9",
+      "request_hash": "7645e8475e93a8d48e49cd528cf5e6f9aaf585dcde5d00e9e114816a487ae852"
+    },
+    {
+      "job_id": "913830daff264e76953b5032ce52ee38",
+      "request_hash": "a52c6012d97210a00338f46ebcc5a38ca6810e98058689f2e993d6feb9a15d60"
+    },
+    {
+      "job_id": "bdf6119dece64ab596065f4831e2d2ab",
+      "request_hash": "e8de24c0a733ab7d9266548fdbb4845526be40587bfe389288dcd844a636a29e"
+    },
+    {
+      "job_id": "12ff648880704556823642402a1df3e6",
+      "request_hash": "1b93332d7e758a1d17281f1cc7f981ad51cfc6d4aba620e09ebd6ecc2ee0fc86"
+    },
+    {
+      "job_id": "970cc9a697b643bb8ad876be1e632730",
+      "request_hash": "44b726e1eb1bfd73e84f81367814ebd62d7daf991906a510f8415b92ebf69e7c"
+    },
+    {
+      "job_id": "31d878304d374f18ab51d451a1e6ba7b",
+      "request_hash": "650e3a7ff3e2f2e8b44aac76854193be996502786c80c2a854a8f0cfe7996e5d"
+    },
+    {
+      "job_id": "0a8cebd1cef84f449de9cb97c0acba43",
+      "request_hash": "244958f5b596324d839a953a6292882198fcda5cbbee55b85e388fb1c87ed183"
+    },
+    {
+      "job_id": "7c0a08928d5a4384aa9e42c446720dec",
+      "request_hash": "3532f18946b6e3d2846d44c2dc99888ca5e5b3d2eb979127caa15780ad66d6ab"
+    },
+    {
+      "job_id": "43b55b936d0d4430bb3f148d379d5b62",
+      "request_hash": "df21d74d2941853f6ce7c85b99511c537916f3bc62e6b1f41e2242b04c4bdadb"
+    },
+    {
+      "job_id": "531c4541ab39464ab686ba99cb37e5fe",
+      "request_hash": "e610e33511afba02e2f435f0f5cd072c039e5fd5a58f739c72214b40deaa200b"
+    },
+    {
+      "job_id": "5ef9f99223d34c348d66c1dd60181194",
+      "request_hash": "ae756d1ba38237a640395c92c74915d91d59472cd5153c2ff2d27a8dbd007e5f"
+    },
+    {
+      "job_id": "c65015baa34342a8ab91bf98bcfaed0e",
+      "request_hash": "8163ec7f79746ef6b049aaa282164224972fe36e68d700a866c9d2c64fc30398"
+    },
+    {
+      "job_id": "3c23d7626611481f8374769790263526",
+      "request_hash": "c17a6dfeb2fe89043a07dc23b260a146222811b9572f517d8aa97be94f456154"
+    }
+  ],
+  "manifest_sha256": "f6ca527ec23b51f73866eebe3efd5a9d74fe77a29a1e0ca20ea0a17e4ebc6058",
+  "retirement_performed": false,
+  "service_or_config_changed": false,
+  "store_id": "dfbd69b42df2453aae7bfa1c5a7af704",
+  "verified_output_bytes": 734548
+}

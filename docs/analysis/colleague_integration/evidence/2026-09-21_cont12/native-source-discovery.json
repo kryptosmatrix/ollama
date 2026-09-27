@@ -1,0 +1,41 @@
+{
+  "root": "/Users/krypto/GitHub/ollama/build/darwin-sources/_deps/llama_cpp-src",
+  "results": [
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD",
+        "b10091^{commit}"
+      ],
+      "exit_code": 0,
+      "stdout": "b4d6c7d8ff69c2e05e4e8ee7e6e710a08abd7b45\nb4d6c7d8ff69c2e05e4e8ee7e6e710a08abd7b45\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all"
+      ],
+      "exit_code": 0,
+      "stdout": " M src/llama-model-loader.cpp\n M src/models/laguna.cpp\n M tools/mtmd/clip.cpp\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "grep",
+        "-n",
+        "-E",
+        "handle_apply_template|apply-template|tokenize_input_prompts|oaicompat_completion_params_parse",
+        "--",
+        "tools/server"
+      ],
+      "exit_code": 0,
+      "stdout": "tools/server/README.md:661:### POST `/apply-template`: Apply chat template to a conversation\ntools/server/server-common.cpp:729: * use tokenize_input_prompts() if the input could be an array.\ntools/server/server-common.cpp:770:std::vector<server_tokens> tokenize_input_prompts(const llama_vocab * vocab, mtmd_context * mctx, const json & json_prompt, bool add_special, bool parse_special) {\ntools/server/server-common.cpp:791:json oaicompat_completion_params_parse(const json & body) {\ntools/server/server-common.h:278:std::vector<server_tokens> tokenize_input_prompts(\ntools/server/server-common.h:307:json oaicompat_completion_params_parse(const json & body);\ntools/server/server-context.cpp:2224:                task.tokens = std::move(tokenize_input_prompts(vocab, mctx, prompt, true, true)[0]);\ntools/server/server-context.cpp:4085:            inputs = tokenize_input_prompts(ctx_server.vocab, ctx_server.mctx, prompt, true, true);\ntools/server/server-context.cpp:4640:        std::vector<server_tokens> tokenized_prompts = tokenize_input_prompts(ctx_server.vocab, ctx_server.mctx, prompt, false, true);\ntools/server/server-context.cpp:5211:    // for the shape of input/content, see tokenize_input_prompts()\ntools/server/server-context.cpp:5234:    auto tokenized_prompts = tokenize_input_prompts(ctx_server.vocab, ctx_server.mctx, prompt, true, true);\ntools/server/server-http.cpp:667:// e.g. \"/v1/chat/completions\" -> \"chatCompletions\", \"/apply-template\" -> \"applyTemplate\"\ntools/server/server.cpp:253:    ctx_http.post(\"/apply-template\",           ex_wrapper(routes.post_apply_template));\ntools/server/tests/unit/test_chat_completion.py:226:    res = server.make_request(\"POST\", \"/apply-template\", data={\ntools/server/tests/unit/test_compat_anthropic.py:955:    res = server.make_request(\"POST\", \"/apply-template\", data={\ntools/server/tests/unit/test_template.py:48:    res = server.make_request(\"POST\", \"/apply-template\", data={\ntools/server/tests/unit/test_template.py:71:    res = server.make_request(\"POST\", \"/apply-template\", data={\ntools/server/tests/unit/test_template.py:94:    res = server.make_request(\"POST\", \"/apply-template\", data={\n",
+      "stderr": ""
+    }
+  ]
+}

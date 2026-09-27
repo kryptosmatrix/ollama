@@ -1,0 +1,23 @@
+19:56:14 [native] keep_all_long: starting fresh daemon
+19:56:48 [native] keep_all_long: http=200 done=length prompt=106 eval=1400 shift_lines=5 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 106}
+19:56:50 teardown: no sandbox process left
+19:56:50 [native] keep_all_oversize: starting fresh daemon
+19:56:51 [native] keep_all_oversize: http=400 done=None prompt=None eval=None shift_lines=1 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 4285}
+19:56:54 teardown: no sandbox process left
+19:56:55 [native] reload step 0 shift=default http=200 1.29s load_ns=906223958 launches=1
+19:56:57 [native] reload step 1 shift=False http=200 1.38s load_ns=990042791 launches=2
+19:56:58 [native] reload step 2 shift=default http=200 1.36s load_ns=975777125 launches=3
+19:56:59 [native] reload step 3 shift=False http=200 1.34s load_ns=963317417 launches=4
+19:57:02 teardown: no sandbox process left
+19:57:02 [rendered] keep_all_long: starting fresh daemon
+19:57:30 [rendered] keep_all_long: http=200 done=length prompt=110 eval=1400 shift_lines=5 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 110}
+19:57:32 teardown: no sandbox process left
+19:57:32 [rendered] keep_all_oversize: starting fresh daemon
+19:57:36 [rendered] keep_all_oversize: http=200 done=length prompt=511 eval=64 shift_lines=65 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 4289}
+19:57:38 teardown: no sandbox process left
+19:57:40 [rendered] reload step 0 shift=default http=200 1.34s load_ns=964406000 launches=1
+19:57:41 [rendered] reload step 1 shift=False http=200 1.37s load_ns=996547542 launches=2
+19:57:42 [rendered] reload step 2 shift=default http=200 1.35s load_ns=971823542 launches=3
+19:57:44 [rendered] reload step 3 shift=False http=200 1.36s load_ns=986069166 launches=4
+19:57:46 teardown: no sandbox process left
+19:57:46 done: 6 probe records

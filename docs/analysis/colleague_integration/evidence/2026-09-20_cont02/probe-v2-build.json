@@ -1,0 +1,11 @@
+{
+  "args": [
+    "/opt/homebrew/bin/go",
+    "build",
+    "-o",
+    "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont02/chat-read-probe-v2",
+    "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont02/testdata/chat_read_probe.go"
+  ],
+  "exit_code": 0,
+  "scope": "Development-mode HTTP handler; real synthetic database; loopback inference fixture."
+}

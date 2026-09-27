@@ -1,0 +1,11 @@
+{
+  "raw_body_limit": 524288,
+  "decoded_text_limit": 65536,
+  "max_binding_bytes": 2432,
+  "six_byte_escaping_significant_body": 407970,
+  "fixed_envelope_bytes_in_worked_instance": 162,
+  "remaining_bytes": 116318,
+  "input_character": "U+0001 (valid UTF-8, NUL-free, six-byte JSON escape)",
+  "whitespace_policy": "Raw bodies exceeding 524288 are refused even if the decoded strings would fit; padding whitespace is not exempt.",
+  "sample_digest": "0b59664b704b51ae53ba213c0e3359a2b60a0bdd11abc751dc6674da2220be16"
+}

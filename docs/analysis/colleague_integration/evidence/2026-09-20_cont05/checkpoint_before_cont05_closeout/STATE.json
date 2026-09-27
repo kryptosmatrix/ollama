@@ -1,0 +1,366 @@
+{
+  "record_type": "ollama_colleague_integration_control_state",
+  "current_candidate": {
+    "continuation": 4,
+    "owner": "Eko",
+    "worktree": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+    "branch": "eko/chat-read-integrity-20260920",
+    "commit": "927fcb5dd706ffd741612a4ab124646aa22a60cb",
+    "parent": "953de98d408a9697fa20a48c23973b9dc8eee921",
+    "worktree_clean_after_commit": true,
+    "precode_contract": "PRECODE_REVIEW_04_R2_PROMPT.md",
+    "precode_contract_sha256": "6505333b5d3d8c786496a7510a8c07cb5e111a8fc7bb47fcd7c69a869c3e564e",
+    "precode_review": "APPROVE; design only",
+    "precode_response_sha256": "dc6d487e9eafc7dbfcb2bb1d24559abc127fbd8e3dfdc4f2beaf0b51c127b800",
+    "report": "CONTINUATION_04_REPORT.md",
+    "source_files_changed": ["app/store/database.go", "app/store/store.go"],
+    "test_files_added": ["app/store/chat_read_errors_test.go", "app/ui/chat_read_errors_test.go"],
+    "source_sha256": {
+      "app/store/database.go": "6905b4e6146f76e0aed66f97e17a39245d27a0182f0051d06642389de042b551",
+      "app/store/store.go": "71097b8bc6664c0c9eb87bedfab5c0b79acc2768df20e0dd0319af2fbd5c0862",
+      "app/store/chat_read_errors_test.go": "78adbad3f024feb30e912722026aa9bb8f6ea1f96b08fc241e5ab0c121b57c99",
+      "app/ui/chat_read_errors_test.go": "299356bec304683503fe4410f19f2f0496307ff64848ebaf0f13fd854421440a"
+    },
+    "compiled": false,
+    "tests_executed": false,
+    "fault_controls_executed": false,
+    "independent_execution_runs": 0,
+    "accepted": false,
+    "merged": false,
+    "installed": false,
+    "pushed": false,
+    "remote_tip_verified": null,
+    "execution_restriction": "Platform refused formatting/red-test input and branch-push input before local execution; not a code failure or missing operator authority.",
+    "shell_session": "4638c679a84e4c08881a66f37af853b0",
+    "shell_closed": true,
+    "shell_exit_code": 0,
+    "shell_exit_is_test_evidence": false,
+    "disposition": "PARKED",
+    "scope_note": "This current candidate supersedes older no-production-change/no-commit statements. Earlier per-continuation execution counters remain historical. No wider programme item is accepted."
+  },
+  "operator_authority": {
+    "decision_id": "ash-eko-standing-preapproval-2026-09-20",
+    "source": "Ash's direct message in the active conversation, recorded verbatim in DECISIONS.md: Standing authority — 20 September 2026",
+    "status": "granted",
+    "condition": "Reason that the change is necessary and tell Ash what will change and why before acting; no further routine approval required.",
+    "excluded": "Deleting unrecoverable material; preserve an established recovery path for potentially destructive edits, overwrites and migrations.",
+    "repair_maintenance_exception": "authorised for the two-function chat-history preservation correction; formal Method 16 promotion and dependent Method 03 readiness gate not required for this slice",
+    "technical_proof_and_independent_review": "unchanged and still required",
+    "earned_implementation_ready_claimed": false,
+    "applied_date_brisbane": "2026-09-20",
+    "supersedes": "Earlier pending-authority statements in DECISION_REQUEST_CHAT_READ_REPAIR.md, HANDOFF.md, BLOCKERS.md and the prior STATE progress/next_action.",
+    "previous_authority_state": "No explicit maintenance exception; next action requested an explicit bounded operator decision. Preserved as history in CONTINUATION_03_REPORT.md and the retained sections of HANDOFF.md and BLOCKERS.md."
+  },
+  "checkpoint_date_brisbane": "2026-09-20",
+  "task_id": "eko-ollama-20260920-initial-recon",
+  "controller": {
+    "name": "Eko",
+    "model": "GPT-6 Astra Pro",
+    "host": "ChatGPT",
+    "is_founded_ollama_colleague": false,
+    "background_execution": false
+  },
+  "commission": {
+    "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+    "revision": "R3",
+    "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec",
+    "read_complete": true,
+    "read_ranges": [
+      [
+        1,
+        492
+      ],
+      [
+        490,
+        590
+      ]
+    ],
+    "partial_final_line_recovered_by_overlap": true,
+    "required_item_count": 31,
+    "accepted_item_count": 0,
+    "index": "REQUIREMENTS.md"
+  },
+  "progress": {
+    "active_item": "OI-01",
+    "phase": "approved maintenance design; repair and permanent tests committed locally; execution and remote backup blocked", 
+    "status": "blocked",
+    "disposition": "PARKED",
+    "stop_token": "PACK_PREREQUISITE_MISSING",
+    "blocker_id": "candidate-execution-platform-blocked", 
+    "recon_complete": false,
+    "design_readiness": "[SPEC-DRAFT]",
+    "active_blueprint": "docs/_design/CHAT_READ_ERROR_INTEGRITY.md",
+    "active_implementation_pack": null,
+    "runtime_features_delivered": [],
+    "runtime_files_changed": ["/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/store/database.go", "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/store/store.go"],
+    "test_files_changed": ["/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/store/chat_read_errors_test.go", "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/chat_read_errors_test.go"],
+    "disposition_reason": "Candidate 927fcb5dd is committed in an isolated Eko worktree. Operator authority and pre-code review are resolved. Platform refused test and push inputs; compilation, fault controls, regressions and independent execution remain owed. No merge or accepted item.",
+    "diagnostic_test_files_created": [
+      "docs/analysis/colleague_integration/evidence/2026-09-20_cont03/testdata/chat_read_errors_test.go",
+      "docs/analysis/colleague_integration/evidence/2026-09-20_cont03/testdata/store_chat_read_errors_test.go"
+    ]
+  },
+  "repository": {
+    "root": "/Users/krypto/GitHub/ollama",
+    "observed_head": "953de98d408a9697fa20a48c23973b9dc8eee921",
+    "observed_branch": "main",
+    "local_tracking_upstream": "origin/main",
+    "remote_fetched": false,
+    "verified_remote_tip": null,
+    "exclusive_checkout_ownership_verified": false,
+    "task_branch_created": "eko/chat-read-integrity-20260920",
+    "task_worktree_created": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+    "commits_created": ["927fcb5dd706ffd741612a4ab124646aa22a60cb"],
+    "pushes_performed": 0,
+    "checkpoint_custody": "Candidate source and tests committed locally on the Eko branch; remote push blocked. Programme docs/evidence remain local in the ordinary checkout. Nothing installed or merged.",
+    "preserved_external_untracked_files": [
+      "docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+      "docs/OLLAMA_CROSS_MODEL_COLLEAGUES_AND_CAPABILITY_ROUTING_HANDOFF.md"
+    ],
+    "concurrent_handoff_read": true,
+    "installed_or_running_app_identity": {
+      "path": "/Applications/Ollama.app",
+      "reported_version": "0.32.5-47-geb8c93d",
+      "resource_binary_revision": "eb8c93da6ab20b980449226029a9bf5cf40a6306",
+      "resource_binary_modified": false,
+      "matches_checkout": false,
+      "installed_candidate_acceptance": false
+    },
+    "companion_handoff_sha256": "24da38b49da7c628a874d96e1d100e7f269315ba591d9bea745c10ba0d07ddcf"
+  },
+  "execution": {
+    "bridge_profile": "Eko Write Bridge",
+    "bridge_version": "0.3.0",
+    "execution_state_id": "dfbd69b42df2453aae7bfa1c5a7af704",
+    "command_admission": "Continuation04 retired two additional preserved completed own jobs. Review, worktree creation, file-copy and commit operations executed; preflight, formatting/test and push inputs were platform-blocked. Shell closed.",
+    "attempted_request_ids": [
+      "eko-ollama-20260920-arrival-01",
+      "eko-ollama-20260920-execution-recheck-01"
+    ],
+    "accepted_job_ids": [
+      "81838f447a5e4575924e70d1560951a4",
+      "f066bb69db834fa280d8d8497ecce8e4",
+      "23b09e55888343ae868cfd1a56adb23d",
+      "f69a3539cb4f42309e57240231e29de4",
+      "86ab9302ee424746b2d8b23f202ee575",
+      "025cbb5a846246bb91c80f4d6a8619b2",
+      "a62675c9ea914b769db928933edf6629",
+      "af8112db875c4c438b3cce0457299f5e"
+    ],
+    "task_commands_in_flight": [],
+    "checkpoint_writer_completion": {
+      "job_id": "af8112db875c4c438b3cce0457299f5e",
+      "state": "exited",
+      "exit_code": 0,
+      "output_complete": 1,
+      "stdout_chunk_sha256": "446bebaec823c671c089088784d962569d0756a33db037b18c2f47262f086f10",
+      "evidence_hashes_verified": true
+    },
+    "retired_request_replay_check": {
+      "job_id": "f68fa53d7c8c4fbaa57ba6fef20f86b2",
+      "state": "forgotten",
+      "replayed": true,
+      "original_timestamps_unchanged": true,
+      "new_execution": false
+    },
+    "retained_job_count_last_observed": null,
+    "retained_job_limit": 256,
+    "builds_run": 3,
+    "test_runs": 5,
+    "discovered_test_count": null,
+    "passed_test_count": null,
+    "failed_test_count": null,
+    "skipped_test_count": null,
+    "warning_baseline": "Frontend lint exit 1: 137 errors and 11 warnings before code edits; Browserslist warning; one Windows-only Go skip.",
+    "git_diff_check_run": true,
+    "archive_maintenance_authorised_in_this_task": true,
+    "jobs_forgotten": 41,
+    "service_configuration_changed": false,
+    "build_scope_note": "Historical standalone core build is in continuation_02. Continuation_03 used only compiler-overlaid diagnostic tests; one first-attempt test compilation failed.",
+    "maintenance_report": "BRIDGE_MAINTENANCE_2026-09-20.md",
+    "test_scope": "Per-continuation records govern: new process-separated authenticated and Store-cause diagnostics against unchanged source, no candidate or independent execution.",
+    "archive_maintenance_authorisation": "Ash: Please do, in response to the explicit preservation-first maintenance request, 20 September 2026.",
+    "historical_admission_failures": [
+      "eko-ollama-20260920-arrival-01",
+      "eko-ollama-20260920-execution-recheck-01",
+      "eko-archive-maintenance-20260920-preflight-01"
+    ],
+    "count_scope_note": "No aggregate test count across parent/subtests, frontend cases and diagnostic programs. See exact per-command results.",
+    "continuation_02": {
+      "baseline": "docs/analysis/colleague_integration/evidence/2026-09-20_cont02/baseline-results.json",
+      "go_named_test_subtest_records": {
+        "pass": 593,
+        "fail": 0,
+        "skip": 1
+      },
+      "frontend_test_cases": 143,
+      "frontend_test_files": 21,
+      "frontend_lint_errors": 137,
+      "frontend_lint_warnings": 11,
+      "diagnostic_child_exits": {
+        "integer_2_ineffective_fault": 1,
+        "invalid_text_reproduced_loss": 1
+      },
+      "diagnostic_builds": 2,
+      "core_go_builds": 1,
+      "typescript_checks": 1,
+      "jobs_forgotten": 0,
+      "production_changes": 0,
+      "full_repository_suite_run": false
+    },
+    "aggregate_counter_scope_note": "builds_run and test_runs are retained historical continuation-02 counters, not current totals. Use continuation_03 run population rather than mixing compilations, parent/subtests and process phases.",
+    "continuation_03": {
+      "run_population": "docs/analysis/colleague_integration/evidence/2026-09-20_cont03/diagnostic-run-population.json",
+      "go_diagnostic_invocations": 4,
+      "invocations_with_test_execution": 3,
+      "diagnostic_compile_failures": 1,
+      "production_source_changes": 0,
+      "default_test_files_added": 0,
+      "jobs_forgotten": 6,
+      "full_affected_suite_run": false,
+      "independent_execution_runs": 0
+    }
+  },
+  "review": {
+    "independent_colleagues_invoked": 2,
+    "reviewed_candidate": "26673e6296d6d541a0a97d69bbe4adae72040a2d1ca191b12b0919ed333d4bb9",
+    "blueprint_judge_verdict": "BLUEPRINT_JUDGE=FAIL",
+    "code_judge_verdict": null,
+    "reality_gate_verdict": null,
+    "notes": "Historical blueprint source review remains advisory/non-counting. Continuation03: one completed DeepSeek routing/proof source review with conflicting routing conclusions; one supplementary Codex invocation failed quota with no review. No formal promotion or independent execution.",
+    "continuation_04": {
+      "source_review_calls": 2,
+      "final_precode_verdict": "APPROVE; design only",
+      "final_precode_report": "/Users/krypto/GitHub/TECHNE/Tools/ollama/_runs/2026-09-20T11-19-41Z_eko-chat-read-precode-cont04-r2_74j29e2d/response.txt",
+      "actual_candidate_code_acceptance": null,
+      "independent_execution_runs": 0
+    },
+    "primary_requested_model": "deepseek-v4.1-flash:cloud",
+    "served_model": "deepseek-v4.1-flash",
+    "model_request_attempts": 6,
+    "completed_source_reviews": 4,
+    "qualifying_promotion_rounds": 0,
+    "independent_execution_runs": 0,
+    "continuation_03": {
+      "primary_report": "evidence/2026-09-20_cont03/deepseek-routing-review/response.txt",
+      "primary_response_sha256": "ee18a1c46704fa8e7e4814e6715d41fe2496ff803e27e2756c141c40a3a4988e",
+      "primary_scope": "advisory routing/proof source review, not a promotion round",
+      "routing_verdict_accepted": false,
+      "supplementary_codex_result": "evidence/2026-09-20_cont03/codex-routing-review/result.json",
+      "supplementary_codex_completed": false,
+      "independent_execution_runs": 0
+    }
+  },
+  "routing_receipt": {
+    "routes_used": [
+      "RECON",
+      "DOCS",
+      "GIT",
+      "HANDOFF",
+      "TEST",
+      "PANEL"
+    ],
+    "read_ledger": "SOURCE_MAP.md",
+    "full_arrival_reads_recorded": true,
+    "source_read_scope": "Bounded excerpts only; exact file ranges and hashes in SOURCE_MAP.md.",
+    "not_completed": [
+      "Complete OI-01 source/test/design-corpus reconciliation",
+      "Full-root and complete app/native/package baseline with safe Keychain isolation",
+      "Independent bounded repair-contract review under the authorised maintenance exception; ordinary readiness gates still apply to other programme work",
+      "Independent executable code/proof review",
+      "Lineage registration and predecessor observation",
+      "LETHE document-pointer recording",
+      "Git checkpoint and remote closeout"
+    ],
+    "continuation_03_sources": "Source/read ranges in the retained Bridge commands and evidence/2026-09-20_cont03/routing-review-manifest.json; full source/proof limits in CONTINUATION_03_REPORT.md."
+  },
+  "records": {
+    "handoff": "HANDOFF.md",
+    "requirements": "REQUIREMENTS.md",
+    "decisions": "DECISIONS.md",
+    "source_map": "SOURCE_MAP.md",
+    "blockers": "BLOCKERS.md",
+    "evidence": [
+      "evidence/2026-09-20_eko_execution_blocker.json",
+      "evidence/2026-09-20_eko_execution_recheck.json",
+      "evidence/2026-09-20_baseline_environment.json",
+      "evidence/2026-09-20_bridge_batch_backup.json",
+      "evidence/2026-09-20_bridge_bootstrap_archive.json",
+      "evidence/2026-09-20_bridge_maintenance_result.json",
+      "evidence/2026-09-20_bridge_retirement_receipts.jsonl",
+      "evidence/2026-09-20_bridge_verified_execution.json",
+      "evidence/2026-09-20_request_baseline.jsonl",
+      "evidence/2026-09-20_request_baseline.stderr.txt",
+      "evidence/2026-09-20_request_baseline_result.json"
+    ],
+    "maintenance": "BRIDGE_MAINTENANCE_2026-09-20.md",
+    "continuation_02_report": "CONTINUATION_02_REPORT.md",
+    "judge_reconciliation": "JUDGE_RECONCILIATION_02.md",
+    "continuation_04_report": "CONTINUATION_04_REPORT.md",
+    "continuation_03_report": "CONTINUATION_03_REPORT.md",
+    "continuation_03_evidence": "evidence/2026-09-20_cont03/"
+  },
+  "record_file_sha256": {
+    "HANDOFF.md": "e10bbfcb62cd7e0a8970910f50b33896a18c60499d73900e0687029eda550ad5",
+    "REQUIREMENTS.md": "a8e35a5b772fde807700d53d1c7b78ddd32fb9b49c3f36a7f89ef039707d7719",
+    "DECISIONS.md": "f9408bc9fc45bffcb4ec1a44788d8df911fb3f988bf7b923475fa952ae21140b",
+    "SOURCE_MAP.md": "b8cf59b85c3241d514c623ae3943af307e0ac4fc39a7531b4bbc4deef6a6768a",
+    "BLOCKERS.md": "437c2bea1be10d1582c23be2b50aadc993b3e24bb6d08a692c7a9ba049947756",
+    "CONTINUATION_04_REPORT.md": "fb1b6584881a04130eaafb58635af8742a0259c8bf04db81c169203947822e2f",
+    "evidence/2026-09-20_eko_execution_blocker.json": "4b01ac2aac752589e0cbc0599d0ae941b9a6cd46969ff20bcef3ab1044806e8d",
+    "evidence/2026-09-20_eko_execution_recheck.json": "0129cdcb20852a8e2890b8a15621590336a6938b341f26443ddf6c469d085e0e",
+    "BRIDGE_MAINTENANCE_2026-09-20.md": "841c00264acd820f3a6c8d029868ede08ad27c5ea46ff441037a64c17672f07e",
+    "evidence/2026-09-20_baseline_environment.json": "ab0b121c822e94a1ac56f29249812fd902cff541b01dd9e5c8f651b9209fe18b",
+    "evidence/2026-09-20_bridge_batch_backup.json": "ae92b5166ecb62b93f7af7c5d94a4e04dc8411a31283a2d0dad6370271839282",
+    "evidence/2026-09-20_bridge_bootstrap_archive.json": "d56215ee4a138c6d4e52f9770e24e9020bb52eb598fbde1dda5bfb36697f2e07",
+    "evidence/2026-09-20_bridge_maintenance_result.json": "ec54a4c048938eea980a03682cba19705e28e740502f88793d082f1c4b1f8f31",
+    "evidence/2026-09-20_bridge_retirement_receipts.jsonl": "6c8371aa6a9ed705229114505cc5880ba58e8908d19c7fc5bf277bd318ce896c",
+    "evidence/2026-09-20_bridge_verified_execution.json": "b2d26b1ff80d0aa9272ff8121e2cecb08bc59988c5ce643453d1426b2c4cab6c",
+    "evidence/2026-09-20_request_baseline.jsonl": "ddff080c1638fb3d134f1be8893f8bf00fd9d7a69bdbae7f17f702e080fc85a2",
+    "evidence/2026-09-20_request_baseline.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "evidence/2026-09-20_request_baseline_result.json": "908dc9f5c74f3cd3c631a17017933f24824c66e86d5114b0c1d775ba46bce766",
+    "CONTINUATION_02_REPORT.md": "facc4fa8994ac7a04f108fa01022faa0848f224fb11d5122e5f9b00cdf416bf2",
+    "JUDGE_RECONCILIATION_02.md": "12c0e34388b144731d1ab2079e2f56f4d7df21a6c1826f46bd8a590933f85a15",
+    "CONTINUATION_03_REPORT.md": "391a31d2a7821ed8a6284b5c5b03c6df3362d399e544e18c7d4519d18ab19e28"
+  },
+  "post_write_containment": {
+    "tool": "Eko_Write_Bridge.git_status",
+    "request_id": "007bcd26e41b4f5db682380d4a5eb49b",
+    "head_commit": "953de98d408a9697fa20a48c23973b9dc8eee921",
+    "branch": "main",
+    "staged": 0,
+    "unstaged": 0,
+    "conflicted": 0,
+    "untracked_total": 10,
+    "pre_existing_or_concurrent_untracked": 2,
+    "new_task_report_files": 8,
+    "truncated": false,
+    "original_work_list_hash_recheck_request": "80bd2a8eee22430b88b472b6a176ccb3",
+    "original_work_list_hash_unchanged": true,
+    "scope_note": "Historical initial checkpoint snapshot, superseded by evidence/2026-09-20_baseline_environment.json and final post-maintenance containment. Not current file counts."
+  },
+  "next_action": {
+    "title": "Prove the locally committed chat-history preservation candidate",
+    "first_dependency": "Permitted execution of candidate tests, formatting and fault controls; do not bypass platform restrictions or repeat the settled operator/design gates.",
+    "then": "Verify 927fcb5dd, run permanent tests and original-bug/consumer-bypass/constant/error controls in isolation, clean rerun, complete safe affected regressions and actual independent executable review; back up and verify the candidate branch before integration.",
+    "revisit_trigger": "Execution access permits the required proof and remote backup. No task remains running between messages."
+  },
+  "checkpoint_updated_brisbane": "2026-09-20T21:30:49.111121+10:00",
+  "diagnosed_prerequisite": {
+    "id": "chat-continuation-load-error-data-loss",
+    "status": "candidate_committed_runtime_unverified",
+    "unit": "original messages lost in one injected-fault continuation",
+    "baseline_value": 2,
+    "target_value": 0,
+    "scope": "Real temporary default-path Store across fresh processes and actual authenticated HTTP Handler; simulated external inference only. Original messages, attachment/tool records and title lost; native error identity also discarded. No installed-app or post-repair proof.",
+    "observations": "docs/analysis/colleague_integration/evidence/2026-09-20_cont03/authenticated-baseline.stdout",
+    "error_cause_observations": "docs/analysis/colleague_integration/evidence/2026-09-20_cont03/store-baseline-v2.stdout"
+  },
+  "blueprint_file_sha256": "b691c8004ed82674c82ebcde3a2f876cd85f65cb5f8167ffadc5e3fd6e6e0570",
+  "continuation_02_custody": {
+    "retained_commands_index": "docs/analysis/colleague_integration/evidence/2026-09-20_cont02/bridge-commands/INDEX.json",
+    "binary_custody": "docs/analysis/colleague_integration/evidence/2026-09-20_cont02/binary-custody.json",
+    "original_checkpoint": "docs/analysis/colleague_integration/evidence/2026-09-20_cont02/checkpoint_before_cont02_closeout",
+    "full_report_write_timeout_reconciled_by_read_request": "a8e4b7558d30411889df2813a032aaff"
+  }
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "file": "agent/session.go",
+    "sha256": "0a2521b18c99b043c8f91af37605a827bdc4d50b380e904013a5959d859d3cec",
+    "bytes": 33934,
+    "lines": 1087
+  },
+  {
+    "file": "cmd/tui/chat/compaction.go",
+    "sha256": "d31cabf34e80f4ae23c772be65bd019aef644a3fa6b1d53428c68c0ebff8b693",
+    "bytes": 2969,
+    "lines": 101
+  },
+  {
+    "file": "cmd/tui/chat/events.go",
+    "sha256": "95c8d6a6e0daccc639b82e6ba99795a0209563a1cb8c8be7349314b1a7c6372e",
+    "bytes": 9617,
+    "lines": 371
+  },
+  {
+    "file": "app/ui/app/src/components/Chat.tsx",
+    "sha256": "ba273fb1c2613aa3722cb1e30a94f445bf68a1283d8db01f7a9970b16cae0f64",
+    "bytes": 11108,
+    "lines": 345
+  },
+  {
+    "file": "app/ui/app/src/components/MessageList.tsx",
+    "sha256": "b6800f9cf043847ddfaba3db2ceec7f09ea0b7feed57bc1242d5934513e1a5ee",
+    "bytes": 5603,
+    "lines": 168
+  },
+  {
+    "file": "app/ui/app/src/hooks/useChats.ts",
+    "sha256": "b8b3f66706d484d7ba56f9cc4f2fd94373787011b670e20844e50d3d077669fb",
+    "bytes": 25543,
+    "lines": 760
+  },
+  {
+    "file": "docs/CURATED_CONTEXT_BLUEPRINT.md",
+    "sha256": "1d35b9f208500fb0d88036fb687f1d892b16ed83f4040e95ad7c453209c7712d",
+    "bytes": 34647,
+    "lines": 1012
+  },
+  {
+    "file": "docs/CURATED_CONTEXT_SYSTEM.md",
+    "sha256": "1952eb35a89b65a1bbd4cad4e8b7621ba7a86851f9c10d4c4d87caa16be8869c",
+    "bytes": 20271,
+    "lines": 501
+  }
+]

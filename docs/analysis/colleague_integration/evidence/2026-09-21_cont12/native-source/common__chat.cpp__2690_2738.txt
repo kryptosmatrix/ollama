@@ -1,0 +1,49 @@
+2690:             }
+2691:         }
+2692:     }
+2693: 
+2694:     if (src.find("<|channel|>") == std::string::npos) {
+2695:         // map developer to system for all models except for GPT-OSS
+2696:         workaround::map_developer_role_to_system(params.messages);
+2697:     }
+2698: 
+2699:     if (!tmpl.original_caps().supports_system_role) {
+2700:         workaround::system_message_not_supported(params.messages);
+2701:     }
+2702: 
+2703:     if (tmpl.original_caps().supports_tool_calls) {
+2704:         // some templates will require the content field in tool call messages
+2705:         // to still be non-null, this puts an empty string everywhere where the
+2706:         // content field is null
+2707:         workaround::requires_non_null_content(params.messages);
+2708:     }
+2709: 
+2710:     if (tmpl.original_caps().supports_object_arguments) {
+2711:         workaround::func_args_not_string(params.messages);
+2712:     }
+2713: 
+2714:     params.extra_context = common_chat_extra_context();
+2715:     for (auto el : inputs.chat_template_kwargs) {
+2716:         params.extra_context[el.first] = json::parse(el.second);
+2717:     }
+2718: 
+2719:     if (!inputs.json_schema.empty()) {
+2720:         params.json_schema = json::parse(inputs.json_schema);
+2721:     }
+2722: 
+2723:     params.parallel_tool_calls = inputs.parallel_tool_calls;
+2724: 
+2725:     if (params.tools.is_array()) {
+2726:         if (params.tool_choice != COMMON_CHAT_TOOL_CHOICE_NONE && !params.grammar.empty()) {
+2727:             throw std::runtime_error("Cannot specify grammar with tools");
+2728:         }
+2729:         if (caps.supports_tool_calls && !caps.supports_tools) {
+2730:             LOG_WRN(
+2731:                 "Template supports tool calls but does not natively describe tools. The fallback behaviour used may "
+2732:                 "produce bad results, inspect prompt w/ --verbose & consider overriding the template.\n");
+2733:         }
+2734:     }
+2735: 
+2736:     if (inputs.force_pure_content) {
+2737:         LOG_WRN("Forcing pure content template, will not render reasoning or tools separately.");
+2738:         // Create the result structure

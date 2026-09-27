@@ -1,0 +1,64 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "created_at": "2026-09-20T11:58:53.184083878Z",
+  "message": {
+    "role": "assistant",
+    "content": "All four mutants fail behaviourally with meaningful assertions. Now let me inspect the mutant sources to confirm they are genuine mutations (not instrument sabotage), and read the store_test.go setup helper and the tts_test.go fixture.",
+    "tool_calls": [
+      {
+        "id": "call_f9cfuvm4",
+        "function": {
+          "index": 0,
+          "name": "read_source",
+          "arguments": {
+            "path": "mutant_rewrap",
+            "start": 1,
+            "count": 60
+          }
+        }
+      },
+      {
+        "id": "call_yw9weutv",
+        "function": {
+          "index": 1,
+          "name": "read_source",
+          "arguments": {
+            "path": "mutant_consumer-bypass",
+            "start": 1,
+            "count": 60
+          }
+        }
+      },
+      {
+        "id": "call_12fmhf3y",
+        "function": {
+          "index": 2,
+          "name": "read_source",
+          "arguments": {
+            "path": "mutant_always-error",
+            "start": 1,
+            "count": 60
+          }
+        }
+      },
+      {
+        "id": "call_4qsqhbv4",
+        "function": {
+          "index": 3,
+          "name": "read_source",
+          "arguments": {
+            "path": "mutant_empty-success",
+            "start": 1,
+            "count": 60
+          }
+        }
+      }
+    ]
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 2437385535,
+  "prompt_eval_count": 67937,
+  "prompt_eval_cached_count": 53376,
+  "eval_count": 310
+}

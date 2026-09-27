@@ -1,0 +1,11 @@
+<|im_start|>system
+
+User-configured instructions; revision 1; selection 1:
+Use Australian English. Keep answers short. Finish with ZEBRA-7Q.<|im_end|>
+<|im_start|>user
+Café naïve résumé — 東京 🦘🌏 ñ Ω ∑ ✓ «quote» é z‍z /no_think<|im_end|>
+<|im_start|>assistant
+<think>
+
+</think>
+

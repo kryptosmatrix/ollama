@@ -1,0 +1,34 @@
+20:31:14 qwen3_8b_rendered: starting daemon
+20:31:18 qwen3_8b_rendered plain     status=200/200 actual=58 go=58 infflags=58 gap_go=0 gap_inf=0
+20:31:18 qwen3_8b_rendered multiturn status=200/200 actual=211 go=211 infflags=211 gap_go=0 gap_inf=0
+20:31:19 qwen3_8b_rendered tools     status=200/200 actual=219 go=219 infflags=219 gap_go=0 gap_inf=0
+20:31:19 qwen3_8b_rendered toolcalls status=200/200 actual=274 go=274 infflags=274 gap_go=0 gap_inf=0
+20:31:20 qwen3_8b_rendered unicode   status=200/200 actual=83 go=83 infflags=83 gap_go=0 gap_inf=0
+20:31:20 qwen3_8b_rendered thinking  status=200/200 actual=69 go=69 infflags=69 gap_go=0 gap_inf=0
+20:31:22 teardown: no sandbox process left
+20:31:22 qwen3_8b_native: starting daemon
+20:31:24 qwen3_8b_native plain     status=200/200 actual=54 go=54 infflags=54 gap_go=0 gap_inf=0
+20:31:24 qwen3_8b_native multiturn status=200/200 actual=207 go=207 infflags=207 gap_go=0 gap_inf=0
+20:31:25 qwen3_8b_native tools     status=200/200 actual=258 go=258 infflags=258 gap_go=0 gap_inf=0
+20:31:25 qwen3_8b_native toolcalls status=200/200 actual=316 go=316 infflags=316 gap_go=0 gap_inf=0
+20:31:25 qwen3_8b_native unicode   status=200/200 actual=79 go=79 infflags=79 gap_go=0 gap_inf=0
+20:31:26 qwen3_8b_native thinking  status=200/200 actual=67 go=67 infflags=67 gap_go=0 gap_inf=0
+20:31:28 teardown: no sandbox process left
+20:31:28 gpt-oss_20b_rendered: starting daemon
+20:31:36 gpt-oss_20b_rendered plain     status=200/200 actual=107 go=107 infflags=107 gap_go=0 gap_inf=0
+20:31:37 gpt-oss_20b_rendered multiturn status=200/200 actual=260 go=260 infflags=260 gap_go=0 gap_inf=0
+20:31:38 gpt-oss_20b_rendered tools     status=200/200 actual=186 go=186 infflags=186 gap_go=0 gap_inf=0
+20:31:38 gpt-oss_20b_rendered toolcalls status=200/200 actual=231 go=231 infflags=231 gap_go=0 gap_inf=0
+20:31:39 gpt-oss_20b_rendered unicode   status=200/200 actual=125 go=125 infflags=125 gap_go=0 gap_inf=0
+20:31:39 gpt-oss_20b_rendered thinking  status=200/200 actual=127 go=127 infflags=127 gap_go=0 gap_inf=0
+20:31:42 teardown: no sandbox process left
+20:31:42 gemma4_26b_rendered: starting daemon
+20:31:54 gemma4_26b_rendered plain     status=200/200 actual=56 go=56 infflags=57 gap_go=0 gap_inf=-1
+20:31:55 gemma4_26b_rendered multiturn status=200/200 actual=209 go=209 infflags=210 gap_go=0 gap_inf=-1
+20:31:55 gemma4_26b_rendered tools     status=200/200 actual=155 go=155 infflags=156 gap_go=0 gap_inf=-1
+20:31:56 gemma4_26b_rendered toolcalls status=200/200 actual=206 go=206 infflags=207 gap_go=0 gap_inf=-1
+20:31:57 gemma4_26b_rendered unicode   status=200/200 actual=73 go=73 infflags=74 gap_go=0 gap_inf=-1
+20:31:58 gemma4_26b_rendered thinking  status=200/200 actual=71 go=71 infflags=72 gap_go=0 gap_inf=-1
+20:32:00 teardown: no sandbox process left
+20:32:00 done: 24 rows, 24 with gaps; max undercount by the current Go estimate = 0
+harness-exit=0

@@ -1,0 +1,211 @@
+905: json oaicompat_chat_params_parse(
+906:     json & body, /* openai api json semantics */
+907:     const server_chat_params & opt,
+908:     std::vector<raw_buffer> & out_files)
+909: {
+910:     json llama_params;
+911: 
+912:     auto tools = json_value(body, "tools", json());
+913:     auto has_tools = tools.is_array() && !tools.empty();
+914:     auto stream = json_value(body, "stream", false);
+915:     auto tool_choice = json_value(body, "tool_choice", std::string("auto"));
+916: 
+917:     if (!opt.use_jinja) {
+918:         if (has_tools) {
+919:             throw std::runtime_error("tools param requires --jinja flag");
+920:         }
+921:         if (tool_choice != "auto") {
+922:             throw std::runtime_error("tool_choice param requires --jinja flag");
+923:         }
+924:     }
+925: 
+926:     // Handle "stop" field
+927:     if (body.contains("stop") && body.at("stop").is_string()) {
+928:         llama_params["stop"] = json::array({body.at("stop").get<std::string>()});
+929:     } else {
+930:         llama_params["stop"] = json_value(body, "stop", json::array());
+931:     }
+932: 
+933:     auto json_schema = json_value(body, "json_schema", json());
+934:     auto grammar = json_value(body, "grammar", std::string());
+935:     if (!json_schema.is_null() && !grammar.empty()) {
+936:         throw std::runtime_error("Cannot use both json_schema and grammar");
+937:     }
+938: 
+939:     // Handle "response_format" field
+940:     if (body.contains("response_format")) {
+941:         json response_format      = json_value(body, "response_format", json::object());
+942:         std::string response_type = json_value(response_format, "type", std::string());
+943:         if (response_type == "json_object") {
+944:             if (response_format.contains("schema") || json_schema.empty()) {
+945:                 json_schema = json_value(response_format, "schema", json::object());
+946:             }
+947:         } else if (response_type == "json_schema") {
+948:             auto schema_wrapper = json_value(response_format, "json_schema", json::object());
+949:             json_schema = json_value(schema_wrapper, "schema", json::object());
+950:         } else if (!response_type.empty() && response_type != "text") {
+951:             throw std::invalid_argument("response_format type must be one of \"text\" or \"json_object\", but got: " + response_type);
+952:         }
+953:     }
+954: 
+955:     // get input files
+956:     if (!body.contains("messages")) {
+957:         throw std::invalid_argument("'messages' is required");
+958:     }
+959:     json & messages = body.at("messages");
+960:     if (!messages.is_array()) {
+961:         throw std::invalid_argument("Expected 'messages' to be an array");
+962:     }
+963:     for (auto & msg : messages) {
+964:         std::string role = json_value(msg, "role", std::string());
+965:         if (role != "assistant" && !msg.contains("content")) {
+966:             throw std::invalid_argument("All non-assistant messages must contain 'content'");
+967:         }
+968:         if (role == "assistant") {
+969:             if (!msg.contains("content") && !msg.contains("tool_calls")) {
+970:                 throw std::invalid_argument("Assistant message must contain either 'content' or 'tool_calls'!");
+971:             }
+972:             if (!msg.contains("content")) {
+973:                 continue; // avoid errors with no content
+974:             }
+975:         }
+976:         json & content = msg.at("content");
+977:         if (content.is_string() || content.is_null()) {
+978:             continue;
+979:         }
+980: 
+981:         if (!content.is_array()) {
+982:             throw std::invalid_argument("Expected 'content' to be a string or an array");
+983:         }
+984: 
+985:         for (auto & p : content) {
+986:             std::string type = json_value(p, "type", std::string());
+987:             if (type == "image_url") {
+988:                 if (!opt.allow_image) {
+989:                     throw std::runtime_error("image input is not supported - hint: if this is unexpected, you may need to provide the mmproj");
+990:                 }
+991: 
+992:                 json image_url = json_value(p, "image_url", json::object());
+993:                 std::string url = json_value(image_url, "url", std::string());
+994:                 handle_media(out_files, url, opt.media_path, true);
+995: 
+996:                 p["type"] = "media_marker";
+997:                 p["text"] = get_media_marker();
+998:                 p.erase("image_url");
+999: 
+1000:             } else if (type == "input_audio") {
+1001:                 if (!opt.allow_audio) {
+1002:                     throw std::runtime_error("audio input is not supported - hint: if this is unexpected, you may need to provide the mmproj");
+1003:                 }
+1004: 
+1005:                 // note: don't need to validate "format", it's redundant
+1006:                 json input_audio = json_value(p, "input_audio", json::object());
+1007:                 std::string url  = json_value(input_audio, "data",
+1008:                                         json_value(input_audio, "url", std::string()));
+1009:                 handle_media(out_files, url, opt.media_path, false);
+1010: 
+1011:                 p["type"] = "media_marker";
+1012:                 p["text"] = get_media_marker();
+1013:                 p.erase("input_audio");
+1014: 
+1015:             } else if (type == "input_video") {
+1016:                 if (!opt.allow_video) {
+1017:                     throw std::runtime_error("video input is not supported - hint: if this is unexpected, you may need to provide the mmproj");
+1018:                 }
+1019: 
+1020:                 json input_video = json_value(p, "input_video", json::object());
+1021:                 std::string url  = json_value(input_video, "data",
+1022:                                         json_value(input_video, "url", std::string()));
+1023:                 handle_media(out_files, url, opt.media_path, false);
+1024: 
+1025:                 p["type"] = "media_marker";
+1026:                 p["text"] = get_media_marker();
+1027:                 p.erase("input_video");
+1028: 
+1029:             } else if (type != "text") {
+1030:                 throw std::invalid_argument("unsupported content[].type");
+1031:             }
+1032:         }
+1033:     }
+1034: 
+1035:     auto caps = common_chat_templates_get_caps(opt.tmpls.get());
+1036: 
+1037:     common_chat_templates_inputs inputs;
+1038:     inputs.messages               = common_chat_msgs_parse_oaicompat(messages);
+1039:     inputs.tools                  = common_chat_tools_parse_oaicompat(tools);
+1040:     inputs.tool_choice            = common_chat_tool_choice_parse_oaicompat(tool_choice);
+1041:     inputs.json_schema            = json_schema.is_null() ? "" : json_schema.dump();
+1042:     inputs.grammar                = grammar;
+1043:     inputs.use_jinja              = opt.use_jinja;
+1044:     inputs.parallel_tool_calls    = json_value(body, "parallel_tool_calls", caps["supports_parallel_tool_calls"]);
+1045:     inputs.add_generation_prompt  = json_value(body, "add_generation_prompt", true);
+1046:     inputs.continue_final_message = body.contains("continue_final_message") ?
+1047:         common_chat_continuation_parse(body.at("continue_final_message")) :
+1048:         COMMON_CHAT_CONTINUATION_NONE;
+1049:     if (inputs.continue_final_message == COMMON_CHAT_CONTINUATION_NONE && opt.prefill_assistant
+1050:         && !inputs.messages.empty() && inputs.messages.back().role == "assistant") {
+1051:         if (inputs.messages.size() >= 2 && inputs.messages[inputs.messages.size() - 2].role == "assistant") {
+1052:             throw std::invalid_argument("Cannot have 2 or more assistant messages at the end of the list.");
+1053:         }
+1054:         inputs.continue_final_message = COMMON_CHAT_CONTINUATION_AUTO;
+1055:         inputs.add_generation_prompt  = false;
+1056:     }
+1057:     if (inputs.continue_final_message != COMMON_CHAT_CONTINUATION_NONE && inputs.add_generation_prompt) {
+1058:         throw std::invalid_argument("Cannot set both add_generation_prompt and continue_final_message to true.");
+1059:     }
+1060:     inputs.reasoning_format = opt.reasoning_format;
+1061:     if (body.contains("reasoning_format")) {
+1062:         inputs.reasoning_format = common_reasoning_format_from_name(body.at("reasoning_format").get<std::string>());
+1063:     }
+1064:     inputs.enable_thinking = opt.enable_thinking;
+1065:     if (!inputs.tools.empty() && inputs.tool_choice != COMMON_CHAT_TOOL_CHOICE_NONE) {
+1066:         if (body.contains("grammar")) {
+1067:             throw std::invalid_argument("Cannot use custom grammar constraints with tools.");
+1068:         }
+1069:         llama_params["parse_tool_calls"] = true;
+1070:     }
+1071: 
+1072:     // merge the template args provided from command line with the args provided in the user request
+1073:     auto chat_template_kwargs_object = json_value(body, "chat_template_kwargs", json::object());
+1074:     inputs.chat_template_kwargs = opt.chat_template_kwargs;
+1075:     for (const auto & item : chat_template_kwargs_object.items()) {
+1076:         inputs.chat_template_kwargs[item.key()] = item.value().dump();
+1077:     }
+1078: 
+1079:     // parse the "enable_thinking" kwarg to override the default value
+1080:     auto enable_thinking_kwarg = json_value(inputs.chat_template_kwargs, "enable_thinking", std::string(""));
+1081:     if (enable_thinking_kwarg == "true") {
+1082:         inputs.enable_thinking = true;
+1083:     } else if (enable_thinking_kwarg == "false") {
+1084:         inputs.enable_thinking = false;
+1085:     } else if (!enable_thinking_kwarg.empty() && enable_thinking_kwarg[0] == '"') {
+1086:         throw std::invalid_argument("invalid type for \"enable_thinking\" (expected boolean, got string)");
+1087:     }
+1088: 
+1089:     inputs.force_pure_content = opt.force_pure_content;
+1090: 
+1091:     // Apply chat template to the list of messages
+1092:     auto chat_params = common_chat_templates_apply(opt.tmpls.get(), inputs);
+1093: 
+1094:     llama_params["chat_format"] = static_cast<int>(chat_params.format);
+1095:     llama_params["prompt"]      = chat_params.prompt;
+1096:     if (!chat_params.grammar.empty()) {
+1097:         llama_params["grammar"]      = chat_params.grammar;
+1098:         llama_params["grammar_type"] = std::string("tool_calls");
+1099:     }
+1100:     llama_params["grammar_lazy"] = chat_params.grammar_lazy;
+1101:     auto grammar_triggers        = json::array();
+1102:     for (const auto & trigger : chat_params.grammar_triggers) {
+1103:         server_grammar_trigger ct(trigger);
+1104:         grammar_triggers.push_back(ct.to_json());
+1105:     }
+1106:     llama_params["grammar_triggers"]  = grammar_triggers;
+1107:     llama_params["preserved_tokens"]  = chat_params.preserved_tokens;
+1108:     llama_params["generation_prompt"] = chat_params.generation_prompt;
+1109:     for (const auto & stop : chat_params.additional_stops) {
+1110:         llama_params["stop"].push_back(stop);
+1111:     }
+1112:     if (!chat_params.parser.empty()) {
+1113:         llama_params["chat_parser"] = chat_params.parser;
+1114:     }
+1115: 

@@ -1,0 +1,59 @@
+[
+  {
+    "argv": [
+      "/opt/homebrew/bin/go",
+      "test",
+      "-count=1",
+      "-json",
+      "-timeout=120s",
+      "-run",
+      "^(TestSessionAddsSystemPromptOnlyToRequest|TestChatSystemCommandControlsBuiltInSystemPrompt)$",
+      "./agent",
+      "./cmd/tui/chat"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 6.927332915947773,
+    "source_head": "17197224933cbdd9875c2277f18767c5f6f134a2",
+    "started": 2,
+    "passed": 2,
+    "fail_or_skip": 0,
+    "completed": true,
+    "test_names": [
+      "TestSessionAddsSystemPromptOnlyToRequest",
+      "TestChatSystemCommandControlsBuiltInSystemPrompt"
+    ],
+    "stdout_sha256": "c321c8fceb5e8475b616b8c45ac48fdec23e20bf2c9e85c5e18b858803cae983",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "isolated_home": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-g1-baseline-fu9vije8",
+    "scope": "existing behaviour baseline only; no new feature acceptance",
+    "model_simulated": true
+  },
+  {
+    "argv": [
+      "/opt/homebrew/bin/go",
+      "test",
+      "-count=1",
+      "-json",
+      "-timeout=120s",
+      "-run",
+      "^TestChatPrompt$/^no_truncate_with_limit_exceeded$",
+      "./server"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 21.65258500003256,
+    "source_head": "17197224933cbdd9875c2277f18767c5f6f134a2",
+    "started": 2,
+    "passed": 2,
+    "fail_or_skip": 0,
+    "completed": true,
+    "test_names": [
+      "TestChatPrompt",
+      "TestChatPrompt/no_truncate_with_limit_exceeded"
+    ],
+    "stdout_sha256": "1076607bf8c19c539e993afaa77440a8452e2d6fbd0d4e0e7d7213f821ce04b3",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "isolated_home": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-g1-baseline-fu9vije8",
+    "scope": "existing behaviour baseline only; no new feature acceptance",
+    "model_simulated": true
+  }
+]

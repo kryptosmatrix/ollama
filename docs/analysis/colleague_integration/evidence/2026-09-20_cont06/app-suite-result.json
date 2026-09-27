@@ -1,0 +1,147 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/go",
+    "test",
+    "-count=1",
+    "-json",
+    "-timeout=180s",
+    "./app/..."
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+  "head": "13139f8d36ec5f447c67ad634c8ad65b713a49db",
+  "exit_code": 1,
+  "timed_out": false,
+  "seconds": 140.61604300001636,
+  "environment_overrides": {
+    "PATH": "/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-app-suite-l_qqw237",
+    "USERPROFILE": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-app-suite-l_qqw237",
+    "LOCALAPPDATA": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-app-suite-l_qqw237",
+    "XDG_CONFIG_HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-app-suite-l_qqw237/.config",
+    "OLLAMA_HOST": "http://127.0.0.1:1",
+    "GOTOOLCHAIN": "local",
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "CI": "true",
+    "OLLAMA_MCP_CONFIG": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-app-suite-l_qqw237/mcp.json",
+    "OLLAMA_MCP_APPROVALS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-app-suite-l_qqw237/approvals.json",
+    "OLLAMA_MCP_TOKENS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-app-suite-l_qqw237/mcp-tokens.json",
+    "OLLAMA_TTS_SECRETS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-app-suite-l_qqw237/tts.json",
+    "OLLAMA_TTS_PREFS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-app-suite-l_qqw237/prefs.json",
+    "OLLAMA_TTS_CACHE": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-app-suite-l_qqw237/tts-cache"
+  },
+  "counts": {
+    "pass": 300,
+    "fail": 1,
+    "skip": 0
+  },
+  "unfinished": [],
+  "package_results": [
+    {
+      "Time": "2026-09-20T22:25:02.534261+10:00",
+      "Action": "skip",
+      "Package": "github.com/ollama/ollama/app/assets",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-09-20T22:25:02.972741+10:00",
+      "Action": "skip",
+      "Package": "github.com/ollama/ollama/app/auth",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-09-20T22:25:34.671926+10:00",
+      "Action": "skip",
+      "Package": "github.com/ollama/ollama/app/dialog",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-09-20T22:25:34.671988+10:00",
+      "Action": "skip",
+      "Package": "github.com/ollama/ollama/app/dialog/cocoa",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-09-20T22:25:34.674777+10:00",
+      "Action": "skip",
+      "Package": "github.com/ollama/ollama/app/ui/responses",
+      "Elapsed": 0.001
+    },
+    {
+      "Time": "2026-09-20T22:25:34.676113+10:00",
+      "Action": "skip",
+      "Package": "github.com/ollama/ollama/app/version",
+      "Elapsed": 0.001
+    },
+    {
+      "Time": "2026-09-20T22:25:34.676774+10:00",
+      "Action": "skip",
+      "Package": "github.com/ollama/ollama/app/webview",
+      "Elapsed": 0.001
+    },
+    {
+      "Time": "2026-09-20T22:25:35.882364+10:00",
+      "Action": "pass",
+      "Package": "github.com/ollama/ollama/app/format",
+      "Elapsed": 1.21
+    },
+    {
+      "Time": "2026-09-20T22:25:36.874679+10:00",
+      "Action": "pass",
+      "Package": "github.com/ollama/ollama/app/store",
+      "Elapsed": 2.202
+    },
+    {
+      "Time": "2026-09-20T22:25:38.602661+10:00",
+      "Action": "pass",
+      "Package": "github.com/ollama/ollama/app/types/not",
+      "Elapsed": 3.9290000000000003
+    },
+    {
+      "Time": "2026-09-20T22:25:39.234043+10:00",
+      "Action": "pass",
+      "Package": "github.com/ollama/ollama/app/logrotate",
+      "Elapsed": 4.562
+    },
+    {
+      "Time": "2026-09-20T22:25:39.673293+10:00",
+      "Action": "pass",
+      "Package": "github.com/ollama/ollama/app/cmd/app",
+      "Elapsed": 5.002
+    },
+    {
+      "Time": "2026-09-20T22:25:41.47287+10:00",
+      "Action": "pass",
+      "Package": "github.com/ollama/ollama/app/server",
+      "Elapsed": 6.801
+    },
+    {
+      "Time": "2026-09-20T22:25:42.245405+10:00",
+      "Action": "pass",
+      "Package": "github.com/ollama/ollama/app/updater",
+      "Elapsed": 7.571
+    },
+    {
+      "Time": "2026-09-20T22:25:46.349587+10:00",
+      "Action": "pass",
+      "Package": "github.com/ollama/ollama/app/tools",
+      "Elapsed": 11.677
+    },
+    {
+      "Time": "2026-09-20T22:26:05.302791+10:00",
+      "Action": "pass",
+      "Package": "github.com/ollama/ollama/app/ui",
+      "Elapsed": 30.629
+    },
+    {
+      "Time": "2026-09-20T22:27:20.173516+10:00",
+      "Action": "fail",
+      "Package": "github.com/ollama/ollama/app/tts",
+      "Elapsed": 105.502
+    }
+  ],
+  "source_unchanged": true,
+  "known_keychain_scope": "Existing TTS test uses a nanosecond-and-test-name service, never Ollama TTS or Ollama MCP production services. Root MCP Keychain tests are not part of ./app/... and were not executed.",
+  "stdout_sha256": "97bdc2fa82d522a89b8d15b53f9d9c8d462b1f9708dda615a24e8ecdd4a68f3a",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

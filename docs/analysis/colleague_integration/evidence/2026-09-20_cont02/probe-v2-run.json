@@ -1,0 +1,8 @@
+{
+  "args": [
+    "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont02/chat-read-probe-v2",
+    "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont02/history-probe-v2-baseline"
+  ],
+  "exit_code": 1,
+  "scope": "Development-mode HTTP handler; real synthetic database; loopback inference fixture."
+}

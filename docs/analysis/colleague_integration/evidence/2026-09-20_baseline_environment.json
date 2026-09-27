@@ -1,0 +1,148 @@
+{
+  "at_brisbane": "2026-09-20T17:39:08.612228+10:00",
+  "results": [
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain=v1"
+      ],
+      "exit_code": 0,
+      "stdout": "?? docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md\n?? docs/OLLAMA_CROSS_MODEL_COLLEAGUES_AND_CAPABILITY_ROUTING_HANDOFF.md\n?? docs/analysis/\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "stdout": "953de98d408a9697fa20a48c23973b9dc8eee921\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "worktree",
+        "list",
+        "--porcelain"
+      ],
+      "exit_code": 0,
+      "stdout": "worktree /Users/krypto/GitHub/ollama\nHEAD 953de98d408a9697fa20a48c23973b9dc8eee921\nbranch refs/heads/main\n\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--name-only"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--name-only"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "ls-files",
+        "--others",
+        "--exclude-standard"
+      ],
+      "exit_code": 0,
+      "stdout": "docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md\ndocs/OLLAMA_CROSS_MODEL_COLLEAGUES_AND_CAPABILITY_ROUTING_HANDOFF.md\ndocs/analysis/colleague_integration/BLOCKERS.md\ndocs/analysis/colleague_integration/DECISIONS.md\ndocs/analysis/colleague_integration/HANDOFF.md\ndocs/analysis/colleague_integration/REQUIREMENTS.md\ndocs/analysis/colleague_integration/SOURCE_MAP.md\ndocs/analysis/colleague_integration/STATE.json\ndocs/analysis/colleague_integration/evidence/2026-09-20_bridge_batch_backup.json\ndocs/analysis/colleague_integration/evidence/2026-09-20_bridge_bootstrap_archive.json\ndocs/analysis/colleague_integration/evidence/2026-09-20_bridge_maintenance_result.json\ndocs/analysis/colleague_integration/evidence/2026-09-20_bridge_retirement_receipts.jsonl\ndocs/analysis/colleague_integration/evidence/2026-09-20_eko_execution_blocker.json\ndocs/analysis/colleague_integration/evidence/2026-09-20_eko_execution_recheck.json\ndocs/analysis/colleague_integration/evidence/bridge_archive_backup_20260920.py\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "ls-files",
+        ".github/workflows",
+        "scripts",
+        "agent",
+        "app/store",
+        "cmd/config"
+      ],
+      "exit_code": 0,
+      "stdout": ".github/workflows/latest.yaml\n.github/workflows/release.yaml\n.github/workflows/test-install.yaml\n.github/workflows/test-llamacpp-update.yaml\n.github/workflows/test.yaml\nagent/approval.go\nagent/approval_test.go\nagent/compactor.go\nagent/compactor_test.go\nagent/events.go\nagent/registry.go\nagent/session.go\nagent/session_test.go\nagent/skill_activation.go\nagent/skill_activation_test.go\nagent/skills.go\nagent/skills_test.go\nagent/testdata/import/release-notes/SKILL.md\nagent/tools/bash.go\nagent/tools/bash_test.go\nagent/tools/bash_unix.go\nagent/tools/bash_unix_test.go\nagent/tools/bash_windows.go\nagent/tools/bash_windows_test.go\nagent/tools/file.go\nagent/tools/file_test.go\nagent/tools/file_unix_test.go\nagent/tools/mcp.go\nagent/tools/mcp_test.go\nagent/tools/skill.go\nagent/tools/skill_test.go\nagent/tools/web.go\nagent/tools/web_test.go\napp/store/cloud_config.go\napp/store/cloud_config_test.go\napp/store/database.go\napp/store/database_test.go\napp/store/image.go\napp/store/migration_test.go\napp/store/schema.sql\napp/store/schema_test.go\napp/store/store.go\napp/store/store_test.go\napp/store/test_home_test.go\napp/store/testdata/schema.sql\ncmd/config/config.go\ncmd/config/config_cloud_test.go\ncmd/config/config_test.go\nscripts/.this-is-the-create-dmg-repo\nscripts/Ollama BUILD.command\nscripts/build_darwin.sh\nscripts/build_docker.sh\nscripts/build_linux.sh\nscripts/build_windows.ps1\nscripts/buildkitd.toml.example\nscripts/create-dmg.sh\nscripts/deduplicate_cuda_libs.sh\nscripts/env.sh\nscripts/install.ps1\nscripts/install.sh\nscripts/push_docker.sh\nscripts/support/eula-resources-template.xml\nscripts/support/template.applescript\nscripts/tag_latest.sh\n",
+      "stderr": ""
+    }
+  ],
+  "toolchains": {
+    "go": {
+      "path": "/opt/homebrew/bin/go",
+      "exit_code": 0,
+      "stdout": "go version go1.26.5 darwin/arm64\n",
+      "stderr": ""
+    },
+    "node": {
+      "path": "/opt/homebrew/bin/node",
+      "exit_code": 0,
+      "stdout": "v25.8.2\n",
+      "stderr": ""
+    },
+    "npm": {
+      "path": "/opt/homebrew/bin/npm",
+      "exit_code": 0,
+      "stdout": "11.11.1\n",
+      "stderr": ""
+    },
+    "cmake": {
+      "path": "/opt/homebrew/bin/cmake",
+      "exit_code": 0,
+      "stdout": "cmake version 4.4.2\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).\n",
+      "stderr": ""
+    }
+  },
+  "state_json_parse": "pass",
+  "current_item": "OI-01",
+  "candidate_source_manifest": {
+    "docs/development.md": {
+      "bytes": 5853,
+      "sha256": "22555c454caab772e1b482a9283a0657e55c4349c82c0ead3fa138a3a6900392"
+    },
+    "go.mod": {
+      "bytes": 4949,
+      "sha256": "afdaa0389e35bcf8497ffd0898b3f4ea936c523ae8526964f7b41d7c7f5d094f"
+    },
+    "app/ui/app/vite.config.ts": {
+      "bytes": 2216,
+      "sha256": "132a1edc07e0eb633e449d6e9afaebd3ef391fb93af76208d367b9f8a0b82022"
+    },
+    "app/store/test_home_test.go": {
+      "bytes": 178,
+      "sha256": "e96d89c596527fa10fbc675342ee2c90fe451b97e06a868a894946d73e7c5071"
+    },
+    "agent/session_test.go": {
+      "bytes": 67385,
+      "sha256": "1526f012c4980fc918f4b8a2381d642662815e0d26453f337a830680bc9e5592"
+    },
+    "app/ui/ui_test.go": {
+      "bytes": 23075,
+      "sha256": "1d386235abc97bf6e0019b34598525d55e21482653e30872768a4af258d07e1d"
+    }
+  },
+  "read_only_scope": "Git/toolchain inspection only; no build, test, fetch, install or inference",
+  "node_modules_present": true
+}

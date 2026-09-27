@@ -1,0 +1,14 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "name": "tsconfig",
+    "start": 1,
+    "count": 60
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/tsconfig.app.json",
+    "file_sha256": "77e0bc69de1e379dd2725a2ab2e7dab81eba688149b0a3d8a50ff7dcbc828d02",
+    "total_lines": 34,
+    "text": "1: {\n2:   \"compilerOptions\": {\n3:     \"baseUrl\": \".\",\n4:     \"tsBuildInfoFile\": \"./node_modules/.tmp/tsconfig.app.tsbuildinfo\",\n5:     \"target\": \"ES2020\",\n6:     \"useDefineForClassFields\": true,\n7:     \"lib\": [\"ES2020\", \"DOM\", \"DOM.Iterable\"],\n8:     \"module\": \"ESNext\",\n9:     \"skipLibCheck\": true,\n10:     \"types\": [],\n11: \n12:     /* Bundler mode */\n13:     \"moduleResolution\": \"bundler\",\n14:     \"allowImportingTsExtensions\": true,\n15:     \"verbatimModuleSyntax\": true,\n16:     \"moduleDetection\": \"force\",\n17:     \"noEmit\": true,\n18:     \"jsx\": \"react-jsx\",\n19: \n20:     /* Linting */\n21:     \"strict\": true,\n22:     \"noUnusedLocals\": true,\n23:     \"noUnusedParameters\": true,\n24:     \"erasableSyntaxOnly\": true,\n25:     \"noFallthroughCasesInSwitch\": true,\n26:     \"noUncheckedSideEffectImports\": true,\n27:     \"paths\": {\n28:       \"@/gotypes\": [\"codegen/gotypes.gen.ts\"],\n29:       \"@/*\": [\"src/*\"]\n30:     }\n31:   },\n32:   \"include\": [\"src\", \"codegen\"],\n33:   \"exclude\": [\"src/**/*.test.*\", \"src/**/*.stories.*\"]\n34: }"
+  }
+}

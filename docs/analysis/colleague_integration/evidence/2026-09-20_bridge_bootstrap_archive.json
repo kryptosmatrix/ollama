@@ -1,0 +1,71 @@
+{
+  "record_type": "bridge_command_preservation_before_retirement",
+  "maintenance_authorisation": "Ash replied Please do on 20 September 2026 to preservation-first command-archive maintenance.",
+  "execution_state_id": "dfbd69b42df2453aae7bfa1c5a7af704",
+  "preservation_scope": "Exact command specification recovered and verified against the live request fingerprint, all input records (none), complete stdout/stderr bytes, and all publicly exposed job metadata. This is not a copy of the SQLite database; internal supervisor fields are not exposed and remain in the service tombstone.",
+  "original_job": {
+    "job_id": "f68fa53d7c8c4fbaa57ba6fef20f86b2",
+    "request_id": "eko-bridge-resolution-plan-probe-20260909-01",
+    "request_hash": "306ed3e519fbfc6ad5cf6ee9eeed9fd7925b4185bd0a9a0a87efc2e5dad703f1",
+    "cwd": "/Users/krypto/GitHub/TECHNE",
+    "state": "exited",
+    "created": 1788927861.637874,
+    "started": 1788927861.90895,
+    "finished": 1788927861.958945,
+    "exit_code": 0,
+    "cancel_requested": 0,
+    "stdout_bytes": 30,
+    "stderr_bytes": 0,
+    "error_code": null,
+    "output_complete": 1,
+    "terminal": true,
+    "succeeded": true,
+    "authority": "macos-user",
+    "execution_state_id": "dfbd69b42df2453aae7bfa1c5a7af704",
+    "effects_rolled_back": false,
+    "output_untrusted": true,
+    "tty": false,
+    "inputs": []
+  },
+  "spec": {
+    "command": "/usr/bin/printf 'EKO_BRIDGE_EXECUTION_CHECK_OK\\n'",
+    "cwd": "/Users/krypto/GitHub/TECHNE",
+    "shell": "bash",
+    "login": false,
+    "env": {},
+    "timeout_seconds": 15,
+    "tty": false,
+    "columns": 100,
+    "rows": 30
+  },
+  "spec_verification": {
+    "hash_encoding": "sha256(json.dumps(spec, sort_keys=True, ensure_ascii=True, separators=(',', ':')).encode('utf-8'))",
+    "computed_hash_equals_live_request_hash": true,
+    "live_same_request_id_and_arguments_returned_original_job": true,
+    "live_replayed": true,
+    "original_created_started_finished_unchanged": true,
+    "new_process_launched": false
+  },
+  "stdout": {
+    "encoding": "base64",
+    "data": "RUtPX0JSSURHRV9FWEVDVVRJT05fQ0hFQ0tfT0sK",
+    "bytes": 30,
+    "sha256": "3905ef5119156cec52e911402467f15b6ff1bcfa9c8bdf26bb6099e9ef216008",
+    "offset": 0,
+    "next_offset": 30,
+    "eof": true,
+    "has_more": false
+  },
+  "stderr": {
+    "encoding": "base64",
+    "data": "",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "offset": 0,
+    "next_offset": 0,
+    "eof": true,
+    "has_more": false
+  },
+  "retirement_status": "not_yet_attempted; preserve this pre-retirement record unchanged and append the result separately",
+  "next_action": "Read back and verify this file, retire only this terminal diagnostic using forget_command, then use the freed slot for preservation-first archive maintenance."
+}

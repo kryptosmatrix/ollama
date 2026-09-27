@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/codex",
+    "exec",
+    "--cd",
+    "/Users/krypto/GitHub/ollama",
+    "--ephemeral",
+    "--output-last-message",
+    "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont03/codex-routing-review/last_message.txt",
+    "--json",
+    "--sandbox",
+    "read-only",
+    "--disable",
+    "hooks"
+  ],
+  "prompt_sha256": "504e99cd293f98098562a884a4f1d4ccacfd0b592fefc271dbbb0103f01e073d",
+  "source_head": "953de98d408a9697fa20a48c23973b9dc8eee921",
+  "tracked_state_before": "",
+  "wrapper": "direct existing Codex CLI; bounded capture avoids ask.sh post-run git add -N/reset over shared untracked evidence",
+  "hooks_preflight": [
+    [
+      "hooks",
+      "stable",
+      "false"
+    ]
+  ],
+  "purpose": "one supplementary independent live-source routing/proof review, no implementation or promotion",
+  "started_unix": 1789897416.9586759
+}

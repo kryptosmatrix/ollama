@@ -1,0 +1,35 @@
+{
+  "created": 1789893300.074077,
+  "cwd": "/Users/krypto/GitHub/ollama",
+  "exit_code": 0,
+  "finished": 1789893301.319406,
+  "job_id": "8d8808c945dd42cf81e45a176a0a16ee",
+  "output_complete": 1,
+  "request_hash": "2dd7b37856bfdb299ae328ad17fea1e7c84f6e9b7f507e079a4257825c361456",
+  "request_id": "eko-ollama-20260920-cont02-baseline-read",
+  "spec": {
+    "columns": 100,
+    "command": "/usr/bin/python3 - <<'PY'\nfrom pathlib import Path\nimport subprocess,hashlib,plistlib\nr=Path.cwd()\nfiles=['app/ui/tts_test.go','app/tts/main_test.go','app/store/test_home_test.go','cmd/launch/omp_test.go','integration/utils_test.go','.github/workflows/test.yaml','app/store/schema.sql','app/store/cloud_config.go','app/ui/app/package.json','../TECHNE/Tools/ollama/ask.sh']\nfor f in files:\n p=r/f\n if p.is_file():\n  b=p.read_bytes();ls=b.decode().splitlines(); n=80 if f.endswith('omp_test.go') or f.startswith('integration/') else len(ls)\n  print('\\nFILE',f,'sha256',hashlib.sha256(b).hexdigest(),'READ',1,n,'OF',len(ls));print('\\n'.join(f'{i+1}: {s}' for i,s in enumerate(ls[:n])))\nfor query,paths in [('func (m chatModel) systemPrompt',['cmd/tui/chat']),('func (m *chatModel) systemPrompt',['cmd/tui/chat']),('func (db *database) getChat',['app/store']),('saveChat',['app/store/database.go']),('Instructions',['app/ui/app/src','cmd/config']),('Terminal',['app/ui/app/src/routes'])]:\n print('\\nSEARCH',query);p=subprocess.run(['git','grep','-n','-F',query,'--']+paths,capture_output=True,text=True);print(p.stdout);print('exit='+str(p.returncode))\nprint('\\nAPP_BINARY_IDENTITY')\np=subprocess.run(['/bin/ps','-axo','pid,comm'],capture_output=True,text=True);print('\\n'.join(x for x in p.stdout.splitlines() if 'ollama' in x.lower()))\nfor base in [Path('/Applications/Ollama.app'),Path.home()/'Applications/Ollama.app']:\n p=base/'Contents/Info.plist'\n if p.is_file():\n  d=plistlib.loads(p.read_bytes());print(str(base),{k:d.get(k) for k in ['CFBundleIdentifier','CFBundleExecutable','CFBundleShortVersionString','CFBundleVersion']})\n  e=base/'Contents/MacOS'/d['CFBundleExecutable']\n  if e.is_file():print('executable',str(e),'sha256',hashlib.sha256(e.read_bytes()).hexdigest())\nPY",
+    "cwd": "/Users/krypto/GitHub/ollama",
+    "env": {},
+    "login": false,
+    "rows": 30,
+    "shell": "bash",
+    "timeout_seconds": 45,
+    "tty": false
+  },
+  "started": 1789893300.2612832,
+  "state": "exited",
+  "stderr_bytes": 0,
+  "stdout_bytes": 43809,
+  "streams": {
+    "stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 43809,
+      "sha256": "86f75949e48716c99656f88786d521fbb02674682e1c8f724901b21dfc134d26"
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "case": "candidate",
+  "head": "6a3778184d43b23c5cba14e0379922377f615f52",
+  "expectation_met": true,
+  "result_path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-15-final/result.json",
+  "collected": true,
+  "completed": true,
+  "counts": {
+    "passed": 10,
+    "failed": 0,
+    "pending": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "required_titles_discovered": true,
+  "intended_fault_detected": false,
+  "clean_tests_passed": true,
+  "failing_assertions": [],
+  "file_load_errors": [],
+  "compile": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "exec",
+      "--no",
+      "--",
+      "tsc",
+      "-b",
+      "--force",
+      "--pretty",
+      "false"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+    "exit_code": 0,
+    "timed_out": false,
+    "seconds": 16.333310749963857,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-15-final/typecheck.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-15-final/typecheck.stderr",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tests": {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "test",
+      "--",
+      "--run",
+      "src/utils/generatedModels.test.tsx",
+      "--reporter=json"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+    "exit_code": 0,
+    "timed_out": false,
+    "seconds": 11.210285541019402,
+    "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-15-final/tests.stdout",
+    "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/author-15-final/tests.stderr",
+    "stdout_sha256": "6883b22d5a6b1b2181b04c1ec3c91f1b051d35fb2af69915c51bf7da04379440",
+    "stderr_sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+  },
+  "fault": null,
+  "source_and_dependencies_unchanged": true
+}

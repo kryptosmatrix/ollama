@@ -1,0 +1,34 @@
+<|im_start|>system
+User-configured instructions; revision 1; selection 1:
+Use Australian English. Keep answers short. Finish with ZEBRA-7Q.<|im_end|>
+<|im_start|>user
+Question 0: name a Brisbane suburb.<|im_end|>
+<|im_start|>assistant
+Answer 0: New Farm.<|im_end|>
+<|im_start|>user
+Question 1: name a Brisbane suburb.<|im_end|>
+<|im_start|>assistant
+Answer 1: New Farm.<|im_end|>
+<|im_start|>user
+Question 2: name a Brisbane suburb.<|im_end|>
+<|im_start|>assistant
+Answer 2: New Farm.<|im_end|>
+<|im_start|>user
+Question 3: name a Brisbane suburb.<|im_end|>
+<|im_start|>assistant
+Answer 3: New Farm.<|im_end|>
+<|im_start|>user
+Question 4: name a Brisbane suburb.<|im_end|>
+<|im_start|>assistant
+Answer 4: New Farm.<|im_end|>
+<|im_start|>user
+Question 5: name a Brisbane suburb.<|im_end|>
+<|im_start|>assistant
+Answer 5: New Farm.<|im_end|>
+<|im_start|>user
+And one more?<|im_end|>
+<|im_start|>assistant
+<think>
+
+</think>
+

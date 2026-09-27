@@ -1,0 +1,13 @@
+{
+  "case": "raw-generator",
+  "path": "codegen/gotypes.gen.ts",
+  "edits": [
+    {
+      "whole_file_fixture": "raw-generator.ts",
+      "sha256": "52238231b9c26abfd763cee92728890939815fdb338a1a164b7f1c9ecee1d2e3"
+    }
+  ],
+  "before_sha256": "e42678b57046bcbfbb50bb9b1d71aab9a917d06a2cb3ca4dd6ac4d49302c26b5",
+  "after_sha256": "52238231b9c26abfd763cee92728890939815fdb338a1a164b7f1c9ecee1d2e3",
+  "required_failure_title": "ships generated declarations without explicit-any syntax"
+}

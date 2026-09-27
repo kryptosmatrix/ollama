@@ -1,0 +1,16 @@
+Browserslist: browsers data (caniuse-lite) is 16 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+stderr | src/utils/clipboard.test.ts > copyTextToClipboard > falls back to execCommand when Clipboard API fails
+Clipboard API failed, falling back to execCommand Error: not allowed
+    at /Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/src/utils/clipboard.test.ts:24:49
+    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11
+    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26
+    at file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)
+    at runTest (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at runSuite (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)
+    at runSuite (file:///Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)
+

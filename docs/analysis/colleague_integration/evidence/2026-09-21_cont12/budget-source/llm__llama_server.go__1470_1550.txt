@@ -1,0 +1,81 @@
+1470: 	PredictMS float64 `json:"predicted_ms"`
+1471: }
+1472: 
+1473: func (t llamaServerTimings) promptEvalCount() int {
+1474: 	return t.CacheN + t.PromptN
+1475: }
+1476: 
+1477: type llamaServerApplyTemplateResponse struct {
+1478: 	Prompt string `json:"prompt"`
+1479: 	Error  any    `json:"error"`
+1480: }
+1481: 
+1482: type llamaServerTokenProb struct {
+1483: 	Token       string                 `json:"token"`
+1484: 	Logprob     float64                `json:"logprob"`
+1485: 	Prob        float64                `json:"prob"`
+1486: 	TopLogprobs []llamaServerTokenProb `json:"top_logprobs"`
+1487: 	TopProbs    []llamaServerTokenProb `json:"top_probs"`
+1488: }
+1489: 
+1490: func (s *llamaServerRunner) Completion(ctx context.Context, req CompletionRequest, fn func(CompletionResponse)) error {
+1491: 	slog.Debug("llama-server completion request", "media", len(req.Media), "prompt_len", len(req.Prompt))
+1492: 
+1493: 	if req.Options == nil {
+1494: 		opts := api.DefaultOptions()
+1495: 		req.Options = &opts
+1496: 	}
+1497: 
+1498: 	if err := s.sem.Acquire(ctx, 1); err != nil {
+1499: 		if errors.Is(err, context.Canceled) {
+1500: 			slog.Info("aborting completion request due to client closing the connection")
+1501: 		}
+1502: 		return err
+1503: 	}
+1504: 	defer s.sem.Release(1)
+1505: 
+1506: 	req.Options.NumPredict = boundedNumPredict(req.Options.NumPredict, s.options.NumCtx)
+1507: 
+1508: 	status, err := s.getServerStatusRetry(ctx)
+1509: 	if err != nil {
+1510: 		return err
+1511: 	} else if status != ServerStatusReady {
+1512: 		return fmt.Errorf("unexpected server status: %s", status)
+1513: 	}
+1514: 
+1515: 	prompt, err := s.completionPromptForRequest(ctx, req)
+1516: 	if err != nil {
+1517: 		return err
+1518: 	}
+1519: 
+1520: 	// Build the llama-server request
+1521: 	lsReq := llamaServerCompletionRequest{
+1522: 		Prompt:          prompt,
+1523: 		Stream:          true,
+1524: 		CachePrompt:     true,
+1525: 		NPredict:        req.Options.NumPredict,
+1526: 		NKeep:           req.Options.NumKeep,
+1527: 		Temperature:     req.Options.Temperature,
+1528: 		TopK:            req.Options.TopK,
+1529: 		TopP:            req.Options.TopP,
+1530: 		MinP:            req.Options.MinP,
+1531: 		Stop:            req.Options.Stop,
+1532: 		RepeatPenalty:   req.Options.RepeatPenalty,
+1533: 		RepeatLastN:     req.Options.RepeatLastN,
+1534: 		FreqPenalty:     req.Options.FrequencyPenalty,
+1535: 		PresPenalty:     req.Options.PresencePenalty,
+1536: 		TypicalP:        req.Options.TypicalP,
+1537: 		Seed:            req.Options.Seed,
+1538: 		PreservedTokens: llamaServerPreservedTokens(req.PreservedTokens, req.ToolCallTag),
+1539: 	}
+1540: 
+1541: 	if req.Logprobs {
+1542: 		lsReq.NProbs = max(req.TopLogprobs, 1)
+1543: 	}
+1544: 
+1545: 	// Handle format: pass JSON schema directly to llama-server, or use grammar
+1546: 	if len(req.Format) > 0 {
+1547: 		switch string(req.Format) {
+1548: 		case `null`, `""`:
+1549: 			// not set
+1550: 		case `"json"`:

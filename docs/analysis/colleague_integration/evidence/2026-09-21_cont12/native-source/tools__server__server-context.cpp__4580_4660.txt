@@ -1,0 +1,81 @@
+4580: 
+4581:         res->ok({{ "success", true }});
+4582:         return res;
+4583:     };
+4584: 
+4585:     this->post_infill = [this](const server_http_req & req) {
+4586:         auto res = create_response();
+4587:         // check model compatibility
+4588:         std::string err;
+4589:         if (llama_vocab_fim_pre(ctx_server.vocab) == LLAMA_TOKEN_NULL) {
+4590:             err += "prefix token is missing. ";
+4591:         }
+4592:         if (llama_vocab_fim_suf(ctx_server.vocab) == LLAMA_TOKEN_NULL) {
+4593:             err += "suffix token is missing. ";
+4594:         }
+4595:         if (llama_vocab_fim_mid(ctx_server.vocab) == LLAMA_TOKEN_NULL) {
+4596:             err += "middle token is missing. ";
+4597:         }
+4598:         if (!err.empty()) {
+4599:             res->error(format_error_response(string_format("Infill is not supported by this model: %s", err.c_str()), ERROR_TYPE_NOT_SUPPORTED));
+4600:             return res;
+4601:         }
+4602: 
+4603:         // validate input
+4604:         json data = json::parse(req.body);
+4605:         if (data.contains("prompt") && !data.at("prompt").is_string()) {
+4606:             // prompt is optional
+4607:             res->error(format_error_response("\"prompt\" must be a string", ERROR_TYPE_INVALID_REQUEST));
+4608:         }
+4609: 
+4610:         if (!data.contains("input_prefix")) {
+4611:             res->error(format_error_response("\"input_prefix\" is required", ERROR_TYPE_INVALID_REQUEST));
+4612:         }
+4613: 
+4614:         if (!data.contains("input_suffix")) {
+4615:             res->error(format_error_response("\"input_suffix\" is required", ERROR_TYPE_INVALID_REQUEST));
+4616:         }
+4617: 
+4618:         if (data.contains("input_extra") && !data.at("input_extra").is_array()) {
+4619:             // input_extra is optional
+4620:             res->error(format_error_response("\"input_extra\" must be an array of {\"filename\": string, \"text\": string}", ERROR_TYPE_INVALID_REQUEST));
+4621:             return res;
+4622:         }
+4623: 
+4624:         json input_extra = json_value(data, "input_extra", json::array());
+4625:         for (const auto & chunk : input_extra) {
+4626:             // { "text": string, "filename": string }
+4627:             if (!chunk.contains("text") || !chunk.at("text").is_string()) {
+4628:                 res->error(format_error_response("extra_context chunk must contain a \"text\" field with a string value", ERROR_TYPE_INVALID_REQUEST));
+4629:                 return res;
+4630:             }
+4631:             // filename is optional
+4632:             if (chunk.contains("filename") && !chunk.at("filename").is_string()) {
+4633:                 res->error(format_error_response("extra_context chunk's \"filename\" field must be a string", ERROR_TYPE_INVALID_REQUEST));
+4634:                 return res;
+4635:             }
+4636:         }
+4637:         data["input_extra"] = input_extra; // default to empty array if it's not exist
+4638: 
+4639:         std::string prompt = json_value(data, "prompt", std::string());
+4640:         std::vector<server_tokens> tokenized_prompts = tokenize_input_prompts(ctx_server.vocab, ctx_server.mctx, prompt, false, true);
+4641:         SRV_DBG("creating infill tasks, n_prompts = %d\n", (int) tokenized_prompts.size());
+4642:         data["prompt"] = format_prompt_infill(
+4643:             ctx_server.vocab,
+4644:             data.at("input_prefix"),
+4645:             data.at("input_suffix"),
+4646:             data.at("input_extra"),
+4647:             params.n_batch,
+4648:             params.n_predict,
+4649:             meta->slot_n_ctx,
+4650:             params.spm_infill,
+4651:             tokenized_prompts[0].get_tokens() // TODO: this could maybe be multimodal.
+4652:         );
+4653: 
+4654:         std::vector<raw_buffer> files; // dummy
+4655:         return handle_completions_impl(
+4656:             req,
+4657:             SERVER_TASK_TYPE_INFILL,
+4658:             data,
+4659:             files,
+4660:             TASK_RESPONSE_TYPE_NONE); // infill is not OAI compatible

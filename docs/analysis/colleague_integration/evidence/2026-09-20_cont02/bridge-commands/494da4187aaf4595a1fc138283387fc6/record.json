@@ -1,0 +1,35 @@
+{
+  "created": 1789893245.060732,
+  "cwd": "/Users/krypto/GitHub/ollama",
+  "exit_code": 0,
+  "finished": 1789893245.7880871,
+  "job_id": "494da4187aaf4595a1fc138283387fc6",
+  "output_complete": 1,
+  "request_hash": "965f0e93ae0a3eb01e694ed4229212e8e1d95b936343bda3859dcc3b3b997da2",
+  "request_id": "eko-ollama-20260920-cont02-source-index",
+  "spec": {
+    "columns": 100,
+    "command": "/usr/bin/python3 - <<'PY'\nfrom pathlib import Path\nimport subprocess,hashlib,json\nr=Path.cwd()\nfor folder in ['docs','app/store','app/ui/app/src','app/ui/app','app/config','.github/workflows','agent','cmd/tui/chat']:\n p=r/folder;print('\\nDIRECTORY',folder)\n if p.is_dir(): print('\\n'.join(x.name for x in sorted(p.iterdir()) if x.name not in ['node_modules','.DS_Store']))\nfor f in ['app/go.mod','app/ui/app/vite.config.ts','app/ui/app/vitest.config.ts','.github/workflows/test.yaml','.github/workflows/test.yml','app/store/store.go','app/store/types.go','app/store/settings.go','cmd/tui/chat/input.go','docs/analysis/colleague_integration/SOURCE_MAP.md']:\n p=r/f\n if not p.is_file():continue\n b=p.read_bytes();print('\\nFILE',f,'SHA256',hashlib.sha256(b).hexdigest(),'BYTES',len(b))\n if len(b)<20000:print(b.decode())\n else:print('BOUNDED_READ_PENDING')\nprint('\\nTEST_RISK_SYMBOLS')\np=subprocess.run(['git','grep','-n','-E',r'func TestMain|OLLAMA_HOST|os.UserHomeDir\\(|os.Getenv\\(\"HOME\"|exec.Command\\(','--','*_test.go'],capture_output=True,text=True);print(p.stdout[:22000]);print('truncated',len(p.stdout)>22000)\nPY",
+    "cwd": "/Users/krypto/GitHub/ollama",
+    "env": {},
+    "login": false,
+    "rows": 30,
+    "shell": "bash",
+    "timeout_seconds": 40,
+    "tty": false
+  },
+  "started": 1789893245.204439,
+  "state": "exited",
+  "stderr_bytes": 0,
+  "stdout_bytes": 47618,
+  "streams": {
+    "stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 47618,
+      "sha256": "157d8e553fe1c0e10b84243b62361c5b1ebbeb9dcfbf3bf256ba4bdcdab56ee8"
+    }
+  }
+}

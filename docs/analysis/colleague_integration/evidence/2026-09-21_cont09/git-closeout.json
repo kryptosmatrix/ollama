@@ -1,0 +1,17 @@
+{
+  "source_commit": "f1d12c7820309cbda29b651a409db7850a079d1b",
+  "documentation_commit": "8a046447b9e665dc3fccc928243fecd134c8ac98",
+  "verified_remote_tip": "8a046447b9e665dc3fccc928243fecd134c8ac98",
+  "branch": "eko/chat-read-integrity-20260920",
+  "remote": "https://github.com/kryptosmatrix/ollama.git",
+  "worktree": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+  "worktree_clean": true,
+  "production_unchanged": true,
+  "new_tests_executed": false,
+  "accepted": false,
+  "main_merged": false,
+  "installed": false,
+  "curated_files": 49,
+  "curated_bytes": 1155479,
+  "timestamp_brisbane": "2026-09-21T15:04:52.828101+10:00"
+}

@@ -1,0 +1,1086 @@
+
+FILE app/ui/tts_test.go sha256 1d18445991670de7ad9d239626e43af19809ca8c2d725fdb562ae1d4147649b0 READ 1 136 OF 136
+1: //go:build windows || darwin
+2: 
+3: package ui
+4: 
+5: import (
+6: 	"bytes"
+7: 	"context"
+8: 	"encoding/json"
+9: 	"net/http"
+10: 	"net/http/httptest"
+11: 	"os"
+12: 	"path/filepath"
+13: 	"strings"
+14: 	"sync/atomic"
+15: 	"testing"
+16: 
+17: 	"github.com/ollama/ollama/app/tts"
+18: )
+19: 
+20: func TestMain(m *testing.M) {
+21: 	dir, err := os.MkdirTemp("", "ollama-ui-tts-")
+22: 	if err != nil {
+23: 		os.Exit(1)
+24: 	}
+25: 	os.Setenv(tts.SecretsPathEnv, filepath.Join(dir, "secrets.json"))
+26: 	os.Setenv(tts.PrefsPathEnv, filepath.Join(dir, "prefs.json"))
+27: 	os.Setenv(tts.CachePathEnv, filepath.Join(dir, "cache"))
+28: 	code := m.Run()
+29: 	os.RemoveAll(dir)
+30: 	os.Exit(code)
+31: }
+32: 
+33: type countingSynth struct {
+34: 	hits atomic.Int32
+35: }
+36: 
+37: func (c *countingSynth) Synthesize(ctx context.Context, req tts.SynthesisRequest, apiKey string) ([]byte, error) {
+38: 	c.hits.Add(1)
+39: 	return []byte("ID3fake-mpeg"), nil
+40: }
+41: 
+42: func (c *countingSynth) ListVoices(ctx context.Context, apiKey string) ([]tts.Voice, error) {
+43: 	c.hits.Add(1)
+44: 	return []tts.Voice{{ID: "v1", Name: "Ada"}}, nil
+45: }
+46: 
+47: func ttsServer(t *testing.T, synth *countingSynth) *Server {
+48: 	t.Helper()
+49: 	svc := tts.Isolated(t.TempDir())
+50: 	svc.Client = synth
+51: 	if err := svc.PutKey("sk-test"); err != nil {
+52: 		t.Fatal(err)
+53: 	}
+54: 	voice := "voice_one"
+55: 	if err := svc.PatchSettings(tts.SettingsPatch{VoiceID: &voice}); err != nil {
+56: 		t.Fatal(err)
+57: 	}
+58: 	return &Server{Token: "test-token-123", Dev: false, TTS: svc}
+59: }
+60: 
+61: func TestSpeakWithoutCookieNeverReachesElevenLabs(t *testing.T) {
+62: 	synth := &countingSynth{}
+63: 	handler := ttsServer(t, synth).Handler()
+64: 	req := httptest.NewRequest(http.MethodPost, "/api/v1/tts/speak", strings.NewReader(`{"text":"Hello","chunk_index":0}`))
+65: 	req.Header.Set("Content-Type", "application/json")
+66: 	rec := httptest.NewRecorder()
+67: 	handler.ServeHTTP(rec, req)
+68: 	if rec.Code != http.StatusForbidden {
+69: 		t.Fatalf("status %d body %s", rec.Code, rec.Body.String())
+70: 	}
+71: 	if !strings.Contains(rec.Body.String(), "Token is required") {
+72: 		t.Fatalf("body %s", rec.Body.String())
+73: 	}
+74: 	if synth.hits.Load() != 0 {
+75: 		t.Fatalf("ElevenLabs was contacted %d times without a cookie", synth.hits.Load())
+76: 	}
+77: }
+78: 
+79: func TestSpeakWithCookieReachesSynthesizer(t *testing.T) {
+80: 	synth := &countingSynth{}
+81: 	server := ttsServer(t, synth)
+82: 	handler := server.Handler()
+83: 	req := httptest.NewRequest(http.MethodPost, "/api/v1/tts/speak", strings.NewReader(`{"text":"Hello","chunk_index":0}`))
+84: 	req.Header.Set("Content-Type", "application/json")
+85: 	req.AddCookie(&http.Cookie{Name: "token", Value: server.Token})
+86: 	rec := httptest.NewRecorder()
+87: 	handler.ServeHTTP(rec, req)
+88: 	if rec.Code != http.StatusOK {
+89: 		t.Fatalf("status %d body %s", rec.Code, rec.Body.String())
+90: 	}
+91: 	if rec.Header().Get("Content-Type") != "audio/mpeg" {
+92: 		t.Fatalf("content-type %s", rec.Header().Get("Content-Type"))
+93: 	}
+94: 	if synth.hits.Load() != 1 {
+95: 		t.Fatalf("hits %d", synth.hits.Load())
+96: 	}
+97: }
+98: 
+99: func TestStatusNeverContainsTheKey(t *testing.T) {
+100: 	synth := &countingSynth{}
+101: 	server := ttsServer(t, synth)
+102: 	handler := server.Handler()
+103: 	req := httptest.NewRequest(http.MethodGet, "/api/v1/tts/status", nil)
+104: 	req.AddCookie(&http.Cookie{Name: "token", Value: server.Token})
+105: 	rec := httptest.NewRecorder()
+106: 	handler.ServeHTTP(rec, req)
+107: 	if rec.Code != http.StatusOK {
+108: 		t.Fatalf("status %d %s", rec.Code, rec.Body.String())
+109: 	}
+110: 	body := rec.Body.String()
+111: 	if strings.Contains(body, "sk-test") || strings.Contains(body, `"api_key"`) {
+112: 		t.Fatalf("leaked key: %s", body)
+113: 	}
+114: 	var st tts.Status
+115: 	if err := json.Unmarshal(rec.Body.Bytes(), &st); err != nil {
+116: 		t.Fatal(err)
+117: 	}
+118: 	if !st.HasAPIKey {
+119: 		t.Fatal("has_api_key")
+120: 	}
+121: }
+122: 
+123: func TestPutKeyRejectsOverlong(t *testing.T) {
+124: 	synth := &countingSynth{}
+125: 	server := ttsServer(t, synth)
+126: 	handler := server.Handler()
+127: 	payload, _ := json.Marshal(map[string]string{"api_key": strings.Repeat("a", 8*1024+1)})
+128: 	req := httptest.NewRequest(http.MethodPut, "/api/v1/tts/key", bytes.NewReader(payload))
+129: 	req.Header.Set("Content-Type", "application/json")
+130: 	req.AddCookie(&http.Cookie{Name: "token", Value: server.Token})
+131: 	rec := httptest.NewRecorder()
+132: 	handler.ServeHTTP(rec, req)
+133: 	if rec.Code != http.StatusBadRequest {
+134: 		t.Fatalf("status %d %s", rec.Code, rec.Body.String())
+135: 	}
+136: }
+
+FILE app/tts/main_test.go sha256 1ce9e9c09c66c4c9930610aa7b187eb40c587c58833a6cb9a4832bfe9ee9d063 READ 1 20 OF 20
+1: package tts
+2: 
+3: import (
+4: 	"os"
+5: 	"path/filepath"
+6: 	"testing"
+7: )
+8: 
+9: func TestMain(m *testing.M) {
+10: 	dir, err := os.MkdirTemp("", "ollama-tts-pkg-")
+11: 	if err != nil {
+12: 		os.Exit(1)
+13: 	}
+14: 	os.Setenv(SecretsPathEnv, filepath.Join(dir, "secrets.json"))
+15: 	os.Setenv(PrefsPathEnv, filepath.Join(dir, "prefs.json"))
+16: 	os.Setenv(CachePathEnv, filepath.Join(dir, "cache"))
+17: 	code := m.Run()
+18: 	os.RemoveAll(dir)
+19: 	os.Exit(code)
+20: }
+
+FILE app/store/test_home_test.go sha256 e96d89c596527fa10fbc675342ee2c90fe451b97e06a868a894946d73e7c5071 READ 1 11 OF 11
+1: //go:build windows || darwin
+2: 
+3: package store
+4: 
+5: import "testing"
+6: 
+7: func setTestHome(t *testing.T, home string) {
+8: 	t.Helper()
+9: 	t.Setenv("HOME", home)
+10: 	t.Setenv("USERPROFILE", home)
+11: }
+
+FILE cmd/launch/omp_test.go sha256 e6afb8108dbd479ebed0b49a61cdc5fca852d6fa20339a087e4b2edd7c643e28 READ 1 80 OF 687
+1: package launch
+2: 
+3: import (
+4: 	"fmt"
+5: 	"net/http"
+6: 	"net/http/httptest"
+7: 	"os"
+8: 	"path/filepath"
+9: 	"runtime"
+10: 	"slices"
+11: 	"strings"
+12: 	"testing"
+13: 
+14: 	modelpkg "github.com/ollama/ollama/types/model"
+15: 	"gopkg.in/yaml.v3"
+16: )
+17: 
+18: func TestMain(m *testing.M) {
+19: 	if os.Getenv("OLLAMA_LAUNCH_OMP_TEST_HELPER") == "1" {
+20: 		runOMPTestHelper()
+21: 		return
+22: 	}
+23: 	os.Exit(m.Run())
+24: }
+25: 
+26: func runOMPTestHelper() {
+27: 	logPath := os.Getenv("OLLAMA_LAUNCH_OMP_TEST_LOG")
+28: 	if logPath != "" {
+29: 		f, err := os.OpenFile(logPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
+30: 		if err == nil {
+31: 			_, _ = fmt.Fprintln(f, strings.Join(os.Args[1:], " "))
+32: 			_ = f.Close()
+33: 		}
+34: 	}
+35: 
+36: 	if len(os.Args) >= 3 && os.Args[1] == "plugin" && os.Args[2] == "list" {
+37: 		fmt.Print(os.Getenv("OLLAMA_LAUNCH_OMP_TEST_PLUGIN_LIST"))
+38: 		os.Exit(0)
+39: 	}
+40: 	if len(os.Args) >= 4 && os.Args[1] == "plugin" && os.Args[2] == "install" {
+41: 		if os.Getenv("OLLAMA_LAUNCH_OMP_TEST_FAIL_INSTALL") == "1" {
+42: 			_, _ = fmt.Fprintln(os.Stderr, "install failed")
+43: 			os.Exit(1)
+44: 		}
+45: 		os.Exit(0)
+46: 	}
+47: 	os.Exit(0)
+48: }
+49: 
+50: func setOMPTestHome(t *testing.T, dir string) {
+51: 	t.Helper()
+52: 	setTestHome(t, dir)
+53: 	t.Setenv("PI_CONFIG_DIR", "")
+54: 	t.Setenv("PI_CODING_AGENT_DIR", "")
+55: }
+56: 
+57: func TestOMPIntegration(t *testing.T) {
+58: 	o := &OMP{}
+59: 
+60: 	t.Run("String", func(t *testing.T) {
+61: 		if got := o.String(); got != "OMP" {
+62: 			t.Errorf("String() = %q, want %q", got, "OMP")
+63: 		}
+64: 	})
+65: 
+66: 	t.Run("implements Runner", func(t *testing.T) {
+67: 		var _ Runner = o
+68: 	})
+69: 
+70: 	t.Run("implements ManagedSingleModel", func(t *testing.T) {
+71: 		var _ ManagedSingleModel = o
+72: 	})
+73: 
+74: 	t.Run("implements ManagedModelListConfigurer", func(t *testing.T) {
+75: 		var _ ManagedModelListConfigurer = o
+76: 	})
+77: 
+78: 	t.Run("does not require interactive onboarding", func(t *testing.T) {
+79: 		var _ ManagedInteractiveOnboarding = o
+80: 		if o.RequiresInteractiveOnboarding() {
+
+FILE integration/utils_test.go sha256 92dc766a46b86088fc47da85ee93582c0219996d8e5a8f6bb721d09e875c6ce5 READ 1 80 OF 769
+1: //go:build integration
+2: 
+3: package integration
+4: 
+5: import (
+6: 	"bytes"
+7: 	"context"
+8: 	"errors"
+9: 	"fmt"
+10: 	"io"
+11: 	"log/slog"
+12: 	"math"
+13: 	"math/rand"
+14: 	"net"
+15: 	"net/http"
+16: 	"net/url"
+17: 	"os"
+18: 	"os/exec"
+19: 	"path/filepath"
+20: 	"runtime"
+21: 	"slices"
+22: 	"strconv"
+23: 	"strings"
+24: 	"sync"
+25: 	"testing"
+26: 	"time"
+27: 
+28: 	"github.com/ollama/ollama/api"
+29: 	"github.com/ollama/ollama/format"
+30: 	"github.com/ollama/ollama/types/model"
+31: )
+32: 
+33: var (
+34: 	// testModel is set via OLLAMA_TEST_MODEL env var. When set, all tests
+35: 	// that loop over model lists will test only this model, and smol is
+36: 	// also overridden to use it.
+37: 	testModel = os.Getenv("OLLAMA_TEST_MODEL")
+38: 
+39: 	smol   = defaultTestModel("llama3.2:1b")
+40: 	stream = false
+41: )
+42: 
+43: var (
+44: 	started = time.Now()
+45: 
+46: 	blueSkyPrompt   = "why is the sky blue? Be brief but factual in your reply"
+47: 	blueSkyExpected = []string{"rayleigh", "scatter", "atmosphere", "nitrogen", "oxygen", "wavelength", "interact"}
+48: 
+49: 	rainbowPrompt    = "how do rainbows form? Be brief but factual in your reply"
+50: 	rainbowFollowups = []string{
+51: 		"Explain the physics involved in them.  Be brief in your reply",
+52: 		"Explain the chemistry involved in them.  Be brief in your reply",
+53: 		"What are common myths related to them? Be brief in your reply",
+54: 		"Can they form if there is no rain?  Be brief in your reply",
+55: 		"Can they form if there are no clouds?  Be brief in your reply",
+56: 		"Do they happen on other planets? Be brief in your reply",
+57: 	}
+58: 	rainbowExpected = []string{"water", "droplet", "mist", "glow", "refract", "reflect", "scatter", "particles", "wave", "color", "spectrum", "raindrop", "atmosphere", "frequency", "shower", "sky", "shimmer", "light", "storm", "sunny", "sunburst", "phenomenon", "mars", "venus", "jupiter", "rain", "sun", "rainbow", "optical", "gold", "cloud", "planet", "prism", "fog", "ice"}
+59: )
+60: 
+61: func init() {
+62: 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+63: 	slog.SetDefault(logger)
+64: 
+65: 	if testModel != "" {
+66: 		slog.Info("test model override", "model", testModel)
+67: 	}
+68: }
+69: 
+70: func defaultTestModel(model string) string {
+71: 	if testModel != "" {
+72: 		return testModel
+73: 	}
+74: 	return model
+75: }
+76: 
+77: // testModels returns the override model as a single-element slice when
+78: // OLLAMA_TEST_MODEL is set, otherwise returns the provided default list.
+79: func testModels(defaults []string) []string {
+80: 	if testModel != "" {
+
+FILE .github/workflows/test.yaml sha256 bec3eda69bc2e32f7670b799fb6eedce6927a0076b7a88ccaba288cd896a3782 READ 1 418 OF 418
+1: name: test
+2: 
+3: concurrency:
+4:   # For PRs, later CI runs preempt previous ones. e.g. a force push on a PR
+5:   # cancels running CI jobs and starts all new ones.
+6:   #
+7:   # For non-PR pushes, concurrency.group needs to be unique for every distinct
+8:   # CI run we want to have happen. Use run_id, which in practice means all
+9:   # non-PR CI runs will be allowed to run without preempting each other.
+10:   group: ${{ github.workflow }}-$${{ github.pull_request.number || github.run_id }}
+11:   cancel-in-progress: true
+12: 
+13: on:
+14:   pull_request:
+15:     paths:
+16:       - '**/*'
+17:       - '!docs/**'
+18:       - '!README.md'
+19: 
+20: jobs:
+21:   changes:
+22:     runs-on: ubuntu-latest
+23:     outputs:
+24:       changed: ${{ steps.changes.outputs.changed }}
+25:       app_changed: ${{ steps.changes.outputs.app_changed }}
+26:       enginehash: ${{ steps.changes.outputs.enginehash }}
+27:     steps:
+28:       - uses: actions/checkout@v4
+29:         with:
+30:           fetch-depth: 0
+31:       - id: changes
+32:         run: |
+33:           changed() {
+34:             local BASE=${{ github.event.pull_request.base.sha }}
+35:             local HEAD=${{ github.event.pull_request.head.sha }}
+36:             local MERGE_BASE=$(git merge-base $BASE $HEAD)
+37:             git diff-tree -r --no-commit-id --name-only "$MERGE_BASE" "$HEAD" \
+38:               | xargs python3 -c "import sys; from pathlib import Path; print(any(Path(x).match(glob) for x in sys.argv[1:] for glob in '$*'.split(' ')))"
+39:           }
+40: 
+41:           echo changed=$(changed \
+42:             'CMakeLists.txt' \
+43:             'CMakePresets.json' \
+44:             'cmake/**' \
+45:             'cmake/**/*' \
+46:             'llama/server/**/*' \
+47:             'llama/compat/**/*' \
+48:             'LLAMA_CPP_VERSION' \
+49:             'MLX_VERSION' \
+50:             'MLX_C_VERSION' \
+51:             'llama/llama.cpp/**/*' \
+52:             'ml/backend/ggml/ggml/**/*' \
+53:             'x/imagegen/mlx/**' \
+54:             'x/imagegen/mlx/**/*' \
+55:             '.github/**/*') | tee -a $GITHUB_OUTPUT
+56:           echo app_changed=$(changed 'app/**' 'app/**/*') | tee -a $GITHUB_OUTPUT
+57:           echo enginehash=$(cat LLAMA_CPP_VERSION)-$(cat MLX_VERSION)-$(cat MLX_C_VERSION) | tee -a $GITHUB_OUTPUT
+58: 
+59:   patches:
+60:     strategy:
+61:       matrix:
+62:         os: [ubuntu-latest, windows-latest]
+63:     runs-on: ${{ matrix.os }}
+64:     steps:
+65:       - uses: actions/checkout@v4
+66:       - name: Verify patches apply cleanly
+67:         shell: bash
+68:         run: |
+69:           cmake -S llama/server -B "$RUNNER_TEMP/llama-server-patch-check" \
+70:             -DCMAKE_BUILD_TYPE=Release \
+71:             -DBUILD_SHARED_LIBS=ON \
+72:             -DGGML_BACKEND_DL=ON \
+73:             -DGGML_NATIVE=OFF \
+74:             -DGGML_OPENMP=OFF \
+75:             -DGGML_CPU_ALL_VARIANTS=ON \
+76:             -DOLLAMA_RUNNER_DIR=
+77: 
+78:   linux:
+79:     needs: [changes]
+80:     if: needs.changes.outputs.changed == 'True'
+81:     strategy:
+82:       matrix:
+83:         include:
+84:           - preset: CPU
+85:             superbuild_target: ollama-local
+86:             superbuild_dir: build/local-superbuild
+87:             superbuild_args: ''
+88:             expected_payload: lib/ollama/llama-server
+89:             install-go: true
+90:           - preset: CUDA
+91:             container: nvidia/cuda:13.0.0-devel-ubuntu22.04
+92:             superbuild_target: ollama-llama-server-cuda_v13
+93:             superbuild_dir: build/local-superbuild-cuda_v13
+94:             superbuild_args: '-DOLLAMA_LLAMA_BACKENDS=cuda_v13 -DCMAKE_CUDA_ARCHITECTURES=87'
+95:             expected_payload: lib/ollama/cuda_v13/libggml-cuda.so
+96:           - preset: ROCm
+97:             container: rocm/dev-ubuntu-22.04:7.2.1
+98:             extra-packages: rocm-libs
+99:             superbuild_target: ollama-llama-server-rocm_v7_2
+100:             superbuild_dir: build/local-superbuild-rocm_v7_2
+101:             superbuild_args: '-DOLLAMA_LLAMA_BACKENDS=rocm_v7_2 -DAMDGPU_TARGETS=gfx1010 -DCMAKE_PREFIX_PATH=/opt/rocm'
+102:             expected_payload: lib/ollama/rocm_v7_2/libggml-hip.so
+103:           - preset: Vulkan
+104:             container: ubuntu:22.04
+105:             extra-packages: >
+106:               mesa-vulkan-drivers vulkan-tools
+107:               libvulkan1 libvulkan-dev
+108:               vulkan-sdk spirv-headers cmake ccache g++ make
+109:             superbuild_target: ollama-llama-server-vulkan
+110:             superbuild_dir: build/local-superbuild-vulkan
+111:             superbuild_args: '-DOLLAMA_LLAMA_BACKENDS=vulkan'
+112:             expected_payload: lib/ollama/vulkan/libggml-vulkan.so
+113:           - preset: 'MLX CUDA 13'
+114:             container: nvidia/cuda:13.0.0-devel-ubuntu22.04
+115:             extra-packages: libcudnn9-dev-cuda-13 libopenblas-dev liblapack-dev liblapacke-dev git curl
+116:             superbuild_target: ollama-mlx-cuda_v13
+117:             superbuild_dir: build/local-superbuild-mlx-cuda_v13
+118:             superbuild_args: '-DOLLAMA_MLX_BACKENDS=cuda_v13 -DCMAKE_CUDA_ARCHITECTURES=87 -DMLX_CUDA_ARCHITECTURES=80-virtual -DBLAS_INCLUDE_DIRS=/usr/include/x86_64-linux-gnu -DLAPACK_INCLUDE_DIRS=/usr/include/x86_64-linux-gnu'
+119:             expected_payload: lib/ollama/mlx_cuda_v13/libmlx.so
+120:             install-go: true
+121:     runs-on: linux
+122:     container: ${{ matrix.container }}
+123:     steps:
+124:       - uses: actions/checkout@v4
+125:       - run: |
+126:           [ -n "${{ matrix.container }}" ] || sudo=sudo
+127:           $sudo apt-get update
+128:           # Add LunarG Vulkan SDK apt repo for Ubuntu 22.04
+129:           if [ "${{ matrix.preset }}" = "Vulkan" ]; then
+130:             $sudo apt-get install -y --no-install-recommends wget gnupg ca-certificates software-properties-common
+131:             wget -qO - https://packages.lunarg.com/lunarg-signing-key-pub.asc | $sudo gpg --dearmor -o /usr/share/keyrings/lunarg-archive-keyring.gpg
+132:             # Use signed-by to bind the repo to the installed keyring to avoid NO_PUBKEY
+133:             echo "deb [signed-by=/usr/share/keyrings/lunarg-archive-keyring.gpg]  https://packages.lunarg.com/vulkan/1.4.313 jammy main" | $sudo tee /etc/apt/sources.list.d/lunarg-vulkan-1.4.313-jammy.list > /dev/null
+134:             $sudo apt-get update
+135:           fi
+136:           $sudo apt-get install -y cmake ccache curl git ${{ matrix.extra-packages }}
+137:           # Use a current CMake for upstream llama.cpp and Vulkan dependency discovery.
+138:           curl -fsSL https://github.com/Kitware/CMake/releases/download/v3.31.2/cmake-3.31.2-linux-$(uname -m).tar.gz | $sudo tar xz -C /usr/local --strip-components 1
+139:           # Export VULKAN_SDK if provided by LunarG package (defensive)
+140:           if [ -d "/usr/lib/x86_64-linux-gnu/vulkan" ] && [ "${{ matrix.preset }}" = "Vulkan" ]; then
+141:             echo "VULKAN_SDK=/usr" >> $GITHUB_ENV
+142:           fi
+143:         env:
+144:           DEBIAN_FRONTEND: noninteractive
+145:       - if: matrix.install-go
+146:         name: Install Go
+147:         run: |
+148:           [ -n "${{ matrix.container }}" ] || sudo=sudo
+149:           GO_VERSION=$(awk '/^go / { print $2 }' go.mod)
+150:           curl -fsSL "https://golang.org/dl/go${GO_VERSION}.linux-$(dpkg --print-architecture).tar.gz" | $sudo tar xz -C /usr/local
+151:           echo "/usr/local/go/bin" >> $GITHUB_PATH
+152:       - uses: actions/cache@v4
+153:         with:
+154:           path: /github/home/.cache/ccache
+155:           key: ccache-${{ runner.os }}-${{ runner.arch }}-${{ matrix.preset }}-${{ needs.changes.outputs.enginehash }}
+156:       - name: Build native superbuild
+157:         if: matrix.superbuild_target
+158:         run: |
+159:           cmake -S . -B "${{ matrix.superbuild_dir }}" ${{ matrix.superbuild_args }}
+160:           CMAKE_BUILD_PARALLEL_LEVEL=$(nproc) cmake --build "${{ matrix.superbuild_dir }}" --target "${{ matrix.superbuild_target }}" -- -l $(nproc)
+161:           test -e "${{ matrix.superbuild_dir }}/${{ matrix.expected_payload }}"
+162:       - name: Verify local superbuild install
+163:         if: matrix.superbuild_target == 'ollama-local'
+164:         run: |
+165:           ./ollama --version
+166:           "${{ matrix.superbuild_dir }}/lib/ollama/llama-server" --version
+167:           test -x "${{ matrix.superbuild_dir }}/lib/ollama/llama-quantize"
+168:           cmake --install "${{ matrix.superbuild_dir }}" --component ollama-local --prefix "$RUNNER_TEMP/ollama-local"
+169:           "$RUNNER_TEMP/ollama-local/bin/ollama" --version
+170:           "$RUNNER_TEMP/ollama-local/lib/ollama/llama-server" --version
+171:           test -x "$RUNNER_TEMP/ollama-local/lib/ollama/llama-quantize"
+172:   windows:
+173:     needs: [changes]
+174:     if: needs.changes.outputs.changed == 'True'
+175:     strategy:
+176:       matrix:
+177:         include:
+178:           - preset: CPU
+179:             superbuild_target: ollama-local
+180:             superbuild_dir: build\local-superbuild
+181:             superbuild_args: ''
+182:             expected_payload: lib\ollama\llama-server.exe
+183:           - preset: CUDA
+184:             install: https://developer.download.nvidia.com/compute/cuda/13.0.0/local_installers/cuda_13.0.0_windows.exe
+185:             superbuild_target: ollama-llama-server-cuda_v13
+186:             superbuild_dir: build\local-superbuild-cuda_v13
+187:             superbuild_args: '-DOLLAMA_LLAMA_BACKENDS=cuda_v13 -DCMAKE_CUDA_ARCHITECTURES=80'
+188:             expected_payload: lib\ollama\cuda_v13\ggml-cuda.dll
+189:             cuda-components:
+190:               - '"cudart"'
+191:               - '"nvcc"'
+192:               - '"cublas"'
+193:               - '"cublas_dev"'
+194:               - '"crt"'
+195:               - '"nvvm"'
+196:               - '"nvptxcompiler"'
+197:             cuda-version: '13.0'
+198:           - preset: ROCm
+199:             install: https://download.amd.com/developer/eula/rocm-hub/AMD-Software-PRO-Edition-26.Q1-Win11-For-HIP.exe
+200:             rocm-version: '7.1'
+201:             superbuild_target: ollama-llama-server-rocm_v7_1
+202:             superbuild_dir: build\local-superbuild-rocm_v7_1
+203:             superbuild_args: '-DOLLAMA_LLAMA_BACKENDS=rocm_v7_1 -DAMDGPU_TARGETS=gfx1010'
+204:             expected_payload: lib\ollama\rocm_v7_1\ggml-hip.dll
+205:           - preset: Vulkan
+206:             install: https://sdk.lunarg.com/sdk/download/1.4.321.1/windows/vulkansdk-windows-X64-1.4.321.1.exe
+207:             superbuild_target: ollama-llama-server-vulkan
+208:             superbuild_dir: build\local-superbuild-vulkan
+209:             superbuild_args: '-DOLLAMA_LLAMA_BACKENDS=vulkan'
+210:             expected_payload: lib\ollama\vulkan\ggml-vulkan.dll
+211:           - preset: 'MLX CUDA 13'
+212:             install: https://developer.download.nvidia.com/compute/cuda/13.0.0/local_installers/cuda_13.0.0_windows.exe
+213:             cudnn-install: https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/windows-x86_64/cudnn-windows-x86_64-9.18.1.3_cuda13-archive.zip
+214:             superbuild_target: ollama-mlx-cuda_v13
+215:             superbuild_dir: build\local-superbuild-mlx-cuda_v13
+216:             superbuild_args: '-DOLLAMA_MLX_BACKENDS=cuda_v13 -DCMAKE_CUDA_ARCHITECTURES=80 -DMLX_CUDA_ARCHITECTURES=80-virtual'
+217:             expected_payload: lib\ollama\mlx_cuda_v13\mlx.dll
+218:             install-go: true
+219:             cuda-components:
+220:               - '"cudart"'
+221:               - '"nvcc"'
+222:               - '"cublas"'
+223:               - '"cublas_dev"'
+224:               - '"cufft"'
+225:               - '"cufft_dev"'
+226:               - '"nvrtc"'
+227:               - '"nvrtc_dev"'
+228:               - '"crt"'
+229:               - '"nvvm"'
+230:               - '"nvptxcompiler"'
+231:             cuda-version: '13.0'
+232:     runs-on: windows
+233:     steps:
+234:       - run: |
+235:           choco install -y --no-progress ccache ninja
+236:           if (Get-Command ccache -ErrorAction SilentlyContinue) {
+237:             ccache -o cache_dir=${{ github.workspace }}\.ccache
+238:           }
+239:       - if: matrix.preset == 'CUDA' || matrix.preset == 'ROCm' || matrix.preset == 'Vulkan' || matrix.preset == 'MLX CUDA 13'
+240:         id: cache-install
+241:         uses: actions/cache/restore@v4
+242:         with:
+243:           path: |
+244:             C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA
+245:             C:\Program Files\AMD\ROCm
+246:             C:\VulkanSDK
+247:             C:\Program Files\NVIDIA\CUDNN
+248:           key: ${{ matrix.install }}-${{ matrix.cudnn-install }}
+249:       - if: matrix.preset == 'CUDA' || matrix.preset == 'MLX CUDA 13'
+250:         name: Install CUDA ${{ matrix.cuda-version }}
+251:         run: |
+252:           $ErrorActionPreference = "Stop"
+253:           if ("${{ steps.cache-install.outputs.cache-hit }}" -ne 'true') {
+254:             Invoke-WebRequest -Uri "${{ matrix.install }}" -OutFile "install.exe"
+255:             $subpackages = @(${{ join(matrix.cuda-components, ', ') }}) | Foreach-Object {"${_}_${{ matrix.cuda-version }}"}
+256:             Start-Process -FilePath .\install.exe -ArgumentList (@("-s") + $subpackages) -NoNewWindow -Wait
+257:           }
+258: 
+259:           $cudaPath = (Resolve-Path "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\*").path
+260:           echo "$cudaPath\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+261:       - if: matrix.preset == 'ROCm'
+262:         name: Install ROCm ${{ matrix.rocm-version }}
+263:         run: |
+264:           $ErrorActionPreference = "Stop"
+265:           if ("${{ steps.cache-install.outputs.cache-hit }}" -ne 'true') {
+266:             Invoke-WebRequest -Uri "${{ matrix.install }}" -OutFile "install.exe"
+267:             Start-Process -FilePath .\install.exe -ArgumentList '-install' -NoNewWindow -Wait
+268:           }
+269: 
+270:           $hipPath = (Resolve-Path "C:\Program Files\AMD\ROCm\*").path
+271:           echo "$hipPath\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+272:           echo "CC=$hipPath\bin\clang.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
+273:           echo "CXX=$hipPath\bin\clang++.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
+274:           echo "HIPCXX=$hipPath\bin\clang++.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
+275:           echo "HIP_PLATFORM=amd" | Out-File -FilePath $env:GITHUB_ENV -Append
+276:           echo "CMAKE_PREFIX_PATH=$hipPath" | Out-File -FilePath $env:GITHUB_ENV -Append
+277:       - if: matrix.preset == 'Vulkan'
+278:         name: Install Vulkan ${{ matrix.rocm-version }}
+279:         run: |
+280:           $ErrorActionPreference = "Stop"
+281:           if ("${{ steps.cache-install.outputs.cache-hit }}" -ne 'true') {
+282:             Invoke-WebRequest -Uri "${{ matrix.install }}" -OutFile "install.exe"
+283:             Start-Process -FilePath .\install.exe -ArgumentList "-c","--am","--al","in" -NoNewWindow -Wait
+284:           }
+285: 
+286:           $vulkanPath = (Resolve-Path "C:\VulkanSDK\*").path
+287:           $vulkanRuntime = Join-Path $vulkanPath "Helpers\VulkanRT.exe"
+288:           if (Test-Path $vulkanRuntime) {
+289:             Start-Process -FilePath $vulkanRuntime -ArgumentList "/s" -NoNewWindow -Wait
+290:           }
+291:           echo "$vulkanPath\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+292:           echo "VULKAN_SDK=$vulkanPath" >> $env:GITHUB_ENV
+293:       - if: matrix.preset == 'MLX CUDA 13'
+294:         name: Install cuDNN for MLX
+295:         run: |
+296:           $ErrorActionPreference = "Stop"
+297:           $cudnnRoot = "C:\Program Files\NVIDIA\CUDNN"
+298:           if ("${{ steps.cache-install.outputs.cache-hit }}" -ne 'true') {
+299:             Invoke-WebRequest -Uri "${{ matrix.cudnn-install }}" -OutFile "cudnn.zip"
+300:             Expand-Archive -Path cudnn.zip -DestinationPath cudnn-extracted
+301:             $cudnnDir = (Get-ChildItem -Path cudnn-extracted -Directory)[0].FullName
+302:             New-Item -ItemType Directory -Force -Path $cudnnRoot
+303:             Copy-Item -Path "$cudnnDir\*" -Destination "$cudnnRoot\" -Recurse
+304:           }
+305: 
+306:           echo "CUDNN_ROOT_DIR=$cudnnRoot" | Out-File -FilePath $env:GITHUB_ENV -Append
+307:           echo "CUDNN_INCLUDE_PATH=$cudnnRoot\include" | Out-File -FilePath $env:GITHUB_ENV -Append
+308:           echo "CUDNN_LIBRARY_PATH=$cudnnRoot\lib\x64" | Out-File -FilePath $env:GITHUB_ENV -Append
+309:           echo "$cudnnRoot\bin\x64" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+310:       - if: ${{ !cancelled() && steps.cache-install.outputs.cache-hit != 'true' }}
+311:         uses: actions/cache/save@v4
+312:         with:
+313:           path: |
+314:             C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA
+315:             C:\Program Files\AMD\ROCm
+316:             C:\VulkanSDK
+317:             C:\Program Files\NVIDIA\CUDNN
+318:           key: ${{ matrix.install }}-${{ matrix.cudnn-install }}
+319:       - uses: actions/checkout@v4
+320:       - if: matrix.superbuild_target == 'ollama-local' || matrix.install-go
+321:         uses: actions/setup-go@v5
+322:         with:
+323:           go-version-file: 'go.mod'
+324:       - uses: actions/cache@v4
+325:         with:
+326:           path: ${{ github.workspace }}\.ccache
+327:           key: ccache-${{ runner.os }}-${{ runner.arch }}-${{ matrix.preset }}-${{ needs.changes.outputs.enginehash }}
+328:       - name: Build native superbuild
+329:         if: matrix.superbuild_target
+330:         run: |
+331:           $ErrorActionPreference = "Stop"
+332:           Import-Module 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\Microsoft.VisualStudio.DevShell.dll'
+333:           Enter-VsDevShell -VsInstallPath 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise' -SkipAutomaticLocation  -DevCmdArguments '-arch=x64 -no_logo'
+334:           cmake -S . -B "${{ matrix.superbuild_dir }}" ${{ matrix.superbuild_args }}
+335:           $env:CMAKE_BUILD_PARALLEL_LEVEL = [Environment]::ProcessorCount
+336:           cmake --build "${{ matrix.superbuild_dir }}" --target "${{ matrix.superbuild_target }}" -- -l $([Environment]::ProcessorCount)
+337:           if (!(Test-Path "${{ matrix.superbuild_dir }}\${{ matrix.expected_payload }}")) {
+338:             throw "missing ${{ matrix.expected_payload }}"
+339:           }
+340:         env:
+341:           CMAKE_GENERATOR: Ninja
+342:       - name: Verify local superbuild install
+343:         if: matrix.superbuild_target == 'ollama-local'
+344:         run: |
+345:           $ErrorActionPreference = "Stop"
+346:           & ".\ollama.exe" --version
+347:           & "${{ matrix.superbuild_dir }}\lib\ollama\llama-server.exe" --version
+348:           if (!(Test-Path "${{ matrix.superbuild_dir }}\lib\ollama\llama-quantize.exe")) {
+349:             throw "missing llama-quantize.exe"
+350:           }
+351:           $installPrefix = Join-Path $env:RUNNER_TEMP "ollama-local"
+352:           cmake --install "${{ matrix.superbuild_dir }}" --component ollama-local --prefix "$installPrefix"
+353:           & "$installPrefix\bin\ollama.exe" --version
+354:           & "$installPrefix\lib\ollama\llama-server.exe" --version
+355:           if (!(Test-Path "$installPrefix\lib\ollama\llama-quantize.exe")) {
+356:             throw "missing installed llama-quantize.exe"
+357:           }
+358:   go_mod_tidy:
+359:     runs-on: ubuntu-latest
+360:     steps:
+361:       - uses: actions/checkout@v4
+362:       - name: check that 'go mod tidy' is clean
+363:         run: go mod tidy --diff || (echo "Please run 'go mod tidy'." && exit 1)
+364: 
+365:   test:
+366:     needs: [changes]
+367:     strategy:
+368:       matrix:
+369:         os: [ubuntu-latest, macos-latest, windows-latest]
+370:     runs-on: ${{ matrix.os }}
+371:     env:
+372:       CGO_ENABLED: '1'
+373:     steps:
+374:       - uses: actions/checkout@v4
+375:       - uses: actions/setup-go@v5
+376:         with:
+377:           go-version-file: 'go.mod'
+378:           cache-dependency-path: |
+379:             go.sum
+380:             LLAMA_CPP_VERSION
+381:             MLX_VERSION
+382:             MLX_C_VERSION
+383:       - uses: actions/setup-node@v4
+384:         with:
+385:           node-version: '20'
+386:       - name: Install UI dependencies
+387:         working-directory: ./app/ui/app
+388:         run: npm ci
+389:       - name: Install tscriptify
+390:         run: |
+391:           go install github.com/tkrajina/typescriptify-golang-structs/tscriptify@latest
+392:       - name: Run UI tests
+393:         if: ${{ startsWith(matrix.os, 'ubuntu') }}
+394:         working-directory: ./app/ui/app
+395:         run: npm test
+396:       - name: Verify MLX generated files are current
+397:         if: ${{ startsWith(matrix.os, 'ubuntu') }}
+398:         run: |
+399:           cmake -S . -B build/mlx-generate -DOLLAMA_MLX_BACKENDS=cuda_v13
+400:           cmake --build build/mlx-generate --target ollama-mlx-generate-wrappers
+401:           git diff --exit-code -- \
+402:             x/imagegen/mlx/mlx.h \
+403:             x/imagegen/mlx/mlx.c \
+404:             x/mlxrunner/mlx/generated.h \
+405:             x/mlxrunner/mlx/generated.c \
+406:             x/mlxrunner/mlx/include/mlx/c
+407:       - name: Run go generate
+408:         run: go generate ./...
+409: 
+410:       - name: go test
+411:         if: always()
+412:         run: go test -count=1 -benchtime=1x ./...
+413: 
+414:       - name: go test app with live updater tag
+415:         if: ${{ needs.changes.outputs.app_changed == 'True' && contains(fromJSON('["macos-latest","windows-latest"]'), matrix.os) }}
+416:         run: go test -count=1 -tags updater_live ./app/...
+417: 
+418:       - uses: golangci/golangci-lint-action@v9
+
+FILE app/store/schema.sql sha256 687b2748516c80d332450cec4b90e732da83d851868ecf282520a5b9f08483e8 READ 1 61 OF 61
+1: -- This is the version 2 schema for the app database, the first released schema to users.
+2: -- Do not modify this file. It is used to test that the database schema stays in a consistent state between schema migrations.
+3: 
+4: CREATE TABLE IF NOT EXISTS settings (
+5:     id INTEGER PRIMARY KEY CHECK (id = 1),
+6:     device_id TEXT NOT NULL DEFAULT '',
+7:     has_completed_first_run BOOLEAN NOT NULL DEFAULT 0,
+8:     expose BOOLEAN NOT NULL DEFAULT 0,
+9:     survey BOOLEAN NOT NULL DEFAULT TRUE,
+10:     browser BOOLEAN NOT NULL DEFAULT 0,
+11:     models TEXT NOT NULL DEFAULT '',
+12:     remote TEXT NOT NULL DEFAULT '',
+13:     agent BOOLEAN NOT NULL DEFAULT 0,
+14:     tools BOOLEAN NOT NULL DEFAULT 0,
+15:     working_dir TEXT NOT NULL DEFAULT '',
+16:     context_length INTEGER NOT NULL DEFAULT 4096,
+17:     window_width INTEGER NOT NULL DEFAULT 0,
+18:     window_height INTEGER NOT NULL DEFAULT 0,
+19:     config_migrated BOOLEAN NOT NULL DEFAULT 0,
+20:     schema_version INTEGER NOT NULL DEFAULT 2
+21: );
+22: 
+23: -- Insert default settings row if it doesn't exist
+24: INSERT OR IGNORE INTO settings (id) VALUES (1);
+25: 
+26: CREATE TABLE IF NOT EXISTS chats (
+27:     id TEXT PRIMARY KEY,
+28:     title TEXT NOT NULL DEFAULT '',
+29:     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+30: );
+31: 
+32: CREATE TABLE IF NOT EXISTS messages (
+33:     id INTEGER PRIMARY KEY AUTOINCREMENT,
+34:     chat_id TEXT NOT NULL,
+35:     role TEXT NOT NULL,
+36:     content TEXT NOT NULL DEFAULT '',
+37:     thinking TEXT NOT NULL DEFAULT '',
+38:     stream BOOLEAN NOT NULL DEFAULT 0,
+39:     model_name TEXT,
+40:     model_cloud BOOLEAN,
+41:     model_ollama_host BOOLEAN,
+42:     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+43:     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+44:     thinking_time_start TIMESTAMP,
+45:     thinking_time_end TIMESTAMP,
+46:     FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
+47: );
+48: 
+49: CREATE INDEX IF NOT EXISTS idx_messages_chat_id ON messages(chat_id);
+50: 
+51: CREATE TABLE IF NOT EXISTS tool_calls (
+52:     id INTEGER PRIMARY KEY AUTOINCREMENT,
+53:     message_id INTEGER NOT NULL,
+54:     type TEXT NOT NULL,
+55:     function_name TEXT NOT NULL,
+56:     function_arguments TEXT NOT NULL,
+57:     function_result TEXT,
+58:     FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
+59: );
+60: 
+61: CREATE INDEX IF NOT EXISTS idx_tool_calls_message_id ON tool_calls(message_id);
+
+FILE app/store/cloud_config.go sha256 1fc8016da263c39f501ffa1e0f7c4ffcb58e1364360a013a7c366c2c9c76aeec READ 1 128 OF 128
+1: //go:build windows || darwin
+2: 
+3: package store
+4: 
+5: import (
+6: 	"encoding/json"
+7: 	"errors"
+8: 	"fmt"
+9: 	"os"
+10: 	"path/filepath"
+11: 
+12: 	"github.com/ollama/ollama/envconfig"
+13: )
+14: 
+15: const serverConfigFilename = "server.json"
+16: 
+17: type serverConfig struct {
+18: 	DisableOllamaCloud bool `json:"disable_ollama_cloud,omitempty"`
+19: }
+20: 
+21: // CloudDisabled returns whether cloud features should be disabled.
+22: // The source of truth is: OLLAMA_NO_CLOUD OR ~/.ollama/server.json:disable_ollama_cloud.
+23: func (s *Store) CloudDisabled() (bool, error) {
+24: 	disabled, _, err := s.CloudStatus()
+25: 	return disabled, err
+26: }
+27: 
+28: // CloudStatus returns whether cloud is disabled and the source of that decision.
+29: // Source is one of: "none", "env", "config", "both".
+30: func (s *Store) CloudStatus() (bool, string, error) {
+31: 	if err := s.ensureDB(); err != nil {
+32: 		return false, "", err
+33: 	}
+34: 
+35: 	configDisabled, err := readServerConfigCloudDisabled()
+36: 	if err != nil {
+37: 		return false, "", err
+38: 	}
+39: 
+40: 	envDisabled := envconfig.NoCloudEnv()
+41: 	return envDisabled || configDisabled, cloudStatusSource(envDisabled, configDisabled), nil
+42: }
+43: 
+44: // SetCloudEnabled writes the cloud setting to ~/.ollama/server.json.
+45: func (s *Store) SetCloudEnabled(enabled bool) error {
+46: 	if err := s.ensureDB(); err != nil {
+47: 		return err
+48: 	}
+49: 	return setCloudEnabled(enabled)
+50: }
+51: 
+52: func setCloudEnabled(enabled bool) error {
+53: 	configPath, err := serverConfigPath()
+54: 	if err != nil {
+55: 		return err
+56: 	}
+57: 
+58: 	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
+59: 		return fmt.Errorf("create server config directory: %w", err)
+60: 	}
+61: 
+62: 	configMap := map[string]any{}
+63: 	if data, err := os.ReadFile(configPath); err == nil {
+64: 		if err := json.Unmarshal(data, &configMap); err != nil {
+65: 			// If the existing file is invalid JSON, overwrite with a fresh object.
+66: 			configMap = map[string]any{}
+67: 		}
+68: 	} else if !errors.Is(err, os.ErrNotExist) {
+69: 		return fmt.Errorf("read server config: %w", err)
+70: 	}
+71: 
+72: 	configMap["disable_ollama_cloud"] = !enabled
+73: 
+74: 	data, err := json.MarshalIndent(configMap, "", "  ")
+75: 	if err != nil {
+76: 		return fmt.Errorf("marshal server config: %w", err)
+77: 	}
+78: 	data = append(data, '\n')
+79: 
+80: 	if err := os.WriteFile(configPath, data, 0o644); err != nil {
+81: 		return fmt.Errorf("write server config: %w", err)
+82: 	}
+83: 
+84: 	return nil
+85: }
+86: 
+87: func readServerConfigCloudDisabled() (bool, error) {
+88: 	configPath, err := serverConfigPath()
+89: 	if err != nil {
+90: 		return false, err
+91: 	}
+92: 
+93: 	data, err := os.ReadFile(configPath)
+94: 	if err != nil {
+95: 		if errors.Is(err, os.ErrNotExist) {
+96: 			return false, nil
+97: 		}
+98: 		return false, fmt.Errorf("read server config: %w", err)
+99: 	}
+100: 
+101: 	var cfg serverConfig
+102: 	// Invalid or unexpected JSON should not block startup; treat as default.
+103: 	if json.Unmarshal(data, &cfg) == nil {
+104: 		return cfg.DisableOllamaCloud, nil
+105: 	}
+106: 	return false, nil
+107: }
+108: 
+109: func serverConfigPath() (string, error) {
+110: 	home, err := os.UserHomeDir()
+111: 	if err != nil {
+112: 		return "", fmt.Errorf("resolve home directory: %w", err)
+113: 	}
+114: 	return filepath.Join(home, ".ollama", serverConfigFilename), nil
+115: }
+116: 
+117: func cloudStatusSource(envDisabled bool, configDisabled bool) string {
+118: 	switch {
+119: 	case envDisabled && configDisabled:
+120: 		return "both"
+121: 	case envDisabled:
+122: 		return "env"
+123: 	case configDisabled:
+124: 		return "config"
+125: 	default:
+126: 		return "none"
+127: 	}
+128: }
+
+FILE app/ui/app/package.json sha256 ba4a16db941ae31c7d33daf5fc4396b05e20cc1906ca731648d3859eb81a029d READ 1 82 OF 82
+1: {
+2:   "name": "app",
+3:   "private": true,
+4:   "version": "0.0.0",
+5:   "type": "module",
+6:   "scripts": {
+7:     "dev": "vite",
+8:     "build": "tsc -b && vite build",
+9:     "lint": "eslint .",
+10:     "preview": "vite preview",
+11:     "prettier": "prettier --write .",
+12:     "prettier:check": "prettier --check .",
+13:     "storybook": "storybook dev -p 6006",
+14:     "build-storybook": "storybook build",
+15:     "test": "vitest",
+16:     "test:ui": "vitest --ui",
+17:     "test:coverage": "vitest --coverage"
+18:   },
+19:   "dependencies": {
+20:     "@headlessui/react": "^2.2.4",
+21:     "@heroicons/react": "^2.2.0",
+22:     "@tanstack/react-query": "^5.80.7",
+23:     "@tanstack/react-router": "^1.120.20",
+24:     "@tanstack/react-router-devtools": "^1.120.20",
+25:     "clsx": "^2.1.1",
+26:     "framer-motion": "^12.17.0",
+27:     "katex": "^0.16.22",
+28:     "micromark-extension-llm-math": "^3.1.0",
+29:     "ollama": "^0.6.0",
+30:     "react": "^19.1.0",
+31:     "react-dom": "^19.1.0",
+32:     "rehype-katex": "^7.0.1",
+33:     "rehype-prism-plus": "^2.0.1",
+34:     "rehype-raw": "^7.0.0",
+35:     "rehype-sanitize": "^6.0.0",
+36:     "remark-math": "^6.0.0",
+37:     "streamdown": "^1.4.0",
+38:     "unist-builder": "^4.0.0",
+39:     "unist-util-parents": "^3.0.0"
+40:   },
+41:   "devDependencies": {
+42:     "@chromatic-com/storybook": "^4.0.1",
+43:     "@eslint/js": "^9.25.0",
+44:     "@storybook/addon-a11y": "^9.0.14",
+45:     "@storybook/addon-docs": "^9.0.14",
+46:     "@storybook/addon-onboarding": "^9.0.14",
+47:     "@storybook/addon-vitest": "^9.0.14",
+48:     "@storybook/react-vite": "^9.0.14",
+49:     "@tailwindcss/typography": "^0.5.16",
+50:     "@tailwindcss/vite": "^4.1.11",
+51:     "@tanstack/router-plugin": "^1.120.20",
+52:     "@types/node": "^24.7.2",
+53:     "@types/react": "^19.1.2",
+54:     "@types/react-dom": "^19.1.2",
+55:     "@vitejs/plugin-react": "^4.4.1",
+56:     "@vitest/browser": "^3.2.4",
+57:     "@vitest/coverage-v8": "^3.2.4",
+58:     "@vitest/ui": "^3.2.4",
+59:     "autoprefixer": "^10.4.21",
+60:     "eslint": "^9.25.0",
+61:     "eslint-plugin-react-hooks": "^5.2.0",
+62:     "eslint-plugin-react-refresh": "^0.4.19",
+63:     "eslint-plugin-storybook": "^9.0.14",
+64:     "globals": "^16.0.0",
+65:     "playwright": "^1.53.2",
+66:     "postcss-preset-env": "^10.2.4",
+67:     "react-markdown": "^10.1.0",
+68:     "remark": "^15.0.1",
+69:     "remark-gfm": "^4.0.1",
+70:     "remark-stringify": "^11.0.0",
+71:     "storybook": "^9.0.14",
+72:     "tailwindcss": "^4.1.9",
+73:     "typescript": "~5.8.3",
+74:     "typescript-eslint": "^8.30.1",
+75:     "vite": "^6.3.5",
+76:     "vite-tsconfig-paths": "^5.1.4",
+77:     "vitest": "^3.2.4"
+78:   },
+79:   "overrides": {
+80:     "mdast-util-gfm-autolink-literal": "2.0.0"
+81:   }
+82: }
+
+FILE ../TECHNE/Tools/ollama/ask.sh sha256 8914376e9f68973ec48c2142f3966c2f17cdc027f8fedc8fe6eabd4fe852b1ca READ 1 16 OF 16
+1: #!/bin/bash
+2: # ask.sh — bounded, loopback-only Ollama text review.
+3: 
+4: set -euo pipefail
+5: 
+6: SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+7: PYTHON_BIN="$(command -v python3 || true)"
+8: 
+9: if [ -z "$PYTHON_BIN" ] || [ ! -x "$PYTHON_BIN" ]; then
+10:   echo "error: python3 is required" >&2
+11:   exit 2
+12: fi
+13: 
+14: # Isolated mode ignores PYTHON* environment variables and the user site. The
+15: # model response is never passed back through this shell.
+16: exec "$PYTHON_BIN" -I -B "$SCRIPT_DIR/ollama_review.py" "$@"
+
+SEARCH func (m chatModel) systemPrompt
+cmd/tui/chat/input.go:443:func (m chatModel) systemPromptState() string {
+cmd/tui/chat/input.go:1719:func (m chatModel) systemPrompt(extra string) string {
+
+exit=0
+
+SEARCH func (m *chatModel) systemPrompt
+
+exit=1
+
+SEARCH func (db *database) getChat
+app/store/database.go:675:func (db *database) getChatWithOptions(id string, loadAttachmentData bool) (*Chat, error) {
+
+exit=0
+
+SEARCH saveChat
+app/store/database.go:716:func (db *database) saveChat(chat Chat) error {
+
+exit=0
+
+SEARCH Instructions
+
+exit=1
+
+SEARCH Terminal
+
+exit=1
+
+APP_BINARY_IDENTITY
+14018 /Applications/Ollama.app/Contents/MacOS/Ollama
+14033 /Applications/Ollama.app/Contents/Resources/ollama
+/Applications/Ollama.app {'CFBundleIdentifier': 'com.electron.ollama', 'CFBundleExecutable': 'Ollama', 'CFBundleShortVersionString': '0.32.5-47-geb8c93d', 'CFBundleVersion': '0.32.5-47-geb8c93d'}
+executable /Applications/Ollama.app/Contents/MacOS/Ollama sha256 4c8139e32e25645e5bbde7cef7b56384ed4a6501c7f74398341d131212d4bb25

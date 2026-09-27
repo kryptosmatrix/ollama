@@ -1,0 +1,21 @@
+{
+  "before_sha256": "46d52889a32c2f4d32d505d31e48e92795d745adde052ab0b307206e0390b10e",
+  "after_sha256": "24d76eb771d94d64979dbeed74aa6c1b706bab98edad56280399a521f292645c",
+  "document_bytes": 54453,
+  "production_estimate_loc": 1489,
+  "byte_ceiling": 59560,
+  "status": "pre-adjudication draft; no production or readiness promotion",
+  "newly_specified": [
+    "same-filesystem staged database publication",
+    "complete table schema",
+    "CAS/binding/reload transaction order",
+    "typed wire success/error envelopes",
+    "idempotent reload and exact event/generation cap",
+    "measured raw JSON envelope bound"
+  ],
+  "remaining_open": [
+    "OQ-1 full capacity admission",
+    "OQ-3 complete restart/request baseline",
+    "OQ-4 derived source/guard/test coverage and independent two-substrate promotion"
+  ]
+}

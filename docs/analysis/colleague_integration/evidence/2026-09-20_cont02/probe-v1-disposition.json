@@ -1,0 +1,7 @@
+{
+  "status": "INSTRUMENT_FAULT_INEFFECTIVE",
+  "injected_value": 2,
+  "observed_load_error": false,
+  "original_messages_lost": 0,
+  "conclusion": "The SQLite driver accepted integer 2 as a boolean. This run did not demonstrate the suspected data-loss failure. Source and outputs preserved; v2 uses invalid text and requires an actual load error."
+}

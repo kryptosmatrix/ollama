@@ -1,0 +1,17 @@
+{
+  "updated_brisbane": "2026-09-20T20:07:36.080817+10:00",
+  "before_sha256": {
+    "STATE.json": "9b6d11161939429a0ebb8fd8cf96a497fc36286cb335a63eb0d8f53c6ea149e9",
+    "HANDOFF.md": "75fdc0a2eb5de6fd38c3ea3f2c344b80fefb69a9ff2d0c867784a5342889e9fa",
+    "BLOCKERS.md": "a6aa1bf7b692f4f3124b46e5c089386d77d23a09e973d07ad463e9ddcbf4fd14"
+  },
+  "after_sha256": {
+    "HANDOFF.md": "b01f9bcbc2c7b8a3e66457196cec73dfcac63c4900d220f298696942ceb2c39f",
+    "BLOCKERS.md": "e595609e4099c14de756c49388e28f11de75c0944f342b486b30ec89288a507f",
+    "STATE.json": "5936f3a6f386f1babe7838753780f745916d7e6db77a5825ee069d4c0b6d2bf2"
+  },
+  "preimages": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont03/checkpoint_before_cont03_closeout",
+  "production_changes": 0,
+  "operator_exception_granted": false,
+  "formal_promotion": false
+}

@@ -1,0 +1,77 @@
+{
+  "api_version": "0.32.5-47-geb8c93d",
+  "approval": "approve-local-content",
+  "done_reason": "stop",
+  "elapsed_seconds": 26.549742,
+  "endpoint": "http://127.0.0.1:11434",
+  "exit_code": 0,
+  "finished_at": "2026-09-20T08:54:47.840255Z",
+  "format_schema_bytes": 0,
+  "format_schema_sha256": null,
+  "format_schema_source": null,
+  "implementation_sha256": "096573d0f859ac56fa81eaa72aedfdb244bee0f236db9a54daba763f4472b3e9",
+  "launcher_sha256": "8914376e9f68973ec48c2142f3966c2f17cdc027f8fedc8fe6eabd4fe852b1ca",
+  "metrics": {
+    "eval_count": 8858,
+    "prompt_eval_count": 63297,
+    "total_duration": 25715975555
+  },
+  "model_capabilities": [
+    "completion",
+    "thinking",
+    "tools",
+    "vision"
+  ],
+  "model_details": {
+    "context_length": 1048576,
+    "family": "",
+    "format": "",
+    "parameter_size": "763B",
+    "quantization_level": "FP8"
+  },
+  "model_digest_after": "e04da138d31e0c9468e982e1ae9503d06cb7e170caa16a90c17d931c4aa140f8",
+  "model_digest_before": "e04da138d31e0c9468e982e1ae9503d06cb7e170caa16a90c17d931c4aa140f8",
+  "model_expected_digest": "e04da138d31e0c9468e982e1ae9503d06cb7e170caa16a90c17d931c4aa140f8",
+  "model_identity_status": "PINNED",
+  "model_modified_at": "2026-09-20T18:29:39.390211061+10:00",
+  "model_requested": "deepseek-v4.1-flash:cloud",
+  "model_show": {
+    "parameters_bytes": 0,
+    "parameters_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "system_bytes": 0,
+    "system_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "template_bytes": 0,
+    "template_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "model_size": 326,
+  "outcome": "OK",
+  "parameters": {
+    "max_response_bytes": 16777216,
+    "num_ctx": 262144,
+    "num_gpu": "auto",
+    "num_predict": 16384,
+    "seed": 0,
+    "temperature": 0.0,
+    "think": "off",
+    "timeout_seconds": 420
+  },
+  "prompt_bytes": 241390,
+  "prompt_sha256": "4e7215e1cab331398a98a34973a708af2d0ba98c8079c9f8571282be72d9377e",
+  "prompt_source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont02/deepseek-review/prompt.txt",
+  "ps_observation": {
+    "status": "not_listed"
+  },
+  "python_executable": "/opt/homebrew/opt/python@3.14/bin/python3.14",
+  "python_version": "3.14.6",
+  "raw_response_bytes": 35087,
+  "raw_response_sha256": "7065f574ec224c1fce78eb083dfc10edd3646742db16590e375563edcf68ceee",
+  "response_bytes": 34440,
+  "response_created_at": "2026-09-20T08:54:47.775947116Z",
+  "response_sha256": "57e6630a39c85086074a88ef38117749782f6c396374da4dab3b2eddebb174e2",
+  "served_model": "deepseek-v4.1-flash",
+  "started_at": "2026-09-20T08:54:21.283033Z",
+  "template_reserve_upper_bound": 2048,
+  "thinking_bytes": 0,
+  "thinking_sha256": null,
+  "wrapper_version": "1.1.0"
+}

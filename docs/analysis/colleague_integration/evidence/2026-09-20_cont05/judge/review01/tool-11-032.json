@@ -1,0 +1,16 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "path": "mutant_manifest",
+    "start": 1,
+    "count": 200
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants.json",
+    "file_sha256": "0b0a47181174da79f6776f82783858900ee11898a76ebc2e0f9dddb776bcf532",
+    "start": 1,
+    "end": 26,
+    "total_lines": 26,
+    "text": "1: {\n2:   \"rewrap\": {\n3:     \"source\": \"app/store/store.go\",\n4:     \"replacement\": \"/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/rewrap/store.go\",\n5:     \"sha256\": \"af324196245292ab5b6ee65abbb8de2f1db5e3d07772db0f98d273c53848349f\",\n6:     \"overlay\": \"/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/rewrap/overlay.json\"\n7:   },\n8:   \"consumer-bypass\": {\n9:     \"source\": \"app/ui/ui.go\",\n10:     \"replacement\": \"/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/consumer-bypass/ui.go\",\n11:     \"sha256\": \"f45b25e29c608f4f5dcca4d0b8eef382bcdfaeadc762491f4d0650def8410124\",\n12:     \"overlay\": \"/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/consumer-bypass/overlay.json\"\n13:   },\n14:   \"always-error\": {\n15:     \"source\": \"app/store/store.go\",\n16:     \"replacement\": \"/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/always-error/store.go\",\n17:     \"sha256\": \"074e77e150b650bb99dab8a69c557f65bb77fd9a1a162ddb20005c53b659f486\",\n18:     \"overlay\": \"/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/always-error/overlay.json\"\n19:   },\n20:   \"empty-success\": {\n21:     \"source\": \"app/store/store.go\",\n22:     \"replacement\": \"/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/empty-success/store.go\",\n23:     \"sha256\": \"f745a211db44c88729c867e0b48b341a08f37af714b24dceba7ccaac85599804\",\n24:     \"overlay\": \"/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/empty-success/overlay.json\"\n25:   }\n26: }"
+  }
+}

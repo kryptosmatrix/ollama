@@ -1,0 +1,47 @@
+2510:             auto content = p.content(p.until("<function"));
+2511: 
+2512:             return generation_prompt + reasoning + content + tool_calls + p.end();
+2513:         }
+2514: 
+2515:         return generation_prompt + reasoning + p.content(p.rest()) + p.end();
+2516:     });
+2517: 
+2518:     data.parser = parser.save();
+2519: 
+2520:     if (include_grammar) {
+2521:         data.grammar_lazy = !(has_response_format || (has_tools && inputs.tool_choice == COMMON_CHAT_TOOL_CHOICE_REQUIRED));
+2522:         data.grammar      = build_grammar([&](const common_grammar_builder & builder) {
+2523:             foreach_function(inputs.tools, [&](const json & tool) {
+2524:                 const auto & function = tool.at("function");
+2525:                 auto         schema   = function.contains("parameters") ? function.at("parameters") : json::object();
+2526:                 builder.resolve_refs(schema);
+2527:             });
+2528:             if (has_response_format) {
+2529:                 auto schema = inputs.json_schema;
+2530:                 builder.resolve_refs(schema);
+2531:             }
+2532:             parser.build_grammar(builder, data.grammar_lazy);
+2533:         });
+2534: 
+2535:         data.grammar_triggers = {
+2536:             { COMMON_GRAMMAR_TRIGGER_TYPE_WORD, "<function" },
+2537:         };
+2538:     }
+2539: 
+2540:     return data;
+2541: }
+2542: 
+2543: static json common_chat_extra_context() {
+2544:     json ctx = json::object();
+2545:     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+2546:     std::string datetime_str = format_time(now, "%b %d %Y");
+2547:     std::string date_str = format_time(now, "%d %b %Y");
+2548:     ctx["datetime"] = datetime_str;
+2549:     ctx["date_string"] = date_str;
+2550:     return ctx;
+2551: }
+2552: 
+2553: std::optional<common_chat_params> common_chat_try_specialized_template(
+2554:         const common_chat_template &          tmpl,
+2555:         const std::string &                   src,
+2556:         autoparser::generation_params & params) {

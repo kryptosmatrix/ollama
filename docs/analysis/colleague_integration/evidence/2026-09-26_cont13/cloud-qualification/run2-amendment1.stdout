@@ -1,0 +1,4 @@
+20:41:21 glm-5.3:cloud Q1: http=200 PASS prompt=58 bound=225 bound_holds=True 0.7s spent=377494 reply="The user has configured a carrier code: 59B87CA3. They're asking me to reply exactly with "
+20:41:23 glm-5.3:cloud Q2: http=200 PASS prompt=24999 bound=54325 bound_holds=True 2.3s spent=402493 reply='The user wants me to reply in exactly this format: CARRIER=<the carrier code>; FIRST=<the '
+20:41:23 done: 2 probes, prompt tokens spent 402493 of cap 500000 (including 377436 before this run)
+harness-exit=0

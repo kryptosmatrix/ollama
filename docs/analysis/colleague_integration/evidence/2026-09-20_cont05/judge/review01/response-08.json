@@ -1,0 +1,40 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "created_at": "2026-09-20T11:58:08.950766089Z",
+  "message": {
+    "role": "assistant",
+    "content": "I have the key consumer at ui.go:728-734. Now let me read the store test file and the store's `getChatWithOptions` implementation.",
+    "tool_calls": [
+      {
+        "id": "call_ao92u341",
+        "function": {
+          "index": 0,
+          "name": "read_source",
+          "arguments": {
+            "path": "app/store/chat_read_errors_test.go",
+            "start": 1,
+            "count": 200
+          }
+        }
+      },
+      {
+        "id": "call_rrd8qfpp",
+        "function": {
+          "index": 1,
+          "name": "read_source",
+          "arguments": {
+            "path": "app/store/database.go",
+            "start": 260,
+            "count": 200
+          }
+        }
+      }
+    ]
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 2354761342,
+  "prompt_eval_count": 33837,
+  "prompt_eval_cached_count": 27904,
+  "eval_count": 174
+}

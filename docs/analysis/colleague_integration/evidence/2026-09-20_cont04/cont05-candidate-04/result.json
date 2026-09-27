@@ -1,0 +1,76 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/go",
+    "test",
+    "-count=1",
+    "-json",
+    "-timeout=150s",
+    "-run=^TestChatRead",
+    "./app/store",
+    "./app/ui"
+  ],
+  "cache_locations": {
+    "GOCACHE": "/Users/krypto/Library/Caches/go-build",
+    "GOMODCACHE": "/Users/krypto/go/pkg/mod",
+    "GOPATH": "/Users/krypto/go"
+  },
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+  "elapsed_seconds": 7.863455375000001,
+  "environment_overrides": {
+    "CI": "true",
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "GOTOOLCHAIN": "local",
+    "HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-nbud2669",
+    "LOCALAPPDATA": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-nbud2669",
+    "OLLAMA_HOST": "http://127.0.0.1:1",
+    "OLLAMA_MCP_APPROVALS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-nbud2669/approvals.json",
+    "OLLAMA_MCP_CONFIG": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-nbud2669/mcp.json",
+    "OLLAMA_MCP_TOKENS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-nbud2669/mcp-tokens.json",
+    "USERPROFILE": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-nbud2669"
+  },
+  "exit_code": 0,
+  "expectation": "pass",
+  "expectation_met": true,
+  "overlay": null,
+  "runner_sha256": "8a1f06496c6e25e43fe7a0e46cc00c971f1d0df3c965ced2210ad90c31b67e0f",
+  "source_head": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+  "source_unchanged_during_run": true,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "08623a468be9fb70e31961c945d815ec78e672968de1097f6ecc37251d7c1455",
+  "test_results": {
+    "build_failures": [],
+    "counts": {
+      "fail": 0,
+      "pass": 10,
+      "skip": 0
+    },
+    "finished": {
+      "TestChatReadInitialisationFailureIsNotAbsence": "pass",
+      "TestChatReadIntegrityAcrossProcesses": "pass",
+      "TestChatReadIntegrityAcrossProcesses/fault": "pass",
+      "TestChatReadIntegrityAcrossProcesses/positive": "pass",
+      "TestChatReadIntegrityAcrossProcesses/recover": "pass",
+      "TestChatReadIntegrityAcrossProcesses/seed": "pass",
+      "TestChatReadMissingHeaderIsNotFound": "pass",
+      "TestChatReadPreservesDatabaseErrorCause": "pass",
+      "TestChatReadRejectsMalformedMessage": "pass",
+      "TestChatReadValidEmptyAndPopulated": "pass"
+    },
+    "missing": [],
+    "started": [
+      "TestChatReadInitialisationFailureIsNotAbsence",
+      "TestChatReadIntegrityAcrossProcesses",
+      "TestChatReadIntegrityAcrossProcesses/fault",
+      "TestChatReadIntegrityAcrossProcesses/positive",
+      "TestChatReadIntegrityAcrossProcesses/recover",
+      "TestChatReadIntegrityAcrossProcesses/seed",
+      "TestChatReadMissingHeaderIsNotFound",
+      "TestChatReadPreservesDatabaseErrorCause",
+      "TestChatReadRejectsMalformedMessage",
+      "TestChatReadValidEmptyAndPopulated"
+    ],
+    "unfinished": []
+  },
+  "timed_out": false
+}

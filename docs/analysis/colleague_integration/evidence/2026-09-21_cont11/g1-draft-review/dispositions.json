@@ -1,0 +1,83 @@
+[
+  {
+    "id": "G1-DRAFT-F-0001",
+    "reviewer_id": "D-1",
+    "disposition": "NOT_SUBSTANTIATED; clarity strengthened",
+    "reason": "The original \u00a75 already placed Compose after existing built-in/extra construction and did not store custom text in Options.SystemPrompt. Current source is pre-feature. The revised text names a separate InstructionSelection and an enabled-custom/builtin-off acceptance case; no alleged production bug was repaired.",
+    "first_document_sha256": "17a25bf3c2d306c475494e2eb3f50cc3f168d8b4b21749527e0916e8d0d67212",
+    "current_document_sha256": "46d52889a32c2f4d32d505d31e48e92795d745adde052ab0b307206e0390b10e",
+    "formal_promotion_finding": false
+  },
+  {
+    "id": "G1-DRAFT-F-0002",
+    "reviewer_id": "D-2",
+    "disposition": "FUTURE_DESIGN_MISREAD; exact signature added",
+    "reason": "The cited source is explicitly the pre-change signature. \u00a75 proposed extending it and \u00a710 allocates that change. No existing function is required to already implement future behaviour. The proposed extended signature and show.System carrier are now exact; future reach still requires implementation and tests.",
+    "first_document_sha256": "17a25bf3c2d306c475494e2eb3f50cc3f168d8b4b21749527e0916e8d0d67212",
+    "current_document_sha256": "46d52889a32c2f4d32d505d31e48e92795d745adde052ab0b307206e0390b10e",
+    "formal_promotion_finding": false
+  },
+  {
+    "id": "G1-DRAFT-F-0003",
+    "reviewer_id": "D-3",
+    "disposition": "REJECTED",
+    "reason": "An immutable per-conversation Profile copy from an immutable revision is intended, not a pointer to mutable Current. Binding participates in hash and active-binding validation even when null/disabled. Removing it as prescribed would weaken validation. Per-active-conversation resident text is one capped profile, not every historical revision.",
+    "first_document_sha256": "17a25bf3c2d306c475494e2eb3f50cc3f168d8b4b21749527e0916e8d0d67212",
+    "current_document_sha256": "46d52889a32c2f4d32d505d31e48e92795d745adde052ab0b307206e0390b10e",
+    "formal_promotion_finding": false
+  },
+  {
+    "id": "G1-DRAFT-F-0004",
+    "reviewer_id": "D-4",
+    "disposition": "CLARIFIED; CAS RETAINED",
+    "reason": "The two comparisons intentionally protect the operator-observed conversation generation and the exact displayed target revision. Adopting a newer unseen value is not required. expected_target_revision and conflict_field now disambiguate the API; concurrent target changes remain explicit conflicts.",
+    "first_document_sha256": "17a25bf3c2d306c475494e2eb3f50cc3f168d8b4b21749527e0916e8d0d67212",
+    "current_document_sha256": "46d52889a32c2f4d32d505d31e48e92795d745adde052ab0b307206e0390b10e",
+    "formal_promotion_finding": false
+  },
+  {
+    "id": "G1-DRAFT-F-0005",
+    "reviewer_id": "D-5",
+    "disposition": "TIMING_AMBIGUITY_CLOSED",
+    "reason": "The handler already reads transcript status; createChat only issues an ID. Binding timing is now explicit: first accepted desktop chat POST after lease/read, before save/inference. Empty drafts are prospective, not active pinned conversations.",
+    "first_document_sha256": "17a25bf3c2d306c475494e2eb3f50cc3f168d8b4b21749527e0916e8d0d67212",
+    "current_document_sha256": "46d52889a32c2f4d32d505d31e48e92795d745adde052ab0b307206e0390b10e",
+    "formal_promotion_finding": false
+  },
+  {
+    "id": "G1-DRAFT-F-0006",
+    "reviewer_id": "D-6",
+    "disposition": "CLARIFIED; arithmetic not refuted",
+    "reason": "The reviewer agreed the 407808-byte string bound. PUT uses Edit, not Profile; server-owned revision/digest/schema are not client-edit fields. Raw body and decoded caps are separate. Exact significant-envelope and escaping measurements are recorded separately.",
+    "first_document_sha256": "17a25bf3c2d306c475494e2eb3f50cc3f168d8b4b21749527e0916e8d0d67212",
+    "current_document_sha256": "46d52889a32c2f4d32d505d31e48e92795d745adde052ab0b307206e0390b10e",
+    "formal_promotion_finding": false
+  },
+  {
+    "id": "G1-DRAFT-F-0007",
+    "reviewer_id": "D-7",
+    "disposition": "REJECTED",
+    "reason": "Host HTTP 422 mapping does not assert that an upstream HTTP 400 was a 422. Zero-output generation is an unsupported probe, not the selected implementation. Upstream status/reason preservation is now explicit. Capacity remains open.",
+    "first_document_sha256": "17a25bf3c2d306c475494e2eb3f50cc3f168d8b4b21749527e0916e8d0d67212",
+    "current_document_sha256": "46d52889a32c2f4d32d505d31e48e92795d745adde052ab0b307206e0390b10e",
+    "formal_promotion_finding": false
+  },
+  {
+    "id": "G1-DRAFT-F-0008",
+    "reviewer_id": "D-8",
+    "disposition": "VALID OPERATIONAL GAP; partly clarified",
+    "reason": "The hard cap is intentional, but opened-vs-reloaded count and continued-use recovery were insufficiently explicit. 256 reloads plus one opened event, no destructive eviction, old conversation remains usable, new conversation can select current. Global-cap operational adequacy remains open rather than declared solved.",
+    "first_document_sha256": "17a25bf3c2d306c475494e2eb3f50cc3f168d8b4b21749527e0916e8d0d67212",
+    "current_document_sha256": "46d52889a32c2f4d32d505d31e48e92795d745adde052ab0b307206e0390b10e",
+    "formal_promotion_finding": false
+  },
+  {
+    "id": "G1-DRAFT-F-0009",
+    "reviewer_id": "D-9",
+    "disposition": "VALID OBSERVABILITY GAP; closed in draft",
+    "reason": "Preview is now explicitly tuple-bound and point-in-time, with prospective/unbound status and stale-on-reload semantics.",
+    "first_document_sha256": "17a25bf3c2d306c475494e2eb3f50cc3f168d8b4b21749527e0916e8d0d67212",
+    "current_document_sha256": "46d52889a32c2f4d32d505d31e48e92795d745adde052ab0b307206e0390b10e",
+    "formal_promotion_finding": false
+  }
+]

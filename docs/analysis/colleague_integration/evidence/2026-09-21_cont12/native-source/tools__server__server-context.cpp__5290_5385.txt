@@ -1,0 +1,55 @@
+5290:         : json(responses);
+5291:     res->ok(root);
+5292:     return res;
+5293: }
+5294: 
+5295: std::unique_ptr<server_res_generator> server_routes::handle_count_tokens(const llama_vocab * vocab, mtmd_context * mctx, const server_http_req & req, task_response_type res_type) {
+5296:     auto res = create_response();
+5297:     std::vector<raw_buffer> files;
+5298:     json body = json::parse(req.body);
+5299:     bool is_oai = false;
+5300: 
+5301:     switch (res_type) {
+5302:         case TASK_RESPONSE_TYPE_OAI_CHAT:
+5303:             {
+5304:                 is_oai = true;
+5305:             } break;
+5306:         case TASK_RESPONSE_TYPE_OAI_RESP:
+5307:             {
+5308:                 is_oai = true;
+5309:                 body = server_chat_convert_responses_to_chatcmpl(body);
+5310:             } break;
+5311:         case TASK_RESPONSE_TYPE_ANTHROPIC:
+5312:             {
+5313:                 body = server_chat_convert_anthropic_to_oai(body);
+5314:             } break;
+5315:         default:
+5316:             res->error(format_error_response("invalid res_type", ERROR_TYPE_INVALID_REQUEST));
+5317:             return res;
+5318:     }
+5319: 
+5320:     json body_parsed = oaicompat_chat_params_parse(
+5321:             body,
+5322:             meta->chat_params,
+5323:             files);
+5324:     json prompt = body_parsed.at("prompt");
+5325:     // SRV_DBG("prompt = %s\n", prompt.dump().c_str());
+5326: 
+5327:     // TODO @ngxson : refactor this code block, move this to server-common and reuse it in other places
+5328:     size_t n_tokens;
+5329:     if (mctx != nullptr) {
+5330:         if (!prompt.is_string()) {
+5331:             throw std::runtime_error("for mtmd, input prompt must be a string.");
+5332:         }
+5333:         n_tokens = process_mtmd_prompt(mctx, prompt.get<std::string>(), files, true).size();
+5334:     } else {
+5335:         n_tokens = tokenize_mixed(vocab, prompt, true, true).size();
+5336:     }
+5337: 
+5338:     json response = {{"input_tokens", static_cast<int64_t>(n_tokens)}};
+5339:     if (is_oai) {
+5340:         response["object"] = "response.input_tokens";
+5341:     }
+5342:     res->ok(response);
+5343:     return res;
+5344: }

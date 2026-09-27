@@ -1,0 +1,134 @@
+{
+  "verified_brisbane": "2026-09-20T20:11:35.318584+10:00",
+  "checkpoint_and_record_hashes": "pass",
+  "all_diagnostic_attempts_and_preimages_retained": "pass",
+  "unchanged_selected_production_and_specification_hashes": {
+    "app/store/store.go": "af324196245292ab5b6ee65abbb8de2f1db5e3d07772db0f98d273c53848349f",
+    "app/store/database.go": "16bde5746f671f7f83c5e4b952186c698f306cd70508d547f7bc91c93ae0a099",
+    "app/ui/ui.go": "dbba86f3d90ec5edac5b23458fec00f25e39f4d9f3ef43ac124571e0c1a0d48e",
+    "docs/_design/CHAT_READ_ERROR_INTEGRITY.md": "b691c8004ed82674c82ebcde3a2f876cd85f65cb5f8167ffadc5e3fd6e6e0570",
+    "docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec"
+  },
+  "git_commands_and_environment": [
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "stdout": "953de98d408a9697fa20a48c23973b9dc8eee921\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "exit_code": 0,
+      "stdout": "?? docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md\n?? docs/OLLAMA_CROSS_MODEL_COLLEAGUES_AND_CAPABILITY_ROUTING_HANDOFF.md\n?? docs/_design/CHAT_READ_ERROR_INTEGRITY.md\n?? docs/analysis/\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain",
+        "--untracked-files=no"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--name-only"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--name-only",
+        "--cached"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/homebrew/bin/go",
+        "version"
+      ],
+      "exit_code": 0,
+      "stdout": "go version go1.26.5 darwin/arm64\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/sw_vers"
+      ],
+      "exit_code": 0,
+      "stdout": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/uname",
+        "-m"
+      ],
+      "exit_code": 0,
+      "stdout": "arm64\n",
+      "stderr": ""
+    }
+  ],
+  "diagnostic_source_hashes": {
+    "testdata/chat_read_errors_dev_test.go.txt": "9fb8959178d92a48bb889d955ffbf9b377a48bc50bcc313803894c25a7822edd",
+    "testdata/chat_read_errors_test.go": "ad7709a2dfb693856e8e2be822052ff2c174b4c43f57566dacc4e2c9400f9d28",
+    "testdata/chat_read_errors_authenticated_v1.go.txt": "ad7709a2dfb693856e8e2be822052ff2c174b4c43f57566dacc4e2c9400f9d28",
+    "testdata/store_chat_read_errors_v1.go.txt": "d74c328b74ccc6ef6dbad44c21863a61b8aae4b056209b6f85591fc7da39f177",
+    "testdata/store_chat_read_errors_test.go": "cb497b9f4d2751dff6acc3de003e6453a1f7d13d33059e789752a3b1d62df5c4"
+  },
+  "state_sha256": "5936f3a6f386f1babe7838753780f745916d7e6db77a5825ee069d4c0b6d2bf2",
+  "handoff_sha256": "b01f9bcbc2c7b8a3e66457196cec73dfcac63c4900d220f298696942ceb2c39f",
+  "report_sha256": "391a31d2a7821ed8a6284b5c5b03c6df3362d399e544e18c7d4519d18ab19e28",
+  "manifest_files": 43,
+  "manifest_sha256": "9cb701a21e3d780ffad6cc82f947c6ab2779e42b7acb4a246b94e810681e2575",
+  "production_changes": 0,
+  "installed_default_test_files": 0,
+  "accepted_programme_items": 0,
+  "formal_promotion": false,
+  "independent_executable_review": false,
+  "retired_own_completed_jobs": 6,
+  "task_job_status_evidence": "Fresh Bridge list_commands(limit=30) immediately before this verifier returned all 16 continuation-03 jobs terminal/exited. This verifier is the only subsequently launched task job; its own completion is checked separately.",
+  "external_service_limits": "DeepSeek source review completed but gave contradictory routing conclusions. Codex quota exhausted; no review. No live-provider or packaged-app acceptance.",
+  "gate_note": "This verifies evidence custody and containment, not a repaired feature or release."
+}

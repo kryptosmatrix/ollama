@@ -1,0 +1,35 @@
+{
+  "created": 1789893136.7594419,
+  "cwd": "/Users/krypto/GitHub/ollama",
+  "exit_code": 0,
+  "finished": 1789893139.219585,
+  "job_id": "69426ec5c6134a618778f9e6dedf41c9",
+  "output_complete": 1,
+  "request_hash": "237d06ffab11dbfa3369dc3258c8220aeb0201bc3e157a3912dafdbf97340e39",
+  "request_id": "eko-ollama-20260920-cont02-preflight",
+  "spec": {
+    "columns": 100,
+    "command": "/usr/bin/python3 - <<'PY'\nimport os,sys,json,hashlib,subprocess,urllib.request\nfrom pathlib import Path\nr=Path.cwd()\nfor f in ['docs/analysis/colleague_integration/STATE.json','../TECHNE/00_START_HERE.md','AGENTS.md']:\n p=r/f\n if p.is_file():\n  b=p.read_bytes();print('\\nFILE',str(p),'SHA256',hashlib.sha256(b).hexdigest());print(b.decode())\n else: print('ABSENT',str(p))\nfor args in [['git','status','--porcelain=v1','--untracked-files=all'],['git','diff','--name-only'],['git','diff','--name-only','--cached'],['git','worktree','list','--porcelain']]:\n p=subprocess.run(args,capture_output=True,text=True);print('\\nCOMMAND',args,'exit='+str(p.returncode));print(p.stdout);print(p.stderr)\nopener=urllib.request.build_opener(urllib.request.ProxyHandler({}))\ntry:\n with opener.open('http://127.0.0.1:11434/api/tags',timeout=8) as f: data=json.load(f)\n print('JUDGE_MODEL_MATCHES',json.dumps([m for m in data.get('models',[]) if 'deepseek' in m.get('name','').lower()]))\nexcept Exception as e: print('OLLAMA_PROBE_ERROR',type(e).__name__,str(e))\nPY",
+    "cwd": "/Users/krypto/GitHub/ollama",
+    "env": {},
+    "login": false,
+    "rows": 30,
+    "shell": "bash",
+    "timeout_seconds": 40,
+    "tty": false
+  },
+  "started": 1789893137.02584,
+  "state": "exited",
+  "stderr_bytes": 0,
+  "stdout_bytes": 35939,
+  "streams": {
+    "stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 35939,
+      "sha256": "cea1b3b7c80568aefdc06ed3105f143dc1fc16333981ec760b96604dff3837a8"
+    }
+  }
+}

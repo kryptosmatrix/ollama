@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/go",
+    "test",
+    "-count=1",
+    "-json",
+    "-timeout=35s",
+    "-run=^TestG1Baseline",
+    "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont11/testdata/instructions_http_baseline_test.go"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+  "source_commit": "baedaf58a711606f343c9c83e13bb68a0169528f",
+  "test_sha256": "22032a934af4e7df912f50afa04ec964706a5c0c15e2199e46d9b313c24b2f0b",
+  "environment_overrides": {
+    "HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-g1-cont12-zomlmje3",
+    "USERPROFILE": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-g1-cont12-zomlmje3",
+    "LOCALAPPDATA": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-g1-cont12-zomlmje3",
+    "OLLAMA_HOST": "http://127.0.0.1:1",
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "GOTOOLCHAIN": "local",
+    "CI": "true"
+  },
+  "cache": {
+    "GOCACHE": "/Users/krypto/Library/Caches/go-build",
+    "GOMODCACHE": "/Users/krypto/go/pkg/mod",
+    "GOPATH": "/Users/krypto/go"
+  },
+  "outer_timeout_seconds": 300,
+  "logs_are_files_from_launch": true,
+  "previous_owned_bridge_job_terminal": "cancelled/-15; no claim about detached processes"
+}

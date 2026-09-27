@@ -1,0 +1,81 @@
+1110:         llama_params["stop"].push_back(stop);
+1111:     }
+1112:     if (!chat_params.parser.empty()) {
+1113:         llama_params["chat_parser"] = chat_params.parser;
+1114:     }
+1115: 
+1116:     llama_params["message_delimiters"] = chat_params.message_delimiters.to_json();
+1117: 
+1118:     // Reasoning budget: pass parameters through to sampling layer
+1119:     {
+1120:         int reasoning_budget = json_value(body, "reasoning_budget_tokens",
+1121:                                json_value(body, "thinking_budget_tokens", -1));
+1122:         if (reasoning_budget == -1) {
+1123:             reasoning_budget = opt.reasoning_budget;
+1124:         }
+1125: 
+1126:         if (!chat_params.thinking_end_tag.empty()) {
+1127:             llama_params["reasoning_budget_tokens"] = reasoning_budget;
+1128:             llama_params["reasoning_budget_start_tag"] = chat_params.thinking_start_tag;
+1129:             llama_params["reasoning_budget_end_tag"] = chat_params.thinking_end_tag;
+1130:             llama_params["reasoning_budget_message"] = json_value(body, "reasoning_budget_message", opt.reasoning_budget_message);
+1131:             llama_params["reasoning_control"] = json_value(body, "reasoning_control", false);
+1132:         }
+1133:     }
+1134: 
+1135:     // Handle "logprobs" field
+1136:     // TODO: The response format of this option is not yet OAI-compatible, but seems like no one really using it; We may need to fix it in the future
+1137:     if (json_value(body, "logprobs", false)) {
+1138:         if (has_tools && stream) {
+1139:             throw std::invalid_argument("logprobs is not supported with tools + stream");
+1140:         }
+1141:         llama_params["n_probs"] = json_value(body, "top_logprobs", 20);
+1142:     } else if (body.contains("top_logprobs") && !body.at("top_logprobs").is_null()) {
+1143:         throw std::invalid_argument("top_logprobs requires logprobs to be set to true");
+1144:     }
+1145: 
+1146:     // Copy remaining properties to llama_params
+1147:     // This allows user to use llama.cpp-specific params like "mirostat", ... via OAI endpoint.
+1148:     // See "launch_slot_with_task()" for a complete list of params supported by llama.cpp
+1149:     for (const auto & item : body.items()) {
+1150:         // Exception: if "n_predict" is present, we overwrite the value specified earlier by "max_tokens"
+1151:         if (!llama_params.contains(item.key()) || item.key() == "n_predict") {
+1152:             llama_params[item.key()] = item.value();
+1153:         }
+1154:     }
+1155: 
+1156:     return llama_params;
+1157: }
+1158: 
+1159: json format_embeddings_response_oaicompat(
+1160:         const json & request,
+1161:         const std::string & model_name,
+1162:         const json & embeddings,
+1163:         bool use_base64) {
+1164:     json data = json::array();
+1165:     int32_t n_tokens = 0;
+1166:     int i = 0;
+1167:     for (const auto & elem : embeddings) {
+1168:         json embedding_obj;
+1169: 
+1170:         if (use_base64) {
+1171:             const auto& vec = json_value(elem, "embedding", json::array()).get<std::vector<float>>();
+1172:             const char* data_ptr = reinterpret_cast<const char*>(vec.data());
+1173:             size_t data_size = vec.size() * sizeof(float);
+1174:             embedding_obj = {
+1175:                 {"embedding", base64::encode(data_ptr, data_size)},
+1176:                 {"index", i++},
+1177:                 {"object", "embedding"},
+1178:                 {"encoding_format", "base64"}
+1179:             };
+1180:         } else {
+1181:             embedding_obj = {
+1182:                 {"embedding", json_value(elem, "embedding", json::array())},
+1183:                 {"index", i++},
+1184:                 {"object", "embedding"}
+1185:             };
+1186:         }
+1187:         data.push_back(embedding_obj);
+1188: 
+1189:         n_tokens += json_value(elem, "tokens_evaluated", 0);
+1190:     }

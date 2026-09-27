@@ -1,0 +1,16 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "path": "mutant_rewrap",
+    "start": 424,
+    "count": 20
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/rewrap/store.go",
+    "file_sha256": "af324196245292ab5b6ee65abbb8de2f1db5e3d07772db0f98d273c53848349f",
+    "start": 424,
+    "end": 443,
+    "total_lines": 542,
+    "text": "424: func (s *Store) Chat(id string) (*Chat, error) {\n425: \treturn s.ChatWithOptions(id, true)\n426: }\n427: \n428: func (s *Store) ChatWithOptions(id string, loadAttachmentData bool) (*Chat, error) {\n429: \tif err := s.ensureDB(); err != nil {\n430: \t\treturn nil, err\n431: \t}\n432: \n433: \tchat, err := s.db.getChatWithOptions(id, loadAttachmentData)\n434: \tif err != nil {\n435: \t\treturn nil, fmt.Errorf(\"%w: chat %s\", not.Found, id)\n436: \t}\n437: \n438: \treturn chat, nil\n439: }\n440: \n441: func (s *Store) SetChat(chat Chat) error {\n442: \tif err := s.ensureDB(); err != nil {\n443: \t\treturn err"
+  }
+}

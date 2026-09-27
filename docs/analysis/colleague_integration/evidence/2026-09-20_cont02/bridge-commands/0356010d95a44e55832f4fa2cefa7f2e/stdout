@@ -1,0 +1,2318 @@
+
+FILE agent/session.go SHA256 0a2521b18c99b043c8f91af37605a827bdc4d50b380e904013a5959d859d3cec LINES 1087
+1: package agent
+2: 
+3: import (
+4: 	"context"
+5: 	"encoding/json"
+6: 	"errors"
+7: 	"fmt"
+8: 	"os"
+9: 	"path/filepath"
+10: 	"strings"
+11: 
+12: 	"github.com/google/uuid"
+13: 
+14: 	"github.com/ollama/ollama/api"
+15: )
+16: 
+17: type ChatClient interface {
+18: 	Chat(context.Context, *api.ChatRequest, api.ChatResponseFunc) error
+19: }
+20: 
+21: type Session struct {
+22: 	Client           ChatClient
+23: 	EventSinks       []EventSink
+24: 	Tools            *Registry
+25: 	Skills           *SkillCatalog
+26: 	DisableTools     bool
+27: 	ApprovalPrompter ApprovalPrompter
+28: 	ApprovalState    *ApprovalState
+29: 	WorkingDir       string
+30: 	Compactor        Compactor
+31: }
+32: 
+33: type RunOptions struct {
+34: 	ChatID       string
+35: 	Model        string
+36: 	SystemPrompt string
+37: 	Messages     []api.Message
+38: 	NewMessages  []api.Message
+39: 	Format       string
+40: 	Options      map[string]any
+41: 	Think        *api.ThinkValue
+42: 	KeepAlive    *api.Duration
+43: 	// SkillName loads a catalog skill as an ordered synthetic tool call/result
+44: 	// before the first model request for this run.
+45: 	SkillName string
+46: 	// MaxToolRounds limits consecutive model/tool cycles. A positive value is
+47: 	// an explicit limit. Zero selects the default guard. A negative value disables
+48: 	// the guard for tests or special callers.
+49: 	MaxToolRounds int
+50: }
+51: 
+52: type RunResult struct {
+53: 	Messages   []api.Message
+54: 	Latest     api.ChatResponse
+55: 	WorkingDir string
+56: }
+57: 
+58: const (
+59: 	defaultMaxToolRounds              = 100
+60: 	maxToolResultRunes                = 60000
+61: 	smallContextToolResultRunes       = 6000
+62: 	tinyContextToolResultRunes        = 3200
+63: 	smallContextToolResultTokenWindow = 8192
+64: 	tinyContextToolResultTokenWindow  = 4096
+65: 	toolTruncationMarkerReserveTokens = 64
+66: 	toolOutputFullOmissionPrefix      = "[tool output truncated: output omitted because the context is full;"
+67: )
+68: 
+69: type toolOutputOverflow struct {
+70: 	toolName   string
+71: 	toolCallID string
+72: 	content    string
+73: }
+74: 
+75: type toolBatchResult struct {
+76: 	messages  []api.Message
+77: 	stop      toolExecutionStop
+78: 	overflows []toolOutputOverflow
+79: }
+80: 
+81: // toolExecutionStop is the batch-level outcome for a group of tool calls,
+82: // distinct from per-call Event.Status values. The values overlap with
+83: // runFinish.status ("denied", "canceled") because a denied or canceled
+84: // batch also terminates the run with the matching status.
+85: type toolExecutionStop string
+86: 
+87: const (
+88: 	toolExecutionDenied   toolExecutionStop = "denied"
+89: 	toolExecutionCanceled toolExecutionStop = "canceled"
+90: )
+91: 
+92: const toolExecutionDisabledMessage = "Tool execution disabled."
+93: 
+94: type runPhase int
+95: 
+96: const (
+97: 	runPhaseModel runPhase = iota
+98: 	runPhaseTools
+99: 	runPhaseCompact
+100: 	runPhaseDone
+101: )
+102: 
+103: type runState struct {
+104: 	runID string
+105: 	opts  RunOptions
+106: 
+107: 	phase runPhase
+108: 
+109: 	messages []api.Message
+110: 	latest   api.ChatResponse
+111: 
+112: 	assistant        api.Message
+113: 	pendingToolCalls []api.ToolCall
+114: 	canceled         bool
+115: 
+116: 	toolBatch *toolBatchResult
+117: 
+118: 	consecutiveModelErrors int
+119: 	toolRounds             int
+120: 	maxToolRounds          int
+121: 	compactionSkipNotified bool
+122: 
+123: 	finish runFinish
+124: }
+125: 
+126: type runFinish struct {
+127: 	status         RunStatus
+128: 	ignoreCanceled bool
+129: 	err            error
+130: }
+131: 
+132: func (st *runState) finishDone() {
+133: 	st.finish = runFinish{status: RunStatusDone}
+134: 	st.phase = runPhaseDone
+135: }
+136: 
+137: func (st *runState) finishDenied() {
+138: 	st.finish = runFinish{status: RunStatusDenied}
+139: 	st.phase = runPhaseDone
+140: }
+141: 
+142: func (st *runState) finishCanceled() {
+143: 	st.finish = runFinish{status: RunStatusCanceled, ignoreCanceled: true}
+144: 	st.phase = runPhaseDone
+145: }
+146: 
+147: func (st *runState) finishError(err error) {
+148: 	st.finish = runFinish{err: err}
+149: 	st.phase = runPhaseDone
+150: }
+151: 
+152: func (s *Session) Run(ctx context.Context, opts RunOptions) (*RunResult, error) {
+153: 	if err := s.validateRun(opts); err != nil {
+154: 		return nil, err
+155: 	}
+156: 	if s.ApprovalState == nil {
+157: 		s.ApprovalState = &ApprovalState{}
+158: 	}
+159: 	runID := uuid.NewString()
+160: 	messages, err := s.buildRunMessages(ctx, runID, opts)
+161: 	if err != nil {
+162: 		return nil, err
+163: 	}
+164: 	activatedSkill, err := s.activateSkill(ctx, runID, opts)
+165: 	if err != nil {
+166: 		s.emit(newErrorEvent(newEventMetadata(runID, opts), err.Error()))
+167: 		return nil, err
+168: 	}
+169: 	if len(activatedSkill) > 0 {
+170: 		messages = append(messages, activatedSkill...)
+171: 		if err := s.checkPreflightPromptBudget(opts, messages); err != nil {
+172: 			s.emit(newErrorEvent(newEventMetadata(runID, opts), err.Error()))
+173: 			return nil, err
+174: 		}
+175: 	}
+176: 
+177: 	st := runState{
+178: 		runID:         runID,
+179: 		opts:          opts,
+180: 		phase:         runPhaseModel,
+181: 		messages:      messages,
+182: 		maxToolRounds: resolvedMaxToolRounds(opts.MaxToolRounds),
+183: 	}
+184: 	for {
+185: 		switch st.phase {
+186: 		case runPhaseModel:
+187: 			if err := s.runModelStep(ctx, &st); err != nil {
+188: 				return nil, err
+189: 			}
+190: 		case runPhaseTools:
+191: 			if err := s.runToolStep(ctx, &st); err != nil {
+192: 				return nil, err
+193: 			}
+194: 		case runPhaseCompact:
+195: 			if err := s.runCompactionStep(ctx, &st); err != nil {
+196: 				return nil, err
+197: 			}
+198: 		case runPhaseDone:
+199: 			return s.finishRun(ctx, &st)
+200: 		}
+201: 	}
+202: }
+203: 
+204: // validateRun checks the preconditions for a run.
+205: func (s *Session) validateRun(opts RunOptions) error {
+206: 	if s == nil {
+207: 		return errors.New("nil session")
+208: 	}
+209: 	if s.Client == nil {
+210: 		return errors.New("agent session requires a chat client")
+211: 	}
+212: 	if opts.Model == "" {
+213: 		return errors.New("agent session requires a model")
+214: 	}
+215: 	return nil
+216: }
+217: 
+218: // buildRunMessages sanitizes the provided message history, runs the preflight
+219: // prompt-budget check, and returns the initial message list for the run. It
+220: // emits an EventError and returns it if the preflight check fails.
+221: func (s *Session) buildRunMessages(ctx context.Context, runID string, opts RunOptions) ([]api.Message, error) {
+222: 	messages := make([]api.Message, 0, len(opts.Messages)+len(opts.NewMessages))
+223: 	for _, msg := range opts.Messages {
+224: 		messages = append(messages, sanitizeMessageForRun(msg))
+225: 	}
+226: 	for _, msg := range opts.NewMessages {
+227: 		msg = sanitizeMessageForRun(msg)
+228: 		messages = append(messages, msg)
+229: 	}
+230: 
+231: 	if err := s.checkPreflightPromptBudget(opts, messages); err != nil {
+232: 		s.emit(newErrorEvent(newEventMetadata(runID, opts), err.Error()))
+233: 		return nil, err
+234: 	}
+235: 	return messages, nil
+236: }
+237: 
+238: func (s *Session) runModelStep(ctx context.Context, st *runState) error {
+239: 	opts := st.opts
+240: 	meta := newEventMetadata(st.runID, opts)
+241: 
+242: 	assistant, pendingToolCalls, canceled, err := s.chatRound(ctx, st.runID, opts, st.messages, &st.latest)
+243: 	if err != nil {
+244: 		var statusErr api.StatusError
+245: 		if errors.As(err, &statusErr) && statusErr.StatusCode >= 500 && st.consecutiveModelErrors < 2 {
+246: 			st.consecutiveModelErrors++
+247: 			st.messages = append(st.messages, api.Message{
+248: 				Role:    "user",
+249: 				Content: fmt.Sprintf("Your previous response caused an error: %s\n\nPlease try again with a valid response.", statusErr.ErrorMessage),
+250: 			})
+251: 			return nil
+252: 		}
+253: 		s.emit(newErrorEvent(meta, err.Error()))
+254: 		return err
+255: 	}
+256: 	st.consecutiveModelErrors = 0
+257: 	st.assistant = assistant
+258: 	st.pendingToolCalls = pendingToolCalls
+259: 	st.canceled = canceled
+260: 
+261: 	if !messageEmpty(assistant) {
+262: 		st.messages = append(st.messages, assistant)
+263: 	}
+264: 
+265: 	if len(pendingToolCalls) == 0 {
+266: 		st.toolBatch = nil
+267: 		st.phase = runPhaseCompact
+268: 		return nil
+269: 	}
+270: 
+271: 	if canceled {
+272: 		skipped, skipErr := s.skipToolCalls(ctx, st.runID, opts, pendingToolCalls, "Tool execution skipped because the run was canceled.")
+273: 		if skipErr != nil {
+274: 			s.emit(newErrorEvent(meta, skipErr.Error()))
+275: 			return skipErr
+276: 		}
+277: 		st.messages = append(st.messages, skipped...)
+278: 		st.finishCanceled()
+279: 		return nil
+280: 	}
+281: 
+282: 	if s.DisableTools {
+283: 		batch, skipErr := s.disabledToolCalls(ctx, st.runID, opts, st.messages, pendingToolCalls)
+284: 		if skipErr != nil {
+285: 			s.emit(newErrorEvent(meta, skipErr.Error()))
+286: 			return skipErr
+287: 		}
+288: 		st.messages = append(st.messages, batch.messages...)
+289: 		st.toolBatch = &batch
+290: 		st.phase = runPhaseCompact
+291: 		return nil
+292: 	}
+293: 
+294: 	if s.Tools == nil {
+295: 		st.finishDone()
+296: 		return nil
+297: 	}
+298: 
+299: 	if st.maxToolRounds >= 0 && st.toolRounds >= st.maxToolRounds {
+300: 		content := fmt.Sprintf("Tool execution skipped because the max tool-round limit of %d was reached. Send another message to continue.", st.maxToolRounds)
+301: 		toolMessages, skipErr := s.skipToolCalls(ctx, st.runID, opts, pendingToolCalls, content)
+302: 		if skipErr != nil {
+303: 			s.emit(newErrorEvent(meta, skipErr.Error()))
+304: 			return skipErr
+305: 		}
+306: 		st.messages = append(st.messages, toolMessages...)
+307: 		err := fmt.Errorf("tool round limit reached after %d rounds; send another message to continue", st.maxToolRounds)
+308: 		s.emit(newErrorEvent(meta, err.Error()))
+309: 		st.finishError(err)
+310: 		return nil
+311: 	}
+312: 
+313: 	st.phase = runPhaseTools
+314: 	return nil
+315: }
+316: 
+317: func (s *Session) runToolStep(ctx context.Context, st *runState) error {
+318: 	batch, err := s.executeToolCalls(ctx, st.runID, st.opts, st.messages, st.pendingToolCalls)
+319: 	if err != nil {
+320: 		s.emit(newErrorEvent(newEventMetadata(st.runID, st.opts), err.Error()))
+321: 		return err
+322: 	}
+323: 
+324: 	st.messages = append(st.messages, batch.messages...)
+325: 	st.toolBatch = &batch
+326: 	st.phase = runPhaseCompact
+327: 	return nil
+328: }
+329: 
+330: func (s *Session) runCompactionStep(ctx context.Context, st *runState) error {
+331: 	opts := st.opts
+332: 	meta := newEventMetadata(st.runID, opts)
+333: 	var err error
+334: 	if st.toolBatch != nil && len(st.toolBatch.overflows) > 0 {
+335: 		st.messages, st.compactionSkipNotified, err = s.compactForToolOutputOverflow(ctx, st.runID, opts, st.messages, st.latest, st.assistant, st.toolBatch.messages, st.toolBatch.overflows, st.compactionSkipNotified)
+336: 	} else {
+337: 		st.messages, st.compactionSkipNotified, err = s.maybeCompact(ctx, st.runID, opts, st.messages, st.latest, st.compactionSkipNotified)
+338: 	}
+339: 	if err != nil {
+340: 		s.emit(newErrorEvent(meta, err.Error()))
+341: 		st.finishError(err)
+342: 		return nil
+343: 	}
+344: 
+345: 	if st.toolBatch == nil {
+346: 		if st.canceled {
+347: 			st.finishCanceled()
+348: 		} else {
+349: 			st.finishDone()
+350: 		}
+351: 		return nil
+352: 	}
+353: 
+354: 	switch st.toolBatch.stop {
+355: 	case toolExecutionDenied:
+356: 		st.finishDenied()
+357: 	case toolExecutionCanceled:
+358: 		st.finishCanceled()
+359: 	default:
+360: 		st.toolRounds++
+361: 		st.assistant = api.Message{}
+362: 		st.pendingToolCalls = nil
+363: 		st.toolBatch = nil
+364: 		st.phase = runPhaseModel
+365: 	}
+366: 	return nil
+367: }
+368: 
+369: func (s *Session) finishRun(ctx context.Context, st *runState) (*RunResult, error) {
+370: 	if st.finish.status != "" {
+371: 		event := newRunFinished(newEventMetadata(st.runID, st.opts), st.finish.status)
+372: 		var err error
+373: 		if st.finish.ignoreCanceled {
+374: 			err = s.emitIgnoringCanceled(ctx, event)
+375: 		} else {
+376: 			err = s.emit(event)
+377: 		}
+378: 		if err != nil {
+379: 			return nil, err
+380: 		}
+381: 	}
+382: 	return &RunResult{Messages: st.messages, Latest: st.latest, WorkingDir: s.WorkingDir}, st.finish.err
+383: }
+384: 
+385: func (s *Session) chatRound(ctx context.Context, runID string, opts RunOptions, messages []api.Message, latest *api.ChatResponse) (api.Message, []api.ToolCall, bool, error) {
+386: 	meta := newEventMetadata(runID, opts)
+387: 	var tools api.Tools
+388: 	if !s.DisableTools {
+389: 		tools = s.availableTools()
+390: 	}
+391: 	req := buildChatRequest(opts, messages, tools)
+392: 
+393: 	assistant := api.Message{Role: "assistant"}
+394: 	var pendingToolCalls []api.ToolCall
+395: 
+396: 	err := s.Client.Chat(ctx, &req, func(response api.ChatResponse) error {
+397: 		if response.Message.Role != "" {
+398: 			assistant.Role = response.Message.Role
+399: 		}
+400: 
+401: 		if messageEmpty(response.Message) {
+402: 			*latest = response
+403: 			return nil
+404: 		}
+405: 
+406: 		if response.Message.Thinking != "" {
+407: 			assistant.Thinking += response.Message.Thinking
+408: 			if err := s.emit(newThinkingDelta(meta, response.Message.Thinking)); err != nil {
+409: 				return err
+410: 			}
+411: 		}
+412: 
+413: 		if response.Message.Content != "" {
+414: 			assistant.Content += response.Message.Content
+415: 			if err := s.emit(newMessageDelta(meta, response.Message.Content)); err != nil {
+416: 				return err
+417: 			}
+418: 		}
+419: 
+420: 		if len(response.Message.ToolCalls) > 0 {
+421: 			assistant.ToolCalls = append(assistant.ToolCalls, response.Message.ToolCalls...)
+422: 			pendingToolCalls = append(pendingToolCalls, response.Message.ToolCalls...)
+423: 			if err := s.emit(newToolCallDetected(meta, response.Message.ToolCalls)); err != nil {
+424: 				return err
+425: 			}
+426: 		}
+427: 
+428: 		*latest = response
+429: 		return nil
+430: 	})
+431: 	if err != nil {
+432: 		if isContextCanceledError(ctx, err) {
+433: 			return assistant, pendingToolCalls, true, nil
+434: 		}
+435: 		return assistant, pendingToolCalls, false, err
+436: 	}
+437: 
+438: 	return assistant, pendingToolCalls, false, nil
+439: }
+440: 
+441: func buildChatRequest(opts RunOptions, messages []api.Message, tools api.Tools) api.ChatRequest {
+442: 	requestMessages := sanitizeMessagesForRequest(messages)
+443: 	if strings.TrimSpace(opts.SystemPrompt) != "" {
+444: 		withSystem := make([]api.Message, 0, len(requestMessages)+1)
+445: 		withSystem = append(withSystem, api.Message{Role: "system", Content: opts.SystemPrompt})
+446: 		requestMessages = append(withSystem, requestMessages...)
+447: 	}
+448: 
+449: 	format := opts.Format
+450: 	if format == "json" {
+451: 		format = `"` + format + `"`
+452: 	}
+453: 
+454: 	req := api.ChatRequest{
+455: 		Model:    opts.Model,
+456: 		Messages: requestMessages,
+457: 		Format:   json.RawMessage(format),
+458: 		Options:  opts.Options,
+459: 		Think:    opts.Think,
+460: 	}
+461: 	if opts.KeepAlive != nil {
+462: 		req.KeepAlive = opts.KeepAlive
+463: 	}
+464: 	if len(tools) > 0 {
+465: 		req.Tools = tools
+466: 	}
+467: 	return req
+468: }
+469: 
+470: func (s *Session) executeToolCalls(ctx context.Context, runID string, opts RunOptions, messages []api.Message, calls []api.ToolCall) (toolBatchResult, error) {
+471: 	meta := newEventMetadata(runID, opts)
+472: 	batch := toolBatchResult{
+473: 		messages: make([]api.Message, 0, len(calls)),
+474: 	}
+475: 	// Pre-compute the full-history token estimate once per batch instead of
+476: 	// re-marshaling the entire history for each tool call. Per-call deltas
+477: 	// (tool messages already appended this batch) are tracked in batchTokens
+478: 	// and added to historyTokens for a lightweight running total.
+479: 	historyTokens := s.estimateRunPromptTokens(opts, messages)
+480: 	batchTokens := 0
+481: 
+482: 	type plannedToolCall struct {
+483: 		call       api.ToolCall
+484: 		tool       Tool
+485: 		toolName   string
+486: 		args       map[string]any
+487: 		workingDir string
+488: 	}
+489: 	plans := make([]plannedToolCall, 0, len(calls))
+490: 	batchWorkingDir := s.currentWorkingDir()
+491: 	approvalReq := ApprovalRequest{WorkingDir: batchWorkingDir}
+492: 	for _, call := range calls {
+493: 		toolName := call.Function.Name
+494: 		args := call.Function.Arguments.ToMap()
+495: 		tool, ok := s.Tools.Get(toolName)
+496: 		plans = append(plans, plannedToolCall{
+497: 			call:       call,
+498: 			tool:       tool,
+499: 			toolName:   toolName,
+500: 			args:       args,
+501: 			workingDir: batchWorkingDir,
+502: 		})
+503: 		if ok && s.needsApproval(tool, toolName, args) {
+504: 			approvalReq.AddToolCall(call.ID, toolName, toolApprovalScope(tool, toolName, args), args)
+505: 		}
+506: 	}
+507: 
+508: 	if len(approvalReq.Calls) > 0 {
+509: 		approvalResult, err := s.authorizeToolCalls(ctx, approvalReq)
+510: 		if err != nil {
+511: 			if ctx.Err() != nil {
+512: 				skipped, skipErr := s.skipToolCalls(ctx, runID, opts, calls, "Tool execution skipped because the run was canceled.")
+513: 				if skipErr != nil {
+514: 					return toolBatchResult{}, skipErr
+515: 				}
+516: 				batch.messages = append(batch.messages, skipped...)
+517: 				batch.stop = toolExecutionCanceled
+518: 				return batch, nil
+519: 			}
+520: 			return toolBatchResult{}, err
+521: 		}
+522: 		if !approvalResult.Allow {
+523: 			content := approvalResult.Reason
+524: 			if content == "" {
+525: 				content = "Tool execution denied."
+526: 			}
+527: 			for _, plan := range plans {
+528: 				msg := s.toolMessageForContext(plan.toolName, plan.call.ID, content, opts, historyTokens+batchTokens)
+529: 				batch.messages = append(batch.messages, msg)
+530: 				batchTokens += estimateMessagesTokens([]api.Message{msg})
+531: 				deniedContent := msg.Content
+532: 				if emitErr := s.emit(newToolFinished(meta, "denied", plan.call.ID, plan.toolName, "", plan.args, deniedContent, deniedContent)); emitErr != nil {
+533: 					return toolBatchResult{}, emitErr
+534: 				}
+535: 			}
+536: 			batch.stop = toolExecutionDenied
+537: 			return batch, nil
+538: 		}
+539: 	}
+540: 
+541: 	for i, plan := range plans {
+542: 		call := plan.call
+543: 		toolName := plan.toolName
+544: 		args := plan.args
+545: 		if ctx.Err() != nil {
+546: 			skipped, skipErr := s.skipToolCalls(ctx, runID, opts, calls[i:], "Tool execution skipped because the run was canceled.")
+547: 			if skipErr != nil {
+548: 				return toolBatchResult{}, skipErr
+549: 			}
+550: 			batch.messages = append(batch.messages, skipped...)
+551: 			batch.stop = toolExecutionCanceled
+552: 			return batch, nil
+553: 		}
+554: 		if plan.tool == nil {
+555: 			content := fmt.Sprintf("Error: unknown tool: %s", toolName)
+556: 			msg := s.toolMessageForContext(toolName, call.ID, content, opts, historyTokens+batchTokens)
+557: 			batch.messages = append(batch.messages, msg)
+558: 			batchTokens += estimateMessagesTokens([]api.Message{msg})
+559: 			content = msg.Content
+560: 			if toolOutputFullyOmitted(content) {
+561: 				batch.overflows = append(batch.overflows, toolOutputOverflow{toolName: toolName, toolCallID: call.ID, content: fmt.Sprintf("Error: unknown tool: %s", toolName)})
+562: 			}
+563: 			if emitErr := s.emit(newToolFinished(meta, "failed", call.ID, toolName, "", args, content, fmt.Sprintf("unknown tool: %s", toolName))); emitErr != nil {
+564: 				return toolBatchResult{}, emitErr
+565: 			}
+566: 			continue
+567: 		}
+568: 
+569: 		if err := s.emit(newToolStarted(meta, call.ID, toolName, plan.workingDir, args)); err != nil {
+570: 			return toolBatchResult{}, err
+571: 		}
+572: 
+573: 		result, err := s.Tools.Execute(ctx, ToolContext{WorkingDir: plan.workingDir}, call)
+574: 		if err != nil {
+575: 			rawContent := fmt.Sprintf("Error: %v", err)
+576: 			msg := s.toolMessageForContext(toolName, call.ID, rawContent, opts, historyTokens+batchTokens)
+577: 			batch.messages = append(batch.messages, msg)
+578: 			batchTokens += estimateMessagesTokens([]api.Message{msg})
+579: 			content := msg.Content
+580: 			if toolOutputFullyOmitted(content) {
+581: 				batch.overflows = append(batch.overflows, toolOutputOverflow{toolName: toolName, toolCallID: call.ID, content: rawContent})
+582: 			}
+583: 			if emitErr := s.emitIgnoringCanceled(ctx, newToolFinished(meta, "failed", call.ID, toolName, "", args, content, err.Error())); emitErr != nil {
+584: 				return toolBatchResult{}, emitErr
+585: 			}
+586: 			if ctx.Err() != nil {
+587: 				skipped, skipErr := s.skipToolCalls(ctx, runID, opts, calls[i+1:], "Tool execution skipped because the run was canceled.")
+588: 				if skipErr != nil {
+589: 					return toolBatchResult{}, skipErr
+590: 				}
+591: 				batch.messages = append(batch.messages, skipped...)
+592: 				batch.stop = toolExecutionCanceled
+593: 				return batch, nil
+594: 			}
+595: 			continue
+596: 		}
+597: 
+598: 		eventWorkingDir := plan.workingDir
+599: 		if s.applyToolWorkingDir(result.WorkingDir) {
+600: 			eventWorkingDir = s.WorkingDir
+601: 		}
+602: 		rawContent := result.Content
+603: 
+604: 		msg := s.toolMessageForContext(toolName, call.ID, rawContent, opts, historyTokens+batchTokens)
+605: 		batch.messages = append(batch.messages, msg)
+606: 		batchTokens += estimateMessagesTokens([]api.Message{msg})
+607: 		content := msg.Content
+608: 
+609: 		if toolOutputFullyOmitted(content) {
+610: 			batch.overflows = append(batch.overflows, toolOutputOverflow{toolName: toolName, toolCallID: call.ID, content: rawContent})
+611: 		}
+612: 		if err := s.emitIgnoringCanceled(ctx, newToolFinished(meta, "done", call.ID, toolName, eventWorkingDir, args, content, "")); err != nil {
+613: 			return toolBatchResult{}, err
+614: 		}
+615: 		if ctx.Err() != nil {
+616: 			skipped, skipErr := s.skipToolCalls(ctx, runID, opts, calls[i+1:], "Tool execution skipped because the run was canceled.")
+617: 			if skipErr != nil {
+618: 				return toolBatchResult{}, skipErr
+619: 			}
+620: 			batch.messages = append(batch.messages, skipped...)
+621: 			batch.stop = toolExecutionCanceled
+622: 			return batch, nil
+623: 		}
+624: 	}
+625: 	return batch, nil
+626: }
+627: 
+628: func (s *Session) disabledToolCalls(ctx context.Context, runID string, opts RunOptions, messages []api.Message, calls []api.ToolCall) (toolBatchResult, error) {
+629: 	meta := newEventMetadata(runID, opts)
+630: 	batch := toolBatchResult{
+631: 		messages: make([]api.Message, 0, len(calls)),
+632: 	}
+633: 	historyTokens := s.estimateRunPromptTokens(opts, messages)
+634: 	batchTokens := 0
+635: 	for _, call := range calls {
+636: 		toolName := call.Function.Name
+637: 		args := call.Function.Arguments.ToMap()
+638: 		msg := s.toolMessageForContext(toolName, call.ID, toolExecutionDisabledMessage, opts, historyTokens+batchTokens)
+639: 		batch.messages = append(batch.messages, msg)
+640: 		batchTokens += estimateMessagesTokens([]api.Message{msg})
+641: 		if emitErr := s.emitIgnoringCanceled(ctx, newToolFinished(meta, "disabled", call.ID, toolName, "", args, msg.Content, msg.Content)); emitErr != nil {
+642: 			return toolBatchResult{}, emitErr
+643: 		}
+644: 	}
+645: 	return batch, nil
+646: }
+647: 
+648: func (s *Session) skipToolCalls(ctx context.Context, runID string, opts RunOptions, calls []api.ToolCall, content string) ([]api.Message, error) {
+649: 	meta := newEventMetadata(runID, opts)
+650: 	toolMessages := make([]api.Message, 0, len(calls))
+651: 	for _, call := range calls {
+652: 		toolName := call.Function.Name
+653: 		args := call.Function.Arguments.ToMap()
+654: 		msg := toolMessage(toolName, call.ID, content)
+655: 		toolMessages = append(toolMessages, msg)
+656: 		if emitErr := s.emitIgnoringCanceled(ctx, newToolFinished(meta, "skipped", call.ID, toolName, "", args, msg.Content, msg.Content)); emitErr != nil {
+657: 			return nil, emitErr
+658: 		}
+659: 	}
+660: 	return toolMessages, nil
+661: }
+662: 
+663: func (s *Session) currentWorkingDir() string {
+664: 	if s.WorkingDir != "" {
+665: 		return s.WorkingDir
+666: 	}
+667: 	wd, err := os.Getwd()
+668: 	if err != nil {
+669: 		return ""
+670: 	}
+671: 	s.WorkingDir = wd
+672: 	return s.WorkingDir
+673: }
+674: 
+675: func (s *Session) applyToolWorkingDir(next string) bool {
+676: 	next = strings.TrimSpace(next)
+677: 	if next == "" {
+678: 		return false
+679: 	}
+680: 	current := s.currentWorkingDir()
+681: 	nextAbs, err := canonicalSessionPath(next)
+682: 	if err != nil {
+683: 		return false
+684: 	}
+685: 	if current == nextAbs {
+686: 		return false
+687: 	}
+688: 	s.WorkingDir = nextAbs
+689: 	return true
+690: }
+691: 
+692: func canonicalSessionPath(path string) (string, error) {
+693: 	abs, err := filepath.Abs(path)
+694: 	if err != nil {
+695: 		return "", err
+696: 	}
+697: 	resolved, err := filepath.EvalSymlinks(abs)
+698: 	if err == nil {
+699: 		return resolved, nil
+700: 	}
+701: 	return abs, nil
+702: }
+703: 
+704: func isContextCanceledError(ctx context.Context, err error) bool {
+705: 	if err == nil {
+706: 		return false
+707: 	}
+708: 	if errors.Is(err, context.Canceled) {
+709: 		return true
+710: 	}
+711: 	return ctx != nil && errors.Is(ctx.Err(), context.Canceled) && strings.Contains(err.Error(), "context canceled")
+712: }
+713: 
+714: func (s *Session) maybeCompact(ctx context.Context, runID string, opts RunOptions, messages []api.Message, latest api.ChatResponse, skipNotified bool) ([]api.Message, bool, error) {
+715: 	if s.Compactor == nil {
+716: 		return messages, skipNotified, nil
+717: 	}
+718: 	req := s.compactionRequest(runID, opts, messages, latest)
+719: 	trigger := s.autoCompactionTrigger(req)
+720: 	if trigger != "" {
+721: 		s.emitCompactionStarted(runID, opts, trigger)
+722: 	}
+723: 	result, err := s.Compactor.MaybeCompact(ctx, req)
+724: 	if err != nil {
+725: 		if result.Due && !skipNotified {
+726: 			if trigger == "" {
+727: 				trigger = CompactionTriggerError
+728: 			}
+729: 			s.emitCompactionSkipped(runID, opts, trigger, result.Reason)
+730: 			skipNotified = true
+731: 		}
+732: 		return messages, skipNotified, nil
+733: 	}
+734: 	if !result.Compacted {
+735: 		if result.Due && !skipNotified {
+736: 			if trigger == "" {
+737: 				trigger = CompactionTriggerDue
+738: 			}
+739: 			s.emitCompactionSkipped(runID, opts, trigger, result.Reason)
+740: 			skipNotified = true
+741: 		}
+742: 		return messages, skipNotified, nil
+743: 	}
+744: 	s.emitCompacted(runID, opts, result.Messages, trigger, result.Summary)
+745: 	if err := s.checkPostCompactionPromptBudget(opts, result.Messages); err != nil {
+746: 		return result.Messages, skipNotified, err
+747: 	}
+748: 	return result.Messages, skipNotified, nil
+749: }
+750: 
+751: func (s *Session) compactForToolOutputOverflow(ctx context.Context, runID string, opts RunOptions, messages []api.Message, latest api.ChatResponse, assistant api.Message, toolMessages []api.Message, overflows []toolOutputOverflow, skipNotified bool) ([]api.Message, bool, error) {
+752: 	if s.Compactor == nil {
+753: 		return messages, skipNotified, nil
+754: 	}
+755: 
+756: 	keepUserTurns := 0
+757: 	req := s.compactionRequest(runID, opts, messages, latest)
+758: 	req.Force = true
+759: 	req.KeepUserTurns = &keepUserTurns
+760: 	s.emitCompactionStarted(runID, opts, CompactionTriggerToolOutput)
+761: 
+762: 	result, err := s.Compactor.MaybeCompact(ctx, req)
+763: 	if err != nil {
+764: 		if result.Due && !skipNotified {
+765: 			s.emitCompactionSkipped(runID, opts, CompactionTriggerToolOutput, result.Reason)
+766: 			skipNotified = true
+767: 		}
+768: 		return messages, skipNotified, nil
+769: 	}
+770: 	if !result.Compacted {
+771: 		if result.Due && !skipNotified {
+772: 			s.emitCompactionSkipped(runID, opts, CompactionTriggerToolOutput, result.Reason)
+773: 			skipNotified = true
+774: 		}
+775: 		return messages, skipNotified, nil
+776: 	}
+777: 
+778: 	overflowByID := make(map[string]toolOutputOverflow, len(overflows))
+779: 	for _, overflow := range overflows {
+780: 		overflowByID[overflow.toolCallID] = overflow
+781: 	}
+782: 
+783: 	compacted := append([]api.Message(nil), result.Messages...)
+784: 	if !messageEmpty(assistant) {
+785: 		compacted = append(compacted, assistant)
+786: 	}
+787: 
+788: 	historyTokens := s.estimateRunPromptTokens(opts, compacted)
+789: 	batchTokens := 0
+790: 	for _, msg := range toolMessages {
+791: 		content := msg.Content
+792: 		toolName := msg.ToolName
+793: 		if overflow, ok := overflowByID[msg.ToolCallID]; ok {
+794: 			content = overflow.content
+795: 			if overflow.toolName != "" {
+796: 				toolName = overflow.toolName
+797: 			}
+798: 		}
+799: 		refit := s.toolMessageForPostCompactionContext(toolName, msg.ToolCallID, content, opts, historyTokens+batchTokens)
+800: 		compacted = append(compacted, refit)
+801: 		batchTokens += estimateMessagesTokens([]api.Message{refit})
+802: 	}
+803: 
+804: 	s.emitCompacted(runID, opts, compacted, CompactionTriggerToolOutput, result.Summary)
+805: 	if err := s.checkPostCompactionPromptBudget(opts, compacted); err != nil {
+806: 		return compacted, skipNotified, err
+807: 	}
+808: 	return compacted, skipNotified, nil
+809: }
+810: 
+811: func (s *Session) compactionRequest(runID string, opts RunOptions, messages []api.Message, latest api.ChatResponse) CompactionRequest {
+812: 	meta := newEventMetadata(runID, opts)
+813: 	return CompactionRequest{
+814: 		ChatID:       opts.ChatID,
+815: 		Model:        opts.Model,
+816: 		SystemPrompt: opts.SystemPrompt,
+817: 		Messages:     messages,
+818: 		Tools:        s.availableTools(),
+819: 		Format:       opts.Format,
+820: 		Latest:       latest,
+821: 		Options:      opts.Options,
+822: 		KeepAlive:    opts.KeepAlive,
+823: 		Think:        opts.Think,
+824: 		ContinueTask: true,
+825: 		Progress: func(progress CompactionProgress) {
+826: 			_ = s.emit(newCompactionProgress(meta, progress.Tokens))
+827: 		},
+828: 	}
+829: }
+830: 
+831: func (s *Session) emitCompactionStarted(runID string, opts RunOptions, trigger CompactionTrigger) {
+832: 	_ = s.emit(newCompactionStarted(newEventMetadata(runID, opts), trigger))
+833: }
+834: 
+835: func (s *Session) emitCompactionSkipped(runID string, opts RunOptions, trigger CompactionTrigger, reason string) {
+836: 	_ = s.emit(newCompactionSkipped(newEventMetadata(runID, opts), trigger, CompactionSkippedMessage(reason)))
+837: }
+838: 
+839: func (s *Session) emitCompacted(runID string, opts RunOptions, messages []api.Message, trigger CompactionTrigger, summary string) {
+840: 	_ = s.emit(newCompacted(newEventMetadata(runID, opts), messages, trigger, summary))
+841: }
+842: 
+843: func (s *Session) autoCompactionTrigger(req CompactionRequest) CompactionTrigger {
+844: 	if s.Compactor == nil {
+845: 		return ""
+846: 	}
+847: 	trigger, should := s.Compactor.ShouldCompact(req)
+848: 	if should {
+849: 		return CompactionTrigger(trigger)
+850: 	}
+851: 	return ""
+852: }
+853: 
+854: func CompactionSkippedMessage(reason string) string {
+855: 	reason = strings.TrimSpace(reason)
+856: 	if reason == "" {
+857: 		reason = "compaction could not run"
+858: 	}
+859: 	return reason
+860: }
+861: 
+862: func resolvedMaxToolRounds(value int) int {
+863: 	if value != 0 {
+864: 		return value
+865: 	}
+866: 	return defaultMaxToolRounds
+867: }
+868: 
+869: // toolMessageWithBudget sizes a tool result message to fit within a token
+870: // budget (compaction threshold or context window). baseTokens is the
+871: // pre-computed estimate of everything before this message; budgetTokens is
+872: // the ceiling. If the message already fits, it is returned with only the
+873: // small-context rune cap applied.
+874: func (s *Session) toolMessageWithBudget(toolName, toolCallID, content string, opts RunOptions, baseTokens, budgetTokens int) api.Message {
+875: 	maxRunes := maxToolResultRunes
+876: 	if limit := smallContextToolResultLimitRunes(s.contextWindowTokens(opts)); limit > 0 {
+877: 		maxRunes = min(maxRunes, limit)
+878: 	}
+879: 
+880: 	if budgetTokens <= 0 {
+881: 		return toolMessageWithLimit(toolName, toolCallID, content, maxRunes)
+882: 	}
+883: 
+884: 	msg := toolMessageWithLimit(toolName, toolCallID, content, maxRunes)
+885: 	projectedTokens := baseTokens + estimateMessagesTokens([]api.Message{msg})
+886: 	if projectedTokens < budgetTokens {
+887: 		return msg
+888: 	}
+889: 
+890: 	overheadTokens := estimateMessagesTokens([]api.Message{{
+891: 		Role:       "tool",
+892: 		ToolName:   toolName,
+893: 		ToolCallID: toolCallID,
+894: 	}})
+895: 	// Keep oversized tool output below the budget before it is appended to
+896: 	// history. This is especially important for <=8k contexts: the next step
+897: 	// must still have enough room to compact and continue the same user
+898: 	// request instead of asking the user to prompt again.
+899: 	availableRunes := (budgetTokens - baseTokens - overheadTokens - toolTruncationMarkerReserveTokens) * 4
+900: 	maxRunes = min(maxRunes, max(0, availableRunes))
+901: 	msg.Content = truncateToolResultContentTo(content, maxRunes)
+902: 	return msg
+903: }
+904: 
+905: func (s *Session) toolMessageForContext(toolName, toolCallID, content string, opts RunOptions, baseTokens int) api.Message {
+906: 	return s.toolMessageWithBudget(toolName, toolCallID, content, opts, baseTokens, s.compactionThresholdTokens(opts))
+907: }
+908: 
+909: func (s *Session) toolMessageForPostCompactionContext(toolName, toolCallID, content string, opts RunOptions, baseTokens int) api.Message {
+910: 	return s.toolMessageWithBudget(toolName, toolCallID, content, opts, baseTokens, s.contextWindowTokens(opts))
+911: }
+912: 
+913: func toolMessageWithLimit(toolName, toolCallID, content string, maxRunes int) api.Message {
+914: 	return api.Message{
+915: 		Role:       "tool",
+916: 		Content:    truncateToolResultContentTo(content, maxRunes),
+917: 		ToolName:   toolName,
+918: 		ToolCallID: toolCallID,
+919: 	}
+920: }
+921: 
+922: func smallContextToolResultLimitRunes(contextWindow int) int {
+923: 	switch {
+924: 	case contextWindow > 0 && contextWindow <= tinyContextToolResultTokenWindow:
+925: 		return tinyContextToolResultRunes
+926: 	case contextWindow > 0 && contextWindow <= smallContextToolResultTokenWindow:
+927: 		return smallContextToolResultRunes
+928: 	default:
+929: 		return 0
+930: 	}
+931: }
+932: 
+933: func (s *Session) availableTools() api.Tools {
+934: 	if s == nil || s.Tools == nil {
+935: 		return nil
+936: 	}
+937: 	return s.Tools.Tools()
+938: }
+939: 
+940: func (s *Session) compactionThresholdTokens(opts RunOptions) int {
+941: 	contextWindow := s.contextWindowTokens(opts)
+942: 	if contextWindow <= 0 {
+943: 		return 0
+944: 	}
+945: 
+946: 	configuredThreshold := 0.0
+947: 	if s.Compactor != nil {
+948: 		configuredThreshold = s.Compactor.Threshold()
+949: 	}
+950: 
+951: 	threshold := int(float64(contextWindow) * ResolveCompactionThreshold(configuredThreshold))
+952: 	if threshold <= 0 {
+953: 		return 0
+954: 	}
+955: 	return threshold
+956: }
+957: 
+958: func (s *Session) contextWindowTokens(opts RunOptions) int {
+959: 	if s.Compactor == nil {
+960: 		return 0
+961: 	}
+962: 	return s.Compactor.ContextWindowTokens(opts.Options)
+963: }
+964: 
+965: func toolMessage(toolName, toolCallID, content string) api.Message {
+966: 	return toolMessageWithLimit(toolName, toolCallID, content, maxToolResultRunes)
+967: }
+968: 
+969: func sanitizeMessageForRun(msg api.Message) api.Message {
+970: 	if msg.Role == "tool" {
+971: 		msg.Content = truncateToolResultContent(msg.Content)
+972: 	}
+973: 	return msg
+974: }
+975: 
+976: func sanitizeMessagesForRequest(messages []api.Message) []api.Message {
+977: 	if len(messages) == 0 {
+978: 		return nil
+979: 	}
+980: 	sanitized := make([]api.Message, len(messages))
+981: 	for i, msg := range messages {
+982: 		sanitized[i] = sanitizeMessageForRun(msg)
+983: 	}
+984: 	return sanitized
+985: }
+986: 
+987: func truncateToolResultContent(content string) string {
+988: 	return truncateToolResultContentTo(content, maxToolResultRunes)
+989: }
+990: 
+991: func truncateToolResultContentTo(content string, maxRunes int) string {
+992: 	return Truncate(content, TruncateConfig{
+993: 		MaxRunes:           maxRunes,
+994: 		HeadTail:           true,
+995: 		HeadPct:            75,
+996: 		Label:              "tool output",
+997: 		Hint:               "Use a narrower command, line range, or search query if more detail is needed.",
+998: 		FullOmissionPrefix: toolOutputFullOmissionPrefix,
+999: 	})
+1000: }
+1001: 
+1002: // TruncateConfig configures content truncation via Truncate.
+1003: type TruncateConfig struct {
+1004: 	MaxRunes           int    // rune limit; <= 0 means full omission
+1005: 	HeadTail           bool   // true = head + tail split; false = head only
+1006: 	HeadPct            int    // percentage of MaxRunes for head (e.g. 75); tail gets the rest
+1007: 	Label              string // e.g. "tool output", "summary", "stdout"
+1008: 	Hint               string // guidance text appended to marker (optional)
+1009: 	FullOmissionPrefix string // marker prefix when MaxRunes <= 0
+1010: }
+1011: 
+1012: // Truncate truncates content to at most cfg.MaxRunes runes. When HeadTail is
+1013: // true, it preserves the first HeadPct% and last (100-HeadPct)% of the budget
+1014: // with a marker between; otherwise it keeps only the head. MaxRunes <= 0
+1015: // triggers full omission using FullOmissionPrefix. All token counts in
+1016: // markers use ApproximateTokens.
+1017: func Truncate(content string, cfg TruncateConfig) string {
+1018: 	runes := []rune(content)
+1019: 	total := len(runes)
+1020: 
+1021: 	if cfg.MaxRunes <= 0 {
+1022: 		return fmt.Sprintf("%s omitted ~%d tokens.%s]", cfg.FullOmissionPrefix, ApproximateTokens(total), truncHint(cfg.Hint))
+1023: 	}
+1024: 	if total <= cfg.MaxRunes {
+1025: 		return content
+1026: 	}
+1027: 
+1028: 	if !cfg.HeadTail {
+1029: 		head := cfg.MaxRunes
+1030: 		omitted := total - head
+1031: 		return string(runes[:head]) + TruncMarker(cfg.Label, head, 0, omitted, false, cfg.Hint)
+1032: 	}
+1033: 
+1034: 	head := cfg.MaxRunes * cfg.HeadPct / 100
+1035: 	tail := cfg.MaxRunes - head
+1036: 	omitted := total - head - tail
+1037: 	return string(runes[:head]) + TruncMarker(cfg.Label, head, tail, omitted, true, cfg.Hint) + string(runes[len(runes)-tail:])
+1038: }
+1039: 
+1040: func truncHint(hint string) string {
+1041: 	hint = strings.TrimSpace(hint)
+1042: 	if hint == "" {
+1043: 		return ""
+1044: 	}
+1045: 	if !strings.HasSuffix(hint, ".") {
+1046: 		hint += "."
+1047: 	}
+1048: 	return " " + hint
+1049: }
+1050: 
+1051: // TruncMarker formats a truncation marker with consistent wording. head and
+1052: // tail are rune counts; omitted is the count of runes removed. headTail
+1053: // selects the head+tail vs head-only format. hint is optional guidance text.
+1054: func TruncMarker(label string, head, tail, omitted int, headTail bool, hint string) string {
+1055: 	var b strings.Builder
+1056: 	b.WriteString("\n\n[")
+1057: 	b.WriteString(label)
+1058: 	b.WriteString(" truncated: ")
+1059: 	if headTail {
+1060: 		fmt.Fprintf(&b, "showing first ~%d tokens and last ~%d tokens; ", ApproximateTokens(head), ApproximateTokens(tail))
+1061: 	} else {
+1062: 		fmt.Fprintf(&b, "showing first ~%d tokens; ", ApproximateTokens(head))
+1063: 	}
+1064: 	fmt.Fprintf(&b, "omitted ~%d tokens.%s]", ApproximateTokens(omitted), truncHint(hint))
+1065: 	if headTail {
+1066: 		b.WriteString("\n\n")
+1067: 	}
+1068: 	return b.String()
+1069: }
+1070: 
+1071: func toolOutputFullyOmitted(content string) bool {
+1072: 	return strings.HasPrefix(content, toolOutputFullOmissionPrefix)
+1073: }
+1074: 
+1075: // ApproximateTokens estimates token count from a character/byte count using
+1076: // the standard ~4 chars-per-token heuristic. It is intentionally rough; all
+1077: // callers use it only for sizing/truncation decisions, not billing.
+1078: func ApproximateTokens(n int) int {
+1079: 	if n <= 0 {
+1080: 		return 0
+1081: 	}
+1082: 	return max(1, (n+3)/4)
+1083: }
+1084: 
+1085: func messageEmpty(msg api.Message) bool {
+1086: 	return msg.Content == "" && msg.Thinking == "" && len(msg.ToolCalls) == 0
+1087: }
+
+FILE cmd/tui/chat/compaction.go SHA256 d31cabf34e80f4ae23c772be65bd019aef644a3fa6b1d53428c68c0ebff8b693 LINES 101
+1: package chat
+2: 
+3: import (
+4: 	"context"
+5: 	"slices"
+6: 
+7: 	tea "github.com/charmbracelet/bubbletea"
+8: 
+9: 	coreagent "github.com/ollama/ollama/agent"
+10: 	"github.com/ollama/ollama/api"
+11: )
+12: 
+13: func (m *chatModel) startManualCompaction() (tea.Model, tea.Cmd) {
+14: 	if m.running || m.compacting {
+15: 		m.entries = append(m.entries, newChatEntry(chatEntry{role: "system", content: "Wait for the current response to finish before compacting."}))
+16: 		return *m, nil
+17: 	}
+18: 	m.refreshContextWindowTokens(m.opts.Model)
+19: 	if m.opts.Compactor == nil {
+20: 		m.entries = append(m.entries, newChatEntry(chatEntry{role: "system", content: coreagent.CompactionSkippedMessage("compaction is unavailable")}))
+21: 		m.status = "compact skipped"
+22: 		return *m, nil
+23: 	}
+24: 
+25: 	ctx := m.ctx
+26: 	if ctx == nil {
+27: 		ctx = context.Background()
+28: 	}
+29: 	runCtx, cancel := context.WithCancel(ctx)
+30: 	compactor := m.opts.Compactor
+31: 	events := make(chan tea.Msg, 128)
+32: 	m.compacting = true
+33: 	m.compactingTokens = 0
+34: 	m.cancel = cancel
+35: 	m.compactEvents = events
+36: 	m.status = "compacting"
+37: 	messages := slices.Clone(m.messages)
+38: 	var tools api.Tools
+39: 	if m.opts.Tools != nil {
+40: 		tools = m.opts.Tools.Tools()
+41: 	}
+42: 	req := coreagent.CompactionRequest{
+43: 		ChatID:       m.chatID,
+44: 		Model:        m.opts.Model,
+45: 		SystemPrompt: m.systemPrompt(""),
+46: 		Messages:     messages,
+47: 		Tools:        tools,
+48: 		Format:       m.opts.Format,
+49: 		Options:      m.opts.Options,
+50: 		KeepAlive:    m.opts.KeepAlive,
+51: 		Force:        true,
+52: 		Progress: func(progress coreagent.CompactionProgress) {
+53: 			select {
+54: 			case events <- chatCompactProgressMsg{tokens: progress.Tokens}:
+55: 			case <-runCtx.Done():
+56: 			}
+57: 		},
+58: 	}
+59: 	go func() {
+60: 		defer close(events)
+61: 		result, err := compactor.MaybeCompact(runCtx, req)
+62: 		select {
+63: 		case events <- chatCompactDoneMsg{result: result, err: err}:
+64: 		case <-runCtx.Done():
+65: 		}
+66: 	}()
+67: 	tickCmd := m.scheduleTick()
+68: 	return *m, tea.Batch(waitForChatMsg(events), tickCmd)
+69: }
+70: 
+71: func (m chatModel) finishManualCompaction(msg chatCompactDoneMsg) (tea.Model, tea.Cmd) {
+72: 	wasCanceling := m.status == "canceling"
+73: 	m.compacting = false
+74: 	m.compactEvents = nil
+75: 	m.cancel = nil
+76: 	m.compactingTokens = 0
+77: 	if wasCanceling || isChatContextCanceledError(msg.err) {
+78: 		m.status = "compact canceled"
+79: 		return m.withFlowTranscriptFlush(nil)
+80: 	}
+81: 	if msg.err != nil {
+82: 		m.entries = append(m.entries, newChatEntry(chatEntry{role: "system", content: coreagent.CompactionSkippedMessage(msg.err.Error())}))
+83: 		m.status = "compact skipped"
+84: 		return m.withFlowTranscriptFlush(nil)
+85: 	}
+86: 	if !msg.result.Compacted {
+87: 		m.entries = append(m.entries, newChatEntry(chatEntry{role: "system", content: coreagent.CompactionSkippedMessage(msg.result.Reason)}))
+88: 		m.status = "compact skipped"
+89: 		return m.withFlowTranscriptFlush(nil)
+90: 	}
+91: 
+92: 	m.messages = msg.result.Messages
+93: 	m.liveMessages = nil
+94: 	m.entries = entriesFromMessages(m.messages)
+95: 	m.contextTokens = m.estimatePromptTokens(m.messages, "")
+96: 	m.contextEstimate = true
+97: 	m.scroll = 0
+98: 	m.flowPrintedLines = 0
+99: 	m.status = "compacted"
+100: 	return m.withFlowTranscriptFlush(nil)
+101: }
+
+FILE cmd/tui/chat/events.go SHA256 95c8d6a6e0daccc639b82e6ba99795a0209563a1cb8c8be7349314b1a7c6372e LINES 371
+1: package chat
+2: 
+3: import (
+4: 	"context"
+5: 	"slices"
+6: 	"strings"
+7: 	"time"
+8: 
+9: 	tea "github.com/charmbracelet/bubbletea"
+10: 
+11: 	coreagent "github.com/ollama/ollama/agent"
+12: 	"github.com/ollama/ollama/api"
+13: )
+14: 
+15: type chatAgentMsg struct {
+16: 	event coreagent.Event
+17: }
+18: 
+19: type chatApprovalPromptMsg struct {
+20: 	request coreagent.ApprovalRequest
+21: 	reply   chan<- coreagent.Approval
+22: }
+23: 
+24: type chatRunDoneMsg struct {
+25: 	result               *coreagent.RunResult
+26: 	err                  error
+27: 	newMessagesPersisted bool
+28: 	persistedMessages    []api.Message
+29: }
+30: 
+31: type chatCompactDoneMsg struct {
+32: 	result coreagent.CompactionResult
+33: 	err    error
+34: }
+35: 
+36: type chatCompactProgressMsg struct {
+37: 	tokens int
+38: }
+39: 
+40: // resetStreamingState clears the transient streaming flags that every
+41: // non-streaming event resets before applying its own state.
+42: func (m *chatModel) resetStreamingState() {
+43: 	m.finishThinkingEntry()
+44: 	m.awaitingModel = false
+45: 	m.thinking = false
+46: 	m.thinkingTokens = 0
+47: }
+48: 
+49: // resetRunState clears all run-progress flags (streaming plus compaction
+50: // progress) for terminal events that fully reset the run view.
+51: func (m *chatModel) resetRunState() {
+52: 	m.finishThinkingEntry()
+53: 	m.awaitingModel = false
+54: 	m.compacting = false
+55: 	m.compactingTokens = 0
+56: 	m.detectedToolCalls = nil
+57: 	m.thinking = false
+58: 	m.thinkingTokens = 0
+59: }
+60: 
+61: type chatModelPreloadDoneMsg struct {
+62: 	model               string
+63: 	contextWindowTokens int
+64: 	err                 error
+65: }
+66: 
+67: type chatEventsClosedMsg struct{}
+68: 
+69: type chatTickMsg struct{}
+70: 
+71: func (m *chatModel) applyAgentEvent(event coreagent.Event) {
+72: 	contextChanged := false
+73: 
+74: 	switch event.Type {
+75: 	case coreagent.EventThinkingDelta:
+76: 		m.awaitingModel = false
+77: 		if event.Thinking != "" {
+78: 			m.thinking = true
+79: 			if event.Tokens > 0 {
+80: 				m.thinkingTokens = max(m.thinkingTokens, event.Tokens)
+81: 			} else {
+82: 				m.thinkingTokens += approximateTokenCount(event.Thinking)
+83: 			}
+84: 			idx := m.ensureLiveAssistantMessage()
+85: 			m.liveMessages[idx].Thinking += event.Thinking
+86: 			m.syncThinkingEntry()
+87: 			contextChanged = true
+88: 		}
+89: 	case coreagent.EventMessageDelta:
+90: 		m.resetStreamingState()
+91: 		m.spinner = 0
+92: 		m.detectedToolCalls = nil
+93: 		idx := m.ensureAssistantEntry()
+94: 		m.entries[idx].content += event.Content
+95: 		m.markEntryDirty(idx)
+96: 		msgIdx := m.ensureLiveAssistantMessage()
+97: 		m.liveMessages[msgIdx].Content += event.Content
+98: 		contextChanged = true
+99: 	case coreagent.EventToolCallDetected:
+100: 		m.finishThinkingEntry()
+101: 		m.awaitingModel = m.running
+102: 		m.thinking = false
+103: 		m.thinkingTokens = 0
+104: 		m.groupCompletedToolHistory()
+105: 		m.detectedToolCalls = nil
+106: 		m.addDetectedToolCalls(event.ToolCalls)
+107: 		idx := m.ensureLiveAssistantMessage()
+108: 		m.liveMessages[idx].ToolCalls = append(m.liveMessages[idx].ToolCalls, event.ToolCalls...)
+109: 		contextChanged = true
+110: 	case coreagent.EventToolStarted:
+111: 		m.resetStreamingState()
+112: 		startedAt := time.Now()
+113: 		idx := m.findActiveToolEntry(event.ToolCallID)
+114: 		if idx < 0 {
+115: 			m.groupCompletedToolHistory()
+116: 			m.entries = append(m.entries, newChatEntry(chatEntry{role: "tool"}))
+117: 			idx = len(m.entries) - 1
+118: 		}
+119: 		m.entries[idx].detail = event.ToolName
+120: 		m.entries[idx].label = toolInvocationLabel(event.ToolName, event.Args)
+121: 		m.entries[idx].status = "running"
+122: 		m.entries[idx].toolID = event.ToolCallID
+123: 		m.entries[idx].args = event.Args
+124: 		m.entries[idx].startedAt = startedAt
+125: 		m.applyToolOutputModeTo(idx)
+126: 		m.markEntryDirty(idx)
+127: 	case coreagent.EventToolFinished:
+128: 		m.resetStreamingState()
+129: 		if event.WorkingDir != "" {
+130: 			m.workingDir = event.WorkingDir
+131: 		}
+132: 		startedAt := m.toolStartedAt(event.ToolCallID)
+133: 		status := toolFinishedStatus(event)
+134: 		idx := m.findToolEntry(event.ToolCallID)
+135: 		if idx < 0 {
+136: 			m.entries = append(m.entries, newChatEntry(chatEntry{role: "tool"}))
+137: 			idx = len(m.entries) - 1
+138: 		}
+139: 		m.entries[idx].content = event.Content
+140: 		m.entries[idx].label = toolInvocationLabel(event.ToolName, event.Args)
+141: 		m.entries[idx].detail = event.ToolName
+142: 		m.entries[idx].status = status
+143: 		if status != "denied" {
+144: 			m.entries[idx].err = event.Error
+145: 		}
+146: 		m.entries[idx].toolID = event.ToolCallID
+147: 		m.entries[idx].args = event.Args
+148: 		m.entries[idx].startedAt = startedAt
+149: 		m.entries[idx].finishedAt = time.Now()
+150: 		m.applyToolOutputModeTo(idx)
+151: 		m.markEntryDirty(idx)
+152: 		m.liveMessages = append(m.liveMessages, api.Message{
+153: 			Role:       "tool",
+154: 			Content:    event.Content,
+155: 			ToolName:   event.ToolName,
+156: 			ToolCallID: event.ToolCallID,
+157: 		})
+158: 		if m.running && status != "denied" && !m.hasPendingDetectedToolCalls() {
+159: 			m.awaitingModel = true
+160: 		}
+161: 		contextChanged = true
+162: 	case coreagent.EventCompacted:
+163: 		m.resetRunState()
+164: 		if len(event.Messages) > 0 {
+165: 			m.liveMessages = slices.Clone(event.Messages)
+166: 			m.messages = slices.Clone(event.Messages)
+167: 			contextChanged = true
+168: 		}
+169: 		m.status = "compacted"
+170: 	case coreagent.EventCompactionStarted:
+171: 		m.awaitingModel = false
+172: 		m.compacting = true
+173: 		m.compactingTokens = 0
+174: 		m.thinking = false
+175: 		m.thinkingTokens = 0
+176: 		m.status = "compacting"
+177: 	case coreagent.EventCompactionProgress:
+178: 		m.awaitingModel = false
+179: 		m.compacting = true
+180: 		m.thinking = false
+181: 		m.thinkingTokens = 0
+182: 		if event.Tokens > m.compactingTokens {
+183: 			m.compactingTokens = event.Tokens
+184: 		}
+185: 	case coreagent.EventCompactionSkipped:
+186: 		m.resetRunState()
+187: 		message := event.Content
+188: 		if strings.TrimSpace(message) == "" {
+189: 			message = coreagent.CompactionSkippedMessage(event.Error)
+190: 		}
+191: 		m.entries = append(m.entries, newChatEntry(chatEntry{role: "system", content: message}))
+192: 		m.status = "compact skipped"
+193: 	case coreagent.EventError:
+194: 		m.resetRunState()
+195: 		m.eventErrorRendered = true
+196: 		m.entries = append(m.entries, newChatEntry(chatEntry{role: "error", content: event.Error, err: event.Error}))
+197: 	}
+198: 
+199: 	if contextChanged {
+200: 		m.refreshLiveContextEstimate()
+201: 	}
+202: }
+203: 
+204: func (m *chatModel) addDetectedToolCalls(calls []api.ToolCall) {
+205: 	if len(calls) == 0 {
+206: 		return
+207: 	}
+208: 	seen := make(map[string]struct{}, len(m.detectedToolCalls)+len(calls))
+209: 	for _, entry := range m.detectedToolCalls {
+210: 		if entry.toolID != "" {
+211: 			seen[entry.toolID] = struct{}{}
+212: 		}
+213: 	}
+214: 	for _, call := range calls {
+215: 		if call.ID != "" {
+216: 			if _, ok := seen[call.ID]; ok {
+217: 				continue
+218: 			}
+219: 			seen[call.ID] = struct{}{}
+220: 		}
+221: 		args := call.Function.Arguments.ToMap()
+222: 		m.detectedToolCalls = append(m.detectedToolCalls, newChatEntry(chatEntry{
+223: 			role:   "tool",
+224: 			label:  toolInvocationLabel(call.Function.Name, args),
+225: 			detail: call.Function.Name,
+226: 			status: "queued",
+227: 			toolID: call.ID,
+228: 			args:   args,
+229: 		}))
+230: 	}
+231: }
+232: 
+233: func toolFinishedStatus(event coreagent.Event) string {
+234: 	switch event.ToolStatus {
+235: 	case coreagent.ToolStatusDenied:
+236: 		return "denied"
+237: 	case coreagent.ToolStatusDisabled:
+238: 		return "disabled"
+239: 	case coreagent.ToolStatusDone:
+240: 		return "done"
+241: 	}
+242: 	// failed/skipped/unknown: derive from content and error fields.
+243: 	if isDeniedToolResult(event.Content) || isDeniedToolResult(event.Error) {
+244: 		return "denied"
+245: 	}
+246: 	if event.Error != "" {
+247: 		return "error"
+248: 	}
+249: 	return "done"
+250: }
+251: 
+252: func messagesEndWithCompactionResult(messages []api.Message) bool {
+253: 	if len(messages) == 0 {
+254: 		return false
+255: 	}
+256: 	return coreagent.IsCompactionToolResult(messages[len(messages)-1])
+257: }
+258: 
+259: func (m chatModel) awaitingToolStart() bool {
+260: 	for i := len(m.liveMessages) - 1; i >= 0; i-- {
+261: 		msg := m.liveMessages[i]
+262: 		if msg.Role != "assistant" {
+263: 			continue
+264: 		}
+265: 		if len(msg.ToolCalls) == 0 {
+266: 			return false
+267: 		}
+268: 		for _, call := range msg.ToolCalls {
+269: 			if call.ID == "" || m.findToolEntry(call.ID) < 0 {
+270: 				return true
+271: 			}
+272: 		}
+273: 		return false
+274: 	}
+275: 	return false
+276: }
+277: 
+278: func (m *chatModel) ensureLiveAssistantMessage() int {
+279: 	if len(m.liveMessages) > 0 && m.liveMessages[len(m.liveMessages)-1].Role == "assistant" {
+280: 		return len(m.liveMessages) - 1
+281: 	}
+282: 	m.liveMessages = append(m.liveMessages, api.Message{Role: "assistant"})
+283: 	return len(m.liveMessages) - 1
+284: }
+285: 
+286: func (m *chatModel) refreshLiveContextEstimate() {
+287: 	messages := m.liveMessages
+288: 	if len(messages) == 0 {
+289: 		messages = m.messages
+290: 	}
+291: 	m.contextTokens = m.estimatePromptTokens(messages, "")
+292: 	m.contextEstimate = true
+293: }
+294: 
+295: //nolint:containedctx // event sinks need the session context to unblock sends on cancellation.
+296: type chatEventSink struct {
+297: 	ctx                  context.Context
+298: 	ch                   chan<- tea.Msg
+299: 	newMessagesPersisted *bool
+300: }
+301: 
+302: func (s chatEventSink) Emit(event coreagent.Event) error {
+303: 	if s.newMessagesPersisted != nil {
+304: 		*s.newMessagesPersisted = true
+305: 	}
+306: 	select {
+307: 	case s.ch <- chatAgentMsg{event: event}:
+308: 		return nil
+309: 	case <-s.ctx.Done():
+310: 		return s.ctx.Err()
+311: 	}
+312: }
+313: 
+314: func waitForChatMsg(ch <-chan tea.Msg) tea.Cmd {
+315: 	if ch == nil {
+316: 		return nil
+317: 	}
+318: 	return func() tea.Msg {
+319: 		msg, ok := <-ch
+320: 		if !ok {
+321: 			return chatEventsClosedMsg{}
+322: 		}
+323: 		return msg
+324: 	}
+325: }
+326: 
+327: func (m *chatModel) scheduleTick() tea.Cmd {
+328: 	if m.tickActive {
+329: 		return nil
+330: 	}
+331: 	m.tickActive = true
+332: 	return chatTickCmd()
+333: }
+334: 
+335: func chatTickCmd() tea.Cmd {
+336: 	return tea.Tick(350*time.Millisecond, func(time.Time) tea.Msg {
+337: 		return chatTickMsg{}
+338: 	})
+339: }
+340: 
+341: func preloadModelCmd(ctx context.Context, preload func(context.Context, string, *api.ThinkValue) (int, error), model string, think *api.ThinkValue) tea.Cmd {
+342: 	if preload == nil || strings.TrimSpace(model) == "" {
+343: 		return nil
+344: 	}
+345: 	if think != nil {
+346: 		copied := *think
+347: 		think = &copied
+348: 	}
+349: 	return func() tea.Msg {
+350: 		if ctx == nil {
+351: 			ctx = context.Background()
+352: 		}
+353: 		tokens, err := preload(ctx, model, think)
+354: 		return chatModelPreloadDoneMsg{model: model, contextWindowTokens: tokens, err: err}
+355: 	}
+356: }
+357: 
+358: func isUnsupportedThinkingError(err error) bool {
+359: 	if err == nil {
+360: 		return false
+361: 	}
+362: 	text := strings.ToLower(err.Error())
+363: 	return strings.Contains(text, "does not support thinking")
+364: }
+365: 
+366: func thinkRequestsThinking(think *api.ThinkValue) bool {
+367: 	if think == nil {
+368: 		return false
+369: 	}
+370: 	return think.Bool()
+371: }
+
+FILE app/ui/app/src/components/Chat.tsx SHA256 ba273fb1c2613aa3722cb1e30a94f445bf68a1283d8db01f7a9970b16cae0f64 LINES 345
+1: import MessageList from "./MessageList";
+2: import ChatForm from "./ChatForm";
+3: import { FileUpload } from "./FileUpload";
+4: import { DisplayUpgrade } from "./DisplayUpgrade";
+5: import { DisplayStale } from "./DisplayStale";
+6: import { DisplayLogin } from "./DisplayLogin";
+7: import {
+8:   useChat,
+9:   useSendMessage,
+10:   useIsStreaming,
+11:   useIsWaitingForLoad,
+12:   useDownloadProgress,
+13:   useChatError,
+14:   useShouldShowStaleDisplay,
+15:   useDismissStaleModel,
+16: } from "@/hooks/useChats";
+17: import { useHealth } from "@/hooks/useHealth";
+18: import { useMessageAutoscroll } from "@/hooks/useMessageAutoscroll";
+19: import {
+20:   useState,
+21:   useEffect,
+22:   useLayoutEffect,
+23:   useRef,
+24:   useCallback,
+25: } from "react";
+26: import { useQueryClient } from "@tanstack/react-query";
+27: import { useNavigate } from "@tanstack/react-router";
+28: import { useSelectedModel } from "@/hooks/useSelectedModel";
+29: import { useUser } from "@/hooks/useUser";
+30: import { useHasVisionCapability } from "@/hooks/useModelCapabilities";
+31: import { Message, ChatEvent } from "@/gotypes";
+32: import { ToolApproval } from "./ToolApproval";
+33: import { respondToToolApproval } from "@/api";
+34: import {
+35:   pendingApprovalFromEvent,
+36:   type ApprovalDecision,
+37:   type PendingApproval,
+38: } from "@/utils/toolApproval";
+39: 
+40: export default function Chat({ chatId }: { chatId: string }) {
+41:   const queryClient = useQueryClient();
+42:   const navigate = useNavigate();
+43:   const chatQuery = useChat(chatId === "new" ? "" : chatId);
+44:   const chatErrorQuery = useChatError(chatId === "new" ? "" : chatId);
+45:   const { selectedModel } = useSelectedModel(chatId);
+46:   const { user } = useUser();
+47:   const hasVisionCapability = useHasVisionCapability(selectedModel?.model);
+48:   const shouldShowStaleDisplay = useShouldShowStaleDisplay(selectedModel);
+49:   const dismissStaleModel = useDismissStaleModel();
+50:   const { isHealthy } = useHealth();
+51: 
+52:   const [editingMessage, setEditingMessage] = useState<{
+53:     content: string;
+54:     index: number;
+55:     originalMessage: Message;
+56:   } | null>(null);
+57:   const prevChatIdRef = useRef<string>(chatId);
+58: 
+59:   const chatFormCallbackRef = useRef<
+60:     | ((
+61:         files: Array<{ filename: string; data: Uint8Array; type?: string }>,
+62:         errors: Array<{ filename: string; error: string }>,
+63:       ) => void)
+64:     | null
+65:   >(null);
+66: 
+67:   const handleFilesReceived = useCallback(
+68:     (
+69:       callback: (
+70:         files: Array<{
+71:           filename: string;
+72:           data: Uint8Array;
+73:           type?: string;
+74:         }>,
+75:         errors: Array<{ filename: string; error: string }>,
+76:       ) => void,
+77:     ) => {
+78:       chatFormCallbackRef.current = callback;
+79:     },
+80:     [],
+81:   );
+82: 
+83:   const handleFilesProcessed = useCallback(
+84:     (
+85:       files: Array<{ filename: string; data: Uint8Array; type?: string }>,
+86:       errors: Array<{ filename: string; error: string }> = [],
+87:     ) => {
+88:       chatFormCallbackRef.current?.(files, errors);
+89:     },
+90:     [],
+91:   );
+92: 
+93:   const allMessages = chatQuery?.data?.chat?.messages ?? [];
+94:   // TODO(parthsareen): will need to consolidate when used with more tools with state
+95:   const browserToolResult = chatQuery?.data?.chat?.browser_state;
+96:   const chatError = chatErrorQuery.data;
+97: 
+98:   const messages = allMessages;
+99:   const isStreaming = useIsStreaming(chatId);
+100:   const isWaitingForLoad = useIsWaitingForLoad(chatId);
+101:   const downloadProgress = useDownloadProgress(chatId);
+102:   const isDownloadingModel = downloadProgress && !downloadProgress.done;
+103:   const isDisabled = !isHealthy;
+104: 
+105:   // Clear editing state when navigating to a different chat
+106:   useEffect(() => {
+107:     setEditingMessage(null);
+108:   }, [chatId]);
+109: 
+110:   const sendMessageMutation = useSendMessage(chatId);
+111: 
+112:   const { containerRef, handleNewUserMessage, spacerHeight } =
+113:     useMessageAutoscroll({
+114:       messages,
+115:       isStreaming,
+116:       chatId,
+117:     });
+118: 
+119:   // Scroll to bottom only when switching to a different existing chat
+120:   useLayoutEffect(() => {
+121:     // Only scroll if the chatId actually changed (not just messages updating)
+122:     if (
+123:       prevChatIdRef.current !== chatId &&
+124:       containerRef.current &&
+125:       messages.length > 0 &&
+126:       chatId !== "new"
+127:     ) {
+128:       // Always scroll to the bottom when opening a chat
+129:       containerRef.current.scrollTop = containerRef.current.scrollHeight;
+130:     }
+131:     prevChatIdRef.current = chatId;
+132:   }, [chatId, messages.length]);
+133: 
+134:   // A tool call waiting on the user. The chat's streaming response is blocked
+135:   // while this is set, so it is cleared on an answer and whenever a run ends.
+136:   const [pendingApproval, setPendingApproval] =
+137:     useState<PendingApproval | null>(null);
+138:   const [approvalError, setApprovalError] = useState<string | null>(null);
+139:   const [isAnsweringApproval, setIsAnsweringApproval] = useState(false);
+140: 
+141:   const answerApproval = async (decision: ApprovalDecision) => {
+142:     if (!pendingApproval) return;
+143:     setIsAnsweringApproval(true);
+144:     setApprovalError(null);
+145:     try {
+146:       await respondToToolApproval(
+147:         chatId,
+148:         pendingApproval.approvalId,
+149:         decision,
+150:       );
+151:       setPendingApproval(null);
+152:     } catch (err) {
+153:       setApprovalError(
+154:         err instanceof Error ? err.message : "Could not send the answer.",
+155:       );
+156:     } finally {
+157:       setIsAnsweringApproval(false);
+158:     }
+159:   };
+160: 
+161:   // Simplified submit handler - ChatForm handles all the attachment logic
+162:   const handleChatFormSubmit = (
+163:     message: string,
+164:     options: {
+165:       attachments?: Array<{ filename: string; data: Uint8Array }>;
+166:       index?: number;
+167:       webSearch?: boolean;
+168:       fileTools?: boolean;
+169:       think?: boolean | string;
+170:     },
+171:   ) => {
+172:     // Clear any existing errors when sending a new message
+173:     sendMessageMutation.reset();
+174:     if (chatError) {
+175:       clearChatError();
+176:     }
+177: 
+178:     // Prepare attachments for backend
+179:     const allAttachments = (options.attachments || []).map((att) => ({
+180:       filename: att.filename,
+181:       data: att.data.length === 0 ? new Uint8Array(0) : att.data,
+182:     }));
+183: 
+184:     sendMessageMutation.mutate({
+185:       message,
+186:       attachments: allAttachments,
+187:       index: editingMessage ? editingMessage.index : options.index,
+188:       webSearch: options.webSearch,
+189:       fileTools: options.fileTools,
+190:       think: options.think,
+191:       onChatEvent: (event) => {
+192:         const approval = pendingApprovalFromEvent(event as ChatEvent);
+193:         if (approval) {
+194:           setApprovalError(null);
+195:           setPendingApproval(approval);
+196:         }
+197:         if (event.eventName === "chat_created" && event.chatId) {
+198:           navigate({
+199:             to: "/c/$chatId",
+200:             params: {
+201:               chatId: event.chatId,
+202:             },
+203:           });
+204:         }
+205:       },
+206:     });
+207: 
+208:     // Clear edit mode after submission
+209:     setEditingMessage(null);
+210:     handleNewUserMessage();
+211:   };
+212: 
+213:   const handleEditMessage = (content: string, index: number) => {
+214:     setEditingMessage({
+215:       content,
+216:       index,
+217:       originalMessage: messages[index],
+218:     });
+219:   };
+220: 
+221:   const handleCancelEdit = () => {
+222:     setEditingMessage(null);
+223:     if (chatError) {
+224:       clearChatError();
+225:     }
+226:   };
+227: 
+228:   const clearChatError = () => {
+229:     queryClient.setQueryData(
+230:       ["chatError", chatId === "new" ? "" : chatId],
+231:       null,
+232:     );
+233:   };
+234: 
+235:   const isWindows = navigator.platform.toLowerCase().includes("win");
+236: 
+237:   return chatId === "new" || chatQuery ? (
+238:     <FileUpload
+239:       onFilesAdded={handleFilesProcessed}
+240:       selectedModel={selectedModel}
+241:       hasVisionCapability={hasVisionCapability}
+242:     >
+243:       {chatId === "new" ? (
+244:         <div className="flex flex-col h-screen justify-center relative">
+245:           <div className="px-6">
+246:             <ChatForm
+247:               hasMessages={false}
+248:               onSubmit={handleChatFormSubmit}
+249:               chatId={chatId}
+250:               autoFocus={true}
+251:               editingMessage={editingMessage}
+252:               onCancelEdit={handleCancelEdit}
+253:               isDownloadingModel={isDownloadingModel}
+254:               isDisabled={isDisabled}
+255:               onFilesReceived={handleFilesReceived}
+256:             />
+257:           </div>
+258:         </div>
+259:       ) : (
+260:         <main className="flex h-screen w-full flex-col relative allow-context-menu select-none">
+261:           <section
+262:             key={chatId} // This key forces React to recreate the element when chatId changes
+263:             ref={containerRef}
+264:             className={`flex-1 overflow-y-auto overscroll-contain relative min-h-0 select-none ${isWindows ? "xl:pt-4" : "xl:pt-8"}`}
+265:           >
+266:             <MessageList
+267:               messages={messages}
+268:               spacerHeight={spacerHeight}
+269:               isWaitingForLoad={isWaitingForLoad}
+270:               isStreaming={isStreaming}
+271:               downloadProgress={downloadProgress}
+272:               onEditMessage={(content: string, index: number) => {
+273:                 handleEditMessage(content, index);
+274:               }}
+275:               editingMessageIndex={editingMessage?.index}
+276:               error={chatError}
+277:               browserToolResult={browserToolResult}
+278:             />
+279:           </section>
+280: 
+281:           <div className="flex-shrink-0 sticky bottom-0 z-20">
+282:             {selectedModel && shouldShowStaleDisplay && (
+283:               <div className="pb-2">
+284:                 <DisplayStale
+285:                   model={selectedModel}
+286:                   onDismiss={() =>
+287:                     dismissStaleModel(selectedModel?.model || "")
+288:                   }
+289:                   chatId={chatId}
+290:                   onScrollToBottom={() => {
+291:                     if (containerRef.current) {
+292:                       containerRef.current.scrollTo({
+293:                         top: containerRef.current.scrollHeight,
+294:                         behavior: "smooth",
+295:                       });
+296:                     }
+297:                   }}
+298:                 />
+299:               </div>
+300:             )}
+301:             {chatError && chatError.code === "usage_limit_upgrade" && (
+302:               <div className="pb-2">
+303:                 <DisplayUpgrade
+304:                   error={chatError}
+305:                   onDismiss={clearChatError}
+306:                   href={
+307:                     user?.plan === "pro"
+308:                       ? "https://ollama.com/settings/billing"
+309:                       : "https://ollama.com/upgrade"
+310:                   }
+311:                 />
+312:               </div>
+313:             )}
+314:             {chatError && chatError.code === "cloud_unauthorized" && (
+315:               <div className="pb-2">
+316:                 <DisplayLogin error={chatError} />
+317:               </div>
+318:             )}
+319:             {pendingApproval && (
+320:               <ToolApproval
+321:                 approval={pendingApproval}
+322:                 onAnswer={answerApproval}
+323:                 error={approvalError}
+324:                 isAnswering={isAnsweringApproval}
+325:               />
+326:             )}
+327:             <ChatForm
+328:               hasMessages={messages.length > 0}
+329:               onSubmit={handleChatFormSubmit}
+330:               chatId={chatId}
+331:               autoFocus={true}
+332:               editingMessage={editingMessage}
+333:               onCancelEdit={handleCancelEdit}
+334:               isDisabled={isDisabled}
+335:               isDownloadingModel={isDownloadingModel}
+336:               onFilesReceived={handleFilesReceived}
+337:             />
+338:           </div>
+339:         </main>
+340:       )}
+341:     </FileUpload>
+342:   ) : (
+343:     <div>Loading...</div>
+344:   );
+345: }
+
+FILE app/ui/app/src/components/MessageList.tsx SHA256 b6800f9cf043847ddfaba3db2ceec7f09ea0b7feed57bc1242d5934513e1a5ee LINES 168
+1: import { Message as MessageType, DownloadEvent, ErrorEvent } from "@/gotypes";
+2: import React from "react";
+3: import Message from "./Message";
+4: import Downloading from "./Downloading";
+5: import { ErrorMessage } from "./ErrorMessage";
+6: 
+7: export default function MessageList({
+8:   messages,
+9:   spacerHeight,
+10:   isWaitingForLoad,
+11:   isStreaming,
+12:   downloadProgress,
+13:   onEditMessage,
+14:   editingMessageIndex,
+15:   error,
+16:   browserToolResult,
+17: }: {
+18:   messages: MessageType[];
+19:   spacerHeight: number;
+20:   isWaitingForLoad?: boolean;
+21:   isStreaming: boolean;
+22:   downloadProgress?: DownloadEvent;
+23:   onEditMessage?: (content: string, index: number) => void | Promise<void>;
+24:   editingMessageIndex?: number;
+25:   error?: ErrorEvent | null;
+26:   browserToolResult?: any;
+27: }) {
+28:   const [showDots, setShowDots] = React.useState(false);
+29:   const isDownloadingModel = downloadProgress && !downloadProgress.done;
+30:   const shouldShowDownload = messages.length > 0;
+31: 
+32:   React.useEffect(() => {
+33:     let timer: number;
+34:     if (
+35:       (isStreaming || isWaitingForLoad) &&
+36:       !isDownloadingModel &&
+37:       messages.length > 0 &&
+38:       messages[messages.length - 1]?.role === "user"
+39:     ) {
+40:       timer = window.setTimeout(() => {
+41:         setShowDots(true);
+42:       }, 750); // Wait 750ms before showing dots
+43:     } else {
+44:       setShowDots(false);
+45:     }
+46: 
+47:     return () => window.clearTimeout(timer);
+48:   }, [isStreaming, isWaitingForLoad, isDownloadingModel, messages]);
+49: 
+50:   const lastIdx = messages.length - 1;
+51: 
+52:   // Memoize the last tool query (web_search query or web_fetch url) at each message index
+53:   const lastToolQueries = React.useMemo(() => {
+54:     const queries: (string | undefined)[] = [];
+55:     let lastQuery: string | undefined = undefined;
+56:     for (let i = 0; i < messages.length; i++) {
+57:       const m: any = messages[i] as any;
+58:       const toolCalls: any[] | undefined = Array.isArray(m?.tool_calls)
+59:         ? (m.tool_calls as any[])
+60:         : m?.tool_call
+61:           ? [m.tool_call]
+62:           : undefined;
+63:       if (toolCalls && toolCalls.length > 0) {
+64:         for (const tc of toolCalls) {
+65:           const name = tc?.function?.name;
+66:           if (name === "web_search" || name === "web_fetch") {
+67:             try {
+68:               const args = JSON.parse(tc.function.arguments || "{}");
+69:               const candidate =
+70:                 typeof args.query === "string" && args.query.trim()
+71:                   ? String(args.query).trim()
+72:                   : typeof args.url === "string" && args.url.trim()
+73:                     ? String(args.url).trim()
+74:                     : "";
+75:               if (candidate) lastQuery = candidate;
+76:             } catch { /* ignored */ }
+77:           }
+78:         }
+79:       }
+80:       queries.push(lastQuery);
+81:     }
+82:     return queries;
+83:   }, [messages]);
+84: 
+85:   return (
+86:     <div
+87:       className="mx-auto flex max-w-[768px] flex-1 flex-col px-6 pb-12 select-text"
+88:       data-role="message-list"
+89:     >
+90:       {messages.map((message, idx) => {
+91:         const lastToolQuery = lastToolQueries[idx];
+92:         return (
+93:           <div key={`${message.created_at}-${idx}`} data-message-index={idx}>
+94:             <Message
+95:               message={message}
+96:               onEditMessage={onEditMessage}
+97:               messageIndex={idx}
+98:               isStreaming={isStreaming && idx === lastIdx}
+99:               isFaded={
+100:                 editingMessageIndex !== undefined && idx >= editingMessageIndex
+101:               }
+102:               browserToolResult={browserToolResult}
+103:               lastToolQuery={lastToolQuery}
+104:             />
+105:           </div>
+106:         );
+107:       })}
+108: 
+109:       {/* Inline error message */}
+110:       {error &&
+111:         error.code !== "usage_limit_upgrade" &&
+112:         error.code !== "cloud_unauthorized" && <ErrorMessage error={error} />}
+113: 
+114:       {/* Indeterminate loading indicator */}
+115:       {showDots && (
+116:         <div className="flex items-center space-x-1.5 py-3 mt-2 self-start rounded-full px-4 min-w-0 bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700">
+117:           <div
+118:             className="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 rounded-full opacity-0"
+119:             style={{
+120:               animation: "typing 1.4s infinite",
+121:               animationDelay: "0s",
+122:             }}
+123:           />
+124:           <div
+125:             className="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 rounded-full opacity-0"
+126:             style={{
+127:               animation: "typing 1.4s infinite",
+128:               animationDelay: "0.15s",
+129:             }}
+130:           />
+131:           <div
+132:             className="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 rounded-full opacity-0"
+133:             style={{
+134:               animation: "typing 1.4s infinite",
+135:               animationDelay: "0.3s",
+136:             }}
+137:           />
+138:         </div>
+139:       )}
+140: 
+141:       {/* Downloading model */}
+142:       {/* Only show for models larger than 1KiB */}
+143:       {downloadProgress?.total && downloadProgress.total > 1024 && (
+144:         <section
+145:           className={`
+146:           transition-all ease-out
+147:           ${shouldShowDownload ? "duration-300" : "duration-0"}
+148:           ${
+149:             downloadProgress
+150:               ? downloadProgress.done
+151:                 ? "opacity-0 -translate-y-8"
+152:                 : "opacity-100 translate-y-0"
+153:               : "opacity-0 translate-y-4 pointer-events-none"
+154:           }
+155:         `}
+156:         >
+157:           <Downloading
+158:             completed={downloadProgress?.completed || 0}
+159:             total={downloadProgress?.total || 0}
+160:           />
+161:         </section>
+162:       )}
+163: 
+164:       {/* Dynamic spacer to allow scrolling the last message to the top of the container */}
+165:       <div style={{ height: `${spacerHeight}px` }} aria-hidden="true" />
+166:     </div>
+167:   );
+168: }
+
+FILE app/ui/app/src/hooks/useChats.ts SHA256 b8b3f66706d484d7ba56f9cc4f2fd94373787011b670e20844e50d3d077669fb LINES 760
+2: import { getChats, getChat, sendMessage, type ChatEventUnion } from "../api";
+15:     queryFn: getChats,
+21:   const { streamingChatIds } = useStreamingContext();
+26:       // Check if we have optimistic data and this chat is currently streaming
+31:       const isStreaming = streamingChatIds.has(chatId);
+33:       const response = await getChat(chatId);
+35:       // If we have existing optimistic data with more messages than the server
+36:       // and this chat is currently streaming, preserve the optimistic data
+38:         const existingCount = existingData.chat.messages?.length || 0;
+39:         const serverCount = response.chat?.messages?.length || 0;
+45:       // Process messages to ensure tool calls are properly structured
+46:       if (response.chat && response.chat.messages) {
+47:         response.chat.messages = response.chat.messages.map((msg) => {
+102:   const { streamingChatIds } = useStreamingContext();
+103:   return streamingChatIds.has(chatId);
+138:     queryClient.setQueryData(["dismissedStaleModels"], newSet);
+144: // Helper hook to check if we should show loading bar (streaming but no first token yet)
+146:   const { streamingChatIds, loadingChats } = useStreamingContext();
+151:   // Basic check: is this chat streaming but hasn't loaded yet?
+153:     streamingChatIds.has(chatId) && !loadingChats.has(chatId);
+180:     !recentChatData?.chat?.messages ||
+181:     recentChatData.chat.messages.length === 0
+185:   const lastAssistantMessage = [...recentChatData.chat.messages]
+255:       // For existing chats, set streaming state and add optimistic user message
+264:         // Only add optimistic message for non-empty messages
+267:           queryClient.setQueryData(
+278:               let messages = old.chat.messages || [];
+280:               // If editing a message (index provided), truncate messages array
+284:                 index < messages.length
+286:                 messages = messages.slice(0, index);
+293:                   messages: [...messages, newMessage],
+338:       // Create batcher for streaming updates with smoother intervals, prevents state update depth being exceeded
+369:             // Update the current chat data with streaming content
+373:               const existingMessages = old.chat.messages || [];
+414:                   messages: newMessages,
+425:               const existingMessages = old.chat.messages || [];
+460:                   messages: newMessages,
+469:             queryClient.setQueryData(
+474:                 const existingMessages = old.chat.messages || [];
+494:                     messages: newMessages,
+502:             // Handle assistant messages that include tool calls
+503:             queryClient.setQueryData(
+508:                 const existingMessages = old.chat.messages || [];
+545:                     messages: newMessages,
+554:             queryClient.setQueryData(
+559:                 const existingMessages = old.chat.messages || [];
+583:                     messages: newMessages,
+605:               queryClient.setQueryData(["staleModels"], newStaleMap);
+612:                   queryClient.setQueryData(
+630:             // Clean up streaming state
+643:             queryClient.setQueryData(
+658:             // Clear download progress when streaming is done
+699:             queryClient.setQueryData(["chat", newId], {
+703:                 messages: [
+
+FILE docs/CURATED_CONTEXT_BLUEPRINT.md SHA256 1d35b9f208500fb0d88036fb687f1d892b16ed83f4040e95ad7c453209c7712d LINES 1012
+1: # Curated Context System — Implementation Blueprint (v10)
+2: 
+3: | Field | Value |
+4: |---|---|
+5: | Status | `[BLUEPRINT-DRAFT v10]` — 1 Cursor round-9 finding fixed, pending re-review |
+6: | Document class | Implementation blueprint |
+7: | Author | Fathom (GLM-5.2) |
+8: | Date | 2026-08-19, Australia/Brisbane |
+9: | Repository | github.com/ollama/ollama (Ash's fork) |
+10: | Concept authority | `docs/CURATED_CONTEXT_SYSTEM.md` (design document) |
+11: | Implementation authority | None — pending judge pass |
+12: | Compatibility | Alongside existing compactor; toggle via settings |
+13: | Review history | v1: 6 BLOCKING; v2: 14 BLOCKING; v3: 7 BLOCKING; v4: 7 BLOCKING; v5: 5 BLOCKING; v6: 5+ BLOCKING; v7: 4 BLOCKING; v8: 4 BLOCKING; v9: 1 BLOCKING |
+14: | Source verification | Read actual agent/session.go, cmd/agent_tui.go, cmd/tui/chat/chat.go, LETHE MemoryTools.swift, MCPServer.swift, StdioJSONRPC.swift |
+15: 
+16: ---
+17: 
+18: ## 0. What changed in v10 and why
+19: 
+20: v10 fixes the 1 finding from Cursor round 9:
+21: 
+22: | Finding | Fix |
+23: |---|---|
+24: | B7: CurateForRun no-ops because ChatID is never set on TUI path | CurateForRun uses "default" when chatID is empty; StorePostResponse uses same default; AgentName is still required |
+25: 
+26: ### What v9 closed (confirmed by reviewer, not re-litigated)
+27: 
+28: - Scopes parse: `{"scopes":[...]}` correctly parsed ✓
+29: - AgentName/Curator wiring: all structs have fields, all copy sites specified ✓
+30: - stripMemoryBlocks: works after compaction, no panic ✓
+31: - Compactor composition: stripMemoryBlocks runs at end ✓
+32: 
+33: ---
+34: 
+35: ## 1. Purpose
+43: ## 2. Affected files
+45: ### 2.1 New files
+55: ### 2.2 Modified files
+67: ## 3. Prerequisites
+69: ### 3.1 LETHE rawText consent
+77: ### 3.2 LETHE MCP server path
+83: ## 4. Types and interfaces
+85: ### 4.1 Curator (agent/curator.go)
+382: ### 4.2 LetheMCPClient (agent/lethe_mcp_client.go)
+666: ### 4.3 Chunker, Synthesizer, helpers
+695: ## 5. Session integration
+697: ### 5.1 Modified Session struct (agent/session.go)
+712: ### 5.2 buildRunMessages changes (agent/session.go L223-240)
+746: ### 5.3 finishRun changes (agent/session.go L371-384)
+794: ## 6. TUI activation
+796: ### 6.1 cmd/agent_tui.go changes
+855: ### 6.2 cmd/tui/chat/chat.go changes
+879: ### 6.3 cmd/config/context_management.go
+927: ## 7. Error policy
+939: ## 8. Testing
+941: ### 8.1 Key tests
+967: ### 8.2 Falsifiable tests
+983: ## 9. Compatibility
+994: ## 10. Open questions
+1006: ## 11. What is NOT in this blueprint
+
+FILE docs/CURATED_CONTEXT_SYSTEM.md SHA256 1952eb35a89b65a1bbd4cad4e8b7621ba7a86851f9c10d4c4d87caa16be8869c LINES 501
+1: # Curated Context System — Design Document
+2: 
+3: ## Replacing Episodic Replay with Semantic Working Memory in Ollama
+4: 
+5: | Field | Value |
+6: |---|---|
+7: | Status | `[DESIGN-DRAFT v3]` |
+8: | Document class | Design proposal; non-implementation |
+9: | Author | Fathom (GLM-5.2), with Ash |
+10: | Date | 2026-08-17, Australia/Brisbane |
+11: | Repository | github.com/ollama/ollama (Ash's fork) |
+12: | Dependencies | LETHE memory server (MCP), existing Ollama agent harness, AGORA workplace (optional) |
+13: | Compatibility | Alongside existing compactor; toggle via settings |
+14: | Prior art | AGORA memory system (semantic chunking, graph storage, synthesis with pointers) |
+15: 
+16: ---
+17: 
+18: ## 1. Problem
+19: 
+20: Ollama's current context management is **episodic replay**: the entire conversation history is sent through the context window on every run. When the context reaches 80% capacity, the `Compactor` summarizes older messages into a single summary and keeps recent turns.
+21: 
+22: This has three problems:
+23: 
+24: 1. **Context grows indefinitely** until compaction triggers, then resets partially
+25: 2. **The single summary is lossy** — exact hashes, precise wording, and verbatim content degrade
+26: 3. **The summary is conversation-scoped only** — it does not persist across sessions or conversations
+27: 
+28: ## 2. Proposed solution
+29: 
+30: Replace episodic replay with **semantic working memory**: a curated set of summaries stored in LETHE, combined with a synthesized narrative of semantically relevant memories, plus recent messages.
+31: 
+32: The context packet stays roughly constant size regardless of conversation length.
+33: 
+34: ### 2.1 Architecture
+35: 
+61: ### 2.2 The Curator interface
+107: ### 2.3 Summary types
+119: ### 2.4 Semantic chunking (AGORA pattern)
+138: ### 2.5 Graph storage and edges
+150: ### 2.6 Synthesis with pointers (AGORA pattern)
+170: ### 2.7 Context packet
+194: ### 2.8 Hallucination prevention
+206: ## 3. LETHE integration
+208: ### 3.1 LETHE tagging schema
+223: ### 3.2 Search capability
+231: ### 3.3 Cross-conversation search
+237: ### 3.4 Cross-agent search
+254: ## 4. Implementation plan
+256: ### 4.1 New files
+265: ### 4.2 Modified files
+273: ### 4.3 Settings
+292: ## 5. Dual interface: Ollama simple + AGORA workspace
+294: ### 5.1 Design principle
+298: ### 5.2 Interface switching
+316: ### 5.3 Feature comparison
+333: ### 5.4 Agent-scoped conversations
+349: ### 5.5 Agent switching
+386: ### 5.6 Model substrate independence
+400: ### 5.7 Implementation notes
+427: ## 6. Testing plan
+429: ### 6.1 Unit tests
+445: ### 6.2 Integration tests
+460: ## 7. Open questions
+476: ## 8. Migration path
+490: ## 9. Compatibility
+
+ARCHIVE_CALLERS
+EventCompacted agent/events.go:20:	EventCompacted          EventType = "compacted"
+agent/events.go:151:	return Event{Type: EventCompacted, RunID: m.runID, ChatID: m.chatID, Model: m.model, CompactionTrigger: trigger, Content: content, Messages: messages}
+agent/session_test.go:1379:	if !hasEventType(events.events, EventCompacted) {
+agent/session_test.go:1557:	if !hasEventType(events.events, EventCompacted) {
+cmd/tui/chat/events.go:162:	case coreagent.EventCompacted:
+ TRUNCATED False
+EventMessages  TRUNCATED False
+SaveChat  TRUNCATED False
+SetMessages  TRUNCATED False
+SaveMessages  TRUNCATED False
+compacted agent/compactor.go:15:// definition of how a compacted turn is represented in message history.
+agent/compactor.go:20:	CompactionContinueInstruction  = "continue the task in progress. the history has been compacted, do not mention compaction to the user"
+agent/compactor.go:134:	compacted := make([]api.Message, 0, len(prefix)+len(suffix)+2)
+agent/compactor.go:135:	compacted = append(compacted, prefix...)
+agent/compactor.go:136:	compacted = append(compacted, CompactionSummaryMessages(summary, req.ContinueTask)...)
+agent/compactor.go:137:	compacted = append(compacted, suffix...)
+agent/compactor.go:138:	result.Messages = compacted
+agent/compactor.go:315:// tool-call plus tool-result pair that represents a compacted turn in the
+agent/compactor_test.go:86:	compacted := result.Messages
+agent/compactor_test.go:87:	if len(compacted) != 6 {
+agent/compactor_test.go:88:		t.Fatalf("compacted messages = %d, want 6", len(compacted))
+agent/compactor_test.go:90:	if compacted[0].Content != "stay pinned" {
+agent/compactor_test.go:91:		t.Fatalf("first message = %#v", compacted[0])
+agent/compactor_test.go:96:	assertCompactionSummaryPair(t, compacted[1:3])
+agent/compactor_test.go:97:	if compacted[3].Content != "recent one" || compacted[5].Content != "recent two" {
+agent/compactor_test.go:98:		t.Fatalf("recent turns were not kept: %#v", compacted)
+agent/compactor_test.go:224:		t.Fatalf("compacted message missing truncation marker: %#v", result.Messages)
+agent/events.go:20:	EventCompacted          EventType = "compacted"
+agent/session.go:783:	compacted := append([]api.Message(nil), result.Messages...)
+agent/session.go:785:		compacted = append(compacted, assistant)
+agent/session.go:788:	historyTokens := s.estimateRunPromptTokens(opts, compacted)
+agent/session.go:800:		compacted = append(compacted, refit)
+agent/session.go:804:	s.emitCompacted(runID, opts, compacted, CompactionTriggerToolOutput, result.Summary)
+agent/session.go:805:	if err := s.checkPostCompactionPromptBudget(opts, compacted); err != nil {
+agent/session.go:806:		return compacted, skipNotified, err
+agent/session.go:808:	return compacted, skipNotified, nil
+agent/session_test.go:1323:		t.Fatalf("second model request did not use compacted messages: %#v", secondRequestMessages)
+agent/session_test.go:1371:		t.Fatal("expected partial result with compacted messages")
+agent/session_test.go:1380:		t.Fatalf("events missing compacted event: %#v", events.events)
+agent/session_test.go:1386:		t.Fatalf("result should retain compacted summary messages: %#v", result.Messages)
+agent/session_test.go:1558:		t.Fatalf("events missing compacted event: %#v", events.events)
+cmd/tui/chat/compaction.go:99:	m.status = "compacted"
+cmd/tui/chat/events.go:169:		m.status = "compacted"
+ TRUNCATED False
+historySink  TRUNCATED False
+
+BUILD_CUSTODY
+.gitignore:7:build	build/eko-colleague-integration-20260920/artifact
+ exit=0

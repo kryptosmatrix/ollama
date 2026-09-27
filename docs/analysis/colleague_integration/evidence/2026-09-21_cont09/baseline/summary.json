@@ -1,0 +1,74 @@
+[
+  {
+    "name": "regenerate",
+    "argv": [
+      "/opt/homebrew/bin/go",
+      "run",
+      "github.com/tkrajina/typescriptify-golang-structs/tscriptify",
+      "-package=github.com/ollama/ollama/app/ui/responses",
+      "-target=/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont09/baseline/gotypes.raw.ts",
+      "responses/types.go"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui",
+    "exit_code": 0,
+    "seconds": 6.418584832921624,
+    "stdout_sha256": "7c58d661d47aeaa9b43c2840712a284d770905c1dcda637134a8123834c17bbe",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "byte_identical": true,
+    "raw_sha256": "49052e66cbd7e279e7bc2abd0270df4f8746fb1545e0e8d486deb51cbf791154",
+    "before_sha256": "49052e66cbd7e279e7bc2abd0270df4f8746fb1545e0e8d486deb51cbf791154"
+  },
+  {
+    "name": "typecheck",
+    "argv": [
+      "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/node_modules/.bin/tsc",
+      "-b",
+      "--force"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+    "exit_code": 0,
+    "seconds": 18.919498125091195,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "lint",
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "run",
+      "lint",
+      "--",
+      "--format=json"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+    "exit_code": 1,
+    "seconds": 8.69070095801726,
+    "stdout_sha256": "0fed227eba030d1f5f3d59d88ccaa792db2abf1c1f9240042d16c6034ea2239b",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "errors": 122,
+    "warnings": 11
+  },
+  {
+    "name": "tests",
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "test",
+      "--",
+      "--run",
+      "--reporter=json"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+    "exit_code": 0,
+    "seconds": 24.15153933293186,
+    "stdout_sha256": "a3fe6a0ba220444bb25293c8446deb697f258f4fb588300526a72ed9bfee9790",
+    "stderr_sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99",
+    "counts": {
+      "numTotalTests": 154,
+      "numPassedTests": 154,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "success": true
+    },
+    "file_failures": []
+  }
+]

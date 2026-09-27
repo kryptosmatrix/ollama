@@ -1,0 +1,14 @@
+{
+  "source_commit": "6a3778184d43b23c5cba14e0379922377f615f52",
+  "documentation_commit": "17197224933cbdd9875c2277f18767c5f6f134a2",
+  "remote_task_tip": "17197224933cbdd9875c2277f18767c5f6f134a2",
+  "worktree_clean": true,
+  "main_merged": false,
+  "installed": false,
+  "current_control_state_sha256": "909c81f264ec2df55741c49e29750edfe3678b51e9ef66a19a0aca36de68bbb2",
+  "report_sha256": "9805cb9cab2ea0bbeffb533cea518d3da1229c6249d6a5e979c076351273e461",
+  "G1_recon_sha256": "a595961aac075e265428e4983a9ec5ae3b021b8f2000e2e8d996fd1d7c0b8771",
+  "session_id": "35a5b7b379654957a908c7f0d8c6825c",
+  "session_eof_next": true,
+  "timestamp_brisbane": "2026-09-21T17:00:42.395382+10:00"
+}

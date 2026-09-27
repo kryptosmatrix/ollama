@@ -1,0 +1,27 @@
+{
+  "job_id": "1dd284e91e084a1cbf36aa6e16187f97",
+  "request_id": "eko-ollama-cont07-20260921-session",
+  "request_hash": "d1cf81aba3357ba9bed451c6408cb40b5bf6d1a0b37558e52cf33f0bdcb33da5",
+  "state": "exited",
+  "exit_code": 0,
+  "finished_unix": 1789952838.144227,
+  "output_complete": true,
+  "stdout_bytes": 184431,
+  "stderr_bytes": 131,
+  "eof_input_id": "eko-cont07-session-eof",
+  "eof_delivered": true,
+  "active_work_after_closeout": false,
+  "shell_exit_is_test_evidence": false,
+  "child_results": {
+    "native_declaration_review": "PASS in the stated native scope",
+    "frontend_typecheck": "PASS",
+    "frontend_javascript_emission": "Identical in four production files",
+    "frontend_lint": "FAIL: 122 errors, 11 warnings",
+    "frontend_runtime_tests": "NOT RUN: request blocked before execution",
+    "first_checkpoint_writer": "Failed before record writes; unchanged originals verified, corrected write passed"
+  },
+  "source_commit": "acd8bb3de93ea01d43dd8783bbeff036113f9ab9",
+  "verified_remote_checkpoint": "d559da25a4db89fa9369d8be4106100803e82a58",
+  "main_merged": false,
+  "installed": false
+}

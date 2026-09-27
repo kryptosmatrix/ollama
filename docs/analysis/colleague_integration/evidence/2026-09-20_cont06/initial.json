@@ -1,0 +1,10 @@
+{
+  "head": "13139f8d36ec5f447c67ad634c8ad65b713a49db",
+  "lint_rules": {
+    "@typescript-eslint/no-explicit-any": 137,
+    "react-hooks/exhaustive-deps": 9,
+    "react-refresh/only-export-components": 2
+  },
+  "retired_job": "0356010d95a44e55832f4fa2cefa7f2e",
+  "retained_archive": "evidence/2026-09-20_cont02/bridge-commands/0356010d95a44e55832f4fa2cefa7f2e"
+}

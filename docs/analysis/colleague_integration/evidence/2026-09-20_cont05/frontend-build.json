@@ -1,0 +1,12 @@
+{
+  "args": [
+    "/opt/homebrew/bin/npm",
+    "run",
+    "build"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+  "exit_code": 2,
+  "elapsed_seconds": 25.458740459000012,
+  "stdout_sha256": "1b6aef20bfb001de04e5aa3d2eeca55a7e9370602b7242e6c2b89af835e6383e",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

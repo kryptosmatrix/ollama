@@ -1,0 +1,39 @@
+1235:             }
+1236:         }
+1237: 
+1238:         if (llama_model_n_swa(model_tgt) == 0) {
+1239:             if (params_base.swa_full) {
+1240:                 params_base.swa_full = false;
+1241:                 SRV_WRN("%s\n", "swa_full is not supported by this model, it will be disabled");
+1242:             }
+1243:         }
+1244: 
+1245:         n_swa = params_base.swa_full ? 0 : llama_model_n_swa(model_tgt);
+1246: 
+1247:         // Necessary similarity of prompt for slot selection
+1248:         slot_prompt_similarity = params_base.slot_prompt_similarity;
+1249: 
+1250:         const int n_ctx_train = llama_model_n_ctx_train(model_tgt);
+1251: 
+1252:         int n_ctx_slot = llama_n_ctx_seq(ctx_tgt);
+1253:         if (n_ctx_slot > n_ctx_train) {
+1254:             SRV_WRN("the slot context (%d) exceeds the training context of the model (%d) - capping\n", n_ctx_slot, n_ctx_train);
+1255:             n_ctx_slot = n_ctx_train;
+1256:         }
+1257: 
+1258:         slots.clear();
+1259: 
+1260:         ctx_tgt_seq_rm_type = common_context_can_seq_rm(ctx_tgt);
+1261:         if (ctx_tgt_seq_rm_type == COMMON_CONTEXT_SEQ_RM_TYPE_NO) {
+1262:             SRV_WRN("%s", "speculative decoding not supported by this context\n");
+1263:         }
+1264: 
+1265:         if (ctx_tgt_seq_rm_type == COMMON_CONTEXT_SEQ_RM_TYPE_FULL) {
+1266:             SRV_TRC("%s", "speculative decoding will use checkpoints\n");
+1267:         }
+1268: 
+1269:         // setup slots
+1270:         SRV_INF("initializing, n_slots = %d, n_ctx_slot = %d, kv_unified = '%s'\n",
+1271:                 params_base.n_parallel, n_ctx_slot, params_base.kv_unified ? "true" : "false");
+1272: 
+1273:         // initialize slots

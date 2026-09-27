@@ -1,0 +1,16 @@
+{
+  "name": "read_evidence",
+  "arguments": {
+    "name": "candidate_rules",
+    "start": 1,
+    "count": 200
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/.gitignore",
+    "file_sha256": "384f341ecedfd8242d7249573dc4215009925a915219148bb4d219d009cda908",
+    "start": 1,
+    "end": 16,
+    "total_lines": 16,
+    "text": "1: ollama.syso\n2: *.crt\n3: *.exe\n4: /app/app\n5: /app/squirrel\n6: ollama\n7: coverage/\n8: *.coverprofile\n9: coverage*.out\n10: coverage*.html\n11: cover.out\n12: cover.html\n13: .vscode\n14: .env\n15: .DS_Store\n16: .claude"
+  }
+}

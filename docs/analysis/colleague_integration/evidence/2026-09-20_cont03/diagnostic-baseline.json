@@ -1,0 +1,32 @@
+{
+  "args": [
+    "/opt/homebrew/bin/go",
+    "test",
+    "-count=1",
+    "-json",
+    "-timeout=90s",
+    "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont03/testdata/chat_read_errors_test.go"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama",
+  "exit_code": 1,
+  "elapsed_seconds": 6.490479291009251,
+  "environment_overrides": {
+    "HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/ollama-chat-read-baseline-rvw_czha",
+    "USERPROFILE": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/ollama-chat-read-baseline-rvw_czha",
+    "LOCALAPPDATA": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/ollama-chat-read-baseline-rvw_czha",
+    "OLLAMA_HOST": "http://127.0.0.1:1",
+    "GOTOOLCHAIN": "local",
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "CI": "true"
+  },
+  "cache_locations": {
+    "GOCACHE": "/Users/krypto/Library/Caches/go-build",
+    "GOMODCACHE": "/Users/krypto/go/pkg/mod",
+    "GOPATH": "/Users/krypto/go"
+  },
+  "source_head": "953de98d408a9697fa20a48c23973b9dc8eee921",
+  "diagnostic_sha256": "9fb8959178d92a48bb889d955ffbf9b377a48bc50bcc313803894c25a7822edd",
+  "stdout_sha256": "2dc3620fb7bc1dedb6572c4f28c4386c3e07c5bef63cc258a604f9cfd68788ea",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

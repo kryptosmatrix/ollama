@@ -1,0 +1,10 @@
+{
+  "commit": "1916ee940c1f479f5ce60da8555976f03b8a8401",
+  "source_parent": "927fcb5dd706ffd741612a4ab124646aa22a60cb",
+  "files": {
+    "app/ui/app/src/components/MCPLocalDiscovery.tsx": "4181a47258597a2e9e35c627dac2c50c35fa74ca780a82ccc4c6bba5d29c755a",
+    "app/ui/app/src/components/MCPLocalDiscovery.test.tsx": "2275e94a9f7dbf17586d337fe8fd370ceb93e70c6e2e7ad832278b01ccb14a11"
+  },
+  "reason": "Existing source and tests unintentionally excluded by app/.gitignore:7 *cover*; originals retained unchanged.",
+  "original_checkout_unmodified": true
+}

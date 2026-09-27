@@ -1,0 +1,28 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "created_at": "2026-09-20T12:33:08.693635555Z",
+  "message": {
+    "role": "assistant",
+    "content": "I have all the evidence needed. Let me confirm the lint_delta run labels/summary near the top of the runs array.",
+    "tool_calls": [
+      {
+        "id": "call_m0qfkbln",
+        "function": {
+          "index": 0,
+          "name": "read_evidence",
+          "arguments": {
+            "name": "lint_delta",
+            "start": 1,
+            "count": 10
+          }
+        }
+      }
+    ]
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 952529678,
+  "prompt_eval_count": 14379,
+  "prompt_eval_cached_count": 11326,
+  "eval_count": 99
+}

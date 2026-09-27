@@ -1,0 +1,15 @@
+{
+  "checkpoint_commit": "04009c432e313eef65172293e75feb038ebe476b",
+  "tested_source_base": "6a3778184d43b23c5cba14e0379922377f615f52",
+  "remote_verified": "evidence/2026-09-21_cont12/git-closeout.json",
+  "worktree_clean": true,
+  "production_unchanged": true,
+  "programme_items_accepted": 0,
+  "design_status": "SPEC-DRAFT",
+  "report_sha256": "eca7521e4e25446e96e77186926c20ed0e2518c68a734447cdbd9702c1c4c681",
+  "state_sha256_before_shell_close": "73fcb2147a8a750cb717c3deb7a73a01c183915c3d73280e0cdf2e9efb48c04e",
+  "blueprint_sha256": "3d2f2db8ff514119f63f302b939455f6ed81b9257c5082e29f1cd9534e2b9241",
+  "shell_session": "c01535a3c3af4904a223a0da31d9bafb",
+  "shell_eof_next": true,
+  "timestamp_brisbane": "2026-09-21T20:36:53.456111+10:00"
+}

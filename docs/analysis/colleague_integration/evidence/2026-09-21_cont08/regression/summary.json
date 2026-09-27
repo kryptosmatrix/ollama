@@ -1,0 +1,148 @@
+{
+  "records": [
+    {
+      "argv": [
+        "/opt/homebrew/bin/npm",
+        "run",
+        "build"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 63.44002845801879,
+      "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/regression/production-build.stdout",
+      "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/regression/production-build.stderr",
+      "stdout_sha256": "f07e449b94cf4b34c16a2cdb55e7b86644a4d7c857e51636f4af96ae98769f97",
+      "stderr_sha256": "7cb0f022ea81adb449ae9f49e0fd651734f8ec69d9a75931c2d821d1c80f8f7a"
+    },
+    {
+      "argv": [
+        "/opt/homebrew/bin/npm",
+        "run",
+        "lint",
+        "--",
+        "--format=json"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+      "exit_code": 1,
+      "timed_out": false,
+      "seconds": 8.388961166958325,
+      "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/regression/lint.stdout",
+      "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/regression/lint.stderr",
+      "stdout_sha256": "0fed227eba030d1f5f3d59d88ccaa792db2abf1c1f9240042d16c6034ea2239b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "lint": {
+    "errors": 122,
+    "warnings": 11,
+    "by_file": [
+      {
+        "file": "codegen/gotypes.gen.ts",
+        "errors": 104,
+        "warnings": 0
+      },
+      {
+        "file": "src/components/Chat.tsx",
+        "errors": 0,
+        "warnings": 1
+      },
+      {
+        "file": "src/components/ChatForm.tsx",
+        "errors": 4,
+        "warnings": 2
+      },
+      {
+        "file": "src/components/ChatSidebar.tsx",
+        "errors": 0,
+        "warnings": 1
+      },
+      {
+        "file": "src/components/Message.tsx",
+        "errors": 9,
+        "warnings": 0
+      },
+      {
+        "file": "src/components/ModelPicker.tsx",
+        "errors": 1,
+        "warnings": 0
+      },
+      {
+        "file": "src/components/SpeechSettings.tsx",
+        "errors": 0,
+        "warnings": 1
+      },
+      {
+        "file": "src/components/ThinkButton.tsx",
+        "errors": 1,
+        "warnings": 0
+      },
+      {
+        "file": "src/components/ui/slider.tsx",
+        "errors": 0,
+        "warnings": 1
+      },
+      {
+        "file": "src/contexts/StreamingContext.tsx",
+        "errors": 0,
+        "warnings": 1
+      },
+      {
+        "file": "src/hooks/useChats.ts",
+        "errors": 3,
+        "warnings": 0
+      },
+      {
+        "file": "src/hooks/useSelectedModel.ts",
+        "errors": 0,
+        "warnings": 4
+      }
+    ]
+  },
+  "dependencies": {
+    "streamdown": {
+      "version": "1.4.0",
+      "package_sha256": "348ed854c9a03639a1772ebbb10981dbc39490daa588a5988aaae4c4b45ace0e"
+    },
+    "shiki": {
+      "version": "3.14.0",
+      "package_sha256": "fe5f5779a80124f6b4c903d510c1eab50cff5ae50c5df48143b3602de768144f"
+    },
+    "react": {
+      "version": "19.1.0",
+      "package_sha256": "8f3eb41d5562d73fd0b367319a8b7f03b36740f2dbd58214581307e0b5aa7a04"
+    },
+    "react-dom": {
+      "version": "19.1.0",
+      "package_sha256": "adf6bb7b4bf078406a677e0bb0123d002a5b706945c213e7abba2381fa1e991c"
+    },
+    "vitest": {
+      "version": "3.2.4",
+      "package_sha256": "555361762b31957f3960220aad50df9f43c9f82d830862ef6e3588168fbe111c"
+    },
+    "vite": {
+      "version": "6.3.5",
+      "package_sha256": "d11969c0ffe6277c5fc21d0fc8bbd5fea3c13d957158c93022d5039e9996cf99"
+    },
+    "typescript": {
+      "version": "5.8.3",
+      "package_sha256": "ebb0ce176c85ac13ce82f5be7e6f15114732ba0f064ccc893fd9051426d35d3a"
+    },
+    "remark": {
+      "version": "15.0.1",
+      "package_sha256": "415a7c1a25744b2b7ac42cf16ed45333b1cdd536d49fd88632a2a1497efd2531"
+    },
+    "katex": {
+      "version": "0.16.22",
+      "package_sha256": "bd6430ca96592a055393a1ce980925162da3d40cd0231813d41ef0c56daacd91"
+    },
+    "rehype-harden": {
+      "version": "1.1.5",
+      "package_sha256": "2184a0b6bbe4de680fbfad796fef2150055af3a625dfe2facfe57ec8aaf05ff4"
+    },
+    "node": "v25.8.2",
+    "npm": "11.11.1"
+  },
+  "source_unchanged": true,
+  "whole_programme_pass": false
+}

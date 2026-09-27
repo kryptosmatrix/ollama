@@ -1,0 +1,23 @@
+{
+  "purpose": "Free one completed Eko-only command slot without deleting its diagnostic output or any project work.",
+  "job_id": "d6159a2b17d94919b980dfe3736b007e",
+  "request_id": "eko-ollama-cont03-20260920-verify-retained-job-copies",
+  "request_hash": "0ca67edf2f53957aa66fe343a664d1e407f3e96b60ede5ff5df34866c33c9742",
+  "cwd": "/Users/krypto/GitHub/ollama",
+  "state": "exited",
+  "exit_code": 0,
+  "output_complete": 1,
+  "stdout_bytes": 8373,
+  "stdout_sha256": "b3e32c431774d4f4d12804eef031c92c6adc9b27ac8f2a8011f2807bd3627fd9",
+  "stdout_reconstruction": "Read retained_stdout_prefix as raw bytes, then append stdout_suffix encoded UTF-8; verify stdout_sha256.",
+  "retained_stdout_prefix": "2026-09-20_cont03/retained-job-custody-check.json",
+  "retained_stdout_prefix_bytes": 8354,
+  "retained_stdout_prefix_sha256": "4eac335f8d07c54ff75ae5d69b8e91553bedb1c136035f318a5f30ef70f80bb4",
+  "stdout_suffix": "CUSTODY_CHECK=PASS\n",
+  "stderr": "",
+  "stdin": [],
+  "explicit_environment_overrides": null,
+  "original_command_source": "Exact run_command payload retained in this conversation, copied below. This is a diagnostics-only invocation, not implementation or unique user data.",
+  "command": "python3 -I -B - <<'PY'\nfrom pathlib import Path\nimport json,hashlib\nr=Path('/Users/krypto/GitHub/ollama');e=r/'docs/analysis/colleague_integration/evidence';base=e/'2026-09-20_cont02/bridge-commands';index=json.loads((base/'INDEX.json').read_text());verified=[]\nfor item in index:\n job=item['job_id'];record_path=base/job/'record.json';rec=json.loads(record_path.read_text());assert rec['job_id']==job and rec['request_id']==item['request_id'] and rec['state']=='exited' and rec['output_complete']==1\n assert rec['request_id'].startswith('eko-ollama-20260920-cont02-') and rec['cwd']==str(r)\n assert rec['spec']['cwd']==str(r) and rec['spec']['command']\n for name,expected in item['streams'].items():\n  b=(base/job/name).read_bytes();assert len(b)==expected['bytes'] and hashlib.sha256(b).hexdigest()==expected['sha256'];assert rec['streams'][name]==expected\n verified.append({'job_id':job,'request_id':rec['request_id'],'request_hash':rec['request_hash'],'record_sha256':hashlib.sha256(record_path.read_bytes()).hexdigest(),'exit_code':rec['exit_code'],'retained_path':str(base/job),'streams':rec['streams']})\noutput={'purpose':'Verify complete byte-exact copies before retiring completed task-only Bridge job records to recover command capacity. No service configuration or other users jobs touched.','verified':verified,'initial_retired_job':'b48bf5be52d8404e85313559c1347737'}\np=e/'2026-09-20_cont03/retained-job-custody-check.json';p.write_text(json.dumps(output,indent=2)+'\\n');print(json.dumps(output,indent=2));print('CUSTODY_CHECK=PASS')\nPY",
+  "retirement_status": "prepared; complete output freshly read, retained result freshly identified; original command preserved above"
+}

@@ -1,0 +1,14 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "name": "go_store",
+    "start": 1,
+    "count": 60
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/store/store.go",
+    "file_sha256": "80c4bf13dd8b811809a389b3a5fc61386770b5963ce10012fe55dc29fab82601",
+    "total_lines": 537,
+    "text": "1: //go:build windows || darwin\n2: \n3: // Package store provides a simple JSON file store for the desktop application\n4: // to save and load data such as ollama server configuration, messages,\n5: // login information and more.\n6: package store\n7: \n8: import (\n9: \t\"encoding/json\"\n10: \t\"fmt\"\n11: \t\"log/slog\"\n12: \t\"os\"\n13: \t\"path/filepath\"\n14: \t\"runtime\"\n15: \t\"sync\"\n16: \t\"time\"\n17: \n18: \t\"github.com/google/uuid\"\n19: \t\"github.com/ollama/ollama/app/types/not\"\n20: )\n21: \n22: type File struct {\n23: \tFilename string `json:\"filename\"`\n24: \tData     []byte `json:\"data\"`\n25: }\n26: \n27: type User struct {\n28: \tName     string    `json:\"name\"`\n29: \tEmail    string    `json:\"email\"`\n30: \tPlan     string    `json:\"plan\"`\n31: \tCachedAt time.Time `json:\"cachedAt\"`\n32: }\n33: \n34: type Message struct {\n35: \tRole              string           `json:\"role\"`\n36: \tContent           string           `json:\"content\"`\n37: \tThinking          string           `json:\"thinking\"`\n38: \tStream            bool             `json:\"stream\"`\n39: \tModel             string           `json:\"model,omitempty\"`\n40: \tAttachments       []File           `json:\"attachments,omitempty\"`\n41: \tToolCalls         []ToolCall       `json:\"tool_calls,omitempty\"`\n42: \tToolCall          *ToolCall        `json:\"tool_call,omitempty\"`\n43: \tToolName          string           `json:\"tool_name,omitempty\"`\n44: \tToolResult        *json.RawMessage `json:\"tool_result,omitempty\"`\n45: \tCreatedAt         time.Time        `json:\"created_at\"`\n46: \tUpdatedAt         time.Time        `json:\"updated_at\"`\n47: \tThinkingTimeStart *time.Time       `json:\"thinkingTimeStart,omitempty\" ts_type:\"Date | undefined\" ts_transform:\"__VALUE__ && new Date(__VALUE__)\"`\n48: \tThinkingTimeEnd   *time.Time       `json:\"thinkingTimeEnd,omitempty\" ts_type:\"Date | undefined\" ts_transform:\"__VALUE__ && new Date(__VALUE__)\"`\n49: }\n50: \n51: // MessageOptions contains optional parameters for creating a Message\n52: type MessageOptions struct {\n53: \tModel             string\n54: \tAttachments       []File\n55: \tStream            bool\n56: \tThinking          string\n57: \tToolCalls         []ToolCall\n58: \tToolCall          *ToolCall\n59: \tToolResult        *json.RawMessage\n60: \tThinkingTimeStart *time.Time"
+  }
+}

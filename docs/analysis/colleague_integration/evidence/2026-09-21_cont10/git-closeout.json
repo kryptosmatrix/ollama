@@ -1,0 +1,52 @@
+{
+  "repository": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+  "authorised_remote": "https://github.com/kryptosmatrix/ollama.git",
+  "integration_branch": "main",
+  "owner": "Eko",
+  "source_commit": "6a3778184d43b23c5cba14e0379922377f615f52",
+  "documentation_commit": "17197224933cbdd9875c2277f18767c5f6f134a2",
+  "verified_remote_task_tip": "17197224933cbdd9875c2277f18767c5f6f134a2",
+  "verified_remote_main_tip": "953de98d408a9697fa20a48c23973b9dc8eee921",
+  "branch": "eko/chat-read-integrity-20260920",
+  "changed_files": 408,
+  "all_changes_documentation_only": true,
+  "source_ancestor_of_checkpoint": true,
+  "source_and_installed_frontend_dependency_fingerprints_equal_to_tested_candidate": true,
+  "proof_scope": "G-01\u2013G-07 generated-model maintenance only",
+  "independent_review": "independent-review-addendum/result.json plus prior finalisation/fresh reviewer runs",
+  "bounded_maintenance_accepted": true,
+  "programme_items_accepted": 0,
+  "main_merged": false,
+  "installed": false,
+  "worktree_clean": true,
+  "disposition": "PARKED",
+  "retained_branch_and_worktree": "Owned source is remotely preserved, but it is not yet integrated into main. Remaining applicable combined/package and baseline gates prevent retirement. Worktree holds reproducible local dependencies and continuing programme work; no shared checkout or other colleague resource was removed.",
+  "next_action": "Resume partial OI-01/G1 lifecycle and existing-context-design reconciliation, then earn the G1 design gates; clear applicable combined-candidate gates before main integration.",
+  "revisit_trigger": "Next commissioned programme continuation or successful completion of the remaining integration gates",
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "push",
+        "origin",
+        "HEAD:refs/heads/eko/chat-read-integrity-20260920"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "To https://github.com/kryptosmatrix/ollama.git\n   6a377818..17197224  HEAD -> eko/chat-read-integrity-20260920\n"
+    },
+    {
+      "argv": [
+        "git",
+        "ls-remote",
+        "origin",
+        "refs/heads/eko/chat-read-integrity-20260920",
+        "refs/heads/main"
+      ],
+      "exit_code": 0,
+      "stdout": "17197224933cbdd9875c2277f18767c5f6f134a2\trefs/heads/eko/chat-read-integrity-20260920\n953de98d408a9697fa20a48c23973b9dc8eee921\trefs/heads/main\n",
+      "stderr": ""
+    }
+  ],
+  "timestamp_brisbane": "2026-09-21T17:00:13.431159+10:00"
+}

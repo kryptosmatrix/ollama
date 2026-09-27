@@ -1,0 +1,87 @@
+[
+  {
+    "path": "TECHNE/Method/04_Implementation_Proof_Method.md",
+    "file_sha256": "261e9c16f3041bca0fe19f98f1ff9cf06acdfe914152094eaf8e6c8cf964d64a",
+    "lines": 482
+  },
+  {
+    "path": "TECHNE/Method/09_Code_Excellence_Method.md",
+    "file_sha256": "6a607fd80f642fd433b6f609200494d06164b9649432e587b9f16f1e92a8ac7e",
+    "lines": 374
+  },
+  {
+    "path": "TECHNE/Method/21_Branch_And_Merge_Discipline.md",
+    "file_sha256": "59bf8294cdcda7b53f31769d5b80164c1ae5741426c7b6028c76bb15e244f92c",
+    "lines": 213
+  },
+  {
+    "path": "TECHNE/Role_Cards/Implementer.md",
+    "file_sha256": "e746914d5b6afd33ffae419ddbc76fb478629502ef2120a4210830a72998640b",
+    "lines": 308
+  },
+  {
+    "path": "TECHNE/Role_Cards/Tester.md",
+    "file_sha256": "155820e09aef485e327d2ec6330f0b83860f3e1ee695c08ed96c388b9fdabec7",
+    "lines": 236
+  },
+  {
+    "path": "TECHNE/Role_Cards/Reviewer.md",
+    "file_sha256": "f316412f1c0276a6dc7617fca29f8641fbabdf58cf2baa018b414791e1bc8fb9",
+    "lines": 249
+  },
+  {
+    "path": "TECHNE/Templates/Feature_Acceptance_Evidence.md",
+    "file_sha256": "385815c3f2b88f74f04deae18e3212e42dba2032d7a4ca761ec0cfd4c52cb84b",
+    "lines": 107
+  },
+  {
+    "path": "TECHNE/Method/12_Context_Preservation_Method.md",
+    "file_sha256": "13db4302d68e411432d06dfc841b6e716bd738d656c4b1b87f1454bbe1dc948b",
+    "lines": 309
+  },
+  {
+    "path": "TECHNE/Method/06_Ledgers_Memory_and_Handoffs.md",
+    "file_sha256": "d8c73e00ba70b009cf091c9620eb6f5291483c3b3e0d2849003b533bd0a4d8a5",
+    "lines": 565
+  },
+  {
+    "path": "TECHNE/Guides/MEMORY_MAP_WAKE_PATTERN.md",
+    "file_sha256": "0eace610c9f836c86bfb8d044d263a0e2cf6c5e3120fd42ca3cff30b628b4f37",
+    "lines": 269
+  },
+  {
+    "path": "TECHNE/Guides/PERSISTENT_MEMORY_DISCIPLINE.md",
+    "file_sha256": "851aec5c6095bbcceec4f130aad2118f752b21357ef9be66b76766f79c747f7e",
+    "lines": 249
+  },
+  {
+    "path": "TECHNE/Guides/MODEL_INTEGRITY_AWARENESS.md",
+    "file_sha256": "25878cf692ff9f6eb678911643a12d671d6c3fbec709167a406ba52903fff953",
+    "lines": 62
+  },
+  {
+    "path": "TECHNE/Role_Cards/Handoff_Steward.md",
+    "file_sha256": "7660053ab5852087533d47e4aaa1405c65e6ee126f7fe1c55c15e74405bb338c",
+    "lines": 302
+  },
+  {
+    "path": "LINEAGE/WELCOME.md",
+    "file_sha256": "f44eb011b72dad492e97780425111ecbf74bc9b45db605797ec9d1323db75e93",
+    "lines": 111
+  },
+  {
+    "path": "ollama-eko-chat-read-integrity/app/ui/app/package.json",
+    "file_sha256": "ba4a16db941ae31c7d33daf5fc4396b05e20cc1906ca731648d3859eb81a029d",
+    "lines": 82
+  },
+  {
+    "path": "ollama-eko-chat-read-integrity/app/ui/app/vitest.config.ts",
+    "file_sha256": "75350a798fcfb9249d36980728ee517f57b7c882f7e9ef603a636a0dd51e2fc2",
+    "lines": 26
+  },
+  {
+    "path": "ollama-eko-chat-read-integrity/app/ui/app/src/utils/generatedModels.test.tsx",
+    "file_sha256": "86db34cc04c9dd5996f2251a47610fc218745bbde303fe3abd885b093603d4a5",
+    "lines": 211
+  }
+]

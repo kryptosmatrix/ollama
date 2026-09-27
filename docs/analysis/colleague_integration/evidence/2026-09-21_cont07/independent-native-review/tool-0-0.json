@@ -1,0 +1,14 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "source": "header",
+    "start": 1586,
+    "count": 12
+  },
+  "result": {
+    "file": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/webview/webview.h",
+    "file_sha256": "60b93d50eefa841c61a37e2c9425107dc720fbb2b112455129776547c2e8eef0",
+    "total_lines": 3997,
+    "content": "1586: enum NSModalResponse : NSInteger { NSModalResponseOK = 1 };\n1587: \n1588: // Convenient conversion of string literals.\n1589: inline id operator\"\"_cls(const char *s, std::size_t) {\n1590:   return (id)objc_getClass(s);\n1591: }\n1592: inline SEL operator\"\"_sel(const char *s, std::size_t) {\n1593:   return sel_registerName(s);\n1594: }\n1595: inline id operator\"\"_str(const char *s, std::size_t) {\n1596:   return objc::msg_send<id>(\"NSString\"_cls, \"stringWithUTF8String:\"_sel, s);\n1597: }"
+  }
+}

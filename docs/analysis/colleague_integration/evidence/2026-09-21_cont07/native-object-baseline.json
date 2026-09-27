@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/usr/bin/clang++",
+    "-std=c++11",
+    "-DWEBVIEW_STATIC",
+    "-DWEBVIEW_COCOA",
+    "-O2",
+    "-c",
+    "app/webview/webview.cc",
+    "-o",
+    "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/webview-baseline.o"
+  ],
+  "exit_code": 0,
+  "seconds": 3.123969791980926,
+  "object_sha256": "b6551cda945646f3d49b6dba0336de43d2d385fa3c7b9692978b89896122b09f"
+}

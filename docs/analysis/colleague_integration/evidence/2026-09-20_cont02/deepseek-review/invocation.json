@@ -1,0 +1,31 @@
+{
+  "args": [
+    "/bin/bash",
+    "/Users/krypto/GitHub/TECHNE/Tools/ollama/ask.sh",
+    "--model",
+    "deepseek-v4.1-flash:cloud",
+    "--prompt-file",
+    "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont02/deepseek-review/prompt.txt",
+    "--approve-local-content",
+    "--expect-digest",
+    "e04da138d31e0c9468e982e1ae9503d06cb7e170caa16a90c17d931c4aa140f8",
+    "--expect-served-model",
+    "deepseek-v4.1-flash",
+    "--num-ctx",
+    "262144",
+    "--num-predict",
+    "12288",
+    "--num-gpu",
+    "auto",
+    "--think",
+    "on",
+    "--timeout-seconds",
+    "420",
+    "--run-id",
+    "eko-ollama-chat-read-20260920"
+  ],
+  "prompt_sha256": "4e7215e1cab331398a98a34973a708af2d0ba98c8079c9f8571282be72d9377e",
+  "prompt_bytes": 241390,
+  "authorisation": "Current user request explicitly selects this cloud judge; only selected task source and synthetic evidence disclosed.",
+  "review_kind": "source-text adversarial review; not independent execution or release acceptance"
+}

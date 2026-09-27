@@ -1,0 +1,58 @@
+1828:             if (stop_pos != std::string::npos) {
+1829:                 slot.generated_text.erase(
+1830:                     slot.generated_text.begin() + pos + stop_pos,
+1831:                     slot.generated_text.end());
+1832:                 pos = std::min(slot.n_sent_text, slot.generated_text.size());
+1833:             } else if (slot.has_next_token && !llama_vocab_is_eog(vocab, result.tok) ) {
+1834:                 stop_pos = slot.find_stopping_strings(str_test, token_str.size(), false);
+1835:                 send_text = stop_pos == std::string::npos;
+1836:             }
+1837: 
+1838:             // check if there is any token to predict
+1839:             if (send_text) {
+1840:                 // no send the stop word in the response
+1841:                 result.text_to_send = slot.generated_text.substr(pos, std::string::npos);
+1842:                 slot.n_sent_text += result.text_to_send.size();
+1843:                 // add the token to slot queue and cache
+1844:             } else {
+1845:                 result.text_to_send = "";
+1846:             }
+1847: 
+1848:             slot.add_token(result);
+1849:             if (slot.task->params.stream) {
+1850:                 send_partial_response(slot, result, false);
+1851:             }
+1852:         }
+1853: 
+1854:         if (incomplete) {
+1855:             slot.has_next_token = true;
+1856:         }
+1857: 
+1858:         // if context shifting is disabled, make sure that we don't run out of context
+1859:         if (!params_base.ctx_shift && slot.prompt.n_tokens() + 1 >= slot.n_ctx) {
+1860:             slot.truncated      = true;
+1861:             slot.stop           = STOP_TYPE_LIMIT;
+1862:             slot.has_next_token = false;
+1863: 
+1864:             SLT_DBG(slot, "stopped due to running out of context capacity, prompt.n_tokens() = %d, task.n_tokens = %d, n_decoded = %d, n_ctx = %d\n",
+1865:                     slot.prompt.n_tokens(), slot.task->n_tokens(), slot.n_decoded, slot.n_ctx);
+1866:         }
+1867: 
+1868:         // check the limits
+1869:         if (slot.n_decoded > 0 && slot.has_next_token && !slot.has_budget(params_base)) {
+1870:             slot.stop           = STOP_TYPE_LIMIT;
+1871:             slot.has_next_token = false;
+1872: 
+1873:             SLT_DBG(slot, "stopped by limit, n_decoded = %d, n_predict = %d\n", slot.n_decoded, slot.task->params.n_predict);
+1874:         }
+1875: 
+1876:         if (slot.has_new_line) {
+1877:             // require that each new line has a whitespace prefix (i.e. indentation) of at least slot.params.n_indent
+1878:             if (slot.task->params.n_indent > 0) {
+1879:                 // check the current indentation
+1880:                 // TODO: improve by not doing it more than once for each new line
+1881:                 if (slot.last_nl_pos > 0) {
+1882:                     size_t pos = slot.last_nl_pos;
+1883: 
+1884:                     int n_indent = 0;
+1885:                     while (pos < slot.generated_text.size() && (slot.generated_text[pos] == ' ' || slot.generated_text[pos] == '\t')) {

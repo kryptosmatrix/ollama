@@ -1,0 +1,15 @@
+{
+  "format_schema_bytes": 0,
+  "format_schema_sha256": null,
+  "model": "deepseek-v4.1-flash:cloud",
+  "options": {
+    "num_ctx": 262144,
+    "num_predict": 8192,
+    "seed": 0,
+    "temperature": 0.0
+  },
+  "prompt_bytes": 223263,
+  "prompt_sha256": "13dea2a5bc6aca10d83b56b2b23024f80cf78ae0fdab58e178c6b58c10ba1fe9",
+  "stream": false,
+  "think": "off"
+}

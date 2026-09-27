@@ -1,0 +1,9 @@
+{
+  "timestamp": "2026-09-21T18:48:40.230025+10:00",
+  "source_commit": "17197224933cbdd9875c2277f18767c5f6f134a2",
+  "report_sha256": "8765119fe8139c6c7a02e4ed75ec45a0b3c71aaa364efdede970b0ada26afa90",
+  "blueprint_sha256": "24d76eb771d94d64979dbeed74aa6c1b706bab98edad56280399a521f292645c",
+  "curated_records": 42,
+  "production_changed": false,
+  "accepted_programme_items": 0
+}

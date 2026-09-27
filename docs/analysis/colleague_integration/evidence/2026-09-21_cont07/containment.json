@@ -1,0 +1,29 @@
+{
+  "source_tip": "acd8bb3de93ea01d43dd8783bbeff036113f9ab9",
+  "changed_source_identities": {
+    "app/webview/webview.h": "60b93d50eefa841c61a37e2c9425107dc720fbb2b112455129776547c2e8eef0",
+    "app/ui/app/src/components/StreamingMarkdownContent.tsx": "983e3aa6e4273b861623a97ae5fe5bf9782294a1d0bcb4449e67f808ac7d32a0",
+    "app/ui/app/src/components/MessageList.tsx": "98fb52e407dab24248f3635bec515e6ace897f779a159d649ea6664af149d02e",
+    "app/ui/app/src/utils/remarkCitationParser.ts": "fda18778386aecda5aac3d49d1cb36bc9593500761dd29f1fb3e9a80011af92c",
+    "app/ui/app/src/lib/highlighter.ts": "e9975a7555a435cd3e899bf4f344cb6fc7f29b10cee8ed2bd2904f53c87848aa",
+    "app/ui/app/src/utils/remarkCitationParser.test.ts": "26981cfea4df53329e5f70933173f006c8b866de2986b9dcbff9101b1cd74cc5",
+    "app/ui/app/src/components/StreamingMarkdownContent.integration.test.tsx": "0cd48db543a398ce45a4978772562c9497e3988d5c044640e7a61c3ebf1e619a"
+  },
+  "critical_unchanged": {
+    "app/store/store.go": "71097b8bc6664c0c9eb87bedfab5c0b79acc2768df20e0dd0319af2fbd5c0862",
+    "app/store/database.go": "6905b4e6146f76e0aed66f97e17a39245d27a0182f0051d06642389de042b551",
+    "app/store/chat_read_errors_test.go": "78adbad3f024feb30e912722026aa9bb8f6ea1f96b08fc241e5ab0c121b57c99",
+    "app/ui/chat_read_errors_test.go": "299356bec304683503fe4410f19f2f0496307ff64848ebaf0f13fd854421440a",
+    "app/ui/ui.go": "dbba86f3d90ec5edac5b23458fec00f25e39f4d9f3ef43ac124571e0c1a0d48e",
+    "app/ui/app/eslint.config.js": "844310478cabaa17e7d6521be0f67a59801c9edd025e4b916420b1ad8d1ce7b3",
+    "app/ui/app/package-lock.json": "ffdee0821030410855d6b432e0c6bac936ad712c0f2689622bd9b56f09ca6fa3",
+    "app/ui/app/codegen/gotypes.gen.ts": "49052e66cbd7e279e7bc2abd0270df4f8746fb1545e0e8d486deb51cbf791154",
+    "mcp/tokenstore_darwin_test.go": "e64778cde71f8a13b35f7d2db1a12b4c95b475275392358f32cd7ee2da73a5dc",
+    "app/tts/secrets_darwin_test.go": "fe833321bcc50f205f8e5626580c8c56505221d4a9290c5b1813c9b506623dff"
+  },
+  "main_head": "953de98d408a9697fa20a48c23973b9dc8eee921",
+  "main_tracked_source_unchanged": true,
+  "installed": false,
+  "main_merged": false,
+  "timestamp_brisbane": "2026-09-21T10:59:53.891604+10:00"
+}

@@ -1,0 +1,30 @@
+{
+ "model": "deepseek-v4.1-flash:cloud",
+ "probe": "Q2",
+ "lines": 2000,
+ "http_status": 200,
+ "seconds": 1.3,
+ "request_bytes": 56464,
+ "content_utf8_bytes": 54277,
+ "conservative_bound": 54325,
+ "prompt_eval_count": 20080,
+ "eval_count": 20,
+ "done_reason": "stop",
+ "bound_holds": true,
+ "expected": {
+  "carrier": "DCA4FCFA",
+  "first": 363737,
+  "last": 118691
+ },
+ "reply": "CARRIER=DCA4FCFA; FIRST=363737; LAST=118691",
+ "ok": {
+  "carrier": true,
+  "first": true,
+  "last": true
+ },
+ "verdict": "PASS",
+ "error": null,
+ "tries": 1,
+ "request_sha256": "95b4febe3bf9dfdca8a1a21f95ee9696c872207cda04fc78e3a78d43e3865997",
+ "spent_after": 20131
+}

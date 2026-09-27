@@ -1,0 +1,446 @@
+[
+  {
+    "case": "rewrap",
+    "controller_exit": 0,
+    "result": {
+      "argv": [
+        "/opt/homebrew/bin/go",
+        "test",
+        "-count=1",
+        "-json",
+        "-timeout=150s",
+        "-run=^TestChatRead",
+        "-overlay",
+        "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/rewrap/overlay.json",
+        "./app/store",
+        "./app/ui"
+      ],
+      "cache_locations": {
+        "GOCACHE": "/Users/krypto/Library/Caches/go-build",
+        "GOMODCACHE": "/Users/krypto/go/pkg/mod",
+        "GOPATH": "/Users/krypto/go"
+      },
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "elapsed_seconds": 15.827200416999998,
+      "environment_overrides": {
+        "CI": "true",
+        "GOPROXY": "off",
+        "GOSUMDB": "off",
+        "GOTOOLCHAIN": "local",
+        "HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-5rhq_qhf",
+        "LOCALAPPDATA": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-5rhq_qhf",
+        "OLLAMA_HOST": "http://127.0.0.1:1",
+        "OLLAMA_MCP_APPROVALS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-5rhq_qhf/approvals.json",
+        "OLLAMA_MCP_CONFIG": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-5rhq_qhf/mcp.json",
+        "OLLAMA_MCP_TOKENS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-5rhq_qhf/mcp-tokens.json",
+        "USERPROFILE": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-5rhq_qhf"
+      },
+      "exit_code": 1,
+      "expectation": "baseline-failure",
+      "expectation_met": true,
+      "overlay": {
+        "file": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/rewrap/overlay.json",
+        "replacements": {
+          "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/store/store.go": {
+            "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/rewrap/store.go",
+            "sha256": "af324196245292ab5b6ee65abbb8de2f1db5e3d07772db0f98d273c53848349f"
+          }
+        },
+        "sha256": "7ade39122dd602824f61d26fa2972e6439c735967d9c4f6ce28687a5a1029608"
+      },
+      "runner_sha256": "8a1f06496c6e25e43fe7a0e46cc00c971f1d0df3c965ced2210ad90c31b67e0f",
+      "source_head": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+      "source_unchanged_during_run": true,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "3b6e859bb6563c00b80061648f1ecb1bfbe042505092fe03f4df8973cad073c3",
+      "test_results": {
+        "build_failures": [],
+        "counts": {
+          "fail": 5,
+          "pass": 5,
+          "skip": 0
+        },
+        "finished": {
+          "TestChatReadInitialisationFailureIsNotAbsence": "pass",
+          "TestChatReadIntegrityAcrossProcesses": "fail",
+          "TestChatReadIntegrityAcrossProcesses/fault": "fail",
+          "TestChatReadIntegrityAcrossProcesses/positive": "pass",
+          "TestChatReadIntegrityAcrossProcesses/recover": "fail",
+          "TestChatReadIntegrityAcrossProcesses/seed": "pass",
+          "TestChatReadMissingHeaderIsNotFound": "pass",
+          "TestChatReadPreservesDatabaseErrorCause": "fail",
+          "TestChatReadRejectsMalformedMessage": "fail",
+          "TestChatReadValidEmptyAndPopulated": "pass"
+        },
+        "missing": [],
+        "started": [
+          "TestChatReadInitialisationFailureIsNotAbsence",
+          "TestChatReadIntegrityAcrossProcesses",
+          "TestChatReadIntegrityAcrossProcesses/fault",
+          "TestChatReadIntegrityAcrossProcesses/positive",
+          "TestChatReadIntegrityAcrossProcesses/recover",
+          "TestChatReadIntegrityAcrossProcesses/seed",
+          "TestChatReadMissingHeaderIsNotFound",
+          "TestChatReadPreservesDatabaseErrorCause",
+          "TestChatReadRejectsMalformedMessage",
+          "TestChatReadValidEmptyAndPopulated"
+        ],
+        "unfinished": []
+      },
+      "timed_out": false
+    }
+  },
+  {
+    "case": "consumer-bypass",
+    "controller_exit": 0,
+    "result": {
+      "argv": [
+        "/opt/homebrew/bin/go",
+        "test",
+        "-count=1",
+        "-json",
+        "-timeout=150s",
+        "-run=^TestChatRead",
+        "-overlay",
+        "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/consumer-bypass/overlay.json",
+        "./app/store",
+        "./app/ui"
+      ],
+      "cache_locations": {
+        "GOCACHE": "/Users/krypto/Library/Caches/go-build",
+        "GOMODCACHE": "/Users/krypto/go/pkg/mod",
+        "GOPATH": "/Users/krypto/go"
+      },
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "elapsed_seconds": 5.876470917,
+      "environment_overrides": {
+        "CI": "true",
+        "GOPROXY": "off",
+        "GOSUMDB": "off",
+        "GOTOOLCHAIN": "local",
+        "HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-yauiu2_f",
+        "LOCALAPPDATA": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-yauiu2_f",
+        "OLLAMA_HOST": "http://127.0.0.1:1",
+        "OLLAMA_MCP_APPROVALS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-yauiu2_f/approvals.json",
+        "OLLAMA_MCP_CONFIG": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-yauiu2_f/mcp.json",
+        "OLLAMA_MCP_TOKENS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-yauiu2_f/mcp-tokens.json",
+        "USERPROFILE": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-yauiu2_f"
+      },
+      "exit_code": 1,
+      "expectation": "baseline-failure",
+      "expectation_met": true,
+      "overlay": {
+        "file": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/consumer-bypass/overlay.json",
+        "replacements": {
+          "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/ui.go": {
+            "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/consumer-bypass/ui.go",
+            "sha256": "f45b25e29c608f4f5dcca4d0b8eef382bcdfaeadc762491f4d0650def8410124"
+          }
+        },
+        "sha256": "9cb6e99289502953bc95f70aefc01256cc14708be2546b37b1e2a5c8ab590a96"
+      },
+      "runner_sha256": "8a1f06496c6e25e43fe7a0e46cc00c971f1d0df3c965ced2210ad90c31b67e0f",
+      "source_head": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+      "source_unchanged_during_run": true,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a9d49473a585bcfbb87d9290d3005177b08aee7fe924d289a0eb6724fd44f1eb",
+      "test_results": {
+        "build_failures": [],
+        "counts": {
+          "fail": 3,
+          "pass": 7,
+          "skip": 0
+        },
+        "finished": {
+          "TestChatReadInitialisationFailureIsNotAbsence": "pass",
+          "TestChatReadIntegrityAcrossProcesses": "fail",
+          "TestChatReadIntegrityAcrossProcesses/fault": "fail",
+          "TestChatReadIntegrityAcrossProcesses/positive": "pass",
+          "TestChatReadIntegrityAcrossProcesses/recover": "fail",
+          "TestChatReadIntegrityAcrossProcesses/seed": "pass",
+          "TestChatReadMissingHeaderIsNotFound": "pass",
+          "TestChatReadPreservesDatabaseErrorCause": "pass",
+          "TestChatReadRejectsMalformedMessage": "pass",
+          "TestChatReadValidEmptyAndPopulated": "pass"
+        },
+        "missing": [],
+        "started": [
+          "TestChatReadInitialisationFailureIsNotAbsence",
+          "TestChatReadIntegrityAcrossProcesses",
+          "TestChatReadIntegrityAcrossProcesses/fault",
+          "TestChatReadIntegrityAcrossProcesses/positive",
+          "TestChatReadIntegrityAcrossProcesses/recover",
+          "TestChatReadIntegrityAcrossProcesses/seed",
+          "TestChatReadMissingHeaderIsNotFound",
+          "TestChatReadPreservesDatabaseErrorCause",
+          "TestChatReadRejectsMalformedMessage",
+          "TestChatReadValidEmptyAndPopulated"
+        ],
+        "unfinished": []
+      },
+      "timed_out": false
+    }
+  },
+  {
+    "case": "always-error",
+    "controller_exit": 0,
+    "result": {
+      "argv": [
+        "/opt/homebrew/bin/go",
+        "test",
+        "-count=1",
+        "-json",
+        "-timeout=150s",
+        "-run=^TestChatRead",
+        "-overlay",
+        "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/always-error/overlay.json",
+        "./app/store",
+        "./app/ui"
+      ],
+      "cache_locations": {
+        "GOCACHE": "/Users/krypto/Library/Caches/go-build",
+        "GOMODCACHE": "/Users/krypto/go/pkg/mod",
+        "GOPATH": "/Users/krypto/go"
+      },
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "elapsed_seconds": 15.13463,
+      "environment_overrides": {
+        "CI": "true",
+        "GOPROXY": "off",
+        "GOSUMDB": "off",
+        "GOTOOLCHAIN": "local",
+        "HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-jlh8nhqu",
+        "LOCALAPPDATA": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-jlh8nhqu",
+        "OLLAMA_HOST": "http://127.0.0.1:1",
+        "OLLAMA_MCP_APPROVALS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-jlh8nhqu/approvals.json",
+        "OLLAMA_MCP_CONFIG": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-jlh8nhqu/mcp.json",
+        "OLLAMA_MCP_TOKENS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-jlh8nhqu/mcp-tokens.json",
+        "USERPROFILE": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-jlh8nhqu"
+      },
+      "exit_code": 1,
+      "expectation": "baseline-failure",
+      "expectation_met": true,
+      "overlay": {
+        "file": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/always-error/overlay.json",
+        "replacements": {
+          "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/store/store.go": {
+            "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/always-error/store.go",
+            "sha256": "074e77e150b650bb99dab8a69c557f65bb77fd9a1a162ddb20005c53b659f486"
+          }
+        },
+        "sha256": "3c9ac47ffb88b74364ebd437420fc74c99a7faaefa4b7a75418ebb37b383c210"
+      },
+      "runner_sha256": "8a1f06496c6e25e43fe7a0e46cc00c971f1d0df3c965ced2210ad90c31b67e0f",
+      "source_head": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+      "source_unchanged_during_run": true,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "f48e382190fd5b7033062e55a60a2237c5b85677cfc309acef8aa32a79ffce6e",
+      "test_results": {
+        "build_failures": [],
+        "counts": {
+          "fail": 7,
+          "pass": 3,
+          "skip": 0
+        },
+        "finished": {
+          "TestChatReadInitialisationFailureIsNotAbsence": "pass",
+          "TestChatReadIntegrityAcrossProcesses": "fail",
+          "TestChatReadIntegrityAcrossProcesses/fault": "pass",
+          "TestChatReadIntegrityAcrossProcesses/positive": "fail",
+          "TestChatReadIntegrityAcrossProcesses/recover": "fail",
+          "TestChatReadIntegrityAcrossProcesses/seed": "pass",
+          "TestChatReadMissingHeaderIsNotFound": "fail",
+          "TestChatReadPreservesDatabaseErrorCause": "fail",
+          "TestChatReadRejectsMalformedMessage": "fail",
+          "TestChatReadValidEmptyAndPopulated": "fail"
+        },
+        "missing": [],
+        "started": [
+          "TestChatReadInitialisationFailureIsNotAbsence",
+          "TestChatReadIntegrityAcrossProcesses",
+          "TestChatReadIntegrityAcrossProcesses/fault",
+          "TestChatReadIntegrityAcrossProcesses/positive",
+          "TestChatReadIntegrityAcrossProcesses/recover",
+          "TestChatReadIntegrityAcrossProcesses/seed",
+          "TestChatReadMissingHeaderIsNotFound",
+          "TestChatReadPreservesDatabaseErrorCause",
+          "TestChatReadRejectsMalformedMessage",
+          "TestChatReadValidEmptyAndPopulated"
+        ],
+        "unfinished": []
+      },
+      "timed_out": false
+    }
+  },
+  {
+    "case": "empty-success",
+    "controller_exit": 0,
+    "result": {
+      "argv": [
+        "/opt/homebrew/bin/go",
+        "test",
+        "-count=1",
+        "-json",
+        "-timeout=150s",
+        "-run=^TestChatRead",
+        "-overlay",
+        "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/empty-success/overlay.json",
+        "./app/store",
+        "./app/ui"
+      ],
+      "cache_locations": {
+        "GOCACHE": "/Users/krypto/Library/Caches/go-build",
+        "GOMODCACHE": "/Users/krypto/go/pkg/mod",
+        "GOPATH": "/Users/krypto/go"
+      },
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "elapsed_seconds": 14.79079125,
+      "environment_overrides": {
+        "CI": "true",
+        "GOPROXY": "off",
+        "GOSUMDB": "off",
+        "GOTOOLCHAIN": "local",
+        "HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-k4eb1gaj",
+        "LOCALAPPDATA": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-k4eb1gaj",
+        "OLLAMA_HOST": "http://127.0.0.1:1",
+        "OLLAMA_MCP_APPROVALS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-k4eb1gaj/approvals.json",
+        "OLLAMA_MCP_CONFIG": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-k4eb1gaj/mcp.json",
+        "OLLAMA_MCP_TOKENS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-k4eb1gaj/mcp-tokens.json",
+        "USERPROFILE": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-k4eb1gaj"
+      },
+      "exit_code": 1,
+      "expectation": "baseline-failure",
+      "expectation_met": true,
+      "overlay": {
+        "file": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/empty-success/overlay.json",
+        "replacements": {
+          "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/store/store.go": {
+            "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/empty-success/store.go",
+            "sha256": "f745a211db44c88729c867e0b48b341a08f37af714b24dceba7ccaac85599804"
+          }
+        },
+        "sha256": "26e4fa9c2d5b3c6bc232f818d7fb4f006d990e3eee429ebadb7611e17c3b9262"
+      },
+      "runner_sha256": "8a1f06496c6e25e43fe7a0e46cc00c971f1d0df3c965ced2210ad90c31b67e0f",
+      "source_head": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+      "source_unchanged_during_run": true,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "713bb9289a4b38c601546445cccb44e5a945dda3978d8ce15672baf2bba6d9dc",
+      "test_results": {
+        "build_failures": [],
+        "counts": {
+          "fail": 8,
+          "pass": 2,
+          "skip": 0
+        },
+        "finished": {
+          "TestChatReadInitialisationFailureIsNotAbsence": "pass",
+          "TestChatReadIntegrityAcrossProcesses": "fail",
+          "TestChatReadIntegrityAcrossProcesses/fault": "fail",
+          "TestChatReadIntegrityAcrossProcesses/positive": "fail",
+          "TestChatReadIntegrityAcrossProcesses/recover": "fail",
+          "TestChatReadIntegrityAcrossProcesses/seed": "pass",
+          "TestChatReadMissingHeaderIsNotFound": "fail",
+          "TestChatReadPreservesDatabaseErrorCause": "fail",
+          "TestChatReadRejectsMalformedMessage": "fail",
+          "TestChatReadValidEmptyAndPopulated": "fail"
+        },
+        "missing": [],
+        "started": [
+          "TestChatReadInitialisationFailureIsNotAbsence",
+          "TestChatReadIntegrityAcrossProcesses",
+          "TestChatReadIntegrityAcrossProcesses/fault",
+          "TestChatReadIntegrityAcrossProcesses/positive",
+          "TestChatReadIntegrityAcrossProcesses/recover",
+          "TestChatReadIntegrityAcrossProcesses/seed",
+          "TestChatReadMissingHeaderIsNotFound",
+          "TestChatReadPreservesDatabaseErrorCause",
+          "TestChatReadRejectsMalformedMessage",
+          "TestChatReadValidEmptyAndPopulated"
+        ],
+        "unfinished": []
+      },
+      "timed_out": false
+    }
+  },
+  {
+    "case": "candidate-final",
+    "controller_exit": 0,
+    "result": {
+      "argv": [
+        "/opt/homebrew/bin/go",
+        "test",
+        "-count=1",
+        "-json",
+        "-timeout=150s",
+        "-run=^TestChatRead",
+        "./app/store",
+        "./app/ui"
+      ],
+      "cache_locations": {
+        "GOCACHE": "/Users/krypto/Library/Caches/go-build",
+        "GOMODCACHE": "/Users/krypto/go/pkg/mod",
+        "GOPATH": "/Users/krypto/go"
+      },
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "elapsed_seconds": 3.8143692080000005,
+      "environment_overrides": {
+        "CI": "true",
+        "GOPROXY": "off",
+        "GOSUMDB": "off",
+        "GOTOOLCHAIN": "local",
+        "HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-fv06j3pt",
+        "LOCALAPPDATA": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-fv06j3pt",
+        "OLLAMA_HOST": "http://127.0.0.1:1",
+        "OLLAMA_MCP_APPROVALS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-fv06j3pt/approvals.json",
+        "OLLAMA_MCP_CONFIG": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-fv06j3pt/mcp.json",
+        "OLLAMA_MCP_TOKENS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-fv06j3pt/mcp-tokens.json",
+        "USERPROFILE": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-fv06j3pt"
+      },
+      "exit_code": 0,
+      "expectation": "pass",
+      "expectation_met": true,
+      "overlay": null,
+      "runner_sha256": "8a1f06496c6e25e43fe7a0e46cc00c971f1d0df3c965ced2210ad90c31b67e0f",
+      "source_head": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+      "source_unchanged_during_run": true,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "4ab8dc193fa74419aa3d30d30a4cdbbe206b4cc1b2778ccba97a57b6cbf84176",
+      "test_results": {
+        "build_failures": [],
+        "counts": {
+          "fail": 0,
+          "pass": 10,
+          "skip": 0
+        },
+        "finished": {
+          "TestChatReadInitialisationFailureIsNotAbsence": "pass",
+          "TestChatReadIntegrityAcrossProcesses": "pass",
+          "TestChatReadIntegrityAcrossProcesses/fault": "pass",
+          "TestChatReadIntegrityAcrossProcesses/positive": "pass",
+          "TestChatReadIntegrityAcrossProcesses/recover": "pass",
+          "TestChatReadIntegrityAcrossProcesses/seed": "pass",
+          "TestChatReadMissingHeaderIsNotFound": "pass",
+          "TestChatReadPreservesDatabaseErrorCause": "pass",
+          "TestChatReadRejectsMalformedMessage": "pass",
+          "TestChatReadValidEmptyAndPopulated": "pass"
+        },
+        "missing": [],
+        "started": [
+          "TestChatReadInitialisationFailureIsNotAbsence",
+          "TestChatReadIntegrityAcrossProcesses",
+          "TestChatReadIntegrityAcrossProcesses/fault",
+          "TestChatReadIntegrityAcrossProcesses/positive",
+          "TestChatReadIntegrityAcrossProcesses/recover",
+          "TestChatReadIntegrityAcrossProcesses/seed",
+          "TestChatReadMissingHeaderIsNotFound",
+          "TestChatReadPreservesDatabaseErrorCause",
+          "TestChatReadRejectsMalformedMessage",
+          "TestChatReadValidEmptyAndPopulated"
+        ],
+        "unfinished": []
+      },
+      "timed_out": false
+    }
+  }
+]

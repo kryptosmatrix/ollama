@@ -1,0 +1,121 @@
+{
+  "at_brisbane": "2026-09-20T17:45:45.796049+10:00",
+  "jobs": [
+    {
+      "job_id": "81838f447a5e4575924e70d1560951a4",
+      "request_id": "eko-archive-maintenance-20260920-backup-01",
+      "request_hash": "db9a3f0320d50f93ce8bfbaed35c8b3e17ed1f4547951705ba2b9ece1765dad7",
+      "cwd": "/Users/krypto/GitHub/ollama",
+      "state": "exited",
+      "created": 1789889571.075752,
+      "started": 1789889571.42297,
+      "finished": 1789889575.049335,
+      "exit_code": 0,
+      "stdout_bytes": 4731,
+      "stderr_bytes": 0,
+      "output_complete": 1
+    },
+    {
+      "job_id": "f066bb69db834fa280d8d8497ecce8e4",
+      "request_id": "eko-archive-maintenance-20260920-noop-check-01",
+      "request_hash": "37164b7bee5fd428f8c221158bffe78f8ef9846271aa21594d3cba368ca25637",
+      "cwd": "/Users/krypto/GitHub/ollama",
+      "state": "exited",
+      "created": 1789889801.855519,
+      "started": 1789889802.047562,
+      "finished": 1789889803.0134358,
+      "exit_code": 0,
+      "stdout_bytes": 266,
+      "stderr_bytes": 0,
+      "output_complete": 1
+    },
+    {
+      "job_id": "23b09e55888343ae868cfd1a56adb23d",
+      "request_id": "eko-archive-maintenance-20260920-retire-verified-batch-01",
+      "request_hash": "12ac566b98f6a46f413e87811e4f87389bf5e781c7101961271c6494203b112b",
+      "cwd": "/Users/krypto/GitHub/ollama",
+      "state": "exited",
+      "created": 1789889866.1948822,
+      "started": 1789889866.349898,
+      "finished": 1789889867.560719,
+      "exit_code": 0,
+      "stdout_bytes": 1052,
+      "stderr_bytes": 0,
+      "output_complete": 1
+    },
+    {
+      "job_id": "f69a3539cb4f42309e57240231e29de4",
+      "request_id": "eko-archive-maintenance-20260920-failure-control-01",
+      "request_hash": "bf29506192e3d83e190d33fe9c0d455f2c3f8d95d7144271449151250759014a",
+      "cwd": "/Users/krypto/GitHub/ollama",
+      "state": "exited",
+      "created": 1789889917.356354,
+      "started": 1789889917.502709,
+      "finished": 1789889917.784128,
+      "exit_code": 1,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "output_complete": 1
+    },
+    {
+      "job_id": "86ab9302ee424746b2d8b23f202ee575",
+      "request_id": "eko-archive-maintenance-20260920-clean-and-baseline-01",
+      "request_hash": "d63ac4a50c56b25063b7ee10d3ed3466642c58b4a82a27971f77423cdb09669f",
+      "cwd": "/Users/krypto/GitHub/ollama",
+      "state": "exited",
+      "created": 1789889945.8492212,
+      "started": 1789889946.034622,
+      "finished": 1789889948.7063968,
+      "exit_code": 0,
+      "stdout_bytes": 1190,
+      "stderr_bytes": 0,
+      "output_complete": 1
+    },
+    {
+      "job_id": "025cbb5a846246bb91c80f4d6a8619b2",
+      "request_id": "eko-archive-maintenance-20260920-checkpoint-read-01",
+      "request_hash": "61aa3db6558d1cc447566080b267b51e07d97267e0147ad1794af455157d0368",
+      "cwd": "/Users/krypto/GitHub/ollama",
+      "state": "exited",
+      "created": 1789890031.799245,
+      "started": 1789890033.3323898,
+      "finished": 1789890034.116825,
+      "exit_code": 0,
+      "stdout_bytes": 21553,
+      "stderr_bytes": 0,
+      "output_complete": 1
+    },
+    {
+      "job_id": "a62675c9ea914b769db928933edf6629",
+      "request_id": "eko-ollama-20260920-request-baseline-01",
+      "request_hash": "ebe844f697b6ce42d7fd2a5925a9fe8babdc39f043c727eb73d98e373d70fd25",
+      "cwd": "/Users/krypto/GitHub/ollama",
+      "state": "exited",
+      "created": 1789890133.1028311,
+      "started": 1789890133.281481,
+      "finished": 1789890144.21153,
+      "exit_code": 0,
+      "stdout_bytes": 707,
+      "stderr_bytes": 0,
+      "output_complete": 1
+    }
+  ],
+  "bootstrap_tombstone": {
+    "job_id": "f68fa53d7c8c4fbaa57ba6fef20f86b2",
+    "request_id": "eko-bridge-resolution-plan-probe-20260909-01",
+    "request_hash": "306ed3e519fbfc6ad5cf6ee9eeed9fd7925b4185bd0a9a0a87efc2e5dad703f1",
+    "state": "forgotten"
+  },
+  "jobs_retired_this_maintenance": 33,
+  "store_counts_during_checkpoint": {
+    "cancelled": 3,
+    "exited": 221,
+    "forgotten": 154,
+    "running": 1,
+    "timed_out": 6
+  },
+  "retained_count_during_checkpoint": 231,
+  "checkpoint_writer_job": "af8112db875c4c438b3cce0457299f5e",
+  "checkpoint_writer_terminal_check_owed": true,
+  "archive_manifest_sha256": "f6ca527ec23b51f73866eebe3efd5a9d74fe77a29a1e0ca20ea0a17e4ebc6058"
+}

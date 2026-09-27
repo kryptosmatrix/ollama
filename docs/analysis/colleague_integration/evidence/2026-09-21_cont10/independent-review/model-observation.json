@@ -1,0 +1,24 @@
+{
+  "name": "deepseek-v4.1-flash:cloud",
+  "model": "deepseek-v4.1-flash:cloud",
+  "remote_model": "deepseek-v4.1-flash",
+  "remote_host": "https://ollama.com",
+  "modified_at": "2026-09-20T18:29:39.390211061+10:00",
+  "size": 326,
+  "digest": "e04da138d31e0c9468e982e1ae9503d06cb7e170caa16a90c17d931c4aa140f8",
+  "details": {
+    "parent_model": "",
+    "format": "",
+    "family": "",
+    "families": null,
+    "parameter_size": "763B",
+    "quantization_level": "FP8",
+    "context_length": 1048576
+  },
+  "capabilities": [
+    "completion",
+    "thinking",
+    "tools",
+    "vision"
+  ]
+}

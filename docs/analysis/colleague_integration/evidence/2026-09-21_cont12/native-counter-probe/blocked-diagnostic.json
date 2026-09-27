@@ -1,0 +1,19 @@
+{
+  "input_id": "eko-cont12-native-launch-diagnosis",
+  "action": "Follow-up file/signing/attribute metadata and bounded version-only diagnostic",
+  "outcome": "Blocked by OpenAI before execution: safety status could not be determined.",
+  "executed": false,
+  "rerouted": false,
+  "prior_version_attempt": {
+    "argv": [
+      "/Users/krypto/GitHub/ollama/build/darwin-arm64/llama-server-local/bin/llama-server",
+      "--version"
+    ],
+    "timeout_seconds": 20,
+    "outcome": "subprocess.TimeoutExpired; capture-after-return lost any partial child output",
+    "native_model_probe_launched": false,
+    "native_runtime_qualified": false
+  },
+  "original_traceback": "Retained in this turn Bridge stderr bytes0\u20131315, SHA256 7ae532a071a5bccff3e9628a60e7b2bd29722dec7337a8abf5f5435fcf02dcd6",
+  "next_permitted_action": "Continue documentation/source analysis, preserving native execution as unverified. Do not route around the refused diagnostic or alter macOS protections."
+}

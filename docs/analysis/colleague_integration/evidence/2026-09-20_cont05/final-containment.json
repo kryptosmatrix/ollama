@@ -1,0 +1,30 @@
+{
+  "tested_candidate": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+  "candidate_worktree_clean": true,
+  "original_main_tracked_source_unchanged": true,
+  "source_identities_preserved": {
+    "app/store/store.go": "71097b8bc6664c0c9eb87bedfab5c0b79acc2768df20e0dd0319af2fbd5c0862",
+    "app/store/database.go": "6905b4e6146f76e0aed66f97e17a39245d27a0182f0051d06642389de042b551",
+    "app/store/chat_read_errors_test.go": "78adbad3f024feb30e912722026aa9bb8f6ea1f96b08fc241e5ab0c121b57c99",
+    "app/ui/chat_read_errors_test.go": "299356bec304683503fe4410f19f2f0496307ff64848ebaf0f13fd854421440a",
+    "app/ui/ui.go": "dbba86f3d90ec5edac5b23458fec00f25e39f4d9f3ef43ac124571e0c1a0d48e",
+    "app/ui/app/package.json": "ba4a16db941ae31c7d33daf5fc4396b05e20cc1906ca731648d3859eb81a029d",
+    "app/ui/app/package-lock.json": "ffdee0821030410855d6b432e0c6bac936ad712c0f2689622bd9b56f09ca6fa3"
+  },
+  "recovered_sources": {
+    "app/ui/app/src/components/MCPLocalDiscovery.tsx": "4181a47258597a2e9e35c627dac2c50c35fa74ca780a82ccc4c6bba5d29c755a",
+    "app/ui/app/src/components/MCPLocalDiscovery.test.tsx": "2275e94a9f7dbf17586d337fe8fd370ceb93e70c6e2e7ad832278b01ccb14a11",
+    "app/ui/app/src/utils/mcpDiscovery.ts": "f694dd00b9d418b9f101a75defc3788328d7acc68790ce5be15fe7e15c545f2e",
+    "app/ui/app/src/utils/mcpDiscovery.test.ts": "caba913193cceddfe517ffa360532de40dae047237defb7f05355a46da0fb51c",
+    "app/ui/mcp_discover.go": "37fefe52f44fb278e1350c52ec5ceec25b2e3778f4c33513340e51c965eefb99",
+    "app/ui/mcp_discover_test.go": "4d5a90fbc7890741b281eb8c4db05906958229d72748578819eff4f89f824ec0"
+  },
+  "original_recovered_files_unchanged": true,
+  "ignore_rules": "app/.gitignore:7:*cover*\tapp/ui/app/src/components/MCPLocalDiscovery.tsx\napp/.gitignore:7:*cover*\tapp/ui/app/src/components/MCPLocalDiscovery.test.tsx\napp/.gitignore:7:*cover*\tapp/ui/app/src/utils/mcpDiscovery.ts\napp/.gitignore:7:*cover*\tapp/ui/app/src/utils/mcpDiscovery.test.ts\napp/.gitignore:7:*cover*\tapp/ui/mcp_discover.go\napp/.gitignore:7:*cover*\tapp/ui/mcp_discover_test.go\n",
+  "git_diff_check_exit": 0,
+  "verified_remote": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c\trefs/heads/eko/chat-read-integrity-20260920",
+  "branch": "eko/chat-read-integrity-20260920",
+  "installed_app_changed": false,
+  "integration_performed": false,
+  "timestamp_brisbane": "2026-09-20T22:04:56.745556+10:00"
+}

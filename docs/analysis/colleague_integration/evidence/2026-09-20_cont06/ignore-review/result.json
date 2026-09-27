@@ -1,0 +1,10 @@
+{
+  "completed": true,
+  "scoped_pass": true,
+  "independent_execution": true,
+  "candidate": "85c69f45e7c0fa731dcb18058c24c2b0a6d03d12",
+  "rules_sha256": "384f341ecedfd8242d7249573dc4215009925a915219148bb4d219d009cda908",
+  "report_sha256": "400b355e6d830af33f9ccdebfa890369ea5c7ec1e1b4acadeb9e3ffddc83a803",
+  "controller_sha256": "ea4fe9e43d26364d7a7bba52c40093d98bd5bb67ad6af0c040fd1c9d8fca7927",
+  "integration_approved": false
+}

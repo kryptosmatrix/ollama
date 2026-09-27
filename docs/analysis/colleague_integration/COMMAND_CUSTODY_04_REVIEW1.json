@@ -1,0 +1,46 @@
+{
+  "purpose": "Preserve this completed Eko-owned review command before retiring its Bridge archive slot. No generated review files are deleted.",
+  "invocation": {
+    "request_id": "eko-ollama-cont04-precode-deepseek-20260920",
+    "command": "/bin/bash /Users/krypto/GitHub/TECHNE/Tools/ollama/ask.sh --model deepseek-v4.1-flash:cloud --prompt-file /Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/PRECODE_REVIEW_04_PROMPT.md --approve-local-content --expect-digest e04da138d31e0c9468e982e1ae9503d06cb7e170caa16a90c17d931c4aa140f8 --expect-served-model deepseek-v4.1-flash --run-id eko-chat-read-precode-cont04 --num-ctx 65536 --num-predict 8192 --think off --num-gpu auto --timeout-seconds 240",
+    "cwd": "/Users/krypto/GitHub/ollama",
+    "timeout_seconds": 270,
+    "shell": "zsh",
+    "login": false,
+    "env": {},
+    "tty": false,
+    "columns": 100,
+    "rows": 30
+  },
+  "status": {
+    "job_id": "2199fec77ef5473a8a551cb76d25978f",
+    "request_hash": "87fad76dfec40f6bdce5316834bc032d248fdf9a98e1ca28373d5993827c28c0",
+    "state": "exited",
+    "created": 1789902963.014994,
+    "started": 1789902963.200315,
+    "finished": 1789902980.65258,
+    "exit_code": 0,
+    "cancel_requested": 0,
+    "output_complete": 1,
+    "stdout_bytes": 106,
+    "stderr_bytes": 0,
+    "error_code": null,
+    "inputs": [],
+    "execution_state_id": "dfbd69b42df2453aae7bfa1c5a7af704"
+  },
+  "stdout": "/Users/krypto/GitHub/TECHNE/Tools/ollama/_runs/2026-09-20T11-16-06Z_eko-chat-read-precode-cont04_ly5419p0\n",
+  "stdout_sha256": "4c9052dbec19cd60e77c7b8f6b853a5178cddc5713ad3b031dbaa2fcb8b0efc7",
+  "stderr": "",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "prompt_sha256": "63a26b5a6a6d37f3abd1f6105ca04aa0e9bd2e900b79f3e1907f6cdb3fb1b43c",
+  "review_path": "/Users/krypto/GitHub/TECHNE/Tools/ollama/_runs/2026-09-20T11-16-06Z_eko-chat-read-precode-cont04_ly5419p0/response.txt",
+  "review_sha256": "6f9e87f9d3f46a6c24c03231058e960d766692a302275df6ba5834db962a95ae",
+  "review_result": "REVISE; source-only pre-code review; no execution or release approval",
+  "previous_retirement": {
+    "job_id": "39cbb17656ee455cb92d43a50e580bbc",
+    "state": "forgotten",
+    "preserved_at": "evidence/2026-09-20_cont02/bridge-commands/39cbb17656ee455cb92d43a50e580bbc/",
+    "record_sha256": "c830eea03b71160a4bfd63e4712986f142992d80c7a9eb5c3d0c899b4c4eeaa6",
+    "stdout_sha256": "f5144a5adf413cc38ef00df3e2d2f1f5ac96040cdd6b0106ca8f6ead05894f90"
+  }
+}

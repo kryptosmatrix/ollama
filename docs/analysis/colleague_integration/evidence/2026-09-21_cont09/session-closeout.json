@@ -1,0 +1,23 @@
+{
+  "job_id": "e997c03979514b46a864eb8e69d32fb1",
+  "request_id": "eko-ollama-cont09-20260921-session",
+  "request_hash": "cc8528db168b06029aa7181334e7a91f34e345002d62838239a7630a64218c99",
+  "execution_state_id": "dfbd69b42df2453aae7bfa1c5a7af704",
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+  "state": "exited",
+  "created": 1789965139.511701,
+  "started": 1789965140.232955,
+  "finished": 1789967478.892928,
+  "exit_code": 0,
+  "stdout_bytes": 456680,
+  "stderr_bytes": 0,
+  "output_complete": true,
+  "terminal": true,
+  "cancel_requested": false,
+  "eof_delivered": true,
+  "eof_input_id": "eko-cont09-session-eof",
+  "blocked_consumer_input_delivered": false,
+  "shell_exit_is_test_evidence": false,
+  "owned_background_work_remaining": false,
+  "note": "The first EOF call lacked the schema-required empty text field and was rejected without sending input; the corrected EOF was delivered. New consumer tests were never admitted. Individual child exits and their scope are retained separately; the successful shell closeout is not a passing test result."
+}

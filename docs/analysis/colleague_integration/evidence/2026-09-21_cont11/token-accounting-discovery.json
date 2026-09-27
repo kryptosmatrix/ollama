@@ -1,0 +1,59 @@
+[
+  {
+    "argv": [
+      "git",
+      "grep",
+      "-n",
+      "-E",
+      "count_tokens|CountTokens|Count.*Token",
+      "--",
+      "api",
+      "server",
+      "anthropic",
+      "openai",
+      "llm",
+      "cmd/agent_tui.go"
+    ],
+    "exit_code": 0,
+    "stdout": "anthropic/anthropic.go:1067:// CountTokensRequest represents an Anthropic count_tokens request\nanthropic/anthropic.go:1068:type CountTokensRequest struct {\nanthropic/anthropic.go:1076:// EstimateInputTokens estimates input tokens from a MessagesRequest (reuses CountTokensRequest logic)\nanthropic/anthropic.go:1078:\treturn estimateTokens(CountTokensRequest{\nanthropic/anthropic.go:1087:// CountTokensResponse represents an Anthropic count_tokens response\nanthropic/anthropic.go:1088:type CountTokensResponse struct {\nanthropic/anthropic.go:1095:func estimateTokens(req CountTokensRequest) int {\nanthropic/anthropic_test.go:1542:\treq := CountTokensRequest{\nanthropic/anthropic_test.go:1562:\treq := CountTokensRequest{\nanthropic/anthropic_test.go:1579:\treq := CountTokensRequest{\nanthropic/anthropic_test.go:1602:\treq := CountTokensRequest{\nanthropic/anthropic_test.go:1631:\treq := CountTokensRequest{\nserver/prompt_test.go:337:\t\t\tif tokenizeCount > tt.maxTokenizes {\nserver/prompt_test.go:338:\t\t\t\tt.Errorf(\"tokenize called %d times, expected at most %d\", tokenizeCount, tt.maxTokenizes)\nserver/routes.go:1009:\t\tPromptEvalCount: int(totalTokens),\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "grep",
+      "-n",
+      "-E",
+      "PromptEvalCount:|TokensEvaluated|tokens_evaluated|TokensCached",
+      "--",
+      "api",
+      "server",
+      "anthropic",
+      "openai",
+      "llm",
+      "cmd/agent_tui.go"
+    ],
+    "exit_code": 0,
+    "stdout": "anthropic/anthropic_test.go:752:\t\t\tPromptEvalCount: 10,\nanthropic/anthropic_test.go:929:\t\tMetrics: api.Metrics{PromptEvalCount: 10},\nanthropic/anthropic_test.go:957:\t\tMetrics:    api.Metrics{PromptEvalCount: 10, EvalCount: 5},\nanthropic/anthropic_test.go:1011:\t\tMetrics:    api.Metrics{PromptEvalCount: 10, EvalCount: 5},\nanthropic/anthropic_test.go:1094:\t\tMetrics:    api.Metrics{PromptEvalCount: 10, EvalCount: 5},\nanthropic/anthropic_test.go:1154:\t\t\tMetrics:    api.Metrics{PromptEvalCount: 10, EvalCount: 5},\nllm/llama_server.go:1681:\t\t\t\t\tPromptEvalCount:    lsResp.Timings.promptEvalCount(),\nllm/llama_server.go:2286:\t// which includes tokens_evaluated for prompt token counting\nllm/llama_server.go:2296:\t// Use /v1/embeddings (OAI-compatible) to get tokens_evaluated in the response\nllm/llama_server.go:2320:\t//   {\"data\": [{\"embedding\": [0.1, ...], \"tokens_evaluated\": N}], \"usage\": {\"prompt_tokens\": N}}\nllm/llama_server.go:2326:\t\t\tTokensEvaluated int             `json:\"tokens_evaluated\"`\nllm/llama_server.go:2339:\t\t\tpromptTokens = oaiResp.Data[0].TokensEvaluated\nllm/llama_server_test.go:1699:\t\tfmt.Fprint(w, `{\"data\":[{\"embedding\":[0.1,0.2,0.3],\"tokens_evaluated\":2}],\"usage\":{\"prompt_tokens\":2}}`)\nopenai/openai_encoding_format_test.go:33:\t\t\t\tPromptEvalCount: tc.promptEval,\nopenai/openai_test.go:179:\t\t\tPromptEvalCount: 10,\nopenai/openai_test.go:431:\t\t\tPromptEvalCount: 5,\nopenai/openai_test.go:490:\t\t\tPromptEvalCount: 5,\nserver/routes.go:677:\t\t\t\t\tPromptEvalCount:    cr.PromptEvalCount,\nserver/routes.go:1009:\t\tPromptEvalCount: int(totalTokens),\nserver/routes.go:2768:\t\t\t\t\t\tPromptEvalCount:    r.PromptEvalCount,\nserver/routes.go:2976:\t\t\t\t\tPromptEvalCount:    r.PromptEvalCount,\nserver/routes_debug_test.go:25:\t\t\tPromptEvalCount:    1,\nserver/routes_debug_test.go:220:\t\t\tPromptEvalCount:    1,\nserver/routes_generate_renderer_test.go:30:\t\t\tPromptEvalCount:    1,\nserver/routes_generate_renderer_test.go:215:\t\t\tPromptEvalCount:    1,\nserver/routes_generate_test.go:285:\t\t\t\tPromptEvalCount:    1,\nserver/routes_generate_test.go:492:\t\t\t\tPromptEvalCount:    1,\nserver/routes_generate_test.go:758:\t\t\tPromptEvalCount:    1,\nserver/routes_generate_test.go:1124:\t\t\tPromptEvalCount:    1,\nserver/routes_generate_test.go:1226:\t\t\t\t\tPromptEvalCount:    1,\nserver/routes_generate_test.go:1232:\t\t\t\t\tPromptEvalCount:    2,\nserver/routes_generate_test.go:1239:\t\t\t\t\tPromptEvalCount:    3,\nserver/routes_generate_test.go:1475:\t\t\tPromptEvalCount:    1,\nserver/routes_generate_test.go:1952:\t\t\t\tPromptEvalCount:    1,\nserver/routes_generate_test.go:2246:\t\t\t\tPromptEvalCount:    1,\nserver/routes_generate_test.go:2364:\t\t\t\tPromptEvalCount:    1,\nserver/routes_generate_test.go:2444:\t\t\t\tPromptEvalCount:    1,\nserver/routes_generate_test.go:2520:\t\t\t\t{Content: \" I need to consider\", Done: false, PromptEvalCount: 1, PromptEvalDuration: 1},\nserver/routes_generate_test.go:2521:\t\t\t\t{Content: \" multiple factors here...\", Done: false, PromptEvalCount: 1, PromptEvalDuration: 1},\nserver/routes_generate_test.go:2522:\t\t\t\t{Content: \" </think> Based on my analysis,\", Done: false, PromptEvalCount: 1, PromptEvalDuration: 1},\nserver/routes_generate_test.go:2523:\t\t\t\t{Content: \" the solution is straightforward.\", Done: true, DoneReason: llm.DoneReasonStop, PromptEvalCount: 1, PromptEvalDuration: 1, EvalCount: 1, EvalDuration: 1},\nserver/routes_generate_test.go:2601:\t\t\t\t\tPromptEvalCount:    1,\nserver/routes_generate_test.go:2617:\t\t\t\t\tPromptEvalCount:    1,\nserver/routes_generate_test.go:2704:\t\t\t\t\tPromptEvalCount:    1,\nserver/routes_generate_test.go:2720:\t\t\t\t\tPromptEvalCount:    1,\nserver/routes_generate_test.go:2829:\t\t\t\t\tPromptEvalCount:    1,\nserver/routes_generate_test.go:2908:\t\t\t\t\tPromptEvalCount:    1,\nserver/routes_generate_test.go:3040:\t\t\tPromptEvalCount:    1,\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "grep",
+      "-n",
+      "-E",
+      "func agentContextWindow|func contextWindow|ContextLength",
+      "--",
+      "api",
+      "server",
+      "anthropic",
+      "openai",
+      "llm",
+      "cmd/agent_tui.go"
+    ],
+    "exit_code": 0,
+    "stdout": "api/types.go:810:\tContextLength   int    `json:\"context_length,omitempty\"`\napi/types.go:843:\tContextLength int          `json:\"context_length\"`\napi/types.go:940:\tContextLength     int      `json:\"context_length,omitempty\"`\napi/types.go:1115:\t\t\tNumCtx:          int(envconfig.ContextLength()),\ncmd/agent_tui.go:465:func agentContextWindowForModel(ctx context.Context, client *api.Client, modelName string, fallback int) int {\ncmd/agent_tui.go:498:func contextWindowFromRecommendations(modelName string, recommendations []api.ModelRecommendation) int {\ncmd/agent_tui.go:500:\t\tif rec.ContextLength <= 0 {\ncmd/agent_tui.go:504:\t\t\treturn rec.ContextLength\ncmd/agent_tui.go:541:\tif resp.Details.ContextLength > 0 {\ncmd/agent_tui.go:542:\t\treturn resp.Details.ContextLength\ncmd/agent_tui.go:627:\t\tif running.ContextLength <= 0 {\ncmd/agent_tui.go:631:\t\t\treturn running.ContextLength\ncmd/agent_tui.go:768:\tif rec.ContextLength > 0 {\ncmd/agent_tui.go:769:\t\tparts = append(parts, format.HumanNumber(uint64(rec.ContextLength))+\" ctx\")\ncmd/agent_tui.go:801:\tif model.Details.ContextLength > 0 {\ncmd/agent_tui.go:802:\t\tparts = append(parts, format.HumanNumber(uint64(model.Details.ContextLength))+\" ctx\")\nllm/llama_server.go:330:func (s *llamaServerRunner) ContextLength() int {\nllm/server.go:77:\tContextLength() int\nllm/server.go:112:\ttrainCtx := f.KV().ContextLength()\nserver/model_list_cache.go:336:\t\t\tContextLength:     cfg.ContextLen,\nserver/model_list_cache.go:352:\t\t\tif summary.Details.ContextLength == 0 {\nserver/model_list_cache.go:353:\t\t\t\tsummary.Details.ContextLength = info.ContextLength\nserver/model_list_cache.go:461:\tContextLength   int\nserver/model_list_cache.go:589:\t\t\t\tinfo.ContextLength = value\nserver/model_list_cache.go:842:\t\t\tContextLength:     s.Details.ContextLength,\nserver/model_list_cache_test.go:52:\tif summary.Details.ContextLength != 4096 {\nserver/model_list_cache_test.go:53:\t\tt.Fatalf(\"context length = %d, want 4096\", summary.Details.ContextLength)\nserver/model_list_cache_test.go:67:\t\tlistModel.Details.ContextLength != 4096 ||\nserver/model_recommendations.go:359:\t\tif isCloudRecommendation(rec.Model) && (rec.ContextLength <= 0 || rec.MaxOutputTokens <= 0) {\nserver/model_recommendations.go:407:\t\tContextLength:   262_144,\nserver/model_recommendations.go:413:\t\tContextLength:   202_752,\nserver/model_recommendations.go:419:\t\tContextLength:   262_144,\nserver/model_recommendations.go:425:\t\tContextLength:   204_800,\nserver/model_recommendations_test.go:45:\t\t{Model: \" first-cloud:cloud \", Description: \" first \", ContextLength: 2048, MaxOutputTokens: 512},\nserver/model_recommendations_test.go:49:\t\t{Model: \"second-cloud:cloud\", Description: \"second\", ContextLength: 4096, MaxOutputTokens: 1024},\nserver/model_recommendations_test.go:80:\t\t{Model: \"first-cloud:cloud\", Description: \"first\", ContextLength: 2048, MaxOutputTokens: 512},\nserver/model_recommendations_test.go:215:\t\t{Model: \"persist-cloud:cloud\", Description: \"persisted\", ContextLength: 8192, MaxOutputTokens: 2048},\nserver/model_recommendations_test.go:320:\t\t{Model: \" good-cloud:cloud \", Description: \" good cloud \", ContextLength: 1024, MaxOutputTokens: 256, RequiredPlan: \" pro \"},\nserver/model_recommendations_test.go:331:\t\t{Model: \"good-cloud:cloud\", Description: \"good cloud\", ContextLength: 1024, MaxOutputTokens: 256, RequiredPlan: \"pro\"},\nserver/model_recommendations_test.go:341:\t\t{Model: \"kimi-k2.6:cloud\", Description: \"coding\", ContextLength: 262_144, MaxOutputTokens: 262_144},\nserver/model_recommendations_test.go:342:\t\t{Model: \"qwen3.5:cloud\", Description: \"reasoning\", ContextLength: 262_144, MaxOutputTokens: 32_768},\nserver/model_recommendations_test.go:343:\t\t{Model: \"custom:cloud\", Description: \"custom\", ContextLength: 4096, MaxOutputTokens: 1024},\nserver/model_recommendations_test.go:344:\t\t{Model: \"minimax-m2.7:cloud\", Description: \"custom\", ContextLength: 204_800, MaxOutputTokens: 128_000, RequiredPlan: \"team\"},\nserver/model_recommendations_test.go:454:\tnewRecs := []api.ModelRecommendation{{Model: \"new-cloud:cloud\", Description: \"new\", ContextLength: 1024, MaxOutputTokens: 256}}\nserver/routes.go:185:\treturn envconfig.ContextLength() == 0\nserver/routes.go:880:\t\tctxLen := int(kvData.ContextLength())\nserver/routes.go:2270:\t\t\tContextLength: v.contextLength,\nserver/routes.go:2318:\tif ctxLen := runner.ContextLength(); ctxLen > 0 && opts.NumCtx > ctxLen {\nserver/routes_generate_test.go:111:func (m mockRunner) ContextLength() int { return m.contextLength }\nserver/routes_generate_test.go:113:func TestOptionsForPromptUsesEffectiveContextLength(t *testing.T) {\nserver/sched.go:158:\treturn int(f.KV().ContextLength())\nserver/sched.go:692:\tif effectiveNumCtx := llama.ContextLength(); req.model.ModelPath != \"\" && effectiveNumCtx > 0 {\nserver/sched.go:766:\t\tif trainCtx := int(f.KV().ContextLength()); trainCtx > 0 && effectiveNumCtx > trainCtx {\nserver/sched.go:1770:\t\t\tlm.contextLength = r.llama.ContextLength()\nserver/sched_test.go:133:func TestSchedLoadStoresEffectiveContextLength(t *testing.T) {\nserver/sched_test.go:154:func TestSchedLoadStoresEffectiveExplicitContextLength(t *testing.T) {\nserver/sched_test.go:2158:func (s *mockLlm) ContextLength() int                                 { return s.contextLength }\n",
+    "stderr": ""
+  }
+]

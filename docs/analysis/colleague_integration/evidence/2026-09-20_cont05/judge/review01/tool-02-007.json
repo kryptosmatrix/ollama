@@ -1,0 +1,16 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "path": "app/types/not/found.go",
+    "start": 1,
+    "count": 60
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/types/not/found.go",
+    "file_sha256": "c3aa0def96031735b4ee82e60613261890a01f9d35260099d267f697605f4225",
+    "start": 1,
+    "end": 28,
+    "total_lines": 28,
+    "text": "1: //go:build windows || darwin\n2: \n3: package not\n4: \n5: import (\n6: \t\"errors\"\n7: )\n8: \n9: // Found is an error that indicates that a value was not found. It\n10: // may be used by low-level packages to signal to higher-level\n11: // packages that a value was not found.\n12: //\n13: // It exists to avoid using errors.New(\"not found\") in multiple\n14: // packages to mean the same thing.\n15: //\n16: // Found should not be used directly. Instead it should be wrapped\n17: // or joined using errors.Join or fmt.Errorf, etc.\n18: //\n19: // Errors wrapping Found should provide additional context, e.g.\n20: // fmt.Errorf(\"%w: %s\", not.Found, key)\n21: //\n22: //lint:ignore ST1012 This is a sentinel error intended to be read like not.Found.\n23: var Found = errors.New(\"not found\")\n24: \n25: // Available is an error that indicates that a value is not available.\n26: //\n27: //lint:ignore ST1012 This is a sentinel error intended to be read like not.Available.\n28: var Available = errors.New(\"not available\")"
+  }
+}

@@ -1,0 +1,49 @@
+//go:build windows || darwin
+
+package store
+
+import (
+	"errors"
+	"testing"
+
+	"github.com/ollama/ollama/app/types/not"
+)
+
+// R-01/R-06: absence retains its established sentinel for both read modes.
+func TestChatReadMissingHeaderIsNotFound(t *testing.T) {
+	s := setupTestStore(t)
+	for _, attachments := range []bool{false, true} {
+		chat, err := s.ChatWithOptions("absent-chat", attachments)
+		if chat != nil || !errors.Is(err, not.Found) {
+			t.Errorf("attachments=%t: chat=%#v error=%v; want absence", attachments, chat, err)
+		}
+	}
+}
+
+// R-02: a native database failure keeps the original error identity, rather
+// than merely acquiring a different error message containing the same words.
+func TestChatReadPreservesDatabaseErrorCause(t *testing.T) {
+	s := setupTestStore(t)
+	if err := s.SetChat(*NewChat("existing-chat")); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+	cause := s.db.conn.Ping()
+	if cause == nil {
+		t.Fatal("closing the real database did not produce a database error")
+	}
+	for _, attachments := range []bool{false, true} {
+		chat, err := s.ChatWithOptions("existing-chat", attachments)
+		if chat != nil || err == nil {
+			t.Fatalf("attachments=%t: closed database returned chat=%#v error=%v", attachments, chat, err)
+		}
+		if errors.Is(err, not.Found) {
+			t.Errorf("R-02: database failure became absence: %v", err)
+		}
+		if !errors.Is(err, cause) {
+			t.Errorf("R-02: database error identity lost: got=%v cause=%v", err, cause)
+		}
+	}
+}

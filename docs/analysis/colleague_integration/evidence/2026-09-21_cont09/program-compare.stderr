@@ -1,0 +1,13 @@
+file:///Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont09/program-compare.mjs:13
+ if(result.emitSkipped||!js||diagnostics.length||result.diagnostics.length)throw new Error(ts.formatDiagnostics([...diagnostics,...result.diagnostics],{getCurrentDirectory:()=>root,getNewLine:()=>"\n",getCanonicalFileName:x=>x}));
+                                                                                 ^
+
+Error: error TS5096: Option 'allowImportingTsExtensions' can only be used when either 'noEmit' or 'emitDeclarationOnly' is set.
+
+    at emit (file:///Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont09/program-compare.mjs:13:82)
+    at file:///Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont09/program-compare.mjs:17:9
+    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:639:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v25.8.2

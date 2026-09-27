@@ -1,0 +1,35 @@
+{
+  "created": 1789893613.6362638,
+  "cwd": "/Users/krypto/GitHub/ollama",
+  "exit_code": 1,
+  "finished": 1789893884.257796,
+  "job_id": "39cbb17656ee455cb92d43a50e580bbc",
+  "output_complete": 1,
+  "request_hash": "12cb03261a61dc6137f6397caab21209b3fa865f756c12986a08f04df61391a4",
+  "request_id": "eko-ollama-20260920-cont02-baselines",
+  "spec": {
+    "columns": 100,
+    "command": "/usr/bin/python3 - <<'PY'\nimport os,json,subprocess,hashlib,time,signal,tempfile\nfrom pathlib import Path\nroot=Path.cwd(); out=root/'docs/analysis/colleague_integration/evidence/2026-09-20_cont02';out.mkdir(mode=0o700,exist_ok=False)\nos.umask(0o077)\nenv=os.environ.copy();env['PATH']='/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin'\ngoenv=json.loads(subprocess.check_output(['/opt/homebrew/bin/go','env','-json','GOPATH','GOMODCACHE','GOCACHE'],env=env))\nhome=Path(tempfile.mkdtemp(prefix='ollama-eko-baseline-'));env.update({k:v for k,v in goenv.items() if v});env.update(HOME=str(home),USERPROFILE=str(home),OLLAMA_HOST='http://127.0.0.1:1',GOTOOLCHAIN='local',GOPROXY='off',GOSUMDB='off',UV_OFFLINE='1',CI='true')\ntracked=subprocess.check_output(['git','ls-files','-z'],cwd=root).decode().split('\\0'); files=[x for x in tracked if x and (x.endswith(('.go','.ts','.tsx','.json','.sql','.mod','.sum')))]\ndef fingerprints():\n return {f:hashlib.sha256((root/f).read_bytes()).hexdigest() for f in files if (root/f).is_file()}\nbefore=fingerprints();(out/'source-before.json').write_text(json.dumps(before,sort_keys=True,indent=2)+'\\n')\ncommands=[('go-build',['/opt/homebrew/bin/go','build','-o',str(out/'ollama-baseline'),'.'],root,180),('go-affected',['/opt/homebrew/bin/go','test','-count=1','-json','-timeout=180s','./agent/...','./cmd/tui/chat/...','./app/store','./app/ui','./app/tools'],root,300),('ui-test',['/opt/homebrew/bin/npm','test','--','--run'],root/'app/ui/app',150),('ui-typecheck',['/opt/homebrew/bin/node','node_modules/typescript/bin/tsc','--build','--pretty','false'],root/'app/ui/app',120),('ui-lint',['/opt/homebrew/bin/npm','run','lint'],root/'app/ui/app',120)]\nresults=[]\nfor name,args,cwd,bound in commands:\n start=time.monotonic();timed_out=False\n with (out/(name+'.stdout')).open('xb') as so,(out/(name+'.stderr')).open('xb') as se:\n  p=subprocess.Popen(args,cwd=cwd,env=env,stdout=so,stderr=se,start_new_session=True)\n  try:code=p.wait(timeout=bound)\n  except subprocess.TimeoutExpired:\n   timed_out=True;os.killpg(p.pid,signal.SIGTERM)\n   try:code=p.wait(timeout=5)\n   except subprocess.TimeoutExpired:os.killpg(p.pid,signal.SIGKILL);code=p.wait()\n record={'name':name,'args':args,'cwd':str(cwd),'exit_code':code,'timed_out':timed_out,'elapsed_seconds':time.monotonic()-start,'stdout_sha256':hashlib.sha256((out/(name+'.stdout')).read_bytes()).hexdigest(),'stderr_sha256':hashlib.sha256((out/(name+'.stderr')).read_bytes()).hexdigest()}\n results.append(record);(out/'baseline-results.json').write_text(json.dumps({'environment_overrides':{k:env[k] for k in ['HOME','USERPROFILE','OLLAMA_HOST','GOTOOLCHAIN','GOPROXY','GOSUMDB','UV_OFFLINE','CI']},'commands':results,'full_root_suite_run':False,'full_root_suite_not_run_reason':'Default Darwin MCP tests write the real login keychain; broad suite remains pending scope/safety review, not waived.'},indent=2)+'\\n')\n print(json.dumps(record),flush=True)\nafter=fingerprints();(out/'source-after.json').write_text(json.dumps(after,sort_keys=True,indent=2)+'\\n');print('TRACKED_SOURCE_DELTAS',json.dumps([k for k in set(before)|set(after) if before.get(k)!=after.get(k)]),flush=True)\nfor name in ['go-affected']:\n events=[json.loads(l) for l in (out/(name+'.stdout')).read_text().splitlines() if l.startswith('{')]\n tests={}\n for e in events:\n  if e.get('Test') and e.get('Action') in ['pass','fail','skip']:tests[(e['Package'],e['Test'])]=e['Action']\n print('GO_TEST_COUNTS',json.dumps({x:list(tests.values()).count(x) for x in ['pass','fail','skip']}),flush=True)\nprint('EVIDENCE',str(out),flush=True)\nraise SystemExit(1 if any(x['exit_code']!=0 or x['timed_out'] for x in results) else 0)\nPY",
+    "cwd": "/Users/krypto/GitHub/ollama",
+    "env": {},
+    "login": false,
+    "rows": 30,
+    "shell": "bash",
+    "timeout_seconds": 950,
+    "tty": false
+  },
+  "started": 1789893613.8173828,
+  "state": "exited",
+  "stderr_bytes": 0,
+  "stdout_bytes": 2255,
+  "streams": {
+    "stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 2255,
+      "sha256": "f5144a5adf413cc38ef00df3e2d2f1f5ac96040cdd6b0106ca8f6ead05894f90"
+    }
+  }
+}

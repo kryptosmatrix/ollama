@@ -1,0 +1,10 @@
+{
+  "app/store/chat_read_errors_test.go": "78adbad3f024feb30e912722026aa9bb8f6ea1f96b08fc241e5ab0c121b57c99",
+  "app/store/database.go": "6905b4e6146f76e0aed66f97e17a39245d27a0182f0051d06642389de042b551",
+  "app/store/store.go": "71097b8bc6664c0c9eb87bedfab5c0b79acc2768df20e0dd0319af2fbd5c0862",
+  "app/ui/chat_read_errors_test.go": "299356bec304683503fe4410f19f2f0496307ff64848ebaf0f13fd854421440a",
+  "app/ui/tts_test.go": "1d18445991670de7ad9d239626e43af19809ca8c2d725fdb562ae1d4147649b0",
+  "app/ui/ui.go": "dbba86f3d90ec5edac5b23458fec00f25e39f4d9f3ef43ac124571e0c1a0d48e",
+  "go.mod": "afdaa0389e35bcf8497ffd0898b3f4ea936c523ae8526964f7b41d7c7f5d094f",
+  "go.sum": "2b74ae620d6fe1d9d09bd0b54b1372305b6a0b26058039117f4e80c3cd29004f"
+}

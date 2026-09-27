@@ -1,0 +1,32 @@
+[
+  {
+    "path": "TECHNE/Method/02_Blueprint_Method.md",
+    "file_sha256": "e1c160a2bcbe0137f2af014285a6831ff2e44d38bb363785818eb2957edbf62c",
+    "lines": 473
+  },
+  {
+    "path": "TECHNE/Method/09_Code_Excellence_Method.md",
+    "file_sha256": "6a607fd80f642fd433b6f609200494d06164b9649432e587b9f16f1e92a8ac7e",
+    "lines": 374
+  },
+  {
+    "path": "TECHNE/Method/04_Implementation_Proof_Method.md",
+    "file_sha256": "261e9c16f3041bca0fe19f98f1ff9cf06acdfe914152094eaf8e6c8cf964d64a",
+    "lines": 482
+  },
+  {
+    "path": "TECHNE/Method/21_Branch_And_Merge_Discipline.md",
+    "file_sha256": "59bf8294cdcda7b53f31769d5b80164c1ae5741426c7b6028c76bb15e244f92c",
+    "lines": 213
+  },
+  {
+    "path": "TECHNE/Role_Cards/Blueprint_Creator_Rewriter.md",
+    "file_sha256": "5133cba4cf2de59a26904a07ccface019f27443b5fffc463f34a216b4015d5f9",
+    "lines": 324
+  },
+  {
+    "path": "TECHNE/Role_Cards/Architect.md",
+    "file_sha256": "03d50e190751f59b7be720903cd23364f8e0ebc501ecf145ea2345eeb30c05a4",
+    "lines": 265
+  }
+]

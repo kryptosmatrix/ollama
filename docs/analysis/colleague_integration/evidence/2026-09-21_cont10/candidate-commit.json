@@ -1,0 +1,18 @@
+{
+  "head": "6a3778184d43b23c5cba14e0379922377f615f52",
+  "files": [
+    "app/store/store.go",
+    "app/ui/responses/types.go",
+    "app/ui/ui.go",
+    "app/ui/app/package.json",
+    "app/ui/app/codegen/gotypes.gen.ts",
+    "app/ui/app/codegen/annotate.mjs",
+    "app/ui/app/codegen/emission.mjs",
+    "app/ui/app/codegen/generate.mjs",
+    "app/ui/app/codegen/generate.checks.mjs",
+    "app/ui/app/codegen/README.md"
+  ],
+  "accepted": false,
+  "production_runtime_js_unchanged": true,
+  "T05_T10_pending": true
+}

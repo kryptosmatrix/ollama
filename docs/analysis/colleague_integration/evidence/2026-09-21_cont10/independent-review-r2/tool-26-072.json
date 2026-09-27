@@ -1,0 +1,14 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "name": "generated",
+    "start": 820,
+    "count": 40
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/codegen/gotypes.gen.ts",
+    "file_sha256": "e42678b57046bcbfbb50bb9b1d71aab9a917d06a2cb3ca4dd6ac4d49302c26b5",
+    "total_lines": 858,
+    "text": "820:         this.problem = (source as Record<string, unknown>)[\"problem\"] as MCPDiscoveredServer[\"problem\"];\n821:         this.command = (source as Record<string, unknown>)[\"command\"] as MCPDiscoveredServer[\"command\"];\n822:         this.args = (source as Record<string, unknown>)[\"args\"] as MCPDiscoveredServer[\"args\"];\n823:         this.env = (source as Record<string, unknown>)[\"env\"] as MCPDiscoveredServer[\"env\"];\n824:         this.url = (source as Record<string, unknown>)[\"url\"] as MCPDiscoveredServer[\"url\"];\n825:         this.headers = (source as Record<string, unknown>)[\"headers\"] as MCPDiscoveredServer[\"headers\"];\n826:         this.disabled = (source as Record<string, unknown>)[\"disabled\"] as MCPDiscoveredServer[\"disabled\"];\n827:     }\n828: }\n829: export class MCPDiscoveryResponse {\n830:     servers: MCPDiscoveredServer[];\n831:     searched?: string[];\n832:     error?: string;\n833: \n834:     constructor(source: unknown = {}) {\n835:         if ('string' === typeof source) source = JSON.parse(source);\n836:         this.servers = this.convertValues((source as Record<string, unknown>)[\"servers\"], MCPDiscoveredServer) as MCPDiscoveryResponse[\"servers\"];\n837:         this.searched = (source as Record<string, unknown>)[\"searched\"] as MCPDiscoveryResponse[\"searched\"];\n838:         this.error = (source as Record<string, unknown>)[\"error\"] as MCPDiscoveryResponse[\"error\"];\n839:     }\n840: \n841: \tconvertValues(a: unknown, classs: new (source: unknown) => unknown, asMap: boolean = false): unknown {\n842: \t    if (!a) {\n843: \t        return a;\n844: \t    }\n845: \t    if (Array.isArray(a)) {\n846: \t        return (a as unknown[]).map(elem => this.convertValues(elem, classs));\n847: \t    } else if (\"object\" === typeof a) {\n848: \t        if (asMap) {\n849: \t            for (const key of Object.keys(a)) {\n850: \t                (a as Record<string, unknown>)[key] = new classs((a as Record<string, unknown>)[key]);\n851: \t            }\n852: \t            return a;\n853: \t        }\n854: \t        return new classs(a);\n855: \t    }\n856: \t    return a;\n857: \t}\n858: }"
+  }
+}

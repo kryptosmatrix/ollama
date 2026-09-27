@@ -1,0 +1,8 @@
+{
+  "commit": "ea3ba51e93fddf048a516e0ad9d9e680dab83254",
+  "files": {
+    "app/ui/app/src/utils/mcpDiscovery.ts": "f694dd00b9d418b9f101a75defc3788328d7acc68790ce5be15fe7e15c545f2e",
+    "app/ui/app/src/utils/mcpDiscovery.test.ts": "caba913193cceddfe517ffa360532de40dae047237defb7f05355a46da0fb51c"
+  },
+  "originals_unchanged": true
+}

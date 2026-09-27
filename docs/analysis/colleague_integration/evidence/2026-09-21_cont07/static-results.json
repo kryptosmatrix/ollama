@@ -1,0 +1,69 @@
+[
+  {
+    "name": "typescript-emission",
+    "argv": [
+      "/opt/homebrew/bin/node",
+      "-e",
+      "const fs=require('node:fs');const cp=require('node:child_process');const crypto=require('node:crypto');const ts=require('./node_modules/typescript');\nconst files=['src/components/StreamingMarkdownContent.tsx','src/components/MessageList.tsx','src/utils/remarkCitationParser.ts'];\nconst options={target:ts.ScriptTarget.ES2020,module:ts.ModuleKind.ESNext,jsx:ts.JsxEmit.ReactJSX,removeComments:true,verbatimModuleSyntax:true,useDefineForClassFields:true};\nconst sha=x=>crypto.createHash('sha256').update(x).digest('hex');\nlet pass=true;const results=[];\nfor(const file of files){const before=cp.execFileSync('git',['show','281dcaa06c7cd8b299c6045a248dd6b6ac85f954:app/ui/app/'+file],{encoding:'utf8'});const after=fs.readFileSync(file,'utf8');const emit=s=>ts.transpileModule(s,{compilerOptions:options,fileName:file,reportDiagnostics:true});const b=emit(before),a=emit(after);const same=b.outputText===a.outputText;pass=pass&&same;results.push({file,before_source_sha256:sha(before),after_source_sha256:sha(after),before_emission_sha256:sha(b.outputText),after_emission_sha256:sha(a.outputText),byte_identical:same,diagnostics:a.diagnostics});}\nconsole.log(JSON.stringify({typescript:ts.version,compiler_options:options,results,pass},null,2));process.exitCode=pass?0:1;"
+    ],
+    "exit_code": 0,
+    "seconds": 1.7666535419994034,
+    "stdout_sha256": "aeea9e8abc46face614156ae5ca81297bcbb8a811e768d47fd54672d6fd09fc4",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "typescript-check",
+    "argv": [
+      "/opt/homebrew/bin/node",
+      "node_modules/typescript/bin/tsc",
+      "--build",
+      "--pretty",
+      "false"
+    ],
+    "exit_code": 2,
+    "seconds": 20.009063291014172,
+    "stdout_sha256": "41c387858264028b848076ba57e7bf630a03be28b65186a2aee4d72647c80306",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "frontend-lint",
+    "argv": [
+      "/opt/homebrew/bin/node",
+      "node_modules/eslint/bin/eslint.js",
+      ".",
+      "--format=json"
+    ],
+    "exit_code": 1,
+    "seconds": 8.55466287501622,
+    "stdout_sha256": "3adae7bd4e79db243eeb4c732b55c65dd6ea28326d064037910a09600a901a60",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "errors": 122,
+    "warnings": 11,
+    "changed_files": [
+      {
+        "file": "src/components/MessageList.tsx",
+        "messages": []
+      },
+      {
+        "file": "src/components/StreamingMarkdownContent.integration.test.tsx",
+        "messages": []
+      },
+      {
+        "file": "src/components/StreamingMarkdownContent.test.tsx",
+        "messages": []
+      },
+      {
+        "file": "src/components/StreamingMarkdownContent.tsx",
+        "messages": []
+      },
+      {
+        "file": "src/utils/remarkCitationParser.test.ts",
+        "messages": []
+      },
+      {
+        "file": "src/utils/remarkCitationParser.ts",
+        "messages": []
+      }
+    ]
+  }
+]

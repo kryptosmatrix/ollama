@@ -1,0 +1,25 @@
+{
+  "record_type": "execution_capacity_recheck",
+  "date_brisbane": "2026-09-20",
+  "owner": "Eko",
+  "observed_after": "SOURCE_MAP.md and REQUIREMENTS.md were written through the file-write tools.",
+  "tool": "Eko_Write_Bridge.run_command",
+  "arguments": {
+    "request_id": "eko-ollama-20260920-execution-recheck-01",
+    "command": "/usr/bin/true",
+    "cwd": "/Users/krypto/GitHub/ollama",
+    "timeout_seconds": 10
+  },
+  "complete_returned_response": {
+    "ok": false,
+    "error": {
+      "code": "COMMAND_ARCHIVE_FULL",
+      "message": "Command archive is full; explicitly forget completed jobs or archive the service state"
+    },
+    "is_error": true
+  },
+  "returned_job_id": null,
+  "child_exit_code": null,
+  "execution_observed": false,
+  "conclusion": "Even a no-op command was refused before a job was returned. File-write success is not command-execution proof."
+}

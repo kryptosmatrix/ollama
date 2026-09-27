@@ -1,0 +1,14 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "name": "api",
+    "start": 118,
+    "count": 30
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/src/api.ts",
+    "file_sha256": "19e7d77c7b8e69cf689172f22a67ed7e28707916c199aefea501f43ef5cd16ff",
+    "total_lines": 879,
+    "text": "118: export async function getChat(chatId: string): Promise<ChatResponse> {\n119:   const response = await fetch(`${API_BASE}/api/v1/chat/${chatId}`);\n120:   const data = await response.json();\n121:   return new ChatResponse(data);\n122: }\n123: \n124: export async function getModels(query?: string): Promise<Model[]> {\n125:   try {\n126:     const { models: modelsResponse } = await ollama.list();\n127: \n128:     let models: Model[] = modelsResponse\n129:       .filter((m: ModelResponse) => {\n130:         const families = m.details?.families;\n131: \n132:         if (!families || families.length === 0) {\n133:           return true;\n134:         }\n135: \n136:         const isBertOnly = families.every((family: string) =>\n137:           family.toLowerCase().includes(\"bert\"),\n138:         );\n139: \n140:         return !isBertOnly;\n141:       })\n142:       .map((m: ModelResponse) => {\n143:         // Remove the latest tag from the returned model\n144:         const modelName = m.name.replace(/:latest$/, \"\");\n145: \n146:         return new Model({\n147:           model: modelName,"
+  }
+}

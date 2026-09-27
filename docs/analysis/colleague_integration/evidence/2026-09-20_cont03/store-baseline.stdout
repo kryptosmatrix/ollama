@@ -1,0 +1,7 @@
+{"ImportPath":"github.com/ollama/ollama/app/store [github.com/ollama/ollama/app/store.test]","Action":"build-output","Output":"# github.com/ollama/ollama/app/store [github.com/ollama/ollama/app/store.test]\n"}
+{"ImportPath":"github.com/ollama/ollama/app/store [github.com/ollama/ollama/app/store.test]","Action":"build-output","Output":"./docs/analysis/colleague_integration/evidence/2026-09-20_cont03/testdata/store_chat_read_errors_test.go:14:7: assignment mismatch: 1 variable but setupTestStore returns 2 values\n"}
+{"ImportPath":"github.com/ollama/ollama/app/store [github.com/ollama/ollama/app/store.test]","Action":"build-output","Output":"./docs/analysis/colleague_integration/evidence/2026-09-20_cont03/testdata/store_chat_read_errors_test.go:26:7: assignment mismatch: 1 variable but setupTestStore returns 2 values\n"}
+{"ImportPath":"github.com/ollama/ollama/app/store [github.com/ollama/ollama/app/store.test]","Action":"build-fail"}
+{"Time":"2026-09-20T19:49:28.687296+10:00","Action":"start","Package":"github.com/ollama/ollama/app/store"}
+{"Time":"2026-09-20T19:49:28.687409+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Output":"FAIL\tgithub.com/ollama/ollama/app/store [build failed]\n"}
+{"Time":"2026-09-20T19:49:28.687422+10:00","Action":"fail","Package":"github.com/ollama/ollama/app/store","Elapsed":0,"FailedBuild":"github.com/ollama/ollama/app/store [github.com/ollama/ollama/app/store.test]"}

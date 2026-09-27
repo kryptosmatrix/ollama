@@ -1,0 +1,69 @@
+{"Time":"2026-09-20T21:55:07.587668+10:00","Action":"start","Package":"github.com/ollama/ollama/app/store"}
+{"Time":"2026-09-20T21:55:08.418324+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadMissingHeaderIsNotFound"}
+{"Time":"2026-09-20T21:55:08.418482+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadMissingHeaderIsNotFound","Output":"=== RUN   TestChatReadMissingHeaderIsNotFound\n"}
+{"Time":"2026-09-20T21:55:08.43063+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadMissingHeaderIsNotFound","Output":"--- PASS: TestChatReadMissingHeaderIsNotFound (0.01s)\n"}
+{"Time":"2026-09-20T21:55:08.430694+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadMissingHeaderIsNotFound","Elapsed":0.01}
+{"Time":"2026-09-20T21:55:08.430795+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadValidEmptyAndPopulated"}
+{"Time":"2026-09-20T21:55:08.43083+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadValidEmptyAndPopulated","Output":"=== RUN   TestChatReadValidEmptyAndPopulated\n"}
+{"Time":"2026-09-20T21:55:08.445998+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadValidEmptyAndPopulated","Output":"--- PASS: TestChatReadValidEmptyAndPopulated (0.02s)\n"}
+{"Time":"2026-09-20T21:55:08.446038+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadValidEmptyAndPopulated","Elapsed":0.02}
+{"Time":"2026-09-20T21:55:08.446093+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadRejectsMalformedMessage"}
+{"Time":"2026-09-20T21:55:08.446116+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadRejectsMalformedMessage","Output":"=== RUN   TestChatReadRejectsMalformedMessage\n"}
+{"Time":"2026-09-20T21:55:08.464163+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadRejectsMalformedMessage","Output":"--- PASS: TestChatReadRejectsMalformedMessage (0.02s)\n"}
+{"Time":"2026-09-20T21:55:08.464225+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadRejectsMalformedMessage","Elapsed":0.02}
+{"Time":"2026-09-20T21:55:08.464276+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadInitialisationFailureIsNotAbsence"}
+{"Time":"2026-09-20T21:55:08.464293+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadInitialisationFailureIsNotAbsence","Output":"=== RUN   TestChatReadInitialisationFailureIsNotAbsence\n"}
+{"Time":"2026-09-20T21:55:08.46673+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadInitialisationFailureIsNotAbsence","Output":"--- PASS: TestChatReadInitialisationFailureIsNotAbsence (0.00s)\n"}
+{"Time":"2026-09-20T21:55:08.466771+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadInitialisationFailureIsNotAbsence","Elapsed":0}
+{"Time":"2026-09-20T21:55:08.466796+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause"}
+{"Time":"2026-09-20T21:55:08.466816+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause","Output":"=== RUN   TestChatReadPreservesDatabaseErrorCause\n"}
+{"Time":"2026-09-20T21:55:08.475153+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause","Output":"--- PASS: TestChatReadPreservesDatabaseErrorCause (0.01s)\n"}
+{"Time":"2026-09-20T21:55:08.4752+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause","Elapsed":0.01}
+{"Time":"2026-09-20T21:55:08.475222+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Output":"PASS\n"}
+{"Time":"2026-09-20T21:55:08.476426+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Output":"ok  \tgithub.com/ollama/ollama/app/store\t0.847s\n"}
+{"Time":"2026-09-20T21:55:08.476507+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Elapsed":0.889}
+{"Time":"2026-09-20T21:55:10.980173+10:00","Action":"start","Package":"github.com/ollama/ollama/app/ui"}
+{"Time":"2026-09-20T21:55:11.835606+10:00","Action":"run","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses"}
+{"Time":"2026-09-20T21:55:11.835726+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses","Output":"=== RUN   TestChatReadIntegrityAcrossProcesses\n"}
+{"Time":"2026-09-20T21:55:11.836181+10:00","Action":"run","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/seed"}
+{"Time":"2026-09-20T21:55:11.836227+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/seed","Output":"=== RUN   TestChatReadIntegrityAcrossProcesses/seed\n"}
+{"Time":"2026-09-20T21:55:11.86978+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/seed","Output":"    chat_read_errors_test.go:54: phase=seed\n"}
+{"Time":"2026-09-20T21:55:11.869849+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/seed","Output":"        === RUN   TestChatReadIntegrityAcrossProcesses\n"}
+{"Time":"2026-09-20T21:55:11.869881+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/seed","Output":"        CHAT_READ_PHASE=seed\n"}
+{"Time":"2026-09-20T21:55:11.869903+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/seed","Output":"        --- PASS: TestChatReadIntegrityAcrossProcesses (0.01s)\n"}
+{"Time":"2026-09-20T21:55:11.869921+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/seed","Output":"        PASS\n"}
+{"Time":"2026-09-20T21:55:11.869954+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/seed","Output":"--- PASS: TestChatReadIntegrityAcrossProcesses/seed (0.03s)\n"}
+{"Time":"2026-09-20T21:55:11.869969+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/seed","Elapsed":0.03}
+{"Time":"2026-09-20T21:55:11.869987+10:00","Action":"run","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/fault"}
+{"Time":"2026-09-20T21:55:11.869999+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/fault","Output":"=== RUN   TestChatReadIntegrityAcrossProcesses/fault\n"}
+{"Time":"2026-09-20T21:55:11.94201+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/fault","Output":"    chat_read_errors_test.go:54: phase=fault\n"}
+{"Time":"2026-09-20T21:55:11.942083+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/fault","Output":"        === RUN   TestChatReadIntegrityAcrossProcesses\n"}
+{"Time":"2026-09-20T21:55:11.942099+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/fault","Output":"            chat_read_errors_test.go:36: R-03/R-04: http=500 model_requests=0 all_records_unchanged=true\n"}
+{"Time":"2026-09-20T21:55:11.942135+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/fault","Output":"        CHAT_READ_PHASE=fault\n"}
+{"Time":"2026-09-20T21:55:11.942149+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/fault","Output":"        --- PASS: TestChatReadIntegrityAcrossProcesses (0.05s)\n"}
+{"Time":"2026-09-20T21:55:11.942168+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/fault","Output":"        PASS\n"}
+{"Time":"2026-09-20T21:55:11.942213+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/fault","Output":"--- PASS: TestChatReadIntegrityAcrossProcesses/fault (0.07s)\n"}
+{"Time":"2026-09-20T21:55:11.942237+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/fault","Elapsed":0.07}
+{"Time":"2026-09-20T21:55:11.942253+10:00","Action":"run","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/recover"}
+{"Time":"2026-09-20T21:55:11.942264+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/recover","Output":"=== RUN   TestChatReadIntegrityAcrossProcesses/recover\n"}
+{"Time":"2026-09-20T21:55:12.006563+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/recover","Output":"    chat_read_errors_test.go:54: phase=recover\n"}
+{"Time":"2026-09-20T21:55:12.006656+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/recover","Output":"        === RUN   TestChatReadIntegrityAcrossProcesses\n"}
+{"Time":"2026-09-20T21:55:12.006672+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/recover","Output":"        CHAT_READ_PHASE=recover\n"}
+{"Time":"2026-09-20T21:55:12.006685+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/recover","Output":"        --- PASS: TestChatReadIntegrityAcrossProcesses (0.04s)\n"}
+{"Time":"2026-09-20T21:55:12.006698+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/recover","Output":"        PASS\n"}
+{"Time":"2026-09-20T21:55:12.006998+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/recover","Output":"--- PASS: TestChatReadIntegrityAcrossProcesses/recover (0.06s)\n"}
+{"Time":"2026-09-20T21:55:12.007181+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/recover","Elapsed":0.06}
+{"Time":"2026-09-20T21:55:12.007229+10:00","Action":"run","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/positive"}
+{"Time":"2026-09-20T21:55:12.007244+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/positive","Output":"=== RUN   TestChatReadIntegrityAcrossProcesses/positive\n"}
+{"Time":"2026-09-20T21:55:12.0778+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/positive","Output":"    chat_read_errors_test.go:54: phase=positive\n"}
+{"Time":"2026-09-20T21:55:12.077864+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/positive","Output":"        === RUN   TestChatReadIntegrityAcrossProcesses\n"}
+{"Time":"2026-09-20T21:55:12.077878+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/positive","Output":"        CHAT_READ_PHASE=positive\n"}
+{"Time":"2026-09-20T21:55:12.077891+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/positive","Output":"        --- PASS: TestChatReadIntegrityAcrossProcesses (0.05s)\n"}
+{"Time":"2026-09-20T21:55:12.077904+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/positive","Output":"        PASS\n"}
+{"Time":"2026-09-20T21:55:12.077934+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/positive","Output":"--- PASS: TestChatReadIntegrityAcrossProcesses/positive (0.07s)\n"}
+{"Time":"2026-09-20T21:55:12.07796+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses/positive","Elapsed":0.07}
+{"Time":"2026-09-20T21:55:12.079865+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses","Output":"--- PASS: TestChatReadIntegrityAcrossProcesses (0.24s)\n"}
+{"Time":"2026-09-20T21:55:12.07991+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/ui","Test":"TestChatReadIntegrityAcrossProcesses","Elapsed":0.24}
+{"Time":"2026-09-20T21:55:12.079925+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Output":"PASS\n"}
+{"Time":"2026-09-20T21:55:12.081496+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui","Output":"ok  \tgithub.com/ollama/ollama/app/ui\t1.101s\n"}
+{"Time":"2026-09-20T21:55:12.081548+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/ui","Elapsed":1.101}

@@ -1,0 +1,688 @@
+
+SOURCE app/store/store.go
+123: type Settings struct {
+124: 	// Expose is a boolean that indicates if the ollama server should
+125: 	// be exposed to the network
+126: 	Expose bool
+127: 
+128: 	// Browser is a boolean that indicates if the ollama server should
+129: 	// be exposed to browser windows (e.g. CORS set to allow all origins)
+130: 	Browser bool
+131: 
+132: 	// Survey is a boolean that indicates if the user allows anonymous
+133: 	// inference information to be shared with Ollama
+134: 	Survey bool
+135: 
+136: 	// Models is a string that contains the models to load on startup
+137: 	Models string
+138: 
+139: 	// TODO(parthsareen): temporary for experimentation
+140: 	// Agent indicates if the app should use multi-turn tools to fulfill user requests
+141: 	Agent bool
+142: 
+143: 	// Tools indicates if the app should use single-turn tools to fulfill user requests
+144: 	Tools bool
+145: 
+146: 	// WorkingDir specifies the working directory for all agent operations
+147: 	WorkingDir string
+148: 
+149: 	// ContextLength specifies the context length for the ollama server (using OLLAMA_CONTEXT_LENGTH)
+150: 	ContextLength int
+151: 
+152: 	// TurboEnabled indicates if Ollama Turbo features are enabled
+153: 	TurboEnabled bool
+154: 
+155: 	// Maps gpt-oss specific frontend name' BrowserToolEnabled' to db field 'websearch_enabled'
+156: 	WebSearchEnabled bool
+157: 
+158: 	// ThinkEnabled indicates if thinking is enabled
+159: 	ThinkEnabled bool
+160: 
+161: 	// ThinkLevel indicates the level of thinking to use for models that support multiple levels
+162: 	ThinkLevel string
+163: 
+164: 	// SelectedModel stores the last model that the user selected
+165: 	SelectedModel string
+166: 
+167: 	// SidebarOpen indicates if the chat sidebar is open
+168: 	SidebarOpen bool
+169: 
+170: 	// LastHomeView stores the preferred home route target ("chat" or integration name)
+171: 	LastHomeView string
+172: 
+173: 	// AutoUpdateEnabled indicates if automatic updates should be downloaded
+174: 	AutoUpdateEnabled bool
+175: 
+176: 	// AutoApproveTools lets every tool call that would otherwise wait for the
+177: 	// user's approval run at once, without asking. It is one global switch,
+178: 	// off by default. The gate that honours it re-reads it on every call, so
+179: 	// switching it off takes effect on the very next tool call.
+180: 	AutoApproveTools bool
+181: }
+182: 
+183: type Store struct {
+184: 	// DBPath allows overriding the default database path (mainly for testing)
+185: 	DBPath string
+186: 
+187: 	// dbMu protects database initialization only
+188: 	dbMu sync.Mutex
+189: 	db   *database
+190: }
+191: 
+192: var defaultDBPath = func() string {
+193: 	switch runtime.GOOS {
+194: 	case "windows":
+195: 		return filepath.Join(os.Getenv("LOCALAPPDATA"), "Ollama", "db.sqlite")
+196: 	case "darwin":
+197: 		return filepath.Join(os.Getenv("HOME"), "Library", "Application Support", "Ollama", "db.sqlite")
+198: 	default:
+199: 		return filepath.Join(os.Getenv("HOME"), ".ollama", "db.sqlite")
+200: 	}
+201: }()
+202: 
+
+SOURCE app/ui/app/src/api.ts
+510:   return readDiscovery(await response.json());
+511: }
+512: 
+513: export async function getSettings(): Promise<{
+514:   settings: Settings;
+515: }> {
+516:   const response = await fetch(`${API_BASE}/api/v1/settings`);
+517:   if (!response.ok) {
+518:     throw new Error("Failed to fetch settings");
+519:   }
+520:   const data = await response.json();
+521:   return {
+522:     settings: new Settings(data.settings),
+523:   };
+524: }
+525: 
+526: export async function updateSettings(settings: Settings): Promise<{
+527:   settings: Settings;
+528: }> {
+529:   const response = await fetch(`${API_BASE}/api/v1/settings`, {
+530:     method: "POST",
+531:     headers: {
+532:       "Content-Type": "application/json",
+533:     },
+534:     body: JSON.stringify(settings),
+535:   });
+536:   if (!response.ok) {
+537:     const error = await response.text();
+538:     throw new Error(error || "Failed to update settings");
+539:   }
+540:   const data = await response.json();
+541:   return {
+542:     settings: new Settings(data.settings),
+543:   };
+544: }
+545: 
+546: export async function updateCloudSetting(
+547:   enabled: boolean,
+548: ): Promise<CloudStatusResponse> {
+549:   const response = await fetch(`${API_BASE}/api/v1/cloud`, {
+550:     method: "POST",
+551:     headers: {
+552:       "Content-Type": "application/json",
+553:     },
+
+SOURCE app/ui/app/src/components/Settings.tsx
+1: import { useEffect, useState, useCallback } from "react";
+2: import { Switch } from "@/components/ui/switch";
+3: import { Text } from "@/components/ui/text";
+4: import { Input } from "@/components/ui/input";
+5: import { Field, Label, Description } from "@/components/ui/fieldset";
+6: import { Badge } from "@/components/ui/badge";
+7: import { Button } from "@/components/ui/button";
+8: import { Slider } from "@/components/ui/slider";
+9: import {
+10:   WifiIcon,
+11:   FolderIcon,
+12:   BoltIcon,
+13:   WrenchIcon,
+14:   CloudIcon,
+15:   XMarkIcon,
+16:   CogIcon,
+17:   ArrowLeftIcon,
+18:   ArrowDownTrayIcon,
+19: } from "@heroicons/react/20/solid";
+20: import { Settings as SettingsType } from "@/gotypes";
+21: import { useNavigate } from "@tanstack/react-router";
+22: import { useUser } from "@/hooks/useUser";
+23: import { useCloudStatus } from "@/hooks/useCloudStatus";
+24: import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+25: import {
+26:   getSettings,
+27:   type CloudStatusResponse,
+28:   updateCloudSetting,
+29:   updateSettings,
+30:   getInferenceCompute,
+31: } from "@/api";
+32: import SpeechSettings from "@/components/SpeechSettings";
+33: import { ToolApprovalSetting } from "@/components/ToolApprovalSetting";
+34: 
+35: function AnimatedDots() {
+36:   return (
+37:     <span className="inline-flex">
+38:       <span className="animate-pulse">.</span>
+39:       <span className="animate-pulse" style={{ animationDelay: "0.2s" }}>
+40:         .
+41:       </span>
+42:       <span className="animate-pulse" style={{ animationDelay: "0.4s" }}>
+43:         .
+44:       </span>
+45:     </span>
+46:   );
+47: }
+48: 
+49: export default function Settings() {
+50:   const queryClient = useQueryClient();
+51:   const [showSaved, setShowSaved] = useState(false);
+52:   const [restartMessage, setRestartMessage] = useState(false);
+53:   const {
+54:     user,
+55:     isAuthenticated,
+56:     refreshUser,
+57:     isRefreshing,
+58:     refetchUser,
+59:     fetchConnectUrl,
+60:     isLoading,
+61:     disconnectUser,
+62:   } = useUser();
+63:   const [isAwaitingConnection, setIsAwaitingConnection] = useState(false);
+64:   const [connectionError, setConnectionError] = useState<string | null>(null);
+65:   const [pollingInterval, setPollingInterval] = useState<number | null>(null);
+66:   const navigate = useNavigate();
+67:   const {
+68:     cloudDisabled,
+69:     cloudStatus,
+70:     isLoading: cloudStatusLoading,
+71:   } = useCloudStatus();
+72: 
+73:   const {
+74:     data: settingsData,
+75:     isLoading: loading,
+76:     error,
+77:   } = useQuery({
+78:     queryKey: ["settings"],
+79:     queryFn: getSettings,
+80:   });
+81: 
+82:   const settings = settingsData?.settings || null;
+83: 
+84:   const { data: inferenceComputeResponse } = useQuery({
+85:     queryKey: ["inferenceCompute"],
+86:     queryFn: getInferenceCompute,
+87:   });
+88: 
+89:   const defaultContextLength = inferenceComputeResponse?.defaultContextLength;
+90: 
+91:   const updateSettingsMutation = useMutation({
+92:     mutationFn: updateSettings,
+93:     onSuccess: () => {
+94:       queryClient.invalidateQueries({ queryKey: ["settings"] });
+95:       setShowSaved(true);
+96:       setTimeout(() => setShowSaved(false), 1500);
+97:     },
+98:   });
+99: 
+100:   const updateCloudMutation = useMutation({
+101:     mutationFn: (enabled: boolean) => updateCloudSetting(enabled),
+102:     onMutate: async (enabled: boolean) => {
+103:       await queryClient.cancelQueries({ queryKey: ["cloudStatus"] });
+104: 
+105:       const previous = queryClient.getQueryData<CloudStatusResponse | null>([
+106:         "cloudStatus",
+107:       ]);
+108:       const envForcesDisabled =
+109:         previous?.source === "env" || previous?.source === "both";
+110: 
+111:       queryClient.setQueryData<CloudStatusResponse | null>(
+112:         ["cloudStatus"],
+113:         previous
+114:           ? {
+115:               ...previous,
+116:               disabled: !enabled || envForcesDisabled,
+117:             }
+118:           : {
+119:               disabled: !enabled,
+120:               source: "config",
+121:             },
+122:       );
+123: 
+124:       return { previous };
+125:     },
+126:     onError: (_error, _enabled, context) => {
+127:       if (context?.previous !== undefined) {
+128:         queryClient.setQueryData(["cloudStatus"], context.previous);
+129:       }
+130:     },
+131:     onSuccess: (status) => {
+132:       queryClient.setQueryData<CloudStatusResponse | null>(
+133:         ["cloudStatus"],
+134:         status,
+135:       );
+136:       queryClient.invalidateQueries({ queryKey: ["models"] });
+137:       queryClient.invalidateQueries({ queryKey: ["cloudStatus"] });
+138: 
+139:       setShowSaved(true);
+140:       setTimeout(() => setShowSaved(false), 1500);
+141:     },
+142:   });
+143: 
+144:   useEffect(() => {
+145:     refetchUser();
+146:   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+147: 
+148:   useEffect(() => {
+149:     const handleFocus = () => {
+150:       if (isAwaitingConnection && pollingInterval) {
+151:         // Stop polling when window gets focus
+152:         clearInterval(pollingInterval);
+153:         setPollingInterval(null);
+154:         // Reset awaiting connection state
+155:         setIsAwaitingConnection(false);
+156:         // Make one last refresh request
+157:         refreshUser();
+158:       }
+159:     };
+160: 
+161:     window.addEventListener("focus", handleFocus);
+162: 
+163:     return () => {
+164:       window.removeEventListener("focus", handleFocus);
+165:     };
+166:   }, [isAwaitingConnection, refreshUser, pollingInterval]);
+167: 
+168:   // Check if user is authenticated after refresh
+169:   useEffect(() => {
+170:     if (isAwaitingConnection && isAuthenticated) {
+171:       setIsAwaitingConnection(false);
+172:       setConnectionError(null);
+173:       if (pollingInterval) {
+174:         clearInterval(pollingInterval);
+175:         setPollingInterval(null);
+176:       }
+177:     }
+178:   }, [isAuthenticated, isAwaitingConnection, pollingInterval]);
+179: 
+180:   // Cleanup interval on unmount
+181:   useEffect(() => {
+182:     return () => {
+183:       if (pollingInterval) {
+184:         clearInterval(pollingInterval);
+185:       }
+186:     };
+187:   }, [pollingInterval]);
+188: 
+189:   const handleChange = useCallback(
+190:     (field: keyof SettingsType, value: boolean | string | number) => {
+191:       if (settings) {
+192:         const updatedSettings = new SettingsType({
+193:           ...settings,
+194:           [field]: value,
+195:         });
+196: 
+197:         // If context length is being changed, show restart message
+198:         if (field === "ContextLength" && value !== settings.ContextLength) {
+199:           setRestartMessage(true);
+200:           // Hide restart message after 3 seconds
+201:           setTimeout(() => setRestartMessage(false), 3000);
+202:         }
+203: 
+204:         updateSettingsMutation.mutate(updatedSettings);
+205:       }
+206:     },
+207:     [settings, updateSettingsMutation],
+208:   );
+209: 
+210:   const handleResetToDefaults = () => {
+211:     if (settings) {
+212:       const defaultSettings = new SettingsType({
+213:         Expose: false,
+214:         Browser: false,
+215:         Models: "",
+216:         Agent: false,
+217:         Tools: false,
+218:         ContextLength: 0,
+219:         AutoUpdateEnabled: true,
+220:         AutoApproveTools: false,
+221:       });
+222:       updateSettingsMutation.mutate(defaultSettings);
+223:     }
+224:   };
+225: 
+226:   const cloudOverriddenByEnv =
+227:     cloudStatus?.source === "env" || cloudStatus?.source === "both";
+228:   const cloudToggleDisabled =
+229:     cloudStatusLoading || updateCloudMutation.isPending || cloudOverriddenByEnv;
+230: 
+231:   const handleConnectOllamaAccount = async () => {
+232:     setConnectionError(null);
+233: 
+234:     // If user is already authenticated, no need to connect
+235:     if (isAuthenticated) {
+236:       return;
+237:     }
+238: 
+239:     try {
+240:       // If we don't have a user or user has no name, get connect URL
+
+SOURCE app/ui/ui.go
+915: 				if !ok {
+916: 					browserState = reconstructBrowserState(chat.Messages, tools.DefaultViewTokens)
+917: 				}
+918: 				browser = tools.NewBrowser(browserState)
+919: 				registry.Register(tools.NewBrowserSearch(browser))
+920: 				registry.Register(tools.NewBrowserOpen(browser))
+921: 				registry.Register(tools.NewBrowserFind(browser))
+922: 			} else {
+923: 				registry.Register(&tools.WebSearch{})
+924: 				registry.Register(&tools.WebFetch{})
+925: 			}
+926: 		}
+927: 
+928: 		if hasToolsCapability {
+929: 			s.registerMCPTools(registry)
+930: 			mcpInstructions = s.mcpInstructions()
+931: 		}
+932: 	}
+933: 
+934: 	var thinkingTimeStart *time.Time = nil
+935: 	var thinkingTimeEnd *time.Time = nil
+936: 	// Request-only assistant tool_calls buffer
+937: 	// if tool_calls arrive before any assistant text, we keep them here,
+938: 	// inject them into the next request, and attach on first assistant content/thinking.
+939: 	var pendingAssistantToolCalls []store.ToolCall
+940: 
+941: 	passNum := 1
+942: 
+943: 	for {
+944: 		var toolsExecuted bool
+945: 
+946: 		availableTools := registry.OllamaTools()
+947: 
+948: 		// If we have pending assistant tool_calls and no assistant yet,
+949: 		// build the request against a temporary chat that includes a
+950: 		// request-only assistant with tool_calls inserted BEFORE tool messages
+951: 		reqChat := chat
+952: 		if len(pendingAssistantToolCalls) > 0 {
+953: 			if len(chat.Messages) == 0 || chat.Messages[len(chat.Messages)-1].Role != "assistant" {
+954: 				temp := *chat
+955: 				synth := store.NewMessage("assistant", "", &store.MessageOptions{Model: req.Model, ToolCalls: pendingAssistantToolCalls})
+956: 				insertIdx := len(temp.Messages) - 1
+957: 				for insertIdx >= 0 && temp.Messages[insertIdx].Role == "tool" {
+958: 					insertIdx--
+959: 				}
+960: 				if insertIdx < 0 {
+961: 					temp.Messages = append([]store.Message{synth}, temp.Messages...)
+962: 				} else {
+963: 					tmp := make([]store.Message, 0, len(temp.Messages)+1)
+964: 					tmp = append(tmp, temp.Messages[:insertIdx+1]...)
+965: 					tmp = append(tmp, synth)
+966: 					tmp = append(tmp, temp.Messages[insertIdx+1:]...)
+967: 					temp.Messages = tmp
+968: 				}
+969: 
+970: 				reqChat = &temp
+971: 			}
+972: 		}
+973: 		chatReq, err := s.buildChatRequest(reqChat, req.Model, thinkValue, availableTools, mcpInstructions)
+974: 		if err != nil {
+975: 			return err
+976: 		}
+977: 
+978: 		err = c.Chat(ctx, chatReq, func(res api.ChatResponse) error {
+979: 			if loading {
+980: 				// Remove the loading indicator on first token
+981: 				cancelLoading()
+982: 				loading = false
+983: 			}
+984: 
+985: 			// Start thinking timer on first thinking content or after tool call when thinking again
+986: 			if res.Message.Thinking != "" && (thinkingTimeStart == nil || thinkingTimeEnd != nil) {
+987: 				now := time.Now()
+988: 				thinkingTimeStart = &now
+989: 				thinkingTimeEnd = nil
+990: 			}
+991: 
+992: 			if res.Message.Content == "" && res.Message.Thinking == "" && len(res.Message.ToolCalls) == 0 {
+993: 				return nil
+994: 			}
+995: 
+996: 			event := EventChat
+997: 			if thinkingTimeStart != nil && res.Message.Content == "" && len(res.Message.ToolCalls) == 0 {
+998: 				event = EventThinking
+999: 			}
+1000: 
+1001: 			if len(res.Message.ToolCalls) > 0 {
+1002: 				event = EventToolCall
+1003: 			}
+1004: 
+1005: 			if event == EventToolCall && thinkingTimeStart != nil && thinkingTimeEnd == nil {
+1006: 				now := time.Now()
+1007: 				thinkingTimeEnd = &now
+1008: 			}
+1009: 
+1010: 			if event == EventChat && thinkingTimeStart != nil && thinkingTimeEnd == nil && res.Message.Content != "" {
+1011: 				now := time.Now()
+1012: 				thinkingTimeEnd = &now
+1013: 			}
+1014: 
+1015: 			json.NewEncoder(w).Encode(chatEventFromApiChatResponse(res, thinkingTimeStart, thinkingTimeEnd))
+
+SOURCE agent/session.go
+285: 			s.emit(newErrorEvent(meta, skipErr.Error()))
+286: 			return skipErr
+287: 		}
+288: 		st.messages = append(st.messages, batch.messages...)
+289: 		st.toolBatch = &batch
+290: 		st.phase = runPhaseCompact
+291: 		return nil
+292: 	}
+293: 
+294: 	if s.Tools == nil {
+295: 		st.finishDone()
+296: 		return nil
+297: 	}
+298: 
+299: 	if st.maxToolRounds >= 0 && st.toolRounds >= st.maxToolRounds {
+300: 		content := fmt.Sprintf("Tool execution skipped because the max tool-round limit of %d was reached. Send another message to continue.", st.maxToolRounds)
+301: 		toolMessages, skipErr := s.skipToolCalls(ctx, st.runID, opts, pendingToolCalls, content)
+302: 		if skipErr != nil {
+303: 			s.emit(newErrorEvent(meta, skipErr.Error()))
+304: 			return skipErr
+305: 		}
+306: 		st.messages = append(st.messages, toolMessages...)
+307: 		err := fmt.Errorf("tool round limit reached after %d rounds; send another message to continue", st.maxToolRounds)
+308: 		s.emit(newErrorEvent(meta, err.Error()))
+309: 		st.finishError(err)
+310: 		return nil
+311: 	}
+312: 
+313: 	st.phase = runPhaseTools
+314: 	return nil
+315: }
+316: 
+317: func (s *Session) runToolStep(ctx context.Context, st *runState) error {
+318: 	batch, err := s.executeToolCalls(ctx, st.runID, st.opts, st.messages, st.pendingToolCalls)
+319: 	if err != nil {
+320: 		s.emit(newErrorEvent(newEventMetadata(st.runID, st.opts), err.Error()))
+321: 		return err
+322: 	}
+323: 
+324: 	st.messages = append(st.messages, batch.messages...)
+325: 	st.toolBatch = &batch
+326: 	st.phase = runPhaseCompact
+327: 	return nil
+328: }
+329: 
+330: func (s *Session) runCompactionStep(ctx context.Context, st *runState) error {
+331: 	opts := st.opts
+332: 	meta := newEventMetadata(st.runID, opts)
+333: 	var err error
+334: 	if st.toolBatch != nil && len(st.toolBatch.overflows) > 0 {
+335: 		st.messages, st.compactionSkipNotified, err = s.compactForToolOutputOverflow(ctx, st.runID, opts, st.messages, st.latest, st.assistant, st.toolBatch.messages, st.toolBatch.overflows, st.compactionSkipNotified)
+336: 	} else {
+337: 		st.messages, st.compactionSkipNotified, err = s.maybeCompact(ctx, st.runID, opts, st.messages, st.latest, st.compactionSkipNotified)
+338: 	}
+339: 	if err != nil {
+340: 		s.emit(newErrorEvent(meta, err.Error()))
+341: 		st.finishError(err)
+342: 		return nil
+
+SOURCE agent/compactor.go
+370: 		total += estimateCompactionTokens(msg.Role)
+371: 		total += estimateCompactionTokens(msg.Content)
+372: 		total += estimateCompactionTokens(msg.Thinking)
+373: 		total += estimateCompactionTokens(msg.ToolName)
+374: 		total += estimateCompactionTokens(msg.ToolCallID)
+375: 		for _, call := range msg.ToolCalls {
+376: 			total += estimateCompactionTokens(call.Function.Name)
+377: 			total += estimateCompactionTokens(call.Function.Arguments.String())
+378: 		}
+379: 	}
+380: 	return total
+381: }
+382: 
+383: func estimateCompactionRequestTokens(req CompactionRequest) int {
+384: 	requestMessages := sanitizeMessagesForEstimate(req.Messages)
+385: 	if strings.TrimSpace(req.SystemPrompt) != "" {
+386: 		requestMessages = make([]api.Message, 0, len(req.Messages)+1)
+387: 		requestMessages = append(requestMessages, api.Message{Role: "system", Content: strings.TrimSpace(req.SystemPrompt)})
+388: 		requestMessages = append(requestMessages, sanitizeMessagesForEstimate(req.Messages)...)
+389: 	}
+390: 
+391: 	payload := struct {
+392: 		Messages []api.Message   `json:"messages,omitempty"`
+393: 		Tools    api.Tools       `json:"tools,omitempty"`
+394: 		Format   json.RawMessage `json:"format,omitempty"`
+395: 	}{
+396: 		Messages: requestMessages,
+397: 		Tools:    req.Tools,
+398: 	}
+399: 	if rawFormat, ok := compactionFormatForEstimate(req.Format); ok {
+400: 		payload.Format = rawFormat
+401: 	}
+402: 	if data, err := json.Marshal(payload); err == nil {
+403: 		return estimateCompactionTokens(string(data))
+404: 	}
+405: 
+406: 	total := estimateMessagesTokens(requestMessages)
+407: 	total += estimateCompactionTokens(req.Tools.String())
+408: 	total += estimateCompactionTokens(req.Format)
+409: 	return total
+410: }
+411: 
+412: func (s *Session) estimateRunPromptTokens(opts RunOptions, messages []api.Message) int {
+413: 	return estimateCompactionRequestTokens(CompactionRequest{
+414: 		SystemPrompt: opts.SystemPrompt,
+415: 		Messages:     messages,
+416: 		Tools:        s.availableTools(),
+417: 		Format:       opts.Format,
+418: 		Options:      opts.Options,
+419: 	})
+420: }
+421: 
+422: func (s *Session) checkPreflightPromptBudget(opts RunOptions, messages []api.Message) error {
+423: 	contextWindow := s.contextWindowTokens(opts)
+424: 	if contextWindow <= 0 {
+425: 		return nil
+
+SOURCE cmd/tui/chat/chat.go
+1116: func (m *chatModel) startRunWithMessages(displayInput, historyInput string, newMessages []api.Message, extraSystemPrompt, skillName string) (tea.Model, tea.Cmd) {
+1117: 	m.addPromptHistory(historyInput)
+1118: 	m.entries = append(m.entries, newChatEntry(chatEntry{role: "user", content: displayInput}))
+1119: 	if len(newMessages) > 1 {
+1120: 		m.entries = append(m.entries, entriesFromMessages(newMessages[1:])...)
+1121: 	}
+1122: 	m.running = true
+1123: 	m.awaitingModel = true
+1124: 	m.status = "running"
+1125: 	m.spinner = 0
+1126: 	m.scroll = 0
+1127: 	m.detectedToolCalls = nil
+1128: 	m.thinking = false
+1129: 	m.thinkingTokens = 0
+1130: 	m.eventErrorRendered = false
+1131: 	systemPrompt := m.systemPrompt(extraSystemPrompt)
+1132: 	m.liveMessages = append(slices.Clone(m.messages), newMessages...)
+1133: 	m.contextTokens = m.estimatePromptTokens(m.liveMessages, systemPrompt)
+1134: 	m.contextEstimate = true
+1135: 
+1136: 	runCtx, cancel := context.WithCancel(m.ctx)
+1137: 	m.cancel = cancel
+1138: 	events := make(chan tea.Msg, 128)
+1139: 	m.events = events
+1140: 	m.approvalController = newChatApprovalController(events, m.ensureApprovalState())
+1141: 
+1142: 	var newMessagesPersisted bool
+1143: 	eventSinks := []coreagent.EventSink{chatEventSink{ctx: runCtx, ch: events, newMessagesPersisted: &newMessagesPersisted}}
+1144: 	eventSinks = append(eventSinks, m.opts.EventSinks...)
+1145: 
+1146: 	session := &coreagent.Session{
+1147: 		Client:           m.opts.Client,
+1148: 		EventSinks:       eventSinks,
+1149: 		Tools:            m.opts.Tools,
+1150: 		Skills:           m.opts.Skills,
+1151: 		DisableTools:     m.opts.ToolsDisabled,
+1152: 		ApprovalPrompter: m.approvalPrompterForRun(m.approvalController),
+1153: 		ApprovalState:    m.ensureApprovalState(),
+1154: 		WorkingDir:       m.currentWorkingDir(),
+1155: 		Compactor:        m.opts.Compactor,
+1156: 	}
+1157: 	opts := coreagent.RunOptions{
+1158: 		ChatID:       m.chatID,
+1159: 		Model:        m.opts.Model,
+1160: 		SystemPrompt: systemPrompt,
+1161: 		Messages:     slices.Clone(m.messages),
+1162: 		NewMessages:  slices.Clone(newMessages),
+1163: 		Format:       m.opts.Format,
+1164: 		Options:      m.opts.Options,
+1165: 		Think:        m.opts.Think,
+1166: 		KeepAlive:    m.opts.KeepAlive,
+1167: 		SkillName:    skillName,
+1168: 	}
+1169: 
+1170: 	persistedMessages := make([]api.Message, 0, len(m.messages)+len(newMessages))
+1171: 	persistedMessages = append(persistedMessages, slices.Clone(m.messages)...)
+1172: 	persistedMessages = append(persistedMessages, slices.Clone(newMessages)...)
+1173: 	go func() {
+1174: 		defer close(events)
+1175: 		result, err := session.Run(runCtx, opts)
+1176: 		select {
+1177: 		case events <- chatRunDoneMsg{result: result, err: err, newMessagesPersisted: newMessagesPersisted, persistedMessages: persistedMessages}:
+1178: 		case <-runCtx.Done():
+1179: 		}
+1180: 	}()
+1181: 
+1182: 	tickCmd := m.scheduleTick()
+1183: 	flushModel, flushCmd := m.flowTranscriptFlushCmd()
+1184: 	*m = flushModel
+1185: 	return *m, tea.Batch(flushCmd, waitForChatMsg(events), tickCmd)
+
+SOURCE cmd/agent_tui.go
+153: 		Compactor: &coreagent.SimpleCompactor{
+154: 			Client:  client,
+155: 			Options: coreagent.CompactionOptions{ContextWindowTokens: opts.ContextWindowTokens},
+156: 		},
+157: 		ContextWindowTokensForModel: func(ctx context.Context, model string, fallback int) int {
+158: 			return contextWindowForModel(ctx, model, fallback)
+159: 		},
+160: 		PreloadModel: func(ctx context.Context, model string, think *api.ThinkValue) (int, error) {
+161: 			return preloadAgentModelIfLocal(ctx, client, opts, model, think)
+162: 		},
+163: 		CheckCloudModel: func(ctx context.Context, model, requiredPlan string) error {
+164: 			return ensureCloudModelAccess(ctx, client, model, requiredPlan)
+165: 		},
+166: 		OpenBrowser: launch.OpenBrowser,
+167: 		PollCloudAuth: func(ctx context.Context) (string, bool, error) {
+168: 			user, err := client.Whoami(ctx)
+169: 			if err != nil {
+170: 				return "", false, err
+171: 			}
+172: 			if user == nil || user.Name == "" {
+173: 				return "", false, nil
+174: 			}
+175: 			return user.Name, true, nil

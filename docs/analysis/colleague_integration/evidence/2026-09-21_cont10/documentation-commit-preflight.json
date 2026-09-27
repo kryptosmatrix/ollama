@@ -1,0 +1,9 @@
+{
+  "source_commit": "6a3778184d43b23c5cba14e0379922377f615f52",
+  "staged_files": 407,
+  "all_paths_under_proof_cont10": true,
+  "git_diff_check_exit": 2,
+  "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/documentation-diff-check.stdout",
+  "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/documentation-diff-check.stderr",
+  "source_unchanged": true
+}

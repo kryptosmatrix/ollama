@@ -1,0 +1,88 @@
+[
+  {
+    "argv": [
+      "/opt/homebrew/bin/node",
+      "--version"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+    "exit_code": 0,
+    "stdout": "v25.8.2\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/opt/homebrew/bin/npm",
+      "--version"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+    "exit_code": 0,
+    "stdout": "11.11.1\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/opt/homebrew/bin/go",
+      "version"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+    "exit_code": 0,
+    "stdout": "go version go1.26.5 darwin/arm64\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/usr/bin/sw_vers"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+    "exit_code": 0,
+    "stdout": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/usr/bin/uname",
+      "-smr"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+    "exit_code": 0,
+    "stdout": "Darwin 25.6.0 arm64\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/usr/sbin/sysctl",
+      "-n",
+      "machdep.cpu.brand_string",
+      "hw.memsize"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+    "exit_code": 0,
+    "stdout": "Apple M3 Max\n137438953472\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "status",
+      "--porcelain=v1",
+      "--untracked-files=all"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "ls-remote",
+      "origin",
+      "refs/heads/main",
+      "refs/heads/eko/chat-read-integrity-20260920"
+    ],
+    "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+    "exit_code": 0,
+    "stdout": "6a3778184d43b23c5cba14e0379922377f615f52\trefs/heads/eko/chat-read-integrity-20260920\n953de98d408a9697fa20a48c23973b9dc8eee921\trefs/heads/main\n",
+    "stderr": ""
+  }
+]

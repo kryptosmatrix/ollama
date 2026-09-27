@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/usr/bin/clang++",
+    "-std=c++11",
+    "-DWEBVIEW_STATIC",
+    "-DWEBVIEW_COCOA",
+    "-Werror=deprecated-literal-operator",
+    "-fsyntax-only",
+    "app/webview/webview.cc"
+  ],
+  "exit_code": 1,
+  "seconds": 5.19787091697799,
+  "source_sha256": "8c8b6ac9adc1d51ff579bf692603f34ce61cf8a332064d825f315dc2d6bd31e6"
+}

@@ -1,0 +1,26 @@
+{
+  "tested_candidate": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+  "documentation_commit": "13139f8d36ec5f447c67ad634c8ad65b713a49db",
+  "documentation_only_delta": [
+    "docs/analysis/colleague_integration/CONTINUATION_05_REPORT.md",
+    "docs/analysis/colleague_integration/proof_cont05/author-matrix.json",
+    "docs/analysis/colleague_integration/proof_cont05/candidate-focused-result.json",
+    "docs/analysis/colleague_integration/proof_cont05/containment.json",
+    "docs/analysis/colleague_integration/proof_cont05/independent-review-result.json",
+    "docs/analysis/colleague_integration/proof_cont05/independent-review.md",
+    "docs/analysis/colleague_integration/proof_cont05/independent-source-identities.json",
+    "docs/analysis/colleague_integration/proof_cont05/manifest.json",
+    "docs/analysis/colleague_integration/proof_cont05/parser-self-checks.json",
+    "docs/analysis/colleague_integration/proof_cont05/regression-results.json"
+  ],
+  "push_exit": 0,
+  "remote_query_exit": 0,
+  "verified_remote_tip": "13139f8d36ec5f447c67ad634c8ad65b713a49db",
+  "documentation_backed_up": true,
+  "branch": "eko/chat-read-integrity-20260920",
+  "worktree": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+  "disposition": "PARKED",
+  "main_merged": false,
+  "installed": false,
+  "timestamp_brisbane": "2026-09-20T22:08:53.004754+10:00"
+}

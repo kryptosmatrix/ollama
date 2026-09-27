@@ -1,0 +1,10 @@
+{
+  "serial_manifest_entries": 36272,
+  "parallel_manifest_entries": 36272,
+  "byte_hash_maps_equal": true,
+  "parallel_seconds": 6.384567082975991,
+  "max_workers": 8,
+  "old_instrument_sha256": "0a7b4948bd79f7e3443d751f175126a64608b82f14d48993e34aa11e98659a86",
+  "new_instrument_sha256": "7f5786820b4ac29134318b18fed1f30ae0277e547f770f2af20882d91ac0acd2",
+  "changed_scope": "Same file population and full SHA-256 checks, eight workers; correct Go directive selector; add literal raw-output lint rejection. No assertion weakened."
+}

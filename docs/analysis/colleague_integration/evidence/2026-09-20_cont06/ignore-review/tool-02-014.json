@@ -1,0 +1,16 @@
+{
+  "name": "read_evidence",
+  "arguments": {
+    "name": "author_negative_cases",
+    "start": 1,
+    "count": 200
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont06/ignore-negative-controls.json",
+    "file_sha256": "d59d5b5289343df8d59725c55c02bf5a4f9ffff979e56b99fad0736335922201",
+    "start": 1,
+    "end": 17,
+    "total_lines": 17,
+    "text": "1: [\n2:   {\n3:     \"path\": \"app/ui/app/src/components/FutureDiscovery.tsx\",\n4:     \"old_rule_ignored\": true,\n5:     \"new_rule_ignored\": false\n6:   },\n7:   {\n8:     \"path\": \"app/ui/app/src/utils/recoverConversation.ts\",\n9:     \"old_rule_ignored\": true,\n10:     \"new_rule_ignored\": false\n11:   },\n12:   {\n13:     \"path\": \"app/ui/recover_history_test.go\",\n14:     \"old_rule_ignored\": true,\n15:     \"new_rule_ignored\": false\n16:   }\n17: ]"
+  }
+}

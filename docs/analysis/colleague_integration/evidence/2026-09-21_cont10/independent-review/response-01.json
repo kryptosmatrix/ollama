@@ -1,0 +1,40 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "created_at": "2026-09-21T06:20:33.752964115Z",
+  "message": {
+    "role": "assistant",
+    "content": "I'll start by reading the contract and the core sources, then run the required executions.",
+    "tool_calls": [
+      {
+        "id": "call_ykpsb0au",
+        "function": {
+          "index": 0,
+          "name": "read_source",
+          "arguments": {
+            "name": "contract",
+            "start": 0,
+            "count": 200
+          }
+        }
+      },
+      {
+        "id": "call_zao4nvw0",
+        "function": {
+          "index": 1,
+          "name": "read_source",
+          "arguments": {
+            "name": "self_audit",
+            "start": 0,
+            "count": 200
+          }
+        }
+      }
+    ]
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 1005757106,
+  "prompt_eval_count": 1357,
+  "prompt_eval_cached_count": 0,
+  "eval_count": 150
+}

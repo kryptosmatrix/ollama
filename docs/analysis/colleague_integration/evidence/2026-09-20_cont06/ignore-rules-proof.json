@@ -1,0 +1,68 @@
+{
+  "rules_sha256": "384f341ecedfd8242d7249573dc4215009925a915219148bb4d219d009cda908",
+  "cases": [
+    {
+      "path": "app/ui/app/src/components/FutureDiscovery.tsx",
+      "expected_ignored": false,
+      "observed_ignored": false,
+      "exit_code": 1,
+      "rule": ""
+    },
+    {
+      "path": "app/ui/app/src/utils/recoverConversation.ts",
+      "expected_ignored": false,
+      "observed_ignored": false,
+      "exit_code": 1,
+      "rule": ""
+    },
+    {
+      "path": "app/ui/recover_history_test.go",
+      "expected_ignored": false,
+      "observed_ignored": false,
+      "exit_code": 1,
+      "rule": ""
+    },
+    {
+      "path": "app/ui/app/coverage/index.html",
+      "expected_ignored": true,
+      "observed_ignored": true,
+      "exit_code": 0,
+      "rule": "app/.gitignore:7:coverage/\tapp/ui/app/coverage/index.html"
+    },
+    {
+      "path": "app/coverage.out",
+      "expected_ignored": true,
+      "observed_ignored": true,
+      "exit_code": 0,
+      "rule": "app/.gitignore:9:coverage*.out\tapp/coverage.out"
+    },
+    {
+      "path": "app/test.coverprofile",
+      "expected_ignored": true,
+      "observed_ignored": true,
+      "exit_code": 0,
+      "rule": "app/.gitignore:8:*.coverprofile\tapp/test.coverprofile"
+    },
+    {
+      "path": "app/cover.html",
+      "expected_ignored": true,
+      "observed_ignored": true,
+      "exit_code": 0,
+      "rule": "app/.gitignore:12:cover.html\tapp/cover.html"
+    },
+    {
+      "path": "app/.env",
+      "expected_ignored": true,
+      "observed_ignored": true,
+      "exit_code": 0,
+      "rule": "app/.gitignore:14:.env\tapp/.env"
+    },
+    {
+      "path": "app/unsafe.crt",
+      "expected_ignored": true,
+      "observed_ignored": true,
+      "exit_code": 0,
+      "rule": "app/.gitignore:2:*.crt\tapp/unsafe.crt"
+    }
+  ]
+}

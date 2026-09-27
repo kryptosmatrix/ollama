@@ -1,0 +1,553 @@
+time=2026-09-26T20:31:28.631+10:00 level=INFO source=routes.go:1933 msg="server config" env="map[HTTPS_PROXY: HTTP_PROXY: LLAMA_ARG_FIT: LLAMA_ARG_FIT_TARGET: NO_PROXY: OLLAMA_CONTEXT_LENGTH:0 OLLAMA_DEBUG:DEBUG OLLAMA_DEBUG_LOG_REQUESTS:false OLLAMA_EDITOR: OLLAMA_FLASH_ATTENTION:false OLLAMA_GO_TEMPLATE:true OLLAMA_GPU_OVERHEAD:0 OLLAMA_HOST:http://127.0.0.1:11500 OLLAMA_IGPU_ENABLE: OLLAMA_KEEP_ALIVE:10m0s OLLAMA_KV_CACHE_TYPE: OLLAMA_LLM_LIBRARY: OLLAMA_LOAD_TIMEOUT:5m0s OLLAMA_MAX_LOADED_MODELS:0 OLLAMA_MAX_QUEUE:512 OLLAMA_MAX_TRANSFER_STREAMS:4 OLLAMA_MODELS:/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models OLLAMA_NOHISTORY:false OLLAMA_NOPRUNE:true OLLAMA_NO_CLOUD:false OLLAMA_NUM_PARALLEL:1 OLLAMA_ORIGINS:[http://localhost https://localhost http://localhost:* https://localhost:* http://127.0.0.1 https://127.0.0.1 http://127.0.0.1:* https://127.0.0.1:* http://0.0.0.0 https://0.0.0.0 http://0.0.0.0:* https://0.0.0.0:* app://* file://* tauri://* vscode-webview://* vscode-file://*] OLLAMA_REMOTES:[ollama.com] OLLAMA_SCHED_SPREAD:false http_proxy: https_proxy: no_proxy:]"
+time=2026-09-26T20:31:28.631+10:00 level=INFO source=routes.go:1935 msg="Ollama cloud disabled: false"
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] HEAD   /                         --> github.com/ollama/ollama/server.(*Server).GenerateRoutes.func1 (5 handlers)
+[GIN-debug] GET    /                         --> github.com/ollama/ollama/server.(*Server).GenerateRoutes.func2 (5 handlers)
+[GIN-debug] HEAD   /api/version              --> github.com/ollama/ollama/server.(*Server).GenerateRoutes.func3 (5 handlers)
+[GIN-debug] GET    /api/version              --> github.com/ollama/ollama/server.(*Server).GenerateRoutes.func4 (5 handlers)
+[GIN-debug] GET    /api/status               --> github.com/ollama/ollama/server.(*Server).StatusHandler-fm (5 handlers)
+[GIN-debug] POST   /api/pull                 --> github.com/ollama/ollama/server.(*Server).PullHandler-fm (5 handlers)
+[GIN-debug] POST   /api/push                 --> github.com/ollama/ollama/server.(*Server).PushHandler-fm (5 handlers)
+[GIN-debug] HEAD   /api/tags                 --> github.com/ollama/ollama/server.(*Server).ListHandler-fm (5 handlers)
+[GIN-debug] GET    /api/tags                 --> github.com/ollama/ollama/server.(*Server).ListHandler-fm (5 handlers)
+[GIN-debug] POST   /api/show                 --> github.com/ollama/ollama/server.(*Server).ShowHandler-fm (5 handlers)
+[GIN-debug] DELETE /api/delete               --> github.com/ollama/ollama/server.(*Server).DeleteHandler-fm (5 handlers)
+[GIN-debug] POST   /api/me                   --> github.com/ollama/ollama/server.(*Server).WhoamiHandler-fm (5 handlers)
+[GIN-debug] POST   /api/signout              --> github.com/ollama/ollama/server.(*Server).SignoutHandler-fm (5 handlers)
+[GIN-debug] DELETE /api/user/keys/:encodedKey --> github.com/ollama/ollama/server.(*Server).SignoutHandler-fm (5 handlers)
+[GIN-debug] POST   /api/create               --> github.com/ollama/ollama/server.(*Server).CreateHandler-fm (5 handlers)
+[GIN-debug] POST   /api/blobs/:digest        --> github.com/ollama/ollama/server.(*Server).CreateBlobHandler-fm (5 handlers)
+[GIN-debug] HEAD   /api/blobs/:digest        --> github.com/ollama/ollama/server.(*Server).HeadBlobHandler-fm (5 handlers)
+[GIN-debug] POST   /api/copy                 --> github.com/ollama/ollama/server.(*Server).CopyHandler-fm (5 handlers)
+[GIN-debug] POST   /api/experimental/web_search --> github.com/ollama/ollama/server.(*Server).WebSearchExperimentalHandler-fm (5 handlers)
+[GIN-debug] POST   /api/experimental/web_fetch --> github.com/ollama/ollama/server.(*Server).WebFetchExperimentalHandler-fm (5 handlers)
+[GIN-debug] GET    /api/experimental/model-recommendations --> github.com/ollama/ollama/server.(*Server).ModelRecommendationsExperimentalHandler-fm (5 handlers)
+[GIN-debug] GET    /api/ps                   --> github.com/ollama/ollama/server.(*Server).PsHandler-fm (5 handlers)
+[GIN-debug] POST   /api/generate             --> github.com/ollama/ollama/server.(*Server).GenerateHandler-fm (5 handlers)
+[GIN-debug] POST   /api/chat                 --> github.com/ollama/ollama/server.(*Server).ChatHandler-fm (5 handlers)
+[GIN-debug] POST   /api/embed                --> github.com/ollama/ollama/server.(*Server).EmbedHandler-fm (5 handlers)
+[GIN-debug] POST   /api/embeddings           --> github.com/ollama/ollama/server.(*Server).EmbeddingsHandler-fm (5 handlers)
+[GIN-debug] POST   /v1/chat/completions      --> github.com/ollama/ollama/server.(*Server).ChatHandler-fm (7 handlers)
+[GIN-debug] POST   /v1/completions           --> github.com/ollama/ollama/server.(*Server).GenerateHandler-fm (7 handlers)
+[GIN-debug] POST   /v1/embeddings            --> github.com/ollama/ollama/server.(*Server).EmbedHandler-fm (7 handlers)
+[GIN-debug] GET    /v1/models                --> github.com/ollama/ollama/server.(*Server).ListHandler-fm (6 handlers)
+[GIN-debug] GET    /v1/models/:model         --> github.com/ollama/ollama/server.(*Server).ShowHandler-fm (7 handlers)
+[GIN-debug] POST   /v1/responses             --> github.com/ollama/ollama/server.(*Server).ChatHandler-fm (7 handlers)
+[GIN-debug] POST   /v1/audio/transcriptions  --> github.com/ollama/ollama/server.(*Server).ChatHandler-fm (6 handlers)
+[GIN-debug] POST   /v1/messages              --> github.com/ollama/ollama/server.(*Server).ChatHandler-fm (7 handlers)
+time=2026-09-26T20:31:28.631+10:00 level=DEBUG source=model_recommendations.go:66 msg="starting model recommendations cache" default_recommendations=6 refresh_interval=4h0m0s fetch_timeout=3s
+time=2026-09-26T20:31:28.631+10:00 level=DEBUG source=model_show_cache.go:132 msg="starting model show cache"
+time=2026-09-26T20:31:28.631+10:00 level=DEBUG source=model_list_cache.go:71 msg="starting model list cache"
+time=2026-09-26T20:31:28.631+10:00 level=INFO source=routes.go:1990 msg="Listening on 127.0.0.1:11500 (version 0.0.0)"
+time=2026-09-26T20:31:28.631+10:00 level=DEBUG source=sched.go:215 msg="starting llm scheduler"
+time=2026-09-26T20:31:28.632+10:00 level=INFO source=runner.go:60 msg="discovering available GPUs..."
+time=2026-09-26T20:31:28.632+10:00 level=DEBUG source=model_recommendations.go:272 msg="loaded model recommendations snapshot" path=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/home/.ollama/cache/model-recommendations.json count=5
+time=2026-09-26T20:31:28.632+10:00 level=DEBUG source=model_recommendations.go:201 msg="refreshing model recommendations from remote" url=https://ollama.com/api/experimental/model-recommendations
+time=2026-09-26T20:31:28.634+10:00 level=INFO source=model_list_cache.go:112 msg="model list cache hydration complete" models=3 failures=0 elapsed=2.672208ms
+time=2026-09-26T20:31:28.720+10:00 level=DEBUG source=llama_server.go:121 msg="llama-server discovery: stopped subprocess after collecting GPU info" exit=unknown libDirs=[/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/lib/ollama]
+time=2026-09-26T20:31:28.792+10:00 level=DEBUG source=llama_server.go:289 msg="skipping pseudo-device with zero memory" name=BLAS description=Accelerate
+time=2026-09-26T20:31:28.792+10:00 level=DEBUG source=llama_server.go:52 msg="llama-server device discovery took" duration=159.6345ms libDirs=[/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/lib/ollama]
+time=2026-09-26T20:31:28.792+10:00 level=DEBUG source=runner.go:494 msg="bootstrap discovery took" duration=159.753375ms OLLAMA_LIBRARY_PATH=[/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/lib/ollama] extra_envs=map[]
+time=2026-09-26T20:31:28.792+10:00 level=DEBUG source=runner.go:131 msg="evaluating which, if any, devices to filter out" initial_count=1
+time=2026-09-26T20:31:28.792+10:00 level=DEBUG source=runner.go:200 msg="adjusting filtering IDs" FilterID=0 new_ID=0
+time=2026-09-26T20:31:28.792+10:00 level=DEBUG source=runner.go:42 msg="GPU bootstrap discovery took" duration=160.358375ms
+time=2026-09-26T20:31:28.792+10:00 level=INFO source=types.go:32 msg="inference compute" id=0 filter_id=0 library=Metal compute=0.0 name=MTL0 description="Apple M3 Max" libdirs=ollama driver=0.0 pci_id="" type=iGPU total="107.5 GiB" available="107.5 GiB"
+time=2026-09-26T20:31:28.792+10:00 level=INFO source=routes.go:2040 msg="vram-based default context" total_vram="107.5 GiB" default_num_ctx=262144
+[GIN] 2026/09/26 - 20:31:28 | 200 |      49.416µs |       127.0.0.1 | GET      "/api/version"
+time=2026-09-26T20:31:29.128+10:00 level=DEBUG source=runner.go:42 msg="overall device VRAM discovery took" duration=458ns
+time=2026-09-26T20:31:29.128+10:00 level=DEBUG source=sched.go:290 msg="updating default concurrency" OLLAMA_MAX_LOADED_MODELS=3 gpu_count=1
+time=2026-09-26T20:31:29.128+10:00 level=DEBUG source=sched.go:299 msg="loading first model" model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb
+time=2026-09-26T20:31:29.182+10:00 level=INFO source=server.go:109 msg="using llama-server for model" model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb
+time=2026-09-26T20:31:29.183+10:00 level=INFO source=llama_server.go:442 msg="starting llama-server" cmd="/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/llama-server --model /private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb --port 61261 --host 127.0.0.1 --no-webui --offline -c 4096 -np 1 --log-verbosity 4 --no-log-prefix --no-log-timestamps --no-jinja --chat-template chatml --flash-attn auto -b 512 -ub 512 --context-shift --keep 4"
+time=2026-09-26T20:31:29.183+10:00 level=DEBUG source=llama_server.go:443 msg=subprocess PATH=/usr/bin:/bin:/usr/sbin:/sbin DYLD_LIBRARY_PATH=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt:/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/lib/ollama/mlx_metal_v4
+time=2026-09-26T20:31:29.186+10:00 level=INFO source=sched.go:613 msg="system memory" total="128.0 GiB" free="44.7 GiB" free_swap="0 B"
+time=2026-09-26T20:31:29.186+10:00 level=INFO source=sched.go:620 msg="gpu memory" id=0 library=Metal available="107.0 GiB" free="107.5 GiB" minimum="512.0 MiB" overhead="0 B"
+time=2026-09-26T20:31:29.186+10:00 level=INFO source=llama_server.go:1010 msg="loading model via llama-server" model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb
+time=2026-09-26T20:31:29.186+10:00 level=INFO source=llama_server.go:1257 msg="waiting for llama-server to start responding"
+time=2026-09-26T20:31:29.186+10:00 level=INFO source=llama_server.go:1312 msg="waiting for llama-server to become available" status="llm server not responding"
+cmn  common_param: common_params_print_info: build 1 (b4d6c7d8f) with AppleClang 21.0.0.21000101 for Darwin arm64
+cmn  common_param: common_params_print_info: verbosity = 4 (adjust with the `-lv N` CLI arg)
+cmn  common_param: device_info:
+cmn  common_param:   - MTL0    : Apple M3 Max (110100 MiB, 110100 MiB free)
+cmn  common_param:   - BLAS    : Accelerate (0 MiB, 0 MiB free)
+cmn  common_param:   - CPU     : Apple M3 Max (131072 MiB, 131072 MiB free)
+cmn  common_param: system_info: n_threads = 12 (n_threads_batch = 12) / 16 | MTL : EMBED_LIBRARY = 1 | CPU : NEON = 1 | ARM_FMA = 1 | FP16_VA = 1 | DOTPROD = 1 | LLAMAFILE = 1 | ACCELERATE = 1 | REPACK = 1 | 
+srv          init: using 15 threads for HTTP server
+srv          init: The UI is disabled
+srv          init: Use --ui/--no-ui (or deprecated --webui/--no-webui) to enable/disable
+srv  llama_server: -----------------
+srv  llama_server: CORS is set to allow all origins ('*') and no API key is set
+srv  llama_server: this can be a security risk (cross-origin attacks)
+srv  llama_server: more info: https://github.com/ggml-org/llama.cpp/pull/25655
+srv  llama_server: -----------------
+srv         start: binding port with default address family
+srv    load_model: loading model '/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb'
+srv    load_model: local path '/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb'
+cmn  common_init_: fitting params to device memory ...
+cmn  common_init_: (for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on)
+common_params_fit_impl: getting device memory data for initial parameters:
+handle_gptoss: detected Ollama-format gpt-oss GGUF; applying compatibility fixes
+time=2026-09-26T20:31:29.438+10:00 level=INFO source=llama_server.go:1312 msg="waiting for llama-server to become available" status="llm server loading model"
+common_memory_breakdown_print: | memory breakdown [MiB]  |  total     free     self   model   context   compute    unaccounted |
+common_memory_breakdown_print: |   - MTL0 (Apple M3 Max) | 110100 = 110100 + (12234 = 12036 +     114 +      83) +      -12233 |
+common_memory_breakdown_print: |   - Host                |                     1136 =  1104 +       0 +      32                |
+time=2026-09-26T20:31:29.640+10:00 level=DEBUG source=model_recommendations.go:234 msg="model recommendations refreshed" count=5
+time=2026-09-26T20:31:29.650+10:00 level=DEBUG source=model_recommendations.go:315 msg="persisted model recommendations snapshot" path=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/home/.ollama/cache/model-recommendations.json count=5
+time=2026-09-26T20:31:29.651+10:00 level=INFO source=model_recommendations.go:186 msg="model recommendations cache sleep scheduled" wait=4h6m14.899700594s consecutive_failures=0
+common_params_fit_impl: projected to use 12234 MiB of device memory vs. 110100 MiB of free device memory
+common_params_fit_impl: will leave 97865 >= 1024 MiB of free device memory, no changes needed
+common_fit_params: successfully fit params to free device memory
+common_fit_params: fitting params to free memory took 0.41 seconds
+handle_gptoss: detected Ollama-format gpt-oss GGUF; applying compatibility fixes
+llama_model_loader: loaded meta data with 48 key-value pairs and 459 tensors from /private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb (version GGUF V3 (latest))
+llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+llama_model_loader: - kv   0:                          general.file_type u32              = 4
+llama_model_loader: - kv   1:               general.quantization_version u32              = 2
+llama_model_loader: - kv   2:                gptoss.attention.head_count u32              = 64
+llama_model_loader: - kv   3:             gptoss.attention.head_count_kv u32              = 8
+llama_model_loader: - kv   4:                gptoss.attention.key_length u32              = 64
+llama_model_loader: - kv   5:    gptoss.attention.layer_norm_rms_epsilon f32              = 0.000010
+llama_model_loader: - kv   6:            gptoss.attention.sliding_window u32              = 128
+llama_model_loader: - kv   7:              gptoss.attention.value_length u32              = 64
+llama_model_loader: - kv   8:                         gptoss.block_count u32              = 24
+llama_model_loader: - kv   9:                      gptoss.context_length u32              = 131072
+llama_model_loader: - kv  10:                    gptoss.embedding_length u32              = 2880
+llama_model_loader: - kv  11:                        gptoss.expert_count u32              = 32
+llama_model_loader: - kv  12:                   gptoss.expert_used_count u32              = 4
+llama_model_loader: - kv  13:                 gptoss.feed_forward_length u32              = 2880
+llama_model_loader: - kv  14:                      gptoss.rope.freq_base f32              = 150000.000000
+llama_model_loader: - kv  15:                 gptoss.rope.scaling.factor f32              = 32.000000
+llama_model_loader: - kv  16: gptoss.rope.scaling.original_context_length u32              = 4096
+llama_model_loader: - kv  17:               tokenizer.ggml.add_bos_token bool             = false
+llama_model_loader: - kv  18:               tokenizer.ggml.add_eos_token bool             = false
+llama_model_loader: - kv  19:           tokenizer.ggml.add_padding_token bool             = false
+llama_model_loader: - kv  20:                tokenizer.ggml.bos_token_id u32              = 199998
+llama_model_loader: - kv  21:                tokenizer.ggml.eos_token_id u32              = 199999
+llama_model_loader: - kv  22:               tokenizer.ggml.eos_token_ids arr[i32,3]       = [199999, 200002, 200012]
+llama_model_loader: - kv  23:                      tokenizer.ggml.merges arr[str,446189]  = ["Ġ Ġ", "Ġ ĠĠĠ", "ĠĠ ĠĠ", "...
+llama_model_loader: - kv  24:                       tokenizer.ggml.model str              = gpt2
+llama_model_loader: - kv  25:            tokenizer.ggml.padding_token_id u32              = 199999
+llama_model_loader: - kv  26:                      tokenizer.ggml.scores arr[f32,201088]  = [0.000000, 1.000000, 2.000000, 3.0000...
+llama_model_loader: - kv  27:                  tokenizer.ggml.token_type arr[i32,201088]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+llama_model_loader: - kv  28:                      tokenizer.ggml.tokens arr[str,201088]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+llama_model_loader: - kv  29:                       general.architecture str              = gpt-oss
+llama_model_loader: - kv  30:               gpt-oss.attention.head_count u32              = 64
+llama_model_loader: - kv  31:            gpt-oss.attention.head_count_kv u32              = 8
+llama_model_loader: - kv  32:               gpt-oss.attention.key_length u32              = 64
+llama_model_loader: - kv  33:   gpt-oss.attention.layer_norm_rms_epsilon f32              = 0.000010
+llama_model_loader: - kv  34:           gpt-oss.attention.sliding_window u32              = 128
+llama_model_loader: - kv  35:             gpt-oss.attention.value_length u32              = 64
+llama_model_loader: - kv  36:                        gpt-oss.block_count u32              = 24
+llama_model_loader: - kv  37:                     gpt-oss.context_length u32              = 131072
+llama_model_loader: - kv  38:                   gpt-oss.embedding_length u32              = 2880
+llama_model_loader: - kv  39:                       gpt-oss.expert_count u32              = 32
+llama_model_loader: - kv  40:                  gpt-oss.expert_used_count u32              = 4
+llama_model_loader: - kv  41:                gpt-oss.feed_forward_length u32              = 2880
+llama_model_loader: - kv  42:                     gpt-oss.rope.freq_base f32              = 150000.000000
+llama_model_loader: - kv  43:                gpt-oss.rope.scaling.factor f32              = 32.000000
+llama_model_loader: - kv  44: gpt-oss.rope.scaling.original_context_length u32              = 4096
+llama_model_loader: - kv  45:         gpt-oss.expert_feed_forward_length u32              = 2880
+llama_model_loader: - kv  46:                  gpt-oss.rope.scaling.type str              = yarn
+llama_model_loader: - kv  47:                         tokenizer.ggml.pre str              = gpt-4o
+llama_model_loader: - type  f32:  289 tensors
+llama_model_loader: - type bf16:   98 tensors
+llama_model_loader: - type mxfp4:   72 tensors
+print_info: file format = GGUF V3 (latest)
+print_info: file type   = unknown, may not work
+print_info: file size   = 12.83 GiB (5.27 BPW) 
+llama_prepare_model_devices: using device MTL0 (Apple M3 Max) (unknown id) - 110100 MiB free
+load: 0 unused tokens
+load: setting token '<|message|>' (200008) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|constrain|>' (200003) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|channel|>' (200005) attribute to USER_DEFINED (16), old attributes: 8
+load: setting token '<|start|>' (200006) attribute to USER_DEFINED (16), old attributes: 8
+load: printing all EOG tokens:
+load:   - 199999 ('<|endoftext|>')
+load:   - 200002 ('<|return|>')
+load:   - 200007 ('<|end|>')
+load:   - 200012 ('<|call|>')
+load: special_eog_ids contains both '<|return|>' and '<|call|>', or '<|calls|>' and '<|flush|>' tokens, removing '<|end|>' token from EOG list
+load: special tokens cache size = 1090
+load: token to piece cache size = 1.3413 MB
+print_info: arch                  = gpt-oss
+print_info: vocab_only            = 0
+print_info: no_alloc              = 0
+print_info: n_ctx_train           = 131072
+print_info: n_embd_inp            = 2880
+print_info: n_embd                = 2880
+print_info: n_embd_out            = 2880
+print_info: n_layer               = 24
+print_info: n_layer_all           = 24
+print_info: n_head                = 64
+print_info: n_head_kv             = 8
+print_info: n_rot                 = 64
+print_info: n_swa                 = 128
+print_info: is_swa_any            = 1
+print_info: n_embd_head_k         = 64
+print_info: n_embd_head_v         = 64
+print_info: n_gqa                 = 8
+print_info: n_embd_k_gqa          = 512
+print_info: n_embd_v_gqa          = 512
+print_info: f_norm_eps            = 0.0e+00
+print_info: f_norm_rms_eps        = 1.0e-05
+print_info: f_clamp_kqv           = 0.0e+00
+print_info: f_max_alibi_bias      = 0.0e+00
+print_info: f_logit_scale         = 0.0e+00
+print_info: f_attn_scale          = 0.0e+00
+print_info: f_attn_value_scale    = 0.0000
+print_info: n_ff                  = 2880
+print_info: n_expert              = 32
+print_info: n_expert_used         = 4
+print_info: n_expert_groups       = 0
+print_info: n_group_used          = 0
+print_info: causal attn           = 1
+print_info: pooling type          = -1
+print_info: rope type             = 2
+print_info: rope scaling          = yarn
+print_info: freq_base_train       = 150000.0
+print_info: freq_scale_train      = 0.03125
+print_info: freq_base_swa         = 150000.0
+print_info: freq_scale_swa        = 0.03125
+print_info: n_embd_head_k_swa     = 64
+print_info: n_embd_head_v_swa     = 64
+print_info: n_rot_swa             = 64
+print_info: n_ctx_orig_yarn       = 4096
+print_info: rope_yarn_log_mul     = 0.0000
+print_info: rope_finetuned        = unknown
+print_info: model type            = 20B
+print_info: model params          = 20.91 B
+print_info: general.name          = n/a
+print_info: n_ff_exp              = 2880
+print_info: vocab type            = BPE
+print_info: n_vocab               = 201088
+print_info: n_merges              = 446189
+print_info: BOS token             = 199998 '<|startoftext|>'
+print_info: EOS token             = 199999 '<|endoftext|>'
+print_info: EOT token             = 200007 '<|end|>'
+print_info: PAD token             = 199999 '<|endoftext|>'
+print_info: LF token              = 198 'Ċ'
+print_info: EOG token             = 199999 '<|endoftext|>'
+print_info: EOG token             = 200002 '<|return|>'
+print_info: EOG token             = 200012 '<|call|>'
+print_info: max token length      = 256
+load_tensors: loading model tensors, this can take a while... (mmap = true, direct_io = false)
+load_tensors: offloading output layer to GPU
+load_tensors: offloading 23 repeating layers to GPU
+load_tensors: offloaded 25/25 layers to GPU
+load_tensors:   CPU_Mapped model buffer size =  1104.61 MiB
+load_tensors:  MTL0_Mapped model buffer size = 12036.67 MiB
+cmn  common_init_: added <|endoftext|> logit bias = -inf
+cmn  common_init_: added <|return|> logit bias = -inf
+cmn  common_init_: added <|call|> logit bias = -inf
+llama_context: constructing llama_context
+llama_context: n_seq_max     = 1
+llama_context: n_ctx         = 4096
+llama_context: n_ctx_seq     = 4096
+llama_context: n_batch       = 512
+llama_context: n_ubatch      = 512
+llama_context: causal_attn   = 1
+llama_context: flash_attn    = auto
+llama_context: kv_unified    = false
+llama_context: freq_base     = 150000.0
+llama_context: freq_scale    = 0.03125
+llama_context: n_rs_seq      = 0
+llama_context: n_outputs_max = 1
+llama_context: n_ctx_seq (4096) < n_ctx_train (131072) -- the full capacity of the model will not be utilized
+ggml_metal_init: allocating
+ggml_metal_init: found device: Apple M3 Max
+ggml_metal_init: picking default device: Apple M3 Max
+ggml_metal_init: use fusion         = true
+ggml_metal_init: use concurrency    = true
+ggml_metal_init: use graph optimize = true
+llama_context:        CPU  output buffer size =     0.77 MiB
+llama_kv_cache_iswa: creating non-SWA KV cache, size = 4096 cells
+llama_kv_cache:       MTL0 KV buffer size =    96.00 MiB
+llama_kv_cache: size =   96.00 MiB (  4096 cells,  12 layers,  1/1 seqs), K (f16):   48.00 MiB, V (f16):   48.00 MiB
+llama_kv_cache: attn_rot_k = 0, n_embd_head_k_all = 64
+llama_kv_cache: attn_rot_v = 0, n_embd_head_k_all = 64
+llama_kv_cache_iswa: creating     SWA KV cache, size = 768 cells
+llama_kv_cache:       MTL0 KV buffer size =    18.00 MiB
+llama_kv_cache: size =   18.00 MiB (   768 cells,  12 layers,  1/1 seqs), K (f16):    9.00 MiB, V (f16):    9.00 MiB
+llama_kv_cache: attn_rot_k = 0, n_embd_head_k_all = 64
+llama_kv_cache: attn_rot_v = 0, n_embd_head_k_all = 64
+sched_reserve: reserving ...
+resolve_fused_ops: Flash Attention enabled
+resolve_fused_ops: resolving fused Gated Delta Net support:
+resolve_fused_ops: fused Gated Delta Net (autoregressive) enabled
+resolve_fused_ops: fused Gated Delta Net (chunked) enabled
+resolve_fused_ops: resolving fused Lightning Indexer support:
+resolve_fused_ops: Lightning Indexer enabled
+resolve_fused_ops: resolving fused DeepSeek V4 HC support:
+resolve_fused_ops: fused DeepSeek V4 HC pre enabled
+resolve_fused_ops: fused DeepSeek V4 HC comb enabled
+resolve_fused_ops: fused DeepSeek V4 HC post enabled
+sched_reserve:       MTL0 compute buffer size =    83.77 MiB
+sched_reserve:        CPU compute buffer size =    16.02 MiB
+sched_reserve: graph nodes  = 1350
+sched_reserve: graph splits = 2
+sched_reserve: reserve took 7.68 ms, sched copies = 1
+cmn  common_init_: KV cache shifting is not supported for this context, disabling KV cache shifting
+cmn  common_init_: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+srv    load_model: initializing, n_slots = 1, n_ctx_slot = 4096, kv_unified = 'false'
+spec common_specu: no implementations specified for speculative decoding
+slot   load_model: id  0 | task -1 | new slot, n_ctx = 4096
+srv    load_model: prompt cache is enabled, size limit: 8192 MiB
+srv    load_model: use `--cache-ram 0` to disable the prompt cache
+srv    load_model: for more info see https://github.com/ggml-org/llama.cpp/pull/16391
+srv    load_model: context checkpoints enabled, max = 32, min spacing = 8192
+srv          init: idle slots will be saved to prompt cache upon starting a new task
+srv          init: init: chat template, example_format: '<|im_start|>system
+You are a helpful assistant<|im_end|>
+<|im_start|>user
+Hello<|im_end|>
+<|im_start|>assistant
+Hi there<|im_end|>
+<|im_start|>user
+How are you?<|im_end|>
+<|im_start|>assistant
+'
+srv          init: init: chat template, thinking = 0
+srv  llama_server: model loaded
+srv  llama_server: listening on http://127.0.0.1:61261
+srv  update_slots: all slots are idle
+time=2026-09-26T20:31:36.231+10:00 level=INFO source=llama_server.go:1324 msg="llama-server started in 7.05 seconds"
+time=2026-09-26T20:31:36.273+10:00 level=INFO source=images.go:373 msg="template selection" model=registry.ollama.ai/library/gpt-oss:20b selected=harmony renderer="" parser="" go_template="[completion tools thinking]" chat_template=null harmony="[completion tools thinking]" renderer_parser=null
+time=2026-09-26T20:31:36.273+10:00 level=INFO source=sched.go:728 msg="loaded runners" count=1
+time=2026-09-26T20:31:36.273+10:00 level=INFO source=llama_server.go:1257 msg="waiting for llama-server to start responding"
+time=2026-09-26T20:31:36.273+10:00 level=INFO source=llama_server.go:1324 msg="llama-server started in 7.09 seconds"
+time=2026-09-26T20:31:36.273+10:00 level=DEBUG source=sched.go:740 msg="finished setting up" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096
+time=2026-09-26T20:31:36.275+10:00 level=DEBUG source=llama_server.go:1491 msg="llama-server completion request" media=0 prompt_len=490
+srv  server_strea: conv_id= (empty=1)
+slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = -1
+srv  get_availabl: updating prompt cache
+srv          load:  - looking for better prompt, base f_keep = -1.000, sim = 0.000
+srv        update:  - cache state: 0 prompts, 0.000 MiB (limits: 8192.000 MiB, 4096 tokens, 8589934592 est)
+srv  get_availabl: prompt cache update took 0.01 ms
+slot launch_slot_: id  0 | task -1 | sampler chain: logits -> penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> ?temp-ext -> dist 
+slot launch_slot_: id  0 | task -1 | sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.100, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 4096
+	top_k = 40, top_p = 0.900, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 1.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+slot launch_slot_: id  0 | task 0 | processing task, is_child = 0
+slot   operator(): id  0 | task 0 | new prompt, n_ctx_slot = 4096, n_keep = 4, task.n_tokens = 107
+slot   operator(): id  0 | task 0 | cached n_tokens = 0, memory_seq_rm [0, end)
+slot   operator(): id  0 | task 0 | cached n_tokens = 103, memory_seq_rm [103, end)
+slot init_sampler: id  0 | task 0 | init sampler, took 0.01 ms, tokens: text = 107, total = 107
+slot create_check: id  0 | task 0 | created context checkpoint 1 of 32 (pos_min = 0, pos_max = 102, n_tokens = 103, size = 2.416 MiB)
+slot print_timing: id  0 | task 0 | prompt eval time =     167.54 ms /   107 tokens (    1.57 ms per token,   638.65 tokens per second)
+slot print_timing: id  0 | task 0 |        eval time =       0.00 ms /     1 tokens (    0.00 ms per token, 1000000.00 tokens per second)
+slot print_timing: id  0 | task 0 |       total time =     167.54 ms /   108 tokens
+slot print_timing: id  0 | task 0 |    graphs reused =          1
+slot      release: id  0 | task 0 | stop processing: n_tokens = 107, truncated = 0
+srv  update_slots: all slots are idle
+[GIN] 2026/09/26 - 20:31:36 | 200 |  7.560568459s |       127.0.0.1 | POST     "/api/chat"
+time=2026-09-26T20:31:36.444+10:00 level=DEBUG source=sched.go:748 msg="context for request finished"
+time=2026-09-26T20:31:36.444+10:00 level=DEBUG source=sched.go:394 msg="runner with non-zero duration has gone idle, adding timer" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 duration=10m0s
+time=2026-09-26T20:31:36.444+10:00 level=DEBUG source=sched.go:412 msg="after processing request finished event" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 refCount=0
+time=2026-09-26T20:31:36.668+10:00 level=DEBUG source=sched.go:1382 msg="evaluating already loaded" model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb
+[GIN] 2026/09/26 - 20:31:36 | 200 |  225.230125ms |       127.0.0.1 | POST     "/api/chat"
+time=2026-09-26T20:31:36.670+10:00 level=DEBUG source=sched.go:489 msg="context for request finished" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096
+time=2026-09-26T20:31:36.670+10:00 level=DEBUG source=sched.go:394 msg="runner with non-zero duration has gone idle, adding timer" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 duration=10m0s
+time=2026-09-26T20:31:36.670+10:00 level=DEBUG source=sched.go:412 msg="after processing request finished event" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 refCount=0
+time=2026-09-26T20:31:36.896+10:00 level=DEBUG source=sched.go:1382 msg="evaluating already loaded" model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb
+time=2026-09-26T20:31:36.899+10:00 level=DEBUG source=llama_server.go:1491 msg="llama-server completion request" media=0 prompt_len=1292
+srv  server_strea: conv_id= (empty=1)
+slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, sim_best = 0.373 (> 0.100 thold), f_keep = 0.907
+slot launch_slot_: id  0 | task -1 | sampler chain: logits -> penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> ?temp-ext -> dist 
+slot launch_slot_: id  0 | task -1 | sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.100, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 4096
+	top_k = 40, top_p = 0.900, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 1.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+slot launch_slot_: id  0 | task 3 | processing task, is_child = 0
+slot   operator(): id  0 | task 3 | new prompt, n_ctx_slot = 4096, n_keep = 4, task.n_tokens = 260
+slot   operator(): id  0 | task 3 | checking checkpoint with [0, 102] against 0...
+slot   operator(): id  0 | task 3 | forcing full prompt re-processing due to lack of cache data (likely due to SWA or hybrid/recurrent memory, see https://github.com/ggml-org/llama.cpp/pull/13194#issuecomment-2868343055)
+slot   operator(): id  0 | task 3 | erased invalidated context checkpoint (pos_min = 0, pos_max = 102, n_tokens = 103, n_swa = 128, pos_next = 0, size = 2.416 MiB)
+slot   operator(): id  0 | task 3 | cached n_tokens = 0, memory_seq_rm [0, end)
+slot   operator(): id  0 | task 3 | cached n_tokens = 256, memory_seq_rm [256, end)
+slot init_sampler: id  0 | task 3 | init sampler, took 0.03 ms, tokens: text = 260, total = 260
+slot create_check: id  0 | task 3 | created context checkpoint 1 of 32 (pos_min = 0, pos_max = 255, n_tokens = 256, size = 3.002 MiB)
+slot print_timing: id  0 | task 3 | prompt eval time =     244.62 ms /   260 tokens (    0.94 ms per token,  1062.85 tokens per second)
+slot print_timing: id  0 | task 3 |        eval time =       0.00 ms /     1 tokens (    0.00 ms per token, 1000000.00 tokens per second)
+slot print_timing: id  0 | task 3 |       total time =     244.63 ms /   261 tokens
+slot print_timing: id  0 | task 3 |    graphs reused =          1
+slot      release: id  0 | task 3 | stop processing: n_tokens = 260, truncated = 0
+srv  update_slots: all slots are idle
+[GIN] 2026/09/26 - 20:31:37 | 200 |  472.435541ms |       127.0.0.1 | POST     "/api/chat"
+time=2026-09-26T20:31:37.147+10:00 level=DEBUG source=sched.go:489 msg="context for request finished" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096
+time=2026-09-26T20:31:37.147+10:00 level=DEBUG source=sched.go:394 msg="runner with non-zero duration has gone idle, adding timer" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 duration=10m0s
+time=2026-09-26T20:31:37.147+10:00 level=DEBUG source=sched.go:412 msg="after processing request finished event" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 refCount=0
+time=2026-09-26T20:31:37.371+10:00 level=DEBUG source=sched.go:1382 msg="evaluating already loaded" model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb
+[GIN] 2026/09/26 - 20:31:37 | 200 |  226.086708ms |       127.0.0.1 | POST     "/api/chat"
+time=2026-09-26T20:31:37.374+10:00 level=DEBUG source=sched.go:489 msg="context for request finished" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096
+time=2026-09-26T20:31:37.374+10:00 level=DEBUG source=sched.go:394 msg="runner with non-zero duration has gone idle, adding timer" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 duration=10m0s
+time=2026-09-26T20:31:37.374+10:00 level=DEBUG source=sched.go:412 msg="after processing request finished event" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 refCount=0
+time=2026-09-26T20:31:37.611+10:00 level=DEBUG source=sched.go:1382 msg="evaluating already loaded" model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb
+time=2026-09-26T20:31:37.614+10:00 level=DEBUG source=llama_server.go:1491 msg="llama-server completion request" media=0 prompt_len=799
+srv  server_strea: conv_id= (empty=1)
+slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, sim_best = 0.290 (> 0.100 thold), f_keep = 0.208
+srv  get_availabl: updating prompt cache
+srv   prompt_save:  - saving prompt with length 260, total state size = 9.099 MiB (draft: 0.000 MiB)
+srv          load:  - looking for better prompt, base f_keep = 0.208, sim = 0.290
+srv        update:  - cache state: 1 prompts, 12.101 MiB (limits: 8192.000 MiB, 4096 tokens, 176018 est)
+srv        update:    - prompt 0xaa9048150:     260 tokens, checkpoints:  1,    12.101 MiB
+srv  get_availabl: prompt cache update took 0.78 ms
+slot launch_slot_: id  0 | task -1 | sampler chain: logits -> penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> ?temp-ext -> dist 
+slot launch_slot_: id  0 | task -1 | sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.100, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 4096
+	top_k = 40, top_p = 0.900, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 1.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+slot launch_slot_: id  0 | task 6 | processing task, is_child = 0
+slot   operator(): id  0 | task 6 | new prompt, n_ctx_slot = 4096, n_keep = 4, task.n_tokens = 186
+slot   operator(): id  0 | task 6 | checking checkpoint with [0, 255] against 0...
+slot   operator(): id  0 | task 6 | forcing full prompt re-processing due to lack of cache data (likely due to SWA or hybrid/recurrent memory, see https://github.com/ggml-org/llama.cpp/pull/13194#issuecomment-2868343055)
+slot   operator(): id  0 | task 6 | erased invalidated context checkpoint (pos_min = 0, pos_max = 255, n_tokens = 256, n_swa = 128, pos_next = 0, size = 3.002 MiB)
+slot   operator(): id  0 | task 6 | cached n_tokens = 0, memory_seq_rm [0, end)
+slot   operator(): id  0 | task 6 | cached n_tokens = 182, memory_seq_rm [182, end)
+slot init_sampler: id  0 | task 6 | init sampler, took 0.03 ms, tokens: text = 186, total = 186
+slot create_check: id  0 | task 6 | created context checkpoint 1 of 32 (pos_min = 0, pos_max = 181, n_tokens = 182, size = 3.002 MiB)
+slot print_timing: id  0 | task 6 | prompt eval time =     203.60 ms /   186 tokens (    1.09 ms per token,   913.56 tokens per second)
+slot print_timing: id  0 | task 6 |        eval time =       0.00 ms /     1 tokens (    0.00 ms per token, 1000000.00 tokens per second)
+slot print_timing: id  0 | task 6 |       total time =     203.60 ms /   187 tokens
+slot print_timing: id  0 | task 6 |    graphs reused =          1
+slot      release: id  0 | task 6 | stop processing: n_tokens = 186, truncated = 0
+srv  update_slots: all slots are idle
+[GIN] 2026/09/26 - 20:31:37 | 200 |  440.215166ms |       127.0.0.1 | POST     "/api/chat"
+time=2026-09-26T20:31:37.821+10:00 level=DEBUG source=sched.go:489 msg="context for request finished" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096
+time=2026-09-26T20:31:37.821+10:00 level=DEBUG source=sched.go:394 msg="runner with non-zero duration has gone idle, adding timer" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 duration=10m0s
+time=2026-09-26T20:31:37.821+10:00 level=DEBUG source=sched.go:412 msg="after processing request finished event" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 refCount=0
+time=2026-09-26T20:31:38.041+10:00 level=DEBUG source=sched.go:1382 msg="evaluating already loaded" model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb
+[GIN] 2026/09/26 - 20:31:38 | 200 |  222.704125ms |       127.0.0.1 | POST     "/api/chat"
+time=2026-09-26T20:31:38.044+10:00 level=DEBUG source=sched.go:489 msg="context for request finished" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096
+time=2026-09-26T20:31:38.044+10:00 level=DEBUG source=sched.go:394 msg="runner with non-zero duration has gone idle, adding timer" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 duration=10m0s
+time=2026-09-26T20:31:38.044+10:00 level=DEBUG source=sched.go:412 msg="after processing request finished event" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 refCount=0
+time=2026-09-26T20:31:38.275+10:00 level=DEBUG source=sched.go:1382 msg="evaluating already loaded" model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb
+time=2026-09-26T20:31:38.278+10:00 level=DEBUG source=llama_server.go:1491 msg="llama-server completion request" media=0 prompt_len=1013
+srv  server_strea: conv_id= (empty=1)
+slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, sim_best = 0.758 (> 0.100 thold), f_keep = 0.941
+slot launch_slot_: id  0 | task -1 | sampler chain: logits -> penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> ?temp-ext -> dist 
+slot launch_slot_: id  0 | task -1 | sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.100, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 4096
+	top_k = 40, top_p = 0.900, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 1.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+slot launch_slot_: id  0 | task 9 | processing task, is_child = 0
+slot   operator(): id  0 | task 9 | new prompt, n_ctx_slot = 4096, n_keep = 4, task.n_tokens = 231
+slot   operator(): id  0 | task 9 | erased invalidated context checkpoint (pos_min = 0, pos_max = 181, n_tokens = 182, n_swa = 128, pos_next = 175, size = 3.002 MiB)
+slot   operator(): id  0 | task 9 | cached n_tokens = 175, memory_seq_rm [175, end)
+slot create_check: id  0 | task 9 | created context checkpoint 1 of 32 (pos_min = 0, pos_max = 174, n_tokens = 175, size = 3.002 MiB)
+slot   operator(): id  0 | task 9 | cached n_tokens = 227, memory_seq_rm [227, end)
+slot init_sampler: id  0 | task 9 | init sampler, took 0.03 ms, tokens: text = 231, total = 231
+slot create_check: id  0 | task 9 | created context checkpoint 2 of 32 (pos_min = 0, pos_max = 226, n_tokens = 227, size = 3.002 MiB)
+slot print_timing: id  0 | task 9 | prompt eval time =     132.89 ms /    56 tokens (    2.37 ms per token,   421.40 tokens per second)
+slot print_timing: id  0 | task 9 |        eval time =       0.00 ms /     1 tokens (    0.00 ms per token, 1000000.00 tokens per second)
+slot print_timing: id  0 | task 9 |       total time =     132.89 ms /    57 tokens
+slot print_timing: id  0 | task 9 |    graphs reused =          1
+slot      release: id  0 | task 9 | stop processing: n_tokens = 231, truncated = 0
+srv  update_slots: all slots are idle
+[GIN] 2026/09/26 - 20:31:38 | 200 |  359.898666ms |       127.0.0.1 | POST     "/api/chat"
+time=2026-09-26T20:31:38.414+10:00 level=DEBUG source=sched.go:489 msg="context for request finished" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096
+time=2026-09-26T20:31:38.414+10:00 level=DEBUG source=sched.go:394 msg="runner with non-zero duration has gone idle, adding timer" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 duration=10m0s
+time=2026-09-26T20:31:38.414+10:00 level=DEBUG source=sched.go:412 msg="after processing request finished event" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 refCount=0
+time=2026-09-26T20:31:38.636+10:00 level=DEBUG source=sched.go:1382 msg="evaluating already loaded" model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb
+[GIN] 2026/09/26 - 20:31:38 | 200 |  224.909375ms |       127.0.0.1 | POST     "/api/chat"
+time=2026-09-26T20:31:38.640+10:00 level=DEBUG source=sched.go:489 msg="context for request finished" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096
+time=2026-09-26T20:31:38.640+10:00 level=DEBUG source=sched.go:394 msg="runner with non-zero duration has gone idle, adding timer" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 duration=10m0s
+time=2026-09-26T20:31:38.640+10:00 level=DEBUG source=sched.go:412 msg="after processing request finished event" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 refCount=0
+time=2026-09-26T20:31:38.870+10:00 level=DEBUG source=sched.go:1382 msg="evaluating already loaded" model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb
+time=2026-09-26T20:31:38.874+10:00 level=DEBUG source=llama_server.go:1491 msg="llama-server completion request" media=0 prompt_len=532
+srv  server_strea: conv_id= (empty=1)
+slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, sim_best = 0.432 (> 0.100 thold), f_keep = 0.234
+srv  get_availabl: updating prompt cache
+srv   prompt_save:  - saving prompt with length 231, total state size = 8.419 MiB (draft: 0.000 MiB)
+srv          load:  - looking for better prompt, base f_keep = 0.234, sim = 0.432
+srv          load:  - found better prompt with f_keep = 0.373, sim = 0.776
+srv        update:  - cache state: 1 prompts, 14.422 MiB (limits: 8192.000 MiB, 4096 tokens, 131210 est)
+srv        update:    - prompt 0xaa90481f0:     231 tokens, checkpoints:  2,    14.422 MiB
+srv  get_availabl: prompt cache update took 1.48 ms
+slot launch_slot_: id  0 | task -1 | sampler chain: logits -> penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> ?temp-ext -> dist 
+slot launch_slot_: id  0 | task -1 | sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.100, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 4096
+	top_k = 40, top_p = 0.900, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 1.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+slot launch_slot_: id  0 | task 12 | processing task, is_child = 0
+slot   operator(): id  0 | task 12 | new prompt, n_ctx_slot = 4096, n_keep = 4, task.n_tokens = 125
+slot   operator(): id  0 | task 12 | checking checkpoint with [0, 255] against 0...
+slot   operator(): id  0 | task 12 | forcing full prompt re-processing due to lack of cache data (likely due to SWA or hybrid/recurrent memory, see https://github.com/ggml-org/llama.cpp/pull/13194#issuecomment-2868343055)
+slot   operator(): id  0 | task 12 | erased invalidated context checkpoint (pos_min = 0, pos_max = 255, n_tokens = 256, n_swa = 128, pos_next = 0, size = 3.002 MiB)
+slot   operator(): id  0 | task 12 | cached n_tokens = 0, memory_seq_rm [0, end)
+slot   operator(): id  0 | task 12 | cached n_tokens = 121, memory_seq_rm [121, end)
+slot init_sampler: id  0 | task 12 | init sampler, took 0.02 ms, tokens: text = 125, total = 125
+slot create_check: id  0 | task 12 | created context checkpoint 1 of 32 (pos_min = 0, pos_max = 120, n_tokens = 121, size = 2.838 MiB)
+slot print_timing: id  0 | task 12 | prompt eval time =     172.80 ms /   125 tokens (    1.38 ms per token,   723.37 tokens per second)
+slot print_timing: id  0 | task 12 |        eval time =       0.00 ms /     1 tokens (    0.00 ms per token, 1000000.00 tokens per second)
+slot print_timing: id  0 | task 12 |       total time =     172.80 ms /   126 tokens
+slot print_timing: id  0 | task 12 |    graphs reused =          1
+slot      release: id  0 | task 12 | stop processing: n_tokens = 125, truncated = 0
+srv  update_slots: all slots are idle
+[GIN] 2026/09/26 - 20:31:39 | 200 |  400.659042ms |       127.0.0.1 | POST     "/api/chat"
+time=2026-09-26T20:31:39.050+10:00 level=DEBUG source=sched.go:489 msg="context for request finished" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096
+time=2026-09-26T20:31:39.050+10:00 level=DEBUG source=sched.go:394 msg="runner with non-zero duration has gone idle, adding timer" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 duration=10m0s
+time=2026-09-26T20:31:39.050+10:00 level=DEBUG source=sched.go:412 msg="after processing request finished event" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 refCount=0
+time=2026-09-26T20:31:39.270+10:00 level=DEBUG source=sched.go:1382 msg="evaluating already loaded" model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb
+[GIN] 2026/09/26 - 20:31:39 | 200 |   221.19675ms |       127.0.0.1 | POST     "/api/chat"
+time=2026-09-26T20:31:39.273+10:00 level=DEBUG source=sched.go:489 msg="context for request finished" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096
+time=2026-09-26T20:31:39.273+10:00 level=DEBUG source=sched.go:394 msg="runner with non-zero duration has gone idle, adding timer" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 duration=10m0s
+time=2026-09-26T20:31:39.273+10:00 level=DEBUG source=sched.go:412 msg="after processing request finished event" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 refCount=0
+time=2026-09-26T20:31:39.504+10:00 level=DEBUG source=sched.go:1382 msg="evaluating already loaded" model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb
+time=2026-09-26T20:31:39.507+10:00 level=DEBUG source=llama_server.go:1491 msg="llama-server completion request" media=0 prompt_len=586
+srv  server_strea: conv_id= (empty=1)
+slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, sim_best = 0.291 (> 0.100 thold), f_keep = 0.296
+srv  get_availabl: updating prompt cache
+srv   prompt_save:  - saving prompt with length 125, total state size = 5.863 MiB (draft: 0.000 MiB)
+srv          load:  - looking for better prompt, base f_keep = 0.296, sim = 0.291
+srv        update:  - cache state: 2 prompts, 23.123 MiB (limits: 8192.000 MiB, 4096 tokens, 126124 est)
+srv        update:    - prompt 0xaa90481f0:     231 tokens, checkpoints:  2,    14.422 MiB
+srv        update:    - prompt 0xaa9048150:     125 tokens, checkpoints:  1,     8.700 MiB
+srv  get_availabl: prompt cache update took 0.74 ms
+slot launch_slot_: id  0 | task -1 | sampler chain: logits -> penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> ?temp-ext -> dist 
+slot launch_slot_: id  0 | task -1 | sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.100, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 4096
+	top_k = 40, top_p = 0.900, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 1.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+slot launch_slot_: id  0 | task 15 | processing task, is_child = 0
+slot   operator(): id  0 | task 15 | new prompt, n_ctx_slot = 4096, n_keep = 4, task.n_tokens = 127
+slot   operator(): id  0 | task 15 | checking checkpoint with [0, 120] against 0...
+slot   operator(): id  0 | task 15 | forcing full prompt re-processing due to lack of cache data (likely due to SWA or hybrid/recurrent memory, see https://github.com/ggml-org/llama.cpp/pull/13194#issuecomment-2868343055)
+slot   operator(): id  0 | task 15 | erased invalidated context checkpoint (pos_min = 0, pos_max = 120, n_tokens = 121, n_swa = 128, pos_next = 0, size = 2.838 MiB)
+slot   operator(): id  0 | task 15 | cached n_tokens = 0, memory_seq_rm [0, end)
+slot   operator(): id  0 | task 15 | cached n_tokens = 123, memory_seq_rm [123, end)
+slot init_sampler: id  0 | task 15 | init sampler, took 0.02 ms, tokens: text = 127, total = 127
+slot create_check: id  0 | task 15 | created context checkpoint 1 of 32 (pos_min = 0, pos_max = 122, n_tokens = 123, size = 2.885 MiB)
+slot print_timing: id  0 | task 15 | prompt eval time =     175.71 ms /   127 tokens (    1.38 ms per token,   722.80 tokens per second)
+slot print_timing: id  0 | task 15 |        eval time =       0.00 ms /     1 tokens (    0.00 ms per token, 1000000.00 tokens per second)
+slot print_timing: id  0 | task 15 |       total time =     175.71 ms /   128 tokens
+slot print_timing: id  0 | task 15 |    graphs reused =          1
+slot      release: id  0 | task 15 | stop processing: n_tokens = 127, truncated = 0
+srv  update_slots: all slots are idle
+[GIN] 2026/09/26 - 20:31:39 | 200 |  403.619791ms |       127.0.0.1 | POST     "/api/chat"
+time=2026-09-26T20:31:39.686+10:00 level=DEBUG source=sched.go:489 msg="context for request finished" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096
+time=2026-09-26T20:31:39.686+10:00 level=DEBUG source=sched.go:394 msg="runner with non-zero duration has gone idle, adding timer" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 duration=10m0s
+time=2026-09-26T20:31:39.686+10:00 level=DEBUG source=sched.go:412 msg="after processing request finished event" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 refCount=0
+time=2026-09-26T20:31:39.911+10:00 level=DEBUG source=sched.go:1382 msg="evaluating already loaded" model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb
+[GIN] 2026/09/26 - 20:31:39 | 200 |  226.394417ms |       127.0.0.1 | POST     "/api/chat"
+time=2026-09-26T20:31:39.913+10:00 level=DEBUG source=sched.go:489 msg="context for request finished" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096
+time=2026-09-26T20:31:39.913+10:00 level=DEBUG source=sched.go:394 msg="runner with non-zero duration has gone idle, adding timer" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 duration=10m0s
+time=2026-09-26T20:31:39.913+10:00 level=DEBUG source=sched.go:412 msg="after processing request finished event" runner.name=registry.ollama.ai/library/gpt-oss:20b runner.inference="[{ID:0 Library:Metal}]" runner.size="11.9 GiB" runner.vram="11.9 GiB" runner.parallel=1 runner.pid=94155 runner.model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb runner.num_ctx=4096 refCount=0
+srv    operator(): operator(): cleaning up before exit...
+time=2026-09-26T20:31:39.925+10:00 level=DEBUG source=sched.go:372 msg="shutting down scheduler completed loop"
+time=2026-09-26T20:31:39.925+10:00 level=DEBUG source=sched.go:1707 msg="shutting down runner" model=/private/tmp/claude-501/-Users-krypto-GitHub/85797c3e-62d8-47f2-af7a-788e4d5ceccf/scratchpad/rt/models/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb
+time=2026-09-26T20:31:39.925+10:00 level=DEBUG source=llama_server.go:2514 msg="stopping llama-server" pid=94155
+time=2026-09-26T20:31:39.925+10:00 level=DEBUG source=llama_server.go:2519 msg="waiting for llama-server to exit" pid=94155
+time=2026-09-26T20:31:39.925+10:00 level=DEBUG source=sched.go:231 msg="shutting down scheduler pending loop"
+time=2026-09-26T20:31:39.997+10:00 level=DEBUG source=llama_server.go:2522 msg="llama-server stopped" pid=94155

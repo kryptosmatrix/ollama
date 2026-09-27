@@ -1,0 +1,234 @@
+[
+  {
+    "path": "native-source/common__chat.cpp__2510_2556.txt",
+    "bytes": 2054,
+    "excerpt_sha256": "765bfdfcea4f8988c0d088b159feb3346818b8910e13cc4869485eb86a7c80af",
+    "numbered_first": 2510,
+    "numbered_last": 2556,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/common__chat.cpp__2690_2738.txt",
+    "bytes": 2153,
+    "excerpt_sha256": "6bcc7c2354ed6c6880490ad60ea62aaadeccd5984af05596aeee03003c017e40",
+    "numbered_first": 2690,
+    "numbered_last": 2738,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/common__chat.h__239_273.txt",
+    "bytes": 1982,
+    "excerpt_sha256": "d84169088b0b57bad96d609ff6c4c7b5b299e028ca7eca687d23afc206f859a8",
+    "numbered_first": 239,
+    "numbered_last": 273,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/tools__server__README.md__650_696.txt",
+    "bytes": 1840,
+    "excerpt_sha256": "089f68734b08e21b7db9a7350d1873ef9247889544e03d1845e997b381d00a0a",
+    "numbered_first": 650,
+    "numbered_last": 696,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/tools__server__server-common.cpp__1110_1190.txt",
+    "bytes": 3919,
+    "excerpt_sha256": "cbdec98a969338e38130385925a34e272abdac87ae279f1cc3f318e5eb690513",
+    "numbered_first": 1110,
+    "numbered_last": 1190,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/tools__server__server-common.cpp__729_791.txt",
+    "bytes": 3281,
+    "excerpt_sha256": "cb8422cf5dff831f789e8f7183bdd55844aaaa6f13daaa0c3ceb8f27e6a1473c",
+    "numbered_first": 729,
+    "numbered_last": 791,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/tools__server__server-common.cpp__905_1115.txt",
+    "bytes": 11196,
+    "excerpt_sha256": "d4008a98f27730fa7725b1e384daeb06c88234d3efec2f03d491ff000f8910e7",
+    "numbered_first": 905,
+    "numbered_last": 1115,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/tools__server__server-context.cpp__1235_1273.txt",
+    "bytes": 1699,
+    "excerpt_sha256": "2a2f601b3c05b588dd0c503631147feeb29b0dbe39ed4b96257a48c5474eae82",
+    "numbered_first": 1235,
+    "numbered_last": 1273,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/tools__server__server-context.cpp__1828_1885.txt",
+    "bytes": 3065,
+    "excerpt_sha256": "219ad6bb78e6ec54d24bb5aed4a2d98f735fb87a5437a769ce8375943967cbf6",
+    "numbered_first": 1828,
+    "numbered_last": 1885,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/tools__server__server-context.cpp__2980_3125.txt",
+    "bytes": 7650,
+    "excerpt_sha256": "131c15c8158f304051b56aa307db551648cc1da3b2ed0e3b7c9b825d1bdbadca",
+    "numbered_first": 2980,
+    "numbered_last": 3125,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/tools__server__server-context.cpp__3119_3179.txt",
+    "bytes": 4061,
+    "excerpt_sha256": "9761e75df9bf36b7b8ef465daed66bc021fe03e496fba6ecdff76c714e9d9cf9",
+    "numbered_first": 3119,
+    "numbered_last": 3179,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/tools__server__server-context.cpp__400_442.txt",
+    "bytes": 1443,
+    "excerpt_sha256": "d4e69d196ea28d31c3d8dd9f08aad19f204d6cf9fde7a370c68396b693b39e51",
+    "numbered_first": 400,
+    "numbered_last": 442,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/tools__server__server-context.cpp__4020_4115.txt",
+    "bytes": 4335,
+    "excerpt_sha256": "a3f6db149ba962ec4d5297743b434830de71cbe38948cabd93b887d9d2b4153f",
+    "numbered_first": 4020,
+    "numbered_last": 4115,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/tools__server__server-context.cpp__4580_4660.txt",
+    "bytes": 4051,
+    "excerpt_sha256": "2e3afc9c89ae6a92a0fad801891ab9ff8356483e1fef26e7c2ac5b7b3145281e",
+    "numbered_first": 4580,
+    "numbered_last": 4660,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/tools__server__server-context.cpp__4680_4749.txt",
+    "bytes": 2924,
+    "excerpt_sha256": "11cb8f037171ffcbdd8592d4917e77043052d6203cf98bbfadb47bc6cceac8ef",
+    "numbered_first": 4680,
+    "numbered_last": 4749,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/tools__server__server-context.cpp__4809_4930.txt",
+    "bytes": 5286,
+    "excerpt_sha256": "be4484a82f78eac70b7a6890e08f94393dad7d4887a221d21612cc44928a3d4d",
+    "numbered_first": 4809,
+    "numbered_last": 4930,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/tools__server__server-context.cpp__5130_5255.txt",
+    "bytes": 5223,
+    "excerpt_sha256": "de6204ce340bd3060adc67cace2c66f40df083db88b1e61a09b49e4b20f8fbe6",
+    "numbered_first": 5130,
+    "numbered_last": 5255,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/tools__server__server-context.cpp__5290_5385.txt",
+    "bytes": 2184,
+    "excerpt_sha256": "bf500340106f9daae5792361b0647f2d9ff9fba605d645787667bd3c302228cc",
+    "numbered_first": 5290,
+    "numbered_last": 5344,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "native-source/tools__server__tests__unit__test_template.py__1_115.txt",
+    "bytes": 4413,
+    "excerpt_sha256": "e64645b4a4573c4d44640760fccbea5cbaf31fcf32b368829f56d42afe713eeb",
+    "numbered_first": 1,
+    "numbered_last": 106,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "budget-source/api__types.go__126_186.txt",
+    "bytes": 2756,
+    "excerpt_sha256": "338a7c3434ea12cdd052dc1a96be98e622cd6f7e5ac91ac3c32cd290d01e0bae",
+    "numbered_first": 126,
+    "numbered_last": 186,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "budget-source/llm__llama_server.go__1470_1550.txt",
+    "bytes": 2934,
+    "excerpt_sha256": "6afd276dbc9d349508a8fd53523b03e610fecde6fcd2ad4245d892905355170e",
+    "numbered_first": 1470,
+    "numbered_last": 1550,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "budget-source/llm__llama_server.go__1820_1880.txt",
+    "bytes": 2181,
+    "excerpt_sha256": "e81306e45537c11c8f1e8b8b51b38827e537c63bc9e6acdebc420205db930874",
+    "numbered_first": 1820,
+    "numbered_last": 1880,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "budget-source/llm__llama_server.go__2040_2145.txt",
+    "bytes": 3457,
+    "excerpt_sha256": "d8b96a871ef1cdf40a9623b9aba0b6a1a1d011b23a320ec5e471f7f6d29ab80b",
+    "numbered_first": 2040,
+    "numbered_last": 2145,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "budget-source/llm__llama_server.go__230_331.txt",
+    "bytes": 3427,
+    "excerpt_sha256": "26ec058cbebc98a494d057b23bc192af47a259f287566118e86ccfad0600538f",
+    "numbered_first": 230,
+    "numbered_last": 331,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "budget-source/llm__server.go__1_110.txt",
+    "bytes": 3728,
+    "excerpt_sha256": "414160fb601be32fc1795fe5b68bde7fe2341796fc924725b2d1051b1012eeb8",
+    "numbered_first": 1,
+    "numbered_last": 110,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "budget-source/server__prompt.go__1_220.txt",
+    "bytes": 5034,
+    "excerpt_sha256": "4b47f293ba59ff35364060fce03cf4dc2c110cd7041ced86637cd57f9fc5a1eb",
+    "numbered_first": 1,
+    "numbered_last": 156,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "budget-source/server__routes.go__2310_2330.txt",
+    "bytes": 567,
+    "excerpt_sha256": "ddc0112ab27e02c25d63a10a203b7ccebc4750a83e31ae90ad8e6b2ae1b1965f",
+    "numbered_first": 2310,
+    "numbered_last": 2330,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "budget-source/server__routes.go__2450_2710.txt",
+    "bytes": 9002,
+    "excerpt_sha256": "843e828d213f57d1a3532017976492ac6f459ff24a1a0d3c693c9e818796b94e",
+    "numbered_first": 2450,
+    "numbered_last": 2710,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  },
+  {
+    "path": "budget-source/server__routes.go__2898_3075.txt",
+    "bytes": 5882,
+    "excerpt_sha256": "82f9788ad86310651a8bf7ea9f487eb25be438dcc699c703d74e306f248e9699",
+    "numbered_first": 2898,
+    "numbered_last": 3075,
+    "note": "excerpt hash, not complete source-file hash; parent source identity is in the retained discovery/read record"
+  }
+]

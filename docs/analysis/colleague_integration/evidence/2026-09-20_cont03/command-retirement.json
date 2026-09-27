@@ -1,0 +1,15 @@
+{
+  "retired_completed_own_jobs": [
+    "b48bf5be52d8404e85313559c1347737",
+    "69426ec5c6134a618778f9e6dedf41c9",
+    "494da4187aaf4595a1fc138283387fc6",
+    "8d8808c945dd42cf81e45a176a0a16ee",
+    "ef181978719c4ff3a6b00b30595fade0",
+    "cc719663bffa47db913a5239d85f5e4a"
+  ],
+  "receipts": "Six forget_command calls each returned ok=true and state=forgotten in this continuation.",
+  "preservation_check": "retained-job-custody-check.json",
+  "all_full_job_specs_and_streams_retained": true,
+  "no_other_jobs_retired": true,
+  "reason": "COMMAND_ARCHIVE_FULL blocked the new store diagnostic; retire only already backed-up own completed jobs, no limit/config change."
+}

@@ -1,0 +1,14 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "source": "contract_reconciliation",
+    "start": 1,
+    "count": 200
+  },
+  "result": {
+    "file": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/precode-reconciliation.md",
+    "file_sha256": "5467b2f5279f68768da54da34ee2a2fb0e2f4cc8461591f18ededb7e72725760",
+    "total_lines": 6,
+    "content": "1: # Pre-code finding reconciliation\n2: \n3: 1. Accepted: pin native invocation. Baseline and candidate use /usr/bin/clang++ -std=c++11 -DWEBVIEW_STATIC -DWEBVIEW_COCOA -O2 -c app/webview/webview.cc -o <evidence>/webview-{arm}.o from the same worktree. Only output path differs. The source delta is exactly three removed spaces. No debug information flag, warning suppression or flag change. Syntax checking uses the identical source with -Werror=deprecated-literal-operator -fsyntax-only. Object equality is a required measured result, not presumed.\n4: 2. Rejected: TypeScript object types are structural, not nominal. Identical {page_stack:string[]} shapes are assignable; a shared exported nominal identity is not required. MessageList derives its prop from Message; StreamingMarkdownContent declares exactly the one field it consumes. No runtime import cycle or export of the same-named BrowserToolResult component will be introduced.\n5: 3. Deferred existing issue: the parser already emits string citation fields and the render callback already annotates cursor as number. mdast registration adds no runtime conversion, no change to that callback's existing annotation and no new static connection into Streamdown's custom-component declaration. The existing callback annotation is not being promoted as correct. The tests must pass actual string-valued citations through the real renderer. If type checking demands an algorithm/value change, stop this type-only slice and revise its boundary; do not silently cast or convert values to satisfy the checker.\n6: 4. Accepted: only webview.h plus the three named frontend source files may change in production. Regression tests are additive, in the existing runner. Generated types, Message.tsx, runtime IO, real data, auth and global toolchain are unchanged. Failures outside this slice remain disclosed."
+  }
+}

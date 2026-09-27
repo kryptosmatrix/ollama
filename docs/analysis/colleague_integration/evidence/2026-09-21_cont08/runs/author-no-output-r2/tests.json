@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/npm",
+    "test",
+    "--",
+    "--run",
+    "src/components/StreamingMarkdownContent.integration.test.tsx",
+    "src/utils/remarkCitationParser.test.ts",
+    "--reporter=json"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-output-r2/frontend",
+  "exit_code": 1,
+  "timed_out": false,
+  "seconds": 12.774292249931023,
+  "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-output-r2/tests.stdout",
+  "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/author-no-output-r2/tests.stderr",
+  "stdout_sha256": "cf9fb44b3ce47f5af048b677a9fbf1009172454a3129b3b03a2efd8965b44127",
+  "stderr_sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+}

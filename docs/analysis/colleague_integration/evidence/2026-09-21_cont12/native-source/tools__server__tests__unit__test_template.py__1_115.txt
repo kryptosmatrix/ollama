@@ -1,0 +1,106 @@
+1: #!/usr/bin/env python
+2: import pytest
+3: 
+4: # ensure grandparent path is in sys.path
+5: from pathlib import Path
+6: import sys
+7: 
+8: from unit.test_tool_call import TEST_TOOL
+9: path = Path(__file__).resolve().parents[1]
+10: sys.path.insert(0, str(path))
+11: 
+12: import datetime
+13: from utils import *
+14: from typing import Literal
+15: 
+16: server: ServerProcess
+17: 
+18: @pytest.fixture(autouse=True)
+19: def create_server():
+20:     global server
+21:     server = ServerPreset.tinyllama2()
+22:     server.model_alias = "tinyllama-2"
+23:     server.n_slots = 1
+24: 
+25: 
+26: @pytest.mark.parametrize("tools", [None, [], [TEST_TOOL]])
+27: @pytest.mark.parametrize("template_name,reasoning,expected_end", [
+28:     ("deepseek-ai-DeepSeek-R1-Distill-Qwen-32B",  "on", "<think>\n"),
+29:     ("deepseek-ai-DeepSeek-R1-Distill-Qwen-32B","auto", "<think>\n"),
+30:     ("deepseek-ai-DeepSeek-R1-Distill-Qwen-32B", "off", "<think>\n</think>"),
+31: 
+32:     ("Qwen-Qwen3-0.6B","auto", "<|im_start|>assistant\n"),
+33:     ("Qwen-Qwen3-0.6B", "off", "<|im_start|>assistant\n<think>\n\n</think>\n\n"),
+34: 
+35:     ("Qwen-QwQ-32B","auto", "<|im_start|>assistant\n<think>\n"),
+36:     ("Qwen-QwQ-32B", "off", "<|im_start|>assistant\n<think>\n</think>"),
+37: 
+38:     ("CohereForAI-c4ai-command-r7b-12-2024-tool_use","auto", "<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>"),
+39:     ("CohereForAI-c4ai-command-r7b-12-2024-tool_use", "off", "<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|><|START_THINKING|><|END_THINKING|>"),
+40: ])
+41: def test_reasoning(template_name: str, reasoning: Literal['on', 'off', 'auto'] | None, expected_end: str, tools: list[dict]):
+42:     global server
+43:     server.jinja = True
+44:     server.reasoning = reasoning
+45:     server.chat_template_file = f'../../../models/templates/{template_name}.jinja'
+46:     server.start()
+47: 
+48:     res = server.make_request("POST", "/apply-template", data={
+49:         "messages": [
+50:             {"role": "user", "content": "What is today?"},
+51:         ],
+52:         "tools": tools,
+53:     })
+54:     assert res.status_code == 200
+55:     prompt = res.body["prompt"]
+56: 
+57:     assert prompt.endswith(expected_end), f"Expected prompt to end with '{expected_end}', got '{prompt}'"
+58: 
+59: 
+60: @pytest.mark.parametrize("tools", [None, [], [TEST_TOOL]])
+61: @pytest.mark.parametrize("template_name,format", [
+62:     ("meta-llama-Llama-3.3-70B-Instruct",    "%d %b %Y"),
+63:     ("fireworks-ai-llama-3-firefunction-v2", "%b %d %Y"),
+64: ])
+65: def test_date_inside_prompt(template_name: str, format: str, tools: list[dict]):
+66:     global server
+67:     server.jinja = True
+68:     server.chat_template_file = f'../../../models/templates/{template_name}.jinja'
+69:     server.start()
+70: 
+71:     res = server.make_request("POST", "/apply-template", data={
+72:         "messages": [
+73:             {"role": "user", "content": "What is today?"},
+74:         ],
+75:         "tools": tools,
+76:     })
+77:     assert res.status_code == 200
+78:     prompt = res.body["prompt"]
+79: 
+80:     today_str = datetime.date.today().strftime(format)
+81:     assert today_str in prompt, f"Expected today's date ({today_str}) in content ({prompt})"
+82: 
+83: 
+84: @pytest.mark.parametrize("add_generation_prompt", [False, True])
+85: @pytest.mark.parametrize("template_name,expected_generation_prompt", [
+86:     ("meta-llama-Llama-3.3-70B-Instruct",    "<|start_header_id|>assistant<|end_header_id|>"),
+87: ])
+88: def test_add_generation_prompt(template_name: str, expected_generation_prompt: str, add_generation_prompt: bool):
+89:     global server
+90:     server.jinja = True
+91:     server.chat_template_file = f'../../../models/templates/{template_name}.jinja'
+92:     server.start()
+93: 
+94:     res = server.make_request("POST", "/apply-template", data={
+95:         "messages": [
+96:             {"role": "user", "content": "What is today?"},
+97:         ],
+98:         "add_generation_prompt": add_generation_prompt,
+99:     })
+100:     assert res.status_code == 200
+101:     prompt = res.body["prompt"]
+102: 
+103:     if add_generation_prompt:
+104:         assert expected_generation_prompt in prompt, f"Expected generation prompt ({expected_generation_prompt}) in content ({prompt})"
+105:     else:
+106:         assert expected_generation_prompt not in prompt, f"Did not expect generation prompt ({expected_generation_prompt}) in content ({prompt})"

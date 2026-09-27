@@ -1,0 +1,140 @@
+package main
+
+import (
+	"database/sql"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"log/slog"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync/atomic"
+	"time"
+
+	"github.com/ollama/ollama/app/store"
+	"github.com/ollama/ollama/app/types/not"
+	"github.com/ollama/ollama/app/ui"
+)
+
+type observation struct {
+	Case string `json:"case"`
+	StoreError string `json:"store_error"`
+	ClassifiedNotFound bool `json:"classified_not_found"`
+	HTTPStatus int `json:"http_status"`
+	HTTPBody string `json:"http_body"`
+	OriginalMessagesBefore int `json:"original_messages_before"`
+	OriginalMessagesAfter int `json:"original_messages_after"`
+	ModelRequests int32 `json:"model_requests"`
+	ContentsAfter []string `json:"contents_after"`
+}
+
+func must(err error) {
+	if err != nil { panic(err) }
+}
+
+func runCase(name, base string) observation {
+	dir := filepath.Join(base, name)
+	must(os.Mkdir(dir, 0700))
+	path := filepath.Join(dir, "db.sqlite")
+	s := &store.Store{DBPath: path}
+	defer s.Close()
+	chat := store.NewChat("probe-chat")
+	chat.Title = "Saved conversation"
+	if name != "missing" {
+		chat.Messages = []store.Message{
+			store.NewMessage("user", "original user message", nil),
+			store.NewMessage("assistant", "original assistant message", nil),
+		}
+		must(s.SetChat(*chat))
+	} else {
+		_, err := s.Settings()
+		must(err)
+	}
+	db, err := sql.Open("sqlite3", path)
+	must(err)
+	defer db.Close()
+	if name == "malformed" {
+		_, err = db.Exec("UPDATE messages SET stream = 2 WHERE chat_id = ?", chat.ID)
+		must(err)
+	}
+	countOriginals := func() int {
+		var n int
+		must(db.QueryRow("SELECT COUNT(*) FROM messages WHERE chat_id = ? AND content IN (?, ?)", chat.ID, "original user message", "original assistant message").Scan(&n))
+		return n
+	}
+	result := observation{Case:name, OriginalMessagesBefore:countOriginals()}
+	_, err = s.ChatWithOptions(chat.ID, true)
+	if err != nil {
+		result.StoreError = err.Error()
+		result.ClassifiedNotFound = errors.Is(err, not.Found)
+	}
+	var hits atomic.Int32
+	model := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		hits.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/api/show":
+			fmt.Fprintln(w, `{"capabilities":["completion"]}`)
+		case "/api/chat":
+			fmt.Fprintln(w, `{"model":"probe-model","message":{"role":"assistant","content":"acknowledged"},"done":true}`)
+		default:
+			http.Error(w, "unexpected model operation", 500)
+		}
+	}))
+	defer model.Close()
+	must(os.Setenv("OLLAMA_HOST", model.URL))
+	// Development-mode HTTP entry point: this diagnostic does not test authentication.
+	server := &ui.Server{Store:s, Dev:true, Logger:slog.New(slog.NewTextHandler(io.Discard, nil))}
+	endpoint := httptest.NewServer(server.Handler())
+	defer endpoint.Close()
+	request, err := http.NewRequest(http.MethodPost, endpoint.URL+"/api/v1/chat/"+chat.ID, strings.NewReader(`{"model":"probe-model","prompt":"new message"}`))
+	must(err)
+	request.Header.Set("Content-Type", "application/json")
+	client := &http.Client{Timeout:10*time.Second}
+	response, err := client.Do(request)
+	must(err)
+	body, err := io.ReadAll(response.Body)
+	response.Body.Close()
+	must(err)
+	result.HTTPStatus = response.StatusCode
+	result.HTTPBody = string(body)
+	result.ModelRequests = hits.Load()
+	result.OriginalMessagesAfter = countOriginals()
+	rows, err := db.Query("SELECT content FROM messages WHERE chat_id = ? ORDER BY id", chat.ID)
+	must(err)
+	for rows.Next() {
+		var text string
+		must(rows.Scan(&text))
+		result.ContentsAfter = append(result.ContentsAfter, text)
+	}
+	must(rows.Err())
+	rows.Close()
+	return result
+}
+
+func main() {
+	if len(os.Args)!=2 { fmt.Fprintln(os.Stderr,"usage: chat_read_probe OUTPUT_DIRECTORY"); os.Exit(2) }
+	base := os.Args[1]
+	must(os.Mkdir(base,0700))
+	results := []observation{}
+	failed := false
+	for _, name := range []string{"healthy", "malformed", "missing"} {
+		o := runCase(name,base)
+		results = append(results,o)
+		if name=="malformed" {
+			failed = failed || o.ClassifiedNotFound || o.ModelRequests!=0 || o.HTTPStatus!=500 || o.OriginalMessagesAfter!=o.OriginalMessagesBefore
+		} else {
+			failed = failed || o.HTTPStatus!=200 || o.ModelRequests!=3 || o.OriginalMessagesAfter!=o.OriginalMessagesBefore
+		}
+	}
+	data,err := json.MarshalIndent(results,"","  ")
+	must(err)
+	must(os.WriteFile(filepath.Join(base,"observations.json"),append(data,'\n'),0600))
+	fmt.Println(string(data))
+	if failed { fmt.Fprintln(os.Stderr,"CHAT_READ_INTEGRITY=FAIL"); os.Exit(1) }
+	fmt.Println("CHAT_READ_INTEGRITY=PASS")
+}

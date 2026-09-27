@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/npm",
+    "test",
+    "--",
+    "--run",
+    "src/components/StreamingMarkdownContent.integration.test.tsx",
+    "src/utils/remarkCitationParser.test.ts",
+    "--reporter=json"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-2-no-output/frontend",
+  "exit_code": 1,
+  "timed_out": false,
+  "seconds": 10.066776250000004,
+  "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-2-no-output/tests.stdout",
+  "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-2-no-output/tests.stderr",
+  "stdout_sha256": "218339908d23f554bc5ff76dde7b5888ef8fb77273541e86855a4b31336b9f2f",
+  "stderr_sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99"
+}

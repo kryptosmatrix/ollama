@@ -1,0 +1,16 @@
+{
+  "name": "read_evidence",
+  "arguments": {
+    "name": "author_ignore_cases",
+    "start": 1,
+    "count": 200
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont06/ignore-rules-proof.json",
+    "file_sha256": "0e2af57962d393ecbb4f70986dd5d8b9bd3d84c283d503dc2d9e8000975ae557",
+    "start": 1,
+    "end": 68,
+    "total_lines": 68,
+    "text": "1: {\n2:   \"rules_sha256\": \"384f341ecedfd8242d7249573dc4215009925a915219148bb4d219d009cda908\",\n3:   \"cases\": [\n4:     {\n5:       \"path\": \"app/ui/app/src/components/FutureDiscovery.tsx\",\n6:       \"expected_ignored\": false,\n7:       \"observed_ignored\": false,\n8:       \"exit_code\": 1,\n9:       \"rule\": \"\"\n10:     },\n11:     {\n12:       \"path\": \"app/ui/app/src/utils/recoverConversation.ts\",\n13:       \"expected_ignored\": false,\n14:       \"observed_ignored\": false,\n15:       \"exit_code\": 1,\n16:       \"rule\": \"\"\n17:     },\n18:     {\n19:       \"path\": \"app/ui/recover_history_test.go\",\n20:       \"expected_ignored\": false,\n21:       \"observed_ignored\": false,\n22:       \"exit_code\": 1,\n23:       \"rule\": \"\"\n24:     },\n25:     {\n26:       \"path\": \"app/ui/app/coverage/index.html\",\n27:       \"expected_ignored\": true,\n28:       \"observed_ignored\": true,\n29:       \"exit_code\": 0,\n30:       \"rule\": \"app/.gitignore:7:coverage/\\tapp/ui/app/coverage/index.html\"\n31:     },\n32:     {\n33:       \"path\": \"app/coverage.out\",\n34:       \"expected_ignored\": true,\n35:       \"observed_ignored\": true,\n36:       \"exit_code\": 0,\n37:       \"rule\": \"app/.gitignore:9:coverage*.out\\tapp/coverage.out\"\n38:     },\n39:     {\n40:       \"path\": \"app/test.coverprofile\",\n41:       \"expected_ignored\": true,\n42:       \"observed_ignored\": true,\n43:       \"exit_code\": 0,\n44:       \"rule\": \"app/.gitignore:8:*.coverprofile\\tapp/test.coverprofile\"\n45:     },\n46:     {\n47:       \"path\": \"app/cover.html\",\n48:       \"expected_ignored\": true,\n49:       \"observed_ignored\": true,\n50:       \"exit_code\": 0,\n51:       \"rule\": \"app/.gitignore:12:cover.html\\tapp/cover.html\"\n52:     },\n53:     {\n54:       \"path\": \"app/.env\",\n55:       \"expected_ignored\": true,\n56:       \"observed_ignored\": true,\n57:       \"exit_code\": 0,\n58:       \"rule\": \"app/.gitignore:14:.env\\tapp/.env\"\n59:     },\n60:     {\n61:       \"path\": \"app/unsafe.crt\",\n62:       \"expected_ignored\": true,\n63:       \"observed_ignored\": true,\n64:       \"exit_code\": 0,\n65:       \"rule\": \"app/.gitignore:2:*.crt\\tapp/unsafe.crt\"\n66:     }\n67:   ]\n68: }"
+  }
+}

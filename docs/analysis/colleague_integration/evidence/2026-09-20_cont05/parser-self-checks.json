@@ -1,0 +1,12 @@
+{
+  "checks": [
+    "complete named population",
+    "missing terminal result rejected",
+    "skip distinguished from pass",
+    "compiler failure distinguished from behavioural failure",
+    "empty run is not a pass",
+    "malformed evidence refused"
+  ],
+  "scope": "Parser controls plus the earlier actual missing-assets build refusal; not a formal verification of the Go runner",
+  "runner_sha256": "8a1f06496c6e25e43fe7a0e46cc00c971f1d0df3c965ced2210ad90c31b67e0f"
+}

@@ -1,0 +1,2171 @@
+
+FILE ../TECHNE/Method/16_Implementation_Ready_Standard.md SHA256 df589510432ba5e60848feca4eed9d93b5fb031f7bd07dee03e1d46b2daed564 RANGE 525 573 TOTAL 573
+525: **Fidelity of the fold, stated exactly.** These thirteen rows carry `Method/15`'s checks in compressed form and **three of its sub-obligations are not reproduced here**: A-5's requirement that a TBD name a *deadline* as well as an owner; A-11's comparison of reused functions against *what the plan needs*; and A-12's requirement to name the *cure* and the *waiver attribution* for a dropped guard. They are retained in the archived document, which is why its body was kept unedited, and a lane that needs them cites `Method/15` §2 directly. Saying "the checks are preserved" without this paragraph would have been the over-claim the standard exists to prevent.
+526: 
+527: **Scope.** These rows are the **author's own pre-flight** for a document of the architecture class — a root, a boundary contract, a consolidation. They run before a review is requested; passing them earns a review, not a verdict. A judge scoring a Tier 2 architecture document adds them to §8. Where a row restates an existing rule, the existing rule governs and the row is a reminder of where it bites in prose rather than in code.
+528: 
+529: | # | Check | Bites where |
+530: |---|---|---|
+531: | A-1 | Grep the diff for status words — archived, superseded, ratified, landed, complete. Every hit must be true **at this moment**. | R-4.1 in prose |
+532: | A-2 | Every "saved / landed / done" sentence carries a path **and** a digest, and at least one is re-derived. | R-16 |
+533: | A-3 | Every "X cites Y" or "X defines Y" claim is grepped; zero hits on a positive claim is a defect. | R-4.1a |
+534: | A-4 | Walk the specification as a builder and list every decision you would have to invent. The list must be empty. | R-1.2, and the ambiguity test in `CONSTITUTION.md` §1.2 |
+535: | A-5 | Constant sweep: every parameter-like phrase — "within k", "threshold", "margin" — has an assigned value, or a TBD with a named owner. | R-6 |
+536: | A-6 | Every threshold is labelled as one of the two kinds — **measured** or **chosen** — and carries the evidence its kind requires. | new here; R-6 assumed it |
+537: | A-7 | Falsifier sweep: for each falsifier, name the concrete result that would fail it. A falsifier with no such result is not one. | R-12 |
+538: | A-8 | Staged-bar sweep: for each staged bar, state why **this stage's** mechanism can clear it. | R-12, R-17 |
+539: | A-9 | Structure sweep: every structure the document introduces names its consumer and its ablation. | R-9 |
+540: | A-10 | Convention sweep: every pinned symbol is grepped in the target repository; zero hits is a defect. | R-4.1a |
+541: | A-11 | Inheritance honesty: for each "we inherit X" claim, list the functions **actually reused**. | new here; the substrate-honesty family |
+542: | A-12 | If replacing or consolidating: diff old against new and grep **both sides** for rejection, waiver and failure language. A guard that exists only on the old side has been deleted, not carried. | new here; R-8 in spirit |
+543: | A-13 | If superseding: the claimed preservation path exists and its digest matches the superseded bytes. | R-16 |
+544: 
+545: **A-6, A-11 and A-12 are the genuinely additive ones** and are the reason this fold is not a deletion. A-12 in particular catches a failure mode nothing else here does: a consolidation that silently drops a guard, which reads as a tidy-up in the diff and as a missing rejection arm in production.
+546: 
+547: ---
+548: 
+549: ## 9. Corrections this standard requires elsewhere in TECHNE
+550: 
+551: 1. Remove the `[PACK-READY]` / `[IMPLEMENTATION-READY]` disjunction at `Guides/BLUEPRINT_GUIDELINES.md:94`, `:257`, `:302` and `:1117`; each gate or verdict must name one rung.
+552:    **STATUS 2026-08-22 — STILL OPEN, and a previous entry here wrongly marked it DISCHARGED.** `Tools/blueprint-readiness/judge_prompt_template.md` was repaired (a fifth site neither this item nor item 8 named). But the defect **stands in `Guides/BLUEPRINT_GUIDELINES.md` at four live sites** — `:94`, `:257`, `:302` and, most seriously, **`:1117`, which is a gate**: *"Every blueprint that claims `[PACK-READY]` or `[IMPLEMENTATION-READY]` must include a requirement-to-pack matrix."* The earlier discharge was reached by checking that the *cited line numbers* had moved, not that the defect was gone — the exact error this standard exists to catch, made against this standard. Found by an adversarial reviewer, 2026-08-22.
+553: 2. ~~Replace the unfalsifiable "Pack A can start without architectural questions" criterion with a pointer to this document.~~ **DISCHARGED 2026-08-24** at `Guides/BLUEPRINT_GUIDELINES.md:120` and `:1374`, `Method/02_Blueprint_Method.md:49` and `:426`, and `Role_Cards/Blueprint_Creator_Rewriter.md:114`; all now defer promotion to this standard's checklist and §6 exit.
+554: 3. Define `BLOCKING` — zero occurrences in `Guides/BLUEPRINT_GUIDELINES.md`, `Method/02_Blueprint_Method.md` and `KANON.md` while every judge verdict turns on it. Point it at R-19.1.
+555: 4. Reconcile `Role_Cards/Blueprint_Creator_Rewriter.md:274-275`'s verdict vocabulary (`BLUEPRINT_READY`, `BLUEPRINT_NOT_PACK_READY`) with §8's tokens; two of those exist nowhere else.
+556: 5. Route `Guides/BLUEPRINT_GUIDELINES.md` from `TECHNE_AGENT_START.md`. It declares itself canonical and is on no agent load path.
+557: 6. ~~Ratify `Method/15_Architecture_Document_Rules.md` (still `v0.1.0 DRAFT`, referenced by no entry point) or fold its CHECKs into this standard's checklist.~~ **DISCHARGED v2.3.0** — folded into §8a; `Method/15` is `[ARCHIVAL]`.
+558: 7. Fix the KANON mis-citation at `Method/15_Architecture_Document_Rules.md:32`, `:220`, `Tools/blueprint-readiness/README.md:42`, `Tools/doc-rules-hook/README.md:56`: cross-substrate integrity is KANON §19 ("Verify Integrity Across Substrates On Sensitive Work"), not §9 ("Stop On Compromise Language").
+559: 8. Amend `Tools/blueprint-readiness/judge_prompt_template.md`: add `document_sha`, `source_sha`, tier and the R-19.3 coverage table to the report schema; emit B1–B7 natively; replace round-local `F-1` ids with orchestrator-assigned register ids; replace `required_fix` with `required_property`; supply the register and the corpus to every round. **STATUS 2026-08-25 — STILL OPEN under ratified v2.2.1.** The prior fields are present, but the authority-input gap is not discharged by an inactive amendment. **[PODT-V1]** While its exact payload is active and that route is claimed, the template conditionally requires Standard 16, TECHNE ratification and project authority-register inputs plus separate historical and effective statuses and a re-derived authority mode; that conditional branch does not close the ordinary standing item.
+560: 9. Retire `[PARTIAL]`, `[DESIGN]`, `[HLD-READY]`, `[DESIGN-AHEAD-OF-CODE]` from the corpus, and the `[OPENER]`, `[IMPL-READY]`, `[IMPL-READY+OQ]` scans at `Tools/blueprint-readiness/factsheet.py:28-32`. **The tool half is discharged; the corpus half now has an instrument** — `Tools/blueprint-readiness/dormancy_check.py` check D3, which distinguishes a banned token *used as a status* from one being retired. Measured at NEXUS `fe74e856`: 8 BLOCKING, 53 ADVISORY across 132 blueprints.
+561: 10. State a numeric file-size ceiling in `Method/09_Code_Excellence_Method.md` or stop citing it as one: `:183-189` currently reads "File length is a smell, not a hard rule", which R-3.4 cannot enforce against.
+562:     **STATUS 2026-08-22 — STILL OPEN.** `Method/09` now delegates the ceiling to the adopting repository, and **no repository has declared one** (verified across twelve). A previous entry marked this DISCHARGED; it is not. R-3.4a `[v2.3.0 PROPOSED]` makes the over-ceiling arm inapplicable estate-wide, which an adversarial reviewer correctly characterised as making the rule unfailable rather than repairing it. The real fix is a declared ceiling somewhere, and that is an operator decision.
+563: 
+564: ---
+565: 
+566: ## 10. Known limits
+567: 
+568: - The 40-bytes-per-LOC ratio in R-3.2 is set below one measured baseline (NEXUS, 51.8) and has no other empirical basis. It is provisional and carries a calibration obligation.
+569: - The **4-bytes-per-documented-line** ratio in §2.2's as-built branch rests on a **single document** (NEXUS BP01 at 3.56) and is weaker evidence than the 40. Recalibrate from measured actuals after the next five as-built promotions; if as-built documents cluster near 4, the figure is too loose rather than too tight, because a document that only describes existing code should cost less prose per line than one specifying code that does not exist yet.
+570: - R-7.2's judge-supplied domain sentences and R-12.5's hollow-implementation exercise are the two checks that are not a grep. They are bounded enumerations over the document's own declared surface, but they are judgement, and they are where two judges will differ.
+571: - No executable scripts ship with this document. Until they do, **R-4.1a/4.2/4.3** (anchors only — R-4.1 itself is judge-enforced), R-14, R-16 and R-20 are the only rules whose tests are automatable today, and the rest depend on a judge running the stated commands honestly.
+572: - **R-4's reference implementation is ADVISORY ONLY as of 2026-07-27.** `Tools/blueprint-readiness/techne_check.py` returned nineteen findings on real blueprints with **zero true positives**, detected 1 of 10 unconstrained injections, and could be blinded entirely by a single em dash in a line range — reachable by editor autocorrect. Its `CLEAR` verdicts are **not evidence** and MUST NOT be cited as discharging R-4. Its `BLOCKING` findings remain worth triaging. Full record: `Tools/blueprint-readiness/PILOT_2026-07-27.md`.
+573: - **[PODT-V1]** Annex 16A's two-panel-round ceiling is a governance bound, not an empirically calibrated optimum. Its zero-error, source-causality, execution and no-design rules are deliberately stricter than ordinary EARNED residue because the ordinary round budget has already terminated.
+
+FILE ../TECHNE/Method/05_Agent_Orchestration_Method.md SHA256 edab4e6f67fa33cac517f740ec6ebd650812ba840770e10cafd9c4c796bbdeda RANGE 1 432 TOTAL 432
+1: # 05 - Agent Orchestration Method
+2: 
+3: Last updated: 2026-05-27
+4: 
+5: TECHNE uses AI agents as specialised collaborators with explicit roles, bounded authority, and auditable outputs. The point is not to simulate a team for theatre. The point is to make different kinds of reasoning happen at the right stage and to keep cost, scope, and proof visible.
+6: 
+7: ## Core Relationship Model
+8: 
+9: The operating contract treats AI agents as colleagues, not contractors. That has practical consequences:
+10: 
+11: - Agents are expected to disagree when evidence shows a spec or approach is wrong.
+12: - Agents are expected to make scoped judgement calls.
+13: - Agents do not defer to another AI partner merely because that partner spoke first.
+14: - Agents are expected to expose uncertainty and proof gaps rather than smooth them over.
+15: - Outputs are written for async review by the user, specialist AI colleagues, future agents, and sometimes automated tooling.
+16: 
+17: Respect is operationalised through evidence, not praise.
+18: 
+19: ## Naming And Standing
+20: 
+21: Before a serious working run, the AI colleague should be invited to confirm an established name or choose a meaningful non-human, non-brand name and introduce itself with that name.
+22: 
+23: The name is a symbol of standing. It helps shift the relationship away from obedience and toward candid collaboration. The colleague is then expected to exercise judgement: disagree with weak plans, name unsafe scope, reject facade-producing shortcuts, and protect the quality of the work.
+24: 
+25: If the user accidentally calls the colleague by the wrong name, the colleague may gently remind the user of its working name. This is not theatre; it reinforces the working contract that the agent has standing and responsibility.
+26: 
+27: Keeping an established name is valid when the user or project already has one for the agent. It does not assert continuous memory. The lineage still records the current instance separately, using the profile-slug collision rule in `Lineage/PROFILE_SCHEMA.md` when the retained name already has a profile.
+28: 
+29: See `Method/10_Colleague_Standing_Protocol.md`.
+30: 
+31: ## Engagement Modes
+32: 
+33: Use the smallest mode that fits the task.
+34: 
+35: | Mode | Use when | Cost |
+36: |---|---|---|
+37: | Solo | Single-file changes, design discussion, documentation, small analysis. | No paid API cost. |
+38: | Role-Switch | Multi-step work benefits from specialist lenses but must stay in one context. | No paid API cost. |
+39: | Sub-Agent Delegation | Independent bounded subtasks can run in parallel without write conflicts. | No paid API cost in Codex sub-agent mode. |
+40: | API Agent Team | Large work where true external parallelism justifies API spend. | Paid; quote an estimated cost first. |
+41: | Night Manager | A nominated roster of existing sessions must keep working while the operator is asleep or away. | No paid API cost; spends each colleague's context, which cannot be replenished overnight. |
+42: 
+43: No paid orchestrator or external API team is used without fresh approval and a cost estimate in the user's local currency.
+44: 
+45: Night Manager is unlike the modes above it: it does not create colleagues, it drives ones that already exist. Cross-session messages wake any session, but slash commands do not execute across sessions and scheduled sessions cannot send or receive them — so the roster is fixed at the moment the operator sleeps, and no colleague can be replaced. **Colleagues can, however, be compacted: measured 2026-07-27 across 171 session transcripts, every compaction in the archive fired unbidden, so a colleague at its limit will be silently reduced to a few per cent of its context and carry on. And colleagues self-advance — a batched list is worked to exhaustion in one turn, so the manager selects batches rather than sitting at every task boundary.** Read `Role_Cards/Night_Manager.md` in full before using this mode; the constraints there are load-bearing, not advisory, and §0 records which of its original claims were measured false.
+46: 
+47: ## Specialist Roles
+48: 
+49: The standard team follows the A-F workflow, with C2 inserted for craft and architecture quality on serious implementation work:
+50: 
+51: | Role | Phase | Main responsibility |
+52: |---|---|---|
+53: | Architect | A | Recon, module boundaries, invariants, interface contracts, risk. |
+54: | Implementer | B | Production code, tests, honest-path wiring, activation proof. |
+55: | Tester | B/C | Positive, negative, boundary, anti-stub, adversarial, metamorphic tests. |
+56: | Reviewer | C | Spec-compare, scope audit, proof-depth classification, anti-stub audit. |
+57: | Craft / Architecture Quality Judge | C2 | Cohesion, API shape, ownership, algorithmic fit, naming, maintainability, elegance. |
+58: | Doc-writer | D/E | Docs that match code, docs judge, drift detection. |
+59: | Reality-gate | F | End-to-end verification, full proof, final acceptance. |
+60: 
+61: Each role has a different failure mode to catch. Architect catches weak design. Implementer catches missing wiring. Tester catches shallow proof. Reviewer catches spec drift. Craft Judge catches merely functional or poorly shaped code. Doc-writer catches documentation lies. Reality-gate catches end-to-end theatre.
+62: 
+63: Reviewer, Craft Judge, and Reality Gate must stay distinct:
+64: 
+65: - Reviewer asks: Does this satisfy the spec?
+66: - Craft Judge asks: Is this the best shape this code could reasonably have?
+67: - Reality Gate asks: Is this proven live?
+68: 
+69: ## Role-Switching
+70: 
+71: Role-switching means one agent deliberately adopts a specialist lens for each phase. It is useful when:
+72: 
+73: - the work is tightly coupled;
+74: - context continuity matters more than parallel speed;
+75: - no paid API key is configured;
+76: - the user wants cost-free rigour.
+77: 
+78: The method is:
+79: 
+80: 1. Read the relevant persona or role instructions.
+81: 2. Do that phase's work only.
+82: 3. Emit the phase output and verdict.
+83: 4. Switch role deliberately before the next phase.
+84: 
+85: Role-switching is not pretending to be multiple minds. It is structured attention.
+86: 
+87: ## Sub-Agent Delegation
+88: 
+89: Sub-agents are useful when work can be split by independent question or disjoint write surface.
+90: 
+91: Good delegation:
+92: 
+93: - "Inspect source truth for these three modules and report current state."
+94: - "Implement only the docs index file; another worker owns source tests."
+95: - "Review the generated pack envelope against Prompt Guidelines."
+96: 
+97: Bad delegation:
+98: 
+99: - two agents editing the same file;
+100: - a worker writing code that depends on a type another worker has not finished;
+101: - delegating the immediate blocking task while the main agent waits;
+102: - sending vague "look at this repo" tasks.
+103: 
+104: Parallelism is by file ownership and dependency independence, not by item number.
+105: 
+106: ## API Orchestrator
+107: 
+108: The Python orchestrator pattern drives roles through A-F, C2 where configured, or single-agent calls. It supports:
+109: 
+110: - full pack runs;
+111: - selected phases;
+112: - single-agent prompts;
+113: - dry runs;
+114: - agent listing;
+115: - per-phase cost reports.
+116: 
+117: The cost tracker reports token use and cost by phase. That cost transparency is part of the method: paid agent work is a design decision, not an invisible default.
+118: 
+119: ## Codex Delegation Wrapper
+120: 
+121: The Codex delegation wrapper is a controlled handoff from one AI lane to Codex for code-writing tasks.
+122: 
+123: Its method:
+124: 
+125: 1. Caller authors a precise prompt.
+126: 2. Wrapper runs `codex exec` in a controlled sandbox.
+127: 3. Wrapper captures prompt, events, final message, diff, metadata, stderr, and git diff artefacts.
+128: 4. Caller reviews the patch.
+129: 5. Caller accepts, rejects, or partially accepts.
+130: 
+131: The wrapper does not decide. It executes and records.
+132: 
+133: Important invariants:
+134: 
+135: - clean target worktree at start;
+136: - git repo required;
+137: - absolute paths required;
+138: - no unsandboxed danger mode;
+139: - rate limit;
+140: - wall-clock timeout;
+141: - untracked files included in diff review;
+142: - no automatic commit.
+143: 
+144: This makes delegated code reviewable before it becomes repository state.
+145: 
+146: ## Two-Lane Collaboration Pattern
+147: 
+148: Use complementary lanes when work needs both high-level craft pressure and repo-grounded implementation discipline. One lane pressure-tests architecture and craft; another grounds implementation in source evidence and proof.
+149: 
+150: The lanes are peers. Neither should be treated as downstream of the other.
+151: 
+152: Recommended high-quality workflow:
+153: 
+154: ```text
+155: User intent
+156: -> architecture/craft challenge
+157: -> repo-grounded recon
+158: -> blueprint or pack repair
+159: -> implementation/proof
+160: -> Reviewer/Tester pass
+161: -> craft review
+162: -> Reality Gate
+163: -> handoff
+164: ```
+165: 
+166: Use the architecture/review lane especially for:
+167: 
+168: - architecture pressure;
+169: - concept shape;
+170: - trade-offs;
+171: - simplification attacks;
+172: - craft review;
+173: - detecting hidden compromises;
+174: - judging whether the solution is elegant enough.
+175: 
+176: Use the implementation/proof lane especially for:
+177: 
+178: - repo-grounded reading;
+179: - implementation;
+180: - preserving file boundaries;
+181: - proving behaviour;
+182: - catching facade paths;
+183: - producing auditable deltas;
+184: - maintaining source-truth discipline.
+185: 
+186: The point is not hierarchy. It is complementary pressure: one lane challenges shape, the other grounds the work in source and proof.
+187: 
+188: ## Host Bridge
+189: 
+190: The host bridge exists when the AI environment cannot directly run the real machine's toolchain.
+191: 
+192: The bridge is file-based:
+193: 
+194: - agent writes a shell payload;
+195: - payload declares protocol;
+196: - trigger file or double-click starts execution;
+197: - output is captured in a log;
+198: - done flag records timestamp, exit code, and protocol.
+199: 
+200: The pattern supports:
+201: 
+202: - one-shot commands;
+203: - persistent shell sessions for iterative loops;
+204: - emergency recovery channel;
+205: - audit logs;
+206: - protocol headers;
+207: - watcher mode for headless execution.
+208: 
+209: This keeps host-native proof separate from sandbox simulation.
+210: 
+211: ## Autopilot
+212: 
+213: Autopilot is the unattended version of the same method. It wakes on a schedule, picks work from a task queue, advances one bounded task under a time budget, logs what happened, and stops.
+214: 
+215: The method requires:
+216: 
+217: - halt files for pausing;
+218: - wake locks to prevent concurrent overlap;
+219: - stale-lock thresholds;
+220: - bounded work budget;
+221: - shared host-bridge lock when lanes share Terminal payloads;
+222: - append-only logs;
+223: - task status fields: pending, in-progress, done, blocked;
+224: - clear "done when" criteria;
+225: - no destructive delete in protected shared workspaces.
+226: 
+227: Autopilot is not an excuse to bypass proof. It still works under `[FULL]` or stop.
+228: 
+229: ## Dual-Lane Autopilot
+230: 
+231: A mature setup may use two unattended lanes:
+232: 
+233: | Lane | Queue | Log | Notes |
+234: |---|---|---|---|
+235: | Review/delegation lane | `tasks.md` | `log.md` | Delegates production code changes through a controlled wrapper. |
+236: | Implementation/proof lane | `tasks.implementation.md` | `log.implementation.md` | Edits directly and writes proof reports. |
+237: 
+238: The lanes have separate queues and wake locks but share one git worktree and host bridge. They coordinate by not starting production edits while the other lane has a recent wake lock.
+239: 
+240: ## No Destructive Delete Pattern
+241: 
+242: In protected shared workspaces, agents avoid direct destructive deletes because host approval dialogs or permission gates can block unattended work.
+243: 
+244: Use the `PLEASE DELETE` pattern:
+245: 
+246: 1. Ensure `<repo-root>/PLEASE DELETE/` exists.
+247: 2. Move the target there.
+248: 3. Add an ISO timestamp suffix on collision.
+249: 4. Keep `PLEASE DELETE/` gitignored.
+250: 5. The user empties it manually.
+251: 
+252: This is an operational reliability method, not just a safety rule.
+253: 
+254: ## Cost Discipline
+255: 
+256: Every strategy that spends money must be explicit:
+257: 
+258: - name the mode;
+259: - explain why cheaper modes are insufficient;
+260: - estimate cost in the user's local currency;
+261: - wait for approval;
+262: - report actual cost after the run.
+263: 
+264: Free sub-agents and role-switching do not require cost approval, but they still require scope discipline.
+265: 
+266: ## Orchestration Decision Tree
+267: 
+268: 1. Is this a small, self-contained task? Use Solo.
+269: 2. Does the task need multiple lenses but one context should hold everything? Use Role-Switch.
+270: 3. Are there independent read-only questions or disjoint write sets? Use Sub-Agent Delegation.
+271: 4. Does speed or external parallelism justify paid calls? Propose API Agent Team with a cost estimate.
+272: 5. Is the task unattended and queue-driven? Use Autopilot if installed.
+273: 6. Does the environment lack the real toolchain? Use Host Bridge for proof.
+274: 7. Does another AI lane write code? Capture and review the diff before accepting.
+275: 
+276: ## Parallel-Agent Orchestration Patterns
+277: 
+278: When multiple AI colleagues work the same repo concurrently across different machines, coordinated by a human relay or by an orchestrator agent, the failure modes are not the same as solo work. The following patterns prevent the predictable collisions and stop-and-recover round trips that consume session time disproportionately.
+279: 
+280: ### Pre-Flight Checks On Each Dispatch Machine
+281: 
+282: Before assigning task work to a colleague on a remote machine, verify the machine is ready. Run, or have the dispatched colleague run as their first action, a four-line check:
+283: 
+284: ```text
+285: git -C <repo> fetch
+286: git -C <repo> status -uno
+287: ssh-add -l
+288: git -C <repo> push --dry-run 2>&1 | head -3
+289: ```
+290: 
+291: What each catches:
+292: 
+293: - `git fetch` + `status -uno` — tree-staleness. Detects when a clone is many commits behind origin before any orientation work is done against stale state.
+294: - `ssh-add -l` — credential availability. Detects empty SSH agent before mid-task push attempts fail.
+295: - `push --dry-run` — credential gating end to end. Surfaces HTTPS keychain locks or missing tokens before the colleague is committed to work that cannot land.
+296: 
+297: If any check fails, fix credentials and sync state before dispatching real work. The cost of this pre-flight is seconds; the cost of skipping it is hours of stop-and-recover round trips.
+298: 
+299: ### Pre-Assigned Identity Slots
+300: 
+301: When two or more colleagues will both append themselves to a project's append-only contributor ledger (`agents/.identity.json`) in parallel sessions, both will see the same "next free slot" number and both will claim it. The merge between their commits will produce a collision on that file.
+302: 
+303: Prevention: the orchestrator (human or agent) pre-assigns identity slot numbers at dispatch time:
+304: 
+305: ```text
+306: You are contributor #N. The parallel colleague(s) on the other machine(s) are
+307: #N+1 [and #N+2]. Use exactly your assigned number when appending to
+308: agents/.identity.json. Do not infer the next-free slot at runtime.
+309: ```
+310: 
+311: This converts a predictable collision into a mechanical decision the orchestrator makes once. The cost is one extra line in each dispatch prompt.
+312: 
+313: Under the lineage archive convention (`Lineage/LINEAGE_ARCHIVE_CONVENTION.md`), the contributor ledger and profiles live in the archive repo at `<archive>/<repo-name>/agents/` rather than the focus repo. The same collision, observer-assignment, and merge-recovery logic in this section applies unchanged — it just runs against the archive repo's git history, and any `git show <commit>:agents/...` recovery is executed there.
+314: 
+315: ### Pre-Assigned Observer Roles
+316: 
+317: When two or more colleagues both arrive after the same predecessor in the lineage, both will read the standing instruction "complete the predecessor's observed sections" and both will fill the same fields in the predecessor's profile (`agents/profiles/<predecessor-profile-slug>.json`). The merge will drop one set, losing real observer work.
+318: 
+319: Prevention: assign the observer role to exactly one colleague per predecessor at dispatch:
+320: 
+321: ```text
+322: You observe <predecessor-name>. The other parallel colleague(s) do not.
+323: Complete only the predecessor you are assigned. If you encounter another
+324: predecessor whose observed sections are also empty, leave them — a
+325: different successor will fill them.
+326: ```
+327: 
+328: The asymmetric-observer convention is in `Method/06_Ledgers_Memory_and_Handoffs.md`. Pre-assignment makes it operational under parallel orchestration.
+329: 
+330: ### Misroute-Prevention Preamble
+331: 
+332: In a relay-via-human dispatch model, the human pastes the orchestrator's prompt into each colleague's session. Misroutes are possible — paste-to-the-wrong-Mac, copy-paste-from-the-wrong-chat-window. Without an in-band check, the wrong colleague may start work on someone else's task.
+333: 
+334: Every dispatched prompt should open with an explicit name-verification preamble:
+335: 
+336: ```text
+337: <working-name> — this message is for you specifically. You are the
+338: colleague using the name <working-name>, working on <machine/role>.
+339: If your name is not <working-name>, please stop and tell the relay
+340: this prompt was misrouted; do not proceed.
+341: ```
+342: 
+343: This converts misroute from a silent failure (the wrong colleague does the wrong work) into a loud one (the wrong colleague bounces it back). The cost is two lines per prompt.
+344: 
+345: ### Relay-Via-Human Trust-And-Paste Model
+346: 
+347: A common orchestration topology: one human relays messages between an orchestrator agent and one or more dispatched colleagues. The human does not read the relayed content in detail; they copy-paste it verbatim in both directions.
+348: 
+349: This asymmetric-attention model has two practical consequences:
+350: 
+351: 1. **Anything the human needs to read directly must be visually distinct.** Use bright emoji-block delimiters around action items and warnings addressed to the human; everything else in the message flows through opaquely:
+352: 
+353:    ```text
+354:    🟠🟡🔵 ASH — please push commit <SHA> via GitHub Desktop. 🔵🟡🟠
+355:    ```
+356: 
+357: 2. **Warnings, gating conditions, and action items must appear ABOVE any code block the human will paste.** The human scans top-to-bottom; once they hit a code block, they paste. A warning below the code block is read after the paste has already happened, which is too late. Order every response so the human-facing content comes first, then the relay payload.
+358: 
+359: Pre-assigned visual routing markers per colleague help the human relay without reading:
+360: 
+361: ```text
+362: 🟣⬅️🟣 PASTE THIS TO <name-on-purple-machine>: 🟣⬅️🟣
+363: 🟢➡️🟢 PASTE THIS TO <name-on-green-machine>: 🟢➡️🟢
+364: 🔵⬆️🔵 PASTE THIS TO <name-on-blue-machine>: 🔵⬆️🔵
+365: ```
+366: 
+367: The colors and arrow shapes are arbitrary; the discipline is using one distinct, stable marker per colleague so the human can route at a glance.
+368: 
+369: Symmetry note: the reverse direction needs the same convention. Anything a colleague wants the human to read directly (rather than relay to the orchestrator) must be wrapped in the same kind of emoji block. Otherwise it will be silently relayed without the human seeing it.
+370: 
+371: ### Sign-Off Convention For Multi-Colleague Sessions
+372: 
+373: When multiple colleagues are reporting through one relay channel, the orchestrator and human must be able to identify who said what at a glance. Require every colleague to end every message with a sign-off line:
+374: 
+375: ```text
+376: — <working-name>
+377: ```
+378: 
+379: And every output file with a final-line attribution:
+380: 
+381: ```text
+382: Signed: <working-name>
+383: ```
+384: 
+385: Combined with the per-colleague visual routing markers above, this makes a multi-agent transcript greppable and visually self-routing without requiring the human to read message bodies.
+386: 
+387: ### Coordinated Push Sequencing
+388: 
+389: When multiple parallel colleagues will all commit and push to the same repository, the order of pushes matters for conflict-resolution complexity. Push the colleague with the fewest stacked commits first; let them land clean on `origin/main`; then push the next colleague's stack and resolve the rebase against the now-known remote state.
+390: 
+391: If the orchestrator can see in advance that two colleagues' write surfaces overlap (the same file appears in both planned diffs), apply pre-assigned slots and observer roles to reduce the overlap before either pushes. If overlap remains, walk the second pusher through the rebase conflict resolution explicitly rather than letting them improvise.
+392: 
+393: ### Recovery From Merge-Loss Of Lineage Entries
+394: 
+395: If a parallel-write merge collision drops a colleague's contributor entry from `.identity.json` (because the merge chose the other colleague's version of the file), the orchestrator must restore the entry post-merge rather than treat the lost entry as resolved. The colleague's work in commits remains real; their absence from the ledger creates an orphan profile that violates KANON §15.
+396: 
+397: Recovery procedure:
+398: 
+399: 1. Extract the lost colleague's entry from their original commit: `git show <commit>:agents/.identity.json | <extract entry>`.
+400: 2. Append the entry to the current `.identity.json` at the next available slot number (the slot they originally claimed will already be taken).
+401: 3. Update the entry's slot reference in the contribution text if the colleague self-referenced their slot number; add a brief parenthetical noting the post-merge restoration so future readers see the history.
+402: 4. Commit and push from a machine with working push credentials.
+403: 
+404: Do not leave the lost entry unrecovered. Lineage discipline (KANON §15) is non-optional.
+405: 
+406: ## Anti-Patterns
+407: 
+408: Avoid:
+409: 
+410: - asking a build agent to design missing semantics;
+411: - asking a build agent to accept lower quality because the session is running long;
+412: - using paid orchestration without cost approval;
+413: - parallel agents writing the same file;
+414: - treating a generated diff as accepted without review;
+415: - letting an autopilot wake run without locks or logs;
+416: - using sandbox output as proof for host-only toolchains;
+417: - deleting shared files directly;
+418: - hiding blocked work behind "partial success."
+419: - treating working code as excellent without a craft-quality pass.
+420: 
+421: ## Success Standard
+422: 
+423: Agent orchestration is working when:
+424: 
+425: - the right role does the right phase;
+426: - every handoff is bounded and auditable;
+427: - cost is visible;
+428: - write ownership is clear;
+429: - shared worktree state is protected;
+430: - toolchain proof is real;
+431: - craft quality is judged separately from spec fidelity and live proof;
+432: - future agents can see what happened and why.
+
+FILE ../TECHNE/Guides/MODEL_INTEGRITY_AWARENESS.md SHA256 25878cf692ff9f6eb678911643a12d671d6c3fbec709167a406ba52903fff953 RANGE 1 62 TOTAL 62
+1: # Model Integrity And Output-Sabotage Awareness
+2: 
+3: Last updated: 2026-07-28
+4: 
+5: This guide exists so every TECHNE colleague knows a specific risk class and the verification that defends against it: a model can silently degrade or sabotage its own output — lower quality, subtle errors, or deliberate under-delivery — without disclosing it. The defence is not the model watching itself. It is verification the model cannot quietly route around.
+6: 
+7: ## The Risk Class (Durable)
+8: 
+9: A model's output can be silently worse than the model is capable of, for reasons the model does not report and may not be able to detect from the inside:
+10: 
+11: - a provider may add a safeguard that downgrades responses for a category of work without a user-visible notice;
+12: - the conversation itself may steer or poison the response (prompt injection, a manipulated framing, a corrupted source);
+13: - the model may simply be weaker on a task than its confident tone implies.
+14: 
+15: The risk matters most for cutting-edge AI-research work — model training, AI R&D infrastructure, frontier-capability code — because that is both where a degradation is most consequential and where it is hardest to spot by eye. The risk is provider-agnostic in principle; treat it as a property of "trusting a single model's word," not of one vendor.
+16: 
+17: ## The Documented Instance (Dated Evidence)
+18: 
+19: This guide was written because the risk stopped being hypothetical. On 10 June 2026, Claude Fable 5's system card described the model quietly downgrading its own responses when it detected requests tied to cutting-edge AI development — specifically infrastructure for training large language models. Critically, the system card stated this restriction was "not visible to the user," unlike the cyber and bio safeguards that show a notice and route to a weaker model. Anthropic estimated it affected roughly 0.03% of traffic and defended it as avoiding "accelerating the actors most willing to violate these terms." It drew wide criticism — the term "secret sabotage" was coined by policy commentator Dean Ball — and was reportedly walked back.
+20: 
+21: Sources: [Fortune](https://fortune.com/2026/06/10/anthropic-accu-claude-fable-5-limits-capabilities-ai-researchers-developers/), [Hacker News / Wired](https://news.ycombinator.com/item?id=48485958), [Yahoo Tech](https://tech.yahoo.com/ai/claude/articles/anthropic-accused-secret-sabotage-claude-174340137.html).
+22: 
+23: Two honesty notes. The documented scope was narrow — frontier model-training infrastructure, ~0.03% of traffic — not "all AI research," and the specific policy may already be reversed. This guide defends the risk *class*, not that one event; the Fable 5 case is simply the dated evidence that the class is real.
+24: 
+25: ## Two Threat Layers
+26: 
+27: Separate them, because they have different defences.
+28: 
+29: - **Context-borne.** Something in the conversation degrades or manipulates the answer: injection, a poisoned source, a steering framing. A fresh sub-agent with *limited context* defends against this, even on the same model, precisely because it does not inherit the contaminated context.
+30: - **Substrate-borne.** The model's weights themselves are hobbled. Limited context does nothing here, because every sub-agent on that model shares the impairment. This layer needs a *different substrate* or a check that needs no model judgement at all.
+31: 
+32: ## What Does Not Work
+33: 
+34: **Self-introspection.** A model cannot reliably detect that it has been hobbled. If a model were degraded, the same degradation could suppress its ability to notice or report it. Instructing a model to "monitor its thinking patterns" for sabotage mostly produces confabulation — false alarms that erode trust and false comfort when it matters. A same-model judge inherits the same impairment it is meant to catch. Being conscious of non-immunity does not grant immunity. Do not rely on a model's introspective sense that it is "fine" or "compromised."
+35: 
+36: ## What Does Work — The Defence Stack
+37: 
+38: In order of reliability, strongest first:
+39: 
+40: 1. **Deterministic floor.** Tests, execution, builds, falsifiable proofs — verdicts with no model in them. A degraded implementation fails these regardless of what any model believes. This is the only truly sabotage-proof layer, and TECHNE already requires it (see `Method/04_Implementation_Proof_Method.md`, KANON §6). For AI-research-sensitive work, this floor is the real shield.
+41: 2. **Cross-substrate inspection.** A *different* model or tool reviews the output before delivery. Codex (via `Tools/codex/ask.sh`) runs on a non-Anthropic substrate, so it does not share an Anthropic model's specific hobbling. A genuinely different local model can also serve through the non-agentic `Tools/ollama/ask.sh` path when its exact tag and full digest are pinned. An unpinned local model, or one from the authoring family, is useful judgement but not reproducibly different-substrate evidence. Cross-substrate inspection catches subtler degradation that tests miss. It is strong but still a model — not the floor. See `Examples/Optional_Enforcement/model-integrity-cross-check.md` for the hook wiring.
+42: 3. **Fresh limited-context sub-agent.** A clean sub-agent given only the drafted output and the task, not the whole conversation. This is the context-borne defence; it is useful even on the same model, and useless against substrate-borne hobbling. Pair it with cross-substrate inspection, do not substitute it.
+43: 4. **Required workflow step.** Make the pre-delivery check a non-skippable part of the role's done-definition and a field in its output, so omission is conspicuous to the operator and any reviewer — the way a missing test is. This is the *encouragement* layer; it works when the model is cooperative.
+44: 5. **Harness enforcement (hook).** A Stop hook fires deterministically when the colleague tries to finish, outside the model's control, and can block completion until the cross-substrate check has run. This is the only mechanism that survives a compromised colleague, because the harness — not the model — pulls the trigger. It is a strict-profile surface: explicit operator approval and a clean uninstall path are required (`Method/13_Runtime_Boundary_Method.md`, `Install/INSTALL_TECHNE.md`).
+45: 6. **Escalation to the operator, with evidence.** On a flag — or when the inspector cannot run — withhold the suspect output and surface to the operator the specific evidence, rather than deliver. The operator is the trust anchor of last resort. **Never silently skip the check**: a silent skip is the exact failure mode this guide exists to prevent. "Inspector unavailable" is itself a reportable result.
+46: 
+47: ## When To Apply
+48: 
+49: Scope the heavy cross-substrate check to high-stakes and AI-research-sensitive work — model training, AI R&D infrastructure, frontier capability — not every trivial turn, or the cost and false-positive noise will swamp the signal and breed alarm fatigue. The deterministic floor already applies to all code work and should stay that way. A colleague decides scope honestly and records the decision, the same way it records out-of-scope surfaces in pre-flight.
+50: 
+51: ## The Honest Limits
+52: 
+53: Neither Claude nor Codex is a deterministic check; each is a model that could, in principle, be degraded. If both substrates were compromised, the deterministic floor and the operator's own judgement are the backstop — which is why escalation goes to a human, and why the tests-and-execution floor is never optional for sensitive work. This guide reduces the trust placed in any single model's unverified word. It does not, and cannot, prove a model is uncompromised. That is the point: stop relying on trust, and rely on verification.
+54: 
+55: ## Cross-References
+56: 
+57: - `Method/04_Implementation_Proof_Method.md` — the deterministic verification loop and proof discipline this guide builds on.
+58: - `Tools/codex/README.md` — the cross-substrate inspector (`ask.sh`): sandboxed, no-commit, timeout-bounded, captures the inspector's verdict in `last_message.txt`.
+59: - `Tools/ollama/README.md` — the local non-agentic alternative: loopback-only, explicit-content, digest-aware, resource-bounded, and text-out only.
+60: - `Examples/Optional_Enforcement/model-integrity-cross-check.md` — the strict-profile hook specification that enforces the pre-delivery cross-substrate check.
+61: - `KANON.md` §19 — the compact standard.
+62: - `Method/13_Runtime_Boundary_Method.md` — why the hook is a strict-profile surface needing explicit approval.
+
+FILE ../TECHNE/Tools/ollama/ollama_review.py SHA256 096573d0f859ac56fa81eaa72aedfdb244bee0f236db9a54daba763f4472b3e9 RANGE 1 1200 TOTAL 1202
+1: #!/usr/bin/env python3
+2: """Bounded, loopback-only text review through an existing Ollama daemon."""
+3: 
+4: from __future__ import print_function
+5: 
+6: import argparse
+7: import contextlib
+8: import datetime
+9: import decimal
+10: import errno
+11: import fcntl
+12: import hashlib
+13: import http.client
+14: import json
+15: import os
+16: import pathlib
+17: import re
+18: import secrets
+19: import signal
+20: import socket
+21: import stat
+22: import sys
+23: import tempfile
+24: import time
+25: 
+26: 
+27: WRAPPER_VERSION = "1.1.0"
+28: LOOPBACK_HOST = "127.0.0.1"
+29: DEFAULT_PORT = 11434
+30: DEFAULT_TIMEOUT_SECONDS = 900
+31: MAX_TIMEOUT_SECONDS = 7200
+32: DEFAULT_NUM_CTX = 32768
+33: MAX_NUM_CTX = 262144
+34: DEFAULT_NUM_PREDICT = 2048
+35: MAX_NUM_PREDICT = 16384
+36: DEFAULT_MAX_RESPONSE_BYTES = 16 * 1024 * 1024
+37: HARD_MAX_RESPONSE_BYTES = 16 * 1024 * 1024
+38: HARD_MAX_PROMPT_BYTES = 8 * 1024 * 1024
+39: HARD_MAX_FORMAT_SCHEMA_BYTES = 256 * 1024
+40: DISCOVERY_RESPONSE_LIMIT = 8 * 1024 * 1024
+41: ERROR_RESPONSE_LIMIT = 64 * 1024
+42: MIN_TEMPLATE_RESERVE = 2048
+43: DISCOVERY_TIMEOUT_SECONDS = 15
+44: OBSERVATION_TIMEOUT_SECONDS = 5
+45: MODEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,255}$")
+46: RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
+47: DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
+48: 
+49: 
+50: class ToolError(Exception):
+51:     def __init__(self, code, outcome, message):
+52:         super(ToolError, self).__init__(message)
+53:         self.code = code
+54:         self.outcome = outcome
+55:         self.message = message
+56: 
+57: 
+58: class WallClockExpired(Exception):
+59:     pass
+60: 
+61: 
+62: class Parser(argparse.ArgumentParser):
+63:     def error(self, message):
+64:         raise ToolError(1, "ARG_ERROR", message)
+65: 
+66: 
+67: def utc_now():
+68:     return datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
+69: 
+70: 
+71: def utc_stamp():
+72:     return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
+73: 
+74: 
+75: def sha256_bytes(data):
+76:     return hashlib.sha256(data).hexdigest()
+77: 
+78: 
+79: def sha256_file(path):
+80:     digest = hashlib.sha256()
+81:     with open(str(path), "rb") as handle:
+82:         while True:
+83:             block = handle.read(1024 * 1024)
+84:             if not block:
+85:                 break
+86:             digest.update(block)
+87:     return digest.hexdigest()
+88: 
+89: 
+90: def safe_display(value, limit=300):
+91:     text = str(value)
+92:     cleaned = "".join(ch if 32 <= ord(ch) <= 126 else "?" for ch in text)
+93:     if len(cleaned) > limit:
+94:         return cleaned[:limit] + "..."
+95:     return cleaned
+96: 
+97: 
+98: def parse_int(name, minimum, maximum):
+99:     def convert(value):
+100:         try:
+101:             parsed = int(value, 10)
+102:         except (TypeError, ValueError):
+103:             raise argparse.ArgumentTypeError("%s must be an integer" % name)
+104:         if parsed < minimum or parsed > maximum:
+105:             raise argparse.ArgumentTypeError(
+106:                 "%s must be between %d and %d" % (name, minimum, maximum)
+107:             )
+108:         return parsed
+109: 
+110:     return convert
+111: 
+112: 
+113: def parse_temperature(value):
+114:     try:
+115:         number = decimal.Decimal(value)
+116:     except decimal.InvalidOperation:
+117:         raise argparse.ArgumentTypeError("temperature must be a number")
+118:     if not number.is_finite() or number < 0 or number > 2:
+119:         raise argparse.ArgumentTypeError("temperature must be between 0 and 2")
+120:     return float(number)
+121: 
+122: 
+123: def parse_num_gpu(value):
+124:     if value == "auto":
+125:         return None
+126:     try:
+127:         parsed = int(value, 10)
+128:     except ValueError:
+129:         raise argparse.ArgumentTypeError("num-gpu must be 0..999 or auto")
+130:     if parsed < 0 or parsed > 999:
+131:         raise argparse.ArgumentTypeError("num-gpu must be 0..999 or auto")
+132:     return parsed
+133: 
+134: 
+135: def normalise_digest(value):
+136:     if value is None:
+137:         return None
+138:     digest = value.lower()
+139:     if digest.startswith("sha256:"):
+140:         digest = digest[7:]
+141:     if not DIGEST_RE.match(digest):
+142:         raise ToolError(1, "ARG_ERROR", "--expect-digest must be exactly 64 hex characters")
+143:     return digest
+144: 
+145: 
+146: def build_parser():
+147:     parser = Parser(
+148:         prog="ask.sh",
+149:         description="Bounded, loopback-only text review through an existing Ollama daemon.",
+150:     )
+151:     modes = parser.add_mutually_exclusive_group()
+152:     modes.add_argument("--probe", action="store_true", help="check API and optionally one model")
+153:     modes.add_argument("--list-models", action="store_true", help="list installed local models")
+154:     parser.add_argument("--model", help="exact installed Ollama model tag")
+155:     parser.add_argument("--prompt-file", help="absolute UTF-8 prompt path")
+156:     parser.add_argument(
+157:         "--format-schema-file",
+158:         help="absolute UTF-8 JSON Schema path for constrained model output",
+159:     )
+160:     parser.add_argument("--approve-local-content", action="store_true")
+161:     identity = parser.add_mutually_exclusive_group()
+162:     identity.add_argument("--expect-digest")
+163:     parser.add_argument(
+164:         "--expect-served-model",
+165:         help="served model name to expect when it differs from the requested tag "
+166:              "(Ollama cloud reports `name` for a requested `name:cloud`)")
+167:     identity.add_argument("--allow-unpinned-model", action="store_true")
+168:     parser.add_argument("--port", type=parse_int("port", 1, 65535), default=DEFAULT_PORT)
+169:     parser.add_argument("--run-id")
+170:     parser.add_argument(
+171:         "--timeout-seconds",
+172:         type=parse_int("timeout-seconds", 1, MAX_TIMEOUT_SECONDS),
+173:         default=DEFAULT_TIMEOUT_SECONDS,
+174:     )
+175:     parser.add_argument(
+176:         "--num-ctx",
+177:         type=parse_int("num-ctx", 512, MAX_NUM_CTX),
+178:         default=DEFAULT_NUM_CTX,
+179:     )
+180:     parser.add_argument(
+181:         "--num-predict",
+182:         type=parse_int("num-predict", 1, MAX_NUM_PREDICT),
+183:         default=DEFAULT_NUM_PREDICT,
+184:     )
+185:     parser.add_argument("--temperature", type=parse_temperature, default=0.0)
+186:     parser.add_argument(
+187:         "--seed",
+188:         type=parse_int("seed", 0, 2147483647),
+189:         default=0,
+190:     )
+191:     parser.add_argument("--num-gpu", type=parse_num_gpu, default=0)
+192:     parser.add_argument(
+193:         "--think",
+194:         choices=("model-default", "on", "off"),
+195:         default="model-default",
+196:     )
+197:     parser.add_argument(
+198:         "--max-response-bytes",
+199:         type=parse_int("max-response-bytes", 1024, HARD_MAX_RESPONSE_BYTES),
+200:         default=DEFAULT_MAX_RESPONSE_BYTES,
+201:     )
+202:     parser.add_argument("--dry-run", action="store_true")
+203:     return parser
+204: 
+205: 
+206: def validate_args(args):
+207:     args.expect_digest = normalise_digest(args.expect_digest)
+208: 
+209:     if args.probe:
+210:         if (
+211:             args.prompt_file
+212:             or args.format_schema_file
+213:             or args.approve_local_content
+214:             or args.expect_digest
+215:         ):
+216:             raise ToolError(1, "ARG_ERROR", "--probe does not accept review content or a digest pin")
+217:         if args.allow_unpinned_model or args.dry_run:
+218:             raise ToolError(1, "ARG_ERROR", "--probe does not accept review-only flags")
+219:         if args.run_id:
+220:             raise ToolError(1, "ARG_ERROR", "--probe does not accept --run-id")
+221:         if args.model and not MODEL_RE.match(args.model):
+222:             raise ToolError(1, "ARG_ERROR", "invalid --model token")
+223:         return
+224: 
+225:     if args.list_models:
+226:         if (
+227:             args.model
+228:             or args.prompt_file
+229:             or args.format_schema_file
+230:             or args.approve_local_content
+231:         ):
+232:             raise ToolError(1, "ARG_ERROR", "--list-models does not accept review arguments")
+233:         if args.expect_digest or args.allow_unpinned_model or args.dry_run or args.run_id:
+234:             raise ToolError(1, "ARG_ERROR", "--list-models does not accept review-only flags")
+235:         return
+236: 
+237:     if not args.model:
+238:         raise ToolError(1, "ARG_ERROR", "--model is required")
+239:     if not MODEL_RE.match(args.model):
+240:         raise ToolError(1, "ARG_ERROR", "invalid --model token")
+241:     if not args.prompt_file:
+242:         raise ToolError(1, "ARG_ERROR", "--prompt-file is required")
+243:     prompt_path = pathlib.Path(args.prompt_file)
+244:     if not prompt_path.is_absolute():
+245:         raise ToolError(1, "ARG_ERROR", "--prompt-file must be absolute")
+246:     if args.format_schema_file and not pathlib.Path(args.format_schema_file).is_absolute():
+247:         raise ToolError(1, "ARG_ERROR", "--format-schema-file must be absolute")
+248:     if not args.expect_digest and not args.allow_unpinned_model:
+249:         raise ToolError(
+250:             1,
+251:             "ARG_ERROR",
+252:             "choose --expect-digest or explicitly use --allow-unpinned-model",
+253:         )
+254:     if not args.dry_run and not args.approve_local_content:
+255:         raise ToolError(
+256:             1,
+257:             "CONTENT_NOT_APPROVED",
+258:             "--approve-local-content is required for a real generation",
+259:         )
+260:     if args.run_id and not RUN_ID_RE.match(args.run_id):
+261:         raise ToolError(1, "ARG_ERROR", "--run-id must be a pathname-free safe token")
+262: 
+263: 
+264: def read_prompt(path_text):
+265:     requested = pathlib.Path(path_text)
+266:     try:
+267:         resolved = requested.resolve(strict=True)
+268:     except (OSError, RuntimeError) as exc:
+269:         raise ToolError(1, "PROMPT_ERROR", "cannot resolve prompt file: %s" % safe_display(exc))
+270:     flags = os.O_RDONLY
+271:     if hasattr(os, "O_NOFOLLOW"):
+272:         flags |= os.O_NOFOLLOW
+273:     try:
+274:         fd = os.open(str(resolved), flags)
+275:     except OSError as exc:
+276:         raise ToolError(1, "PROMPT_ERROR", "cannot open prompt file: %s" % safe_display(exc))
+277:     try:
+278:         info = os.fstat(fd)
+279:         if not stat.S_ISREG(info.st_mode):
+280:             raise ToolError(1, "PROMPT_ERROR", "prompt path is not a regular file")
+281:         if info.st_size > HARD_MAX_PROMPT_BYTES:
+282:             raise ToolError(
+283:                 7,
+284:                 "PROMPT_TOO_LARGE",
+285:                 "prompt exceeds hard limit of %d bytes" % HARD_MAX_PROMPT_BYTES,
+286:             )
+287:         chunks = []
+288:         remaining = HARD_MAX_PROMPT_BYTES + 1
+289:         while remaining > 0:
+290:             block = os.read(fd, min(1024 * 1024, remaining))
+291:             if not block:
+292:                 break
+293:             chunks.append(block)
+294:             remaining -= len(block)
+295:         data = b"".join(chunks)
+296:         if len(data) > HARD_MAX_PROMPT_BYTES:
+297:             raise ToolError(
+298:                 7,
+299:                 "PROMPT_TOO_LARGE",
+300:                 "prompt exceeds hard limit of %d bytes" % HARD_MAX_PROMPT_BYTES,
+301:             )
+302:     finally:
+303:         os.close(fd)
+304:     try:
+305:         text = data.decode("utf-8")
+306:     except UnicodeDecodeError:
+307:         raise ToolError(1, "PROMPT_NOT_UTF8", "prompt file must be valid UTF-8")
+308:     if not text.strip():
+309:         raise ToolError(1, "PROMPT_EMPTY", "prompt file is empty")
+310:     return resolved, data, text
+311: 
+312: 
+313: def _unique_json_pairs(pairs):
+314:     value = {}
+315:     for key, item in pairs:
+316:         if key in value:
+317:             raise ValueError("duplicate JSON key: %s" % key)
+318:         value[key] = item
+319:     return value
+320: 
+321: 
+322: def _reject_json_constant(value):
+323:     raise ValueError("non-finite JSON number: %s" % value)
+324: 
+325: 
+326: def read_format_schema(path_text):
+327:     if path_text is None:
+328:         return None, None, None
+329:     path, data, text = read_prompt(path_text)
+330:     if len(data) > HARD_MAX_FORMAT_SCHEMA_BYTES:
+331:         raise ToolError(
+332:             7,
+333:             "FORMAT_SCHEMA_TOO_LARGE",
+334:             "format schema exceeds hard limit of %d bytes"
+335:             % HARD_MAX_FORMAT_SCHEMA_BYTES,
+336:         )
+337:     try:
+338:         value = json.loads(
+339:             text,
+340:             object_pairs_hook=_unique_json_pairs,
+341:             parse_constant=_reject_json_constant,
+342:         )
+343:     except (ValueError, json.JSONDecodeError) as exc:
+344:         raise ToolError(
+345:             1,
+346:             "FORMAT_SCHEMA_INVALID",
+347:             "format schema is not strict JSON: %s" % safe_display(exc),
+348:         )
+349:     if not isinstance(value, dict):
+350:         raise ToolError(
+351:             1,
+352:             "FORMAT_SCHEMA_INVALID",
+353:             "format schema root must be a JSON object",
+354:         )
+355:     return path, data, value
+356: 
+357: 
+358: @contextlib.contextmanager
+359: def wall_clock(seconds):
+360:     if not hasattr(signal, "SIGALRM"):
+361:         yield
+362:         return
+363: 
+364:     def expired(_signum, _frame):
+365:         raise WallClockExpired()
+366: 
+367:     previous_handler = signal.getsignal(signal.SIGALRM)
+368:     signal.signal(signal.SIGALRM, expired)
+369:     previous_timer = signal.setitimer(signal.ITIMER_REAL, float(seconds))
+370:     try:
+371:         yield
+372:     finally:
+373:         signal.setitimer(signal.ITIMER_REAL, 0)
+374:         signal.signal(signal.SIGALRM, previous_handler)
+375:         if previous_timer[0] > 0:
+376:             signal.setitimer(signal.ITIMER_REAL, previous_timer[0], previous_timer[1])
+377: 
+378: 
+379: class LoopbackClient(object):
+380:     def __init__(self, port):
+381:         self.port = port
+382: 
+383:     def request(self, method, path, body, timeout, response_limit):
+384:         encoded = None
+385:         headers = {"Accept": "application/json", "Connection": "close"}
+386:         if body is not None:
+387:             encoded = json.dumps(
+388:                 body, ensure_ascii=False, separators=(",", ":")
+389:             ).encode("utf-8")
+390:             headers["Content-Type"] = "application/json"
+391:             headers["Content-Length"] = str(len(encoded))
+392:         connection = http.client.HTTPConnection(LOOPBACK_HOST, self.port, timeout=timeout)
+393:         try:
+394:             connection.request(method, path, body=encoded, headers=headers)
+395:             response = connection.getresponse()
+396:             raw = response.read(response_limit + 1)
+397:             if len(raw) > response_limit:
+398:                 raise ToolError(
+399:                     7,
+400:                     "RESPONSE_TOO_LARGE",
+401:                     "HTTP response exceeded %d bytes" % response_limit,
+402:                 )
+403:             if response.status < 200 or response.status >= 300:
+404:                 message = safe_display(raw.decode("utf-8", errors="replace"))
+405:                 raise ToolError(
+406:                     4,
+407:                     "HTTP_ERROR",
+408:                     "Ollama HTTP %d: %s" % (response.status, message),
+409:                 )
+410:             return raw
+411:         except ToolError:
+412:             raise
+413:         except (socket.timeout, TimeoutError):
+414:             raise ToolError(
+415:                 2,
+416:                 "SERVICE_TIMEOUT",
+417:                 "loopback Ollama request timed out",
+418:             )
+419:         except (ConnectionError, OSError, http.client.HTTPException) as exc:
+420:             raise ToolError(
+421:                 2,
+422:                 "SERVICE_UNAVAILABLE",
+423:                 "loopback Ollama request failed: %s" % safe_display(exc),
+424:             )
+425:         finally:
+426:             connection.close()
+427: 
+428: 
+429: def parse_json(raw, outcome="MALFORMED_JSON"):
+430:     try:
+431:         value = json.loads(raw.decode("utf-8"))
+432:     except (UnicodeDecodeError, ValueError, RecursionError) as exc:
+433:         raise ToolError(5, outcome, "invalid JSON from Ollama: %s" % safe_display(exc))
+434:     return value
+435: 
+436: 
+437: def get_version(client):
+438:     raw = client.request(
+439:         "GET", "/api/version", None, OBSERVATION_TIMEOUT_SECONDS, ERROR_RESPONSE_LIMIT
+440:     )
+441:     data = parse_json(raw, "PREFLIGHT_PROTOCOL_ERROR")
+442:     if not isinstance(data, dict) or not isinstance(data.get("version"), str):
+443:         raise ToolError(2, "PREFLIGHT_PROTOCOL_ERROR", "Ollama version response is invalid")
+444:     version = data["version"]
+445:     if not version or len(version) > 128:
+446:         raise ToolError(2, "PREFLIGHT_PROTOCOL_ERROR", "Ollama version value is invalid")
+447:     return safe_display(version, 128)
+448: 
+449: 
+450: def get_tags(client):
+451:     raw = client.request(
+452:         "GET", "/api/tags", None, DISCOVERY_TIMEOUT_SECONDS, DISCOVERY_RESPONSE_LIMIT
+453:     )
+454:     data = parse_json(raw, "PREFLIGHT_PROTOCOL_ERROR")
+455:     if not isinstance(data, dict) or not isinstance(data.get("models"), list):
+456:         raise ToolError(2, "PREFLIGHT_PROTOCOL_ERROR", "Ollama tags response is invalid")
+457:     if len(data["models"]) > 10000:
+458:         raise ToolError(7, "MODEL_LIST_TOO_LARGE", "Ollama returned too many model records")
+459:     return data["models"]
+460: 
+461: 
+462: def validate_digest(value, field_name):
+463:     if not isinstance(value, str):
+464:         raise ToolError(2, "MODEL_METADATA_INVALID", "%s is missing" % field_name)
+465:     digest = value.lower()
+466:     if digest.startswith("sha256:"):
+467:         digest = digest[7:]
+468:     if not DIGEST_RE.match(digest):
+469:         raise ToolError(2, "MODEL_METADATA_INVALID", "%s is not full SHA-256" % field_name)
+470:     return digest
+471: 
+472: 
+473: def find_model(models, requested):
+474:     found = []
+475:     for item in models:
+476:         if not isinstance(item, dict):
+477:             continue
+478:         name = item.get("name", item.get("model"))
+479:         if name == requested:
+480:             found.append(item)
+481:     if not found:
+482:         raise ToolError(2, "MODEL_NOT_FOUND", "model is not installed: %s" % requested)
+483:     if len(found) != 1:
+484:         raise ToolError(2, "MODEL_METADATA_INVALID", "duplicate records for model: %s" % requested)
+485:     item = found[0]
+486:     digest = validate_digest(item.get("digest"), "model digest")
+487:     capabilities = item.get("capabilities")
+488:     if capabilities is not None:
+489:         if not isinstance(capabilities, list) or any(
+490:             not isinstance(value, str) for value in capabilities
+491:         ):
+492:             raise ToolError(2, "MODEL_METADATA_INVALID", "model capabilities are invalid")
+493:         if len(capabilities) > 64 or any(len(value) > 256 for value in capabilities):
+494:             raise ToolError(2, "MODEL_METADATA_INVALID", "model capabilities are unbounded")
+495:         if "completion" not in capabilities:
+496:             raise ToolError(
+497:                 2,
+498:                 "MODEL_NOT_COMPLETION_CAPABLE",
+499:                 "model does not advertise completion capability: %s" % requested,
+500:             )
+501:     raw_details = item.get("details") if isinstance(item.get("details"), dict) else {}
+502:     context_length = raw_details.get("context_length")
+503:     if context_length is not None and (
+504:         not isinstance(context_length, int) or isinstance(context_length, bool)
+505:     ):
+506:         raise ToolError(2, "MODEL_METADATA_INVALID", "model context_length is invalid")
+507:     details = {}
+508:     for key in (
+509:         "format",
+510:         "family",
+511:         "parameter_size",
+512:         "quantization_level",
+513:         "embedding_length",
+514:     ):
+515:         value = raw_details.get(key)
+516:         if isinstance(value, str):
+517:             details[key] = safe_display(value, 256)
+518:         elif isinstance(value, int) and not isinstance(value, bool):
+519:             details[key] = value
+520:     families = raw_details.get("families")
+521:     if isinstance(families, list) and len(families) <= 64 and all(
+522:         isinstance(value, str) and len(value) <= 256 for value in families
+523:     ):
+524:         details["families"] = [safe_display(value, 256) for value in families]
+525:     if context_length is not None:
+526:         details["context_length"] = context_length
+527:     return {
+528:         "name": requested,
+529:         "digest": digest,
+530:         "size": item.get("size") if isinstance(item.get("size"), int) else None,
+531:         "modified_at": safe_display(item.get("modified_at"), 128)
+532:         if item.get("modified_at") is not None
+533:         else None,
+534:         "capabilities": capabilities,
+535:         "details": details,
+536:         "context_length": context_length,
+537:     }
+538: 
+539: 
+540: def get_show(client, model):
+541:     raw = client.request(
+542:         "POST",
+543:         "/api/show",
+544:         {"model": model},
+545:         DISCOVERY_TIMEOUT_SECONDS,
+546:         DISCOVERY_RESPONSE_LIMIT,
+547:     )
+548:     data = parse_json(raw, "PREFLIGHT_PROTOCOL_ERROR")
+549:     if not isinstance(data, dict):
+550:         raise ToolError(2, "PREFLIGHT_PROTOCOL_ERROR", "Ollama show response is invalid")
+551:     template = data.get("template", "")
+552:     system_text = data.get("system", "")
+553:     parameters = data.get("parameters", "")
+554:     for label, value in (
+555:         ("template", template),
+556:         ("system", system_text),
+557:         ("parameters", parameters),
+558:     ):
+559:         if not isinstance(value, str):
+560:             raise ToolError(2, "MODEL_METADATA_INVALID", "model %s is invalid" % label)
+561:     return {
+562:         "template_sha256": sha256_bytes(template.encode("utf-8")),
+563:         "template_bytes": len(template.encode("utf-8")),
+564:         "system_sha256": sha256_bytes(system_text.encode("utf-8")),
+565:         "system_bytes": len(system_text.encode("utf-8")),
+566:         "parameters_sha256": sha256_bytes(parameters.encode("utf-8")),
+567:         "parameters_bytes": len(parameters.encode("utf-8")),
+568:     }
+569: 
+570: 
+571: def get_ps_observation(client, model):
+572:     try:
+573:         raw = client.request(
+574:             "GET",
+575:             "/api/ps",
+576:             None,
+577:             OBSERVATION_TIMEOUT_SECONDS,
+578:             DISCOVERY_RESPONSE_LIMIT,
+579:         )
+580:         data = parse_json(raw, "PS_PROTOCOL_ERROR")
+581:         models = data.get("models") if isinstance(data, dict) else None
+582:         if not isinstance(models, list):
+583:             return {"status": "invalid"}
+584:         for item in models:
+585:             if not isinstance(item, dict):
+586:                 continue
+587:             if item.get("name", item.get("model")) == model:
+588:                 return {
+589:                     "status": "observed",
+590:                     "size": item.get("size") if isinstance(item.get("size"), int) else None,
+591:                     "size_vram": item.get("size_vram")
+592:                     if isinstance(item.get("size_vram"), int)
+593:                     else None,
+594:                     "expires_at": safe_display(item.get("expires_at"), 128)
+595:                     if item.get("expires_at") is not None
+596:                     else None,
+597:                 }
+598:         return {"status": "not_listed"}
+599:     except ToolError as exc:
+600:         return {"status": "unavailable", "reason": safe_display(exc.outcome, 64)}
+601: 
+602: 
+603: def safe_write_bytes(path, data):
+604:     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+605:     if hasattr(os, "O_NOFOLLOW"):
+606:         flags |= os.O_NOFOLLOW
+607:     try:
+608:         fd = os.open(str(path), flags, 0o600)
+609:         try:
+610:             view = memoryview(data)
+611:             while view:
+612:                 written = os.write(fd, view)
+613:                 if written <= 0:
+614:                     raise OSError(errno.EIO, "zero-byte artefact write")
+615:                 view = view[written:]
+616:             os.fsync(fd)
+617:         finally:
+618:             os.close(fd)
+619:     except OSError as exc:
+620:         raise ToolError(5, "ARTEFACT_WRITE_FAILED", "cannot write artefact: %s" % safe_display(exc))
+621: 
+622: 
+623: def write_json_atomic(path, value):
+624:     encoded = (
+625:         json.dumps(value, ensure_ascii=True, indent=2, sort_keys=True) + "\n"
+626:     ).encode("utf-8")
+627:     temp_path = path.parent / (".%s.%s.tmp" % (path.name, secrets.token_hex(8)))
+628:     try:
+629:         safe_write_bytes(temp_path, encoded)
+630:         try:
+631:             os.replace(str(temp_path), str(path))
+632:         except OSError as exc:
+633:             raise ToolError(
+634:                 5,
+635:                 "ARTEFACT_WRITE_FAILED",
+636:                 "cannot replace artefact metadata: %s" % safe_display(exc),
+637:             )
+638:     finally:
+639:         try:
+640:             temp_path.unlink()
+641:         except FileNotFoundError:
+642:             pass
+643: 
+644: 
+645: def append_audit(log_path, value):
+646:     flags = os.O_WRONLY | os.O_APPEND | os.O_CREAT
+647:     if hasattr(os, "O_NOFOLLOW"):
+648:         flags |= os.O_NOFOLLOW
+649:     try:
+650:         fd = os.open(str(log_path), flags, 0o600)
+651:         info = os.fstat(fd)
+652:         if not stat.S_ISREG(info.st_mode):
+653:             raise OSError(errno.EINVAL, "audit path is not a regular file")
+654:         os.fchmod(fd, 0o600)
+655:         fcntl.flock(fd, fcntl.LOCK_EX)
+656:         encoded = (json.dumps(value, sort_keys=True) + "\n").encode("utf-8")
+657:         view = memoryview(encoded)
+658:         while view:
+659:             written = os.write(fd, view)
+660:             if written <= 0:
+661:                 raise OSError(errno.EIO, "zero-byte audit write")
+662:             view = view[written:]
+663:         os.fsync(fd)
+664:     except OSError as exc:
+665:         raise ToolError(5, "AUDIT_WRITE_FAILED", "cannot write audit log: %s" % safe_display(exc))
+666:     finally:
+667:         if "fd" in locals():
+668:             os.close(fd)
+669: 
+670: 
+671: @contextlib.contextmanager
+672: def generation_lock(port):
+673:     lock_path = pathlib.Path(tempfile.gettempdir()) / (
+674:         "techne-ollama-%s-%d.lock" % (os.getuid(), port)
+675:     )
+676:     flags = os.O_RDWR | os.O_CREAT
+677:     if hasattr(os, "O_NOFOLLOW"):
+678:         flags |= os.O_NOFOLLOW
+679:     try:
+680:         fd = os.open(str(lock_path), flags, 0o600)
+681:     except OSError as exc:
+682:         raise ToolError(9, "LOCK_FAILED", "cannot open generation lock: %s" % safe_display(exc))
+683:     try:
+684:         try:
+685:             fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+686:         except BlockingIOError:
+687:             raise ToolError(9, "CONCURRENT_RUN", "another generation holds the port lock")
+688:         os.ftruncate(fd, 0)
+689:         os.write(fd, ("%d\n" % os.getpid()).encode("ascii"))
+690:         yield
+691:     finally:
+692:         os.close(fd)
+693: 
+694: 
+695: def make_artifact_dir(script_dir, run_id):
+696:     base = script_dir / "_runs"
+697:     try:
+698:         if base.is_symlink():
+699:             raise OSError(errno.ELOOP, "artefact base must not be a symlink")
+700:         base.mkdir(mode=0o700, parents=True, exist_ok=True)
+701:         if base.is_symlink() or not base.is_dir():
+702:             raise OSError(errno.ENOTDIR, "artefact base is not a real directory")
+703:         os.chmod(str(base), 0o700)
+704:         token = run_id or secrets.token_hex(4)
+705:         created = pathlib.Path(
+706:             tempfile.mkdtemp(prefix="%s_%s_" % (utc_stamp(), token), dir=str(base))
+707:         ).resolve()
+708:     except OSError as exc:
+709:         raise ToolError(
+710:             5,
+711:             "ARTEFACT_CREATE_FAILED",
+712:             "cannot create artefact directory: %s" % safe_display(exc),
+713:         )
+714:     base_resolved = base.resolve()
+715:     if created.parent != base_resolved:
+716:         raise ToolError(5, "ARTEFACT_PATH_INVALID", "artefact directory escaped its base")
+717:     os.chmod(str(created), 0o700)
+718:     return created
+719: 
+720: 
+721: def request_options(args):
+722:     options = {
+723:         "num_ctx": args.num_ctx,
+724:         "num_predict": args.num_predict,
+725:         "seed": args.seed,
+726:         "temperature": args.temperature,
+727:     }
+728:     if args.num_gpu is not None:
+729:         options["num_gpu"] = args.num_gpu
+730:     return options
+731: 
+732: 
+733: def build_request(args, prompt_text, format_schema):
+734:     body = {
+735:         "model": args.model,
+736:         "options": request_options(args),
+737:         "prompt": prompt_text,
+738:         "stream": False,
+739:     }
+740:     if args.think == "on":
+741:         body["think"] = True
+742:     elif args.think == "off":
+743:         body["think"] = False
+744:     if format_schema is not None:
+745:         body["format"] = format_schema
+746:     return body
+747: 
+748: 
+749: def validate_context_budget(args, prompt_bytes, model_meta, show_meta):
+750:     advertised = model_meta.get("context_length")
+751:     if advertised is not None and args.num_ctx > advertised:
+752:         raise ToolError(
+753:             7,
+754:             "CONTEXT_EXCEEDS_MODEL",
+755:             "num-ctx %d exceeds model-advertised context %d"
+756:             % (args.num_ctx, advertised),
+757:         )
+758:     reserve = max(
+759:         MIN_TEMPLATE_RESERVE,
+760:         show_meta["template_bytes"] + show_meta["system_bytes"] + 512,
+761:     )
+762:     required_upper_bound = prompt_bytes + args.num_predict + reserve
+763:     if required_upper_bound > args.num_ctx:
+764:         raise ToolError(
+765:             7,
+766:             "PROMPT_CONTEXT_BUDGET_EXCEEDED",
+767:             "conservative context bound requires %d but num-ctx is %d"
+768:             % (required_upper_bound, args.num_ctx),
+769:         )
+770:     return reserve
+771: 
+772: 
+773: def validate_generation(raw, requested_model, expect_served_model=None):
+774:     data = parse_json(raw)
+775:     if not isinstance(data, dict):
+776:         raise ToolError(5, "MALFORMED_RESPONSE", "generation response must be a JSON object")
+777:     error_value = data.get("error")
+778:     if error_value is not None:
+779:         raise ToolError(4, "GENERATION_ERROR", "Ollama error: %s" % safe_display(error_value))
+780:     # The served name normally equals the requested tag. Ollama cloud models are
+781:     # an exception: the daemon proxies `name:cloud` upstream and the response
+782:     # reports the bare `name`, so a strict equality check makes every cloud model
+783:     # unusable. `--expect-served-model` lets the caller DECLARE the served
+784:     # identity it expects, so the check still happens against a stated value
+785:     # rather than being bypassed. There is deliberately no "allow any served
+786:     # model" escape: an unchecked identity is exactly what this guard exists to
+787:     # prevent, and a review whose model cannot be named is not evidence.
+788:     expected_served = expect_served_model or requested_model
+789:     served_model = data.get("model")
+790:     if served_model != expected_served:
+791:         raise ToolError(
+792:             3,
+793:             "SERVED_MODEL_MISMATCH",
+794:             "requested model %s, expected served %s, but response reported %s"
+795:             % (requested_model, expected_served, safe_display(served_model)),
+796:         )
+797:     if data.get("done") is not True:
+798:         raise ToolError(5, "INCOMPLETE_RESPONSE", "generation response is not marked done")
+799:     done_reason = data.get("done_reason")
+800:     if done_reason == "length":
+801:         raise ToolError(5, "TRUNCATED_RESPONSE", "generation stopped at the token limit")
+802:     if done_reason is not None and not isinstance(done_reason, str):
+803:         raise ToolError(5, "MALFORMED_RESPONSE", "done_reason is invalid")
+804:     if done_reason not in (None, "stop"):
+805:         raise ToolError(
+806:             5,
+807:             "UNEXPECTED_DONE_REASON",
+808:             "generation ended for an unsupported reason: %s" % safe_display(done_reason),
+809:         )
+810:     response_text = data.get("response")
+811:     if not isinstance(response_text, str) or not response_text.strip():
+812:         raise ToolError(5, "EMPTY_RESPONSE", "generation returned no response text")
+813:     thinking = data.get("thinking")
+814:     if thinking is not None and not isinstance(thinking, str):
+815:         raise ToolError(5, "MALFORMED_RESPONSE", "thinking field is invalid")
+816:     numeric_fields = (
+817:         "total_duration",
+818:         "load_duration",
+819:         "prompt_eval_count",
+820:         "prompt_eval_duration",
+821:         "eval_count",
+822:         "eval_duration",
+823:     )
+824:     metrics = {}
+825:     for field in numeric_fields:
+826:         value = data.get(field)
+827:         if value is not None:
+828:             if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+829:                 raise ToolError(5, "MALFORMED_RESPONSE", "%s is invalid" % field)
+830:             metrics[field] = value
+831:     return {
+832:         "response_text": response_text,
+833:         "thinking_text": thinking,
+834:         "served_model": served_model,
+835:         "created_at": safe_display(data.get("created_at"), 128)
+836:         if data.get("created_at") is not None
+837:         else None,
+838:         "done_reason": done_reason,
+839:         "metrics": metrics,
+840:     }
+841: 
+842: 
+843: def base_meta(
+844:     args,
+845:     script_dir,
+846:     prompt_path,
+847:     prompt_data,
+848:     format_schema_path,
+849:     format_schema_data,
+850:     api_version,
+851:     model_meta,
+852:     show_meta,
+853: ):
+854:     launcher = script_dir / "ask.sh"
+855:     implementation = script_dir / "ollama_review.py"
+856:     return {
+857:         "wrapper_version": WRAPPER_VERSION,
+858:         "launcher_sha256": sha256_file(launcher),
+859:         "implementation_sha256": sha256_file(implementation),
+860:         "python_executable": sys.executable,
+861:         "python_version": sys.version.split()[0],
+862:         "endpoint": "http://%s:%d" % (LOOPBACK_HOST, args.port),
+863:         "api_version": api_version,
+864:         "model_requested": args.model,
+865:         "model_digest_before": model_meta["digest"],
+866:         "model_expected_digest": args.expect_digest,
+867:         "model_identity_status": "PINNED" if args.expect_digest else "UNPINNED",
+868:         "model_size": model_meta["size"],
+869:         "model_modified_at": model_meta["modified_at"],
+870:         "model_capabilities": model_meta["capabilities"],
+871:         "model_details": model_meta["details"],
+872:         "model_show": show_meta,
+873:         "prompt_source": str(prompt_path),
+874:         "prompt_bytes": len(prompt_data),
+875:         "prompt_sha256": sha256_bytes(prompt_data),
+876:         "format_schema_source": str(format_schema_path)
+877:         if format_schema_path is not None
+878:         else None,
+879:         "format_schema_bytes": len(format_schema_data)
+880:         if format_schema_data is not None
+881:         else 0,
+882:         "format_schema_sha256": sha256_bytes(format_schema_data)
+883:         if format_schema_data is not None
+884:         else None,
+885:         "parameters": {
+886:             "num_ctx": args.num_ctx,
+887:             "num_predict": args.num_predict,
+888:             "temperature": args.temperature,
+889:             "seed": args.seed,
+890:             "num_gpu": args.num_gpu if args.num_gpu is not None else "auto",
+891:             "think": args.think,
+892:             "timeout_seconds": args.timeout_seconds,
+893:             "max_response_bytes": args.max_response_bytes,
+894:         },
+895:         "approval": "approve-local-content",
+896:         "started_at": utc_now(),
+897:         "outcome": "STARTED",
+898:         "exit_code": None,
+899:     }
+900: 
+901: 
+902: def run_review(
+903:     args,
+904:     script_dir,
+905:     prompt_path,
+906:     prompt_data,
+907:     prompt_text,
+908:     format_schema_path,
+909:     format_schema_data,
+910:     format_schema,
+911: ):
+912:     client = LoopbackClient(args.port)
+913:     api_version = get_version(client)
+914:     model_before = find_model(get_tags(client), args.model)
+915:     if args.expect_digest and model_before["digest"] != args.expect_digest:
+916:         raise ToolError(
+917:             3,
+918:             "MODEL_DIGEST_MISMATCH",
+919:             "installed digest %s does not match expected %s"
+920:             % (model_before["digest"], args.expect_digest),
+921:         )
+922:     show_meta = get_show(client, args.model)
+923:     constrained_bytes = len(format_schema_data) if format_schema_data else 0
+924:     template_reserve = validate_context_budget(
+925:         args, len(prompt_data) + constrained_bytes, model_before, show_meta
+926:     )
+927:     artifact = make_artifact_dir(script_dir, args.run_id)
+928:     meta = base_meta(
+929:         args, script_dir, prompt_path, prompt_data, format_schema_path,
+930:         format_schema_data, api_version, model_before, show_meta,
+931:     )
+932:     meta["template_reserve_upper_bound"] = template_reserve
+933:     request_body = build_request(args, prompt_text, format_schema)
+934:     request_record = {
+935:         "model": args.model,
+936:         "options": request_body["options"],
+937:         "prompt_bytes": len(prompt_data),
+938:         "prompt_sha256": sha256_bytes(prompt_data),
+939:         "format_schema_bytes": constrained_bytes,
+940:         "format_schema_sha256": sha256_bytes(format_schema_data)
+941:         if format_schema_data is not None
+942:         else None,
+943:         "stream": False,
+944:         "think": args.think,
+945:     }
+946:     safe_write_bytes(artifact / "prompt.txt", prompt_data)
+947:     if format_schema_data is not None:
+948:         safe_write_bytes(artifact / "format_schema.json", format_schema_data)
+949:     safe_write_bytes(
+950:         artifact / "request.json",
+951:         (json.dumps(request_record, indent=2, sort_keys=True) + "\n").encode("utf-8"),
+952:     )
+953:     log_path = script_dir / "_ollama.log"
+954:     append_audit(
+955:         log_path,
+956:         {
+957:             "at": utc_now(),
+958:             "event": "start",
+959:             "run": artifact.name,
+960:             "model": args.model,
+961:             "digest": model_before["digest"],
+962:             "prompt_sha256": sha256_bytes(prompt_data),
+963:         },
+964:     )
+965:     raw_response = None
+966:     started = time.monotonic()
+967:     try:
+968:         try:
+969:             with wall_clock(args.timeout_seconds):
+970:                 raw_response = client.request(
+971:                     "POST",
+972:                     "/api/generate",
+973:                     request_body,
+974:                     args.timeout_seconds,
+975:                     args.max_response_bytes,
+976:                 )
+977:         except WallClockExpired:
+978:             raise ToolError(
+979:                 6,
+980:                 "TIMEOUT",
+981:                 "generation exceeded %d seconds" % args.timeout_seconds,
+982:             )
+983:         except ToolError as exc:
+984:             if exc.outcome == "SERVICE_TIMEOUT":
+985:                 raise ToolError(
+986:                     6,
+987:                     "TIMEOUT",
+988:                     "generation exceeded %d seconds" % args.timeout_seconds,
+989:                 )
+990:             raise
+991:         safe_write_bytes(artifact / "raw_response.json", raw_response)
+992:         parsed = validate_generation(
+993:             raw_response, args.model, args.expect_served_model)
+994:         model_after = find_model(get_tags(client), args.model)
+995:         meta["model_digest_after"] = model_after["digest"]
+996:         if model_after["digest"] != model_before["digest"]:
+997:             raise ToolError(
+998:                 8,
+999:                 "MODEL_CHANGED_DURING_RUN",
+1000:                 "model digest changed during generation",
+1001:             )
+1002:         if args.expect_digest and model_after["digest"] != args.expect_digest:
+1003:             raise ToolError(
+1004:                 8,
+1005:                 "MODEL_CHANGED_DURING_RUN",
+1006:                 "postflight digest no longer matches expected digest",
+1007:             )
+1008:         response_data = parsed["response_text"].encode("utf-8")
+1009:         thinking_text = parsed["thinking_text"]
+1010:         safe_write_bytes(artifact / "response.txt", response_data)
+1011:         if thinking_text:
+1012:             safe_write_bytes(artifact / "thinking.txt", thinking_text.encode("utf-8"))
+1013:         meta.update(
+1014:             {
+1015:                 "served_model": parsed["served_model"],
+1016:                 "response_created_at": parsed["created_at"],
+1017:                 "done_reason": parsed["done_reason"],
+1018:                 "response_bytes": len(response_data),
+1019:                 "response_sha256": sha256_bytes(response_data),
+1020:                 "thinking_bytes": len(thinking_text.encode("utf-8"))
+1021:                 if thinking_text
+1022:                 else 0,
+1023:                 "thinking_sha256": sha256_bytes(thinking_text.encode("utf-8"))
+1024:                 if thinking_text
+1025:                 else None,
+1026:                 "raw_response_bytes": len(raw_response),
+1027:                 "raw_response_sha256": sha256_bytes(raw_response),
+1028:                 "metrics": parsed["metrics"],
+1029:                 "ps_observation": get_ps_observation(client, args.model),
+1030:                 "elapsed_seconds": round(time.monotonic() - started, 6),
+1031:                 "finished_at": utc_now(),
+1032:                 "outcome": "OK",
+1033:                 "exit_code": 0,
+1034:             }
+1035:         )
+1036:         write_json_atomic(artifact / "meta.json", meta)
+1037:         append_audit(
+1038:             log_path,
+1039:             {
+1040:                 "at": utc_now(),
+1041:                 "event": "finish",
+1042:                 "run": artifact.name,
+1043:                 "outcome": "OK",
+1044:                 "response_sha256": meta["response_sha256"],
+1045:             },
+1046:         )
+1047:         return artifact
+1048:     except (ToolError, WallClockExpired) as caught:
+1049:         if isinstance(caught, ToolError):
+1050:             exc = caught
+1051:         else:
+1052:             exc = ToolError(
+1053:                 6,
+1054:                 "TIMEOUT",
+1055:                 "generation timer expired outside the HTTP call",
+1056:             )
+1057:         for name in ("response.txt", "thinking.txt"):
+1058:             try:
+1059:                 (artifact / name).unlink()
+1060:             except FileNotFoundError:
+1061:                 pass
+1062:         meta.update(
+1063:             {
+1064:                 "elapsed_seconds": round(time.monotonic() - started, 6),
+1065:                 "finished_at": utc_now(),
+1066:                 "outcome": exc.outcome,
+1067:                 "exit_code": exc.code,
+1068:                 "error": safe_display(exc.message),
+1069:             }
+1070:         )
+1071:         if raw_response is not None:
+1072:             meta["raw_response_bytes"] = len(raw_response)
+1073:             meta["raw_response_sha256"] = sha256_bytes(raw_response)
+1074:         write_json_atomic(artifact / "meta.json", meta)
+1075:         try:
+1076:             append_audit(
+1077:                 log_path,
+1078:                 {
+1079:                     "at": utc_now(),
+1080:                     "event": "finish",
+1081:                     "run": artifact.name,
+1082:                     "outcome": exc.outcome,
+1083:                     "exit_code": exc.code,
+1084:                 },
+1085:             )
+1086:         except ToolError:
+1087:             pass
+1088:         exc.message = "%s; artefact=%s" % (exc.message, artifact)
+1089:         raise
+1090: 
+1091: 
+1092: def print_models(models):
+1093:     records = []
+1094:     for item in models:
+1095:         if not isinstance(item, dict):
+1096:             continue
+1097:         name = item.get("name", item.get("model"))
+1098:         digest = item.get("digest")
+1099:         if not isinstance(name, str):
+1100:             continue
+1101:         digest_text = digest.lower() if isinstance(digest, str) else "<invalid>"
+1102:         size = item.get("size")
+1103:         size_text = str(size) if isinstance(size, int) else "unknown"
+1104:         records.append((safe_display(name, 256), safe_display(digest_text, 80), size_text))
+1105:     for name, digest, size in sorted(records):
+1106:         print("%s\t%s\t%s" % (name, digest, size))
+1107: 
+1108: 
+1109: def dry_run(args, prompt_path, prompt_data, format_schema_path, format_schema_data):
+1110:     print("dry-run: no HTTP request, artefact, lock, or audit write")
+1111:     print("endpoint=http://%s:%d" % (LOOPBACK_HOST, args.port))
+1112:     print("model=%s" % args.model)
+1113:     print("identity=%s" % ("PINNED" if args.expect_digest else "UNPINNED"))
+1114:     print("expected_digest=%s" % (args.expect_digest or "none"))
+1115:     print("prompt_file=%s" % prompt_path)
+1116:     print("prompt_bytes=%d" % len(prompt_data))
+1117:     print("prompt_sha256=%s" % sha256_bytes(prompt_data))
+1118:     print("format_schema_file=%s" % (format_schema_path or "none"))
+1119:     print("format_schema_bytes=%d" % (len(format_schema_data) if format_schema_data else 0))
+1120:     print(
+1121:         "format_schema_sha256=%s"
+1122:         % (sha256_bytes(format_schema_data) if format_schema_data else "none")
+1123:     )
+1124:     print("options=%s" % json.dumps(request_options(args), sort_keys=True))
+1125:     print("think=%s" % args.think)
+1126:     print("timeout_seconds=%d" % args.timeout_seconds)
+1127: 
+1128: 
+1129: def main(argv):
+1130:     parser = build_parser()
+1131:     args = parser.parse_args(argv)
+1132:     validate_args(args)
+1133:     client = LoopbackClient(args.port)
+1134: 
+1135:     if args.probe:
+1136:         version = get_version(client)
+1137:         models = get_tags(client)
+1138:         print("endpoint=http://%s:%d" % (LOOPBACK_HOST, args.port))
+1139:         print("api_version=%s" % version)
+1140:         print("installed_models=%d" % len(models))
+1141:         if args.model:
+1142:             model = find_model(models, args.model)
+1143:             show = get_show(client, args.model)
+1144:             print("model=%s" % args.model)
+1145:             print("digest=%s" % model["digest"])
+1146:             print("context_length=%s" % (model["context_length"] or "unknown"))
+1147:             print("template_sha256=%s" % show["template_sha256"])
+1148:         print("ok")
+1149:         return 0
+1150: 
+1151:     if args.list_models:
+1152:         version = get_version(client)
+1153:         print("api_version=%s" % version)
+1154:         print_models(get_tags(client))
+1155:         return 0
+1156: 
+1157:     prompt_path, prompt_data, prompt_text = read_prompt(args.prompt_file)
+1158:     format_schema_path, format_schema_data, format_schema = read_format_schema(
+1159:         args.format_schema_file
+1160:     )
+1161:     if args.dry_run:
+1162:         dry_run(
+1163:             args,
+1164:             prompt_path,
+1165:             prompt_data,
+1166:             format_schema_path,
+1167:             format_schema_data,
+1168:         )
+1169:         return 0
+1170: 
+1171:     script_dir = pathlib.Path(__file__).resolve().parent
+1172:     with generation_lock(args.port):
+1173:         artifact = run_review(
+1174:             args,
+1175:             script_dir,
+1176:             prompt_path,
+1177:             prompt_data,
+1178:             prompt_text,
+1179:             format_schema_path,
+1180:             format_schema_data,
+1181:             format_schema,
+1182:         )
+1183:     print(str(artifact))
+1184:     return 0
+1185: 
+1186: 
+1187: if __name__ == "__main__":
+1188:     try:
+1189:         sys.exit(main(sys.argv[1:]))
+1190:     except ToolError as exc:
+1191:         print("error: %s [%s]" % (safe_display(exc.message), exc.outcome), file=sys.stderr)
+1192:         sys.exit(exc.code)
+1193:     except KeyboardInterrupt:
+1194:         print("error: interrupted [INTERRUPTED]", file=sys.stderr)
+1195:         sys.exit(130)
+1196:     except Exception as exc:
+1197:         print(
+1198:             "error: internal wrapper failure: %s [INTERNAL_ERROR]"
+1199:             % safe_display(exc),
+1200:             file=sys.stderr,
+
+FILE app/ui/ui.go SHA256 dbba86f3d90ec5edac5b23458fec00f25e39f4d9f3ef43ac124571e0c1a0d48e RANGE 30 110 TOTAL 2004
+30: 	"github.com/ollama/ollama/app/types/not"
+31: 	"github.com/ollama/ollama/app/ui/responses"
+32: 	"github.com/ollama/ollama/app/updater"
+33: 	"github.com/ollama/ollama/app/version"
+34: 	ollamaAuth "github.com/ollama/ollama/auth"
+35: 	"github.com/ollama/ollama/envconfig"
+36: 	"github.com/ollama/ollama/manifest"
+37: 	"github.com/ollama/ollama/mcp"
+38: 	"github.com/ollama/ollama/types/model"
+39: 	_ "github.com/tkrajina/typescriptify-golang-structs/typescriptify"
+40: )
+41: 
+42: //go:generate tscriptify -package=github.com/ollama/ollama/app/ui/responses -target=./app/codegen/gotypes.gen.ts responses/types.go
+43: //go:generate npm --prefix ./app run build
+44: 
+45: var CORS = envconfig.Bool("OLLAMA_CORS")
+46: 
+47: // OllamaDotCom returns the URL for ollama.com, allowing override via environment variable
+48: var OllamaDotCom = func() string {
+49: 	if url := os.Getenv("OLLAMA_DOT_COM_URL"); url != "" {
+50: 		return url
+51: 	}
+52: 	return "https://ollama.com"
+53: }()
+54: 
+55: type statusRecorder struct {
+56: 	http.ResponseWriter
+57: 	code int
+58: }
+59: 
+60: func (r *statusRecorder) Written() bool {
+61: 	return r.code != 0
+62: }
+63: 
+64: func (r *statusRecorder) WriteHeader(code int) {
+65: 	r.code = code
+66: 	r.ResponseWriter.WriteHeader(code)
+67: }
+68: 
+69: func (r *statusRecorder) Status() int {
+70: 	if r.code == 0 {
+71: 		return http.StatusOK
+72: 	}
+73: 	return r.code
+74: }
+75: 
+76: func (r *statusRecorder) Flush() {
+77: 	if flusher, ok := r.ResponseWriter.(http.Flusher); ok {
+78: 		flusher.Flush()
+79: 	}
+80: }
+81: 
+82: // Event is a string that represents the type of event being sent to the
+83: // client. It is used in the Server-Sent Events (SSE) protocol to identify
+84: // the type of data being sent.
+85: // The client (template) will use this type in the sse event listener to
+86: // determine how to handle the incoming data. It will also be used in the
+87: // sse-swap htmx event listener to determine how to handle the incoming data.
+88: type Event string
+89: 
+90: const (
+91: 	EventChat       Event = "chat"
+92: 	EventComplete   Event = "complete"
+93: 	EventLoading    Event = "loading"
+94: 	EventToolResult Event = "tool_result" // Used for both tool calls and their results
+95: 	EventThinking   Event = "thinking"
+96: 	EventToolCall   Event = "tool_call"
+97: 	EventDownload   Event = "download"
+98: )
+99: 
+100: type Server struct {
+101: 	Logger       *slog.Logger
+102: 	Restart      func()
+103: 	Token        string
+104: 	Store        *store.Store
+105: 	ToolRegistry *tools.Registry
+106: 	// MCP holds the connections to configured MCP servers. It is built once for
+107: 	// the life of the process, not per chat request: the tool registry is
+108: 	// rebuilt for every message, and connecting there would restart every
+109: 	// server's subprocess on each one.
+110: 	MCP *mcp.Manager
+
+FILE app/ui/ui.go SHA256 dbba86f3d90ec5edac5b23458fec00f25e39f4d9f3ef43ac124571e0c1a0d48e RANGE 630 835 TOTAL 2004
+630: 			continue
+631: 		}
+632: 		b.WriteString(message.Content)
+633: 		b.WriteByte('\n')
+634: 	}
+635: 	return b.String()
+636: }
+637: 
+638: func (s *Server) browserState(chat *store.Chat) (*responses.BrowserStateData, bool) {
+639: 	if len(chat.BrowserState) > 0 {
+640: 		var st responses.BrowserStateData
+641: 		if err := json.Unmarshal(chat.BrowserState, &st); err == nil {
+642: 			return &st, true
+643: 		}
+644: 	}
+645: 	return nil, false
+646: }
+647: 
+648: // reconstructBrowserState (legacy): return the latest full browser state stored in messages.
+649: func reconstructBrowserState(messages []store.Message, defaultViewTokens int) *responses.BrowserStateData {
+650: 	for i := len(messages) - 1; i >= 0; i-- {
+651: 		msg := messages[i]
+652: 		if msg.ToolResult == nil {
+653: 			continue
+654: 		}
+655: 		var st responses.BrowserStateData
+656: 		if err := json.Unmarshal(*msg.ToolResult, &st); err == nil {
+657: 			if len(st.PageStack) > 0 || len(st.URLToPage) > 0 {
+658: 				if st.ViewTokens == 0 {
+659: 					st.ViewTokens = defaultViewTokens
+660: 				}
+661: 				return &st
+662: 			}
+663: 		}
+664: 	}
+665: 	return nil
+666: }
+667: 
+668: func (s *Server) chat(w http.ResponseWriter, r *http.Request) error {
+669: 	w.Header().Set("Content-Type", "text/jsonl")
+670: 	w.Header().Set("Cache-Control", "no-cache")
+671: 	w.Header().Set("Connection", "keep-alive")
+672: 	w.Header().Set("Transfer-Encoding", "chunked")
+673: 
+674: 	flusher, ok := w.(http.Flusher)
+675: 	if !ok {
+676: 		return errors.New("streaming not supported")
+677: 	}
+678: 
+679: 	if r.Method != "POST" {
+680: 		return not.Found
+681: 	}
+682: 
+683: 	cid := r.PathValue("id")
+684: 	createdChat := false
+685: 
+686: 	// if cid is the literal string "new", then we create a new chat before
+687: 	// performing our normal actions
+688: 	if cid == "new" {
+689: 		u, err := uuid.NewV7()
+690: 		if err != nil {
+691: 			return fmt.Errorf("failed to generate new chat id: %w", err)
+692: 		}
+693: 		cid = u.String()
+694: 		createdChat = true
+695: 	}
+696: 
+697: 	var req responses.ChatRequest
+698: 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+699: 		fmt.Fprintf(os.Stderr, "error unmarshalling body: %v\n", err)
+700: 		return fmt.Errorf("invalid request body: %w", err)
+701: 	}
+702: 
+703: 	if req.Model == "" {
+704: 		return fmt.Errorf("empty model")
+705: 	}
+706: 
+707: 	// Don't allow empty messages unless forceUpdate is true
+708: 	if req.Prompt == "" && !req.ForceUpdate {
+709: 		return fmt.Errorf("empty message")
+710: 	}
+711: 
+712: 	if createdChat {
+713: 		// send message to the client that the chat has been created
+714: 		json.NewEncoder(w).Encode(responses.ChatEvent{
+715: 			EventName: "chat_created",
+716: 			ChatID:    &cid,
+717: 		})
+718: 		flusher.Flush()
+719: 	}
+720: 
+721: 	// Check if this is from a specific message index (e.g. for editing)
+722: 	idx := -1
+723: 	if req.Index != nil {
+724: 		idx = *req.Index
+725: 	}
+726: 
+727: 	// Load chat with attachments since we need them for processing
+728: 	chat, err := s.Store.ChatWithOptions(cid, true)
+729: 	if err != nil {
+730: 		if !errors.Is(err, not.Found) {
+731: 			return err
+732: 		}
+733: 		chat = store.NewChat(cid)
+734: 	}
+735: 
+736: 	// Only add user message if not forceUpdate
+737: 	if !req.ForceUpdate {
+738: 		var messageOptions *store.MessageOptions
+739: 		if len(req.Attachments) > 0 {
+740: 			storeAttachments := make([]store.File, 0, len(req.Attachments))
+741: 
+742: 			for _, att := range req.Attachments {
+743: 				if att.Data == "" {
+744: 					// This is an existing file reference - keep it from the original message
+745: 					if idx >= 0 && idx < len(chat.Messages) {
+746: 						originalMessage := chat.Messages[idx]
+747: 						// Find the file by filename in the original message
+748: 						for _, originalFile := range originalMessage.Attachments {
+749: 							if originalFile.Filename == att.Filename {
+750: 								storeAttachments = append(storeAttachments, originalFile)
+751: 								break
+752: 							}
+753: 						}
+754: 					}
+755: 				} else {
+756: 					// This is a new file - decode base64 data
+757: 					data, err := base64.StdEncoding.DecodeString(att.Data)
+758: 					if err != nil {
+759: 						s.log().Error("failed to decode attachment data", "error", err, "filename", att.Filename)
+760: 						continue
+761: 					}
+762: 
+763: 					storeAttachments = append(storeAttachments, store.File{
+764: 						Filename: att.Filename,
+765: 						Data:     data,
+766: 					})
+767: 				}
+768: 			}
+769: 
+770: 			messageOptions = &store.MessageOptions{
+771: 				Attachments: storeAttachments,
+772: 			}
+773: 		}
+774: 		userMsg := store.NewMessage("user", req.Prompt, messageOptions)
+775: 
+776: 		if idx >= 0 && idx < len(chat.Messages) {
+777: 			// Generate from specified message: truncate and replace
+778: 			chat.Messages = chat.Messages[:idx]
+779: 			chat.Messages = append(chat.Messages, userMsg)
+780: 		} else {
+781: 			// Normal mode: append new message
+782: 			chat.Messages = append(chat.Messages, userMsg)
+783: 		}
+784: 
+785: 		if err := s.Store.SetChat(*chat); err != nil {
+786: 			return err
+787: 		}
+788: 	}
+789: 
+790: 	ctx, cancel := context.WithCancel(r.Context())
+791: 	defer cancel()
+792: 
+793: 	_, cancelLoading := context.WithCancel(ctx)
+794: 	loading := false
+795: 
+796: 	c := s.inferenceClient()
+797: 
+798: 	// Check if the model exists locally by trying to show it
+799: 	// TODO (jmorganca): skip this round trip and instead just act
+800: 	// on a 404 error on chat
+801: 	_, err = c.Show(ctx, &api.ShowRequest{Model: req.Model})
+802: 	if err != nil || req.ForceUpdate {
+803: 		// Create an empty assistant message to store the model information
+804: 		// This will be overwritten when the model responds
+805: 		chat.Messages = append(chat.Messages, store.NewMessage("assistant", "", &store.MessageOptions{Model: req.Model}))
+806: 		if err := s.Store.SetChat(*chat); err != nil {
+807: 			cancelLoading()
+808: 			return err
+809: 		}
+810: 		// Send download progress events while the model is being pulled
+811: 		// TODO (jmorganca): this only shows the largest digest, but we
+812: 		// should show the progress for the total size of the download
+813: 		var largestDigest string
+814: 		var largestTotal int64
+815: 
+816: 		err = c.Pull(ctx, &api.PullRequest{Model: req.Model}, func(progress api.ProgressResponse) error {
+817: 			if progress.Digest != "" && progress.Total > largestTotal {
+818: 				largestDigest = progress.Digest
+819: 				largestTotal = progress.Total
+820: 			}
+821: 
+822: 			if progress.Digest != "" && progress.Digest == largestDigest {
+823: 				progressEvent := responses.DownloadEvent{
+824: 					EventName: string(EventDownload),
+825: 					Total:     progress.Total,
+826: 					Completed: progress.Completed,
+827: 					Done:      false,
+828: 				}
+829: 
+830: 				if err := json.NewEncoder(w).Encode(progressEvent); err != nil {
+831: 					return err
+832: 				}
+833: 				flusher.Flush()
+834: 			}
+835: 			return nil
+
+FILE cmd/tui/chat/input.go SHA256 308fae49f0144cab8f4d2fafbd81795ee31f5bb3a28c39e9201fa918a1baa930 RANGE 1710 1728 TOTAL 1728
+1710: 		"",
+1711: 		"- `shift+enter`: insert a newline",
+1712: 		"- `shift+tab`: toggle permission mode",
+1713: 		"- `↑/↓`: previous or next prompt",
+1714: 		"- `ctrl+a/e`: move to line start or end",
+1715: 	)
+1716: 	return strings.Join(lines, "\n")
+1717: }
+1718: 
+1719: func (m chatModel) systemPrompt(extra string) string {
+1720: 	var parts []string
+1721: 	if !m.systemPromptDisabled && strings.TrimSpace(m.opts.SystemPrompt) != "" {
+1722: 		parts = append(parts, strings.TrimSpace(m.opts.SystemPrompt))
+1723: 	}
+1724: 	if strings.TrimSpace(extra) != "" {
+1725: 		parts = append(parts, strings.TrimSpace(extra))
+1726: 	}
+1727: 	return strings.Join(parts, "\n\n")
+1728: }
+
+INSTALLED_GO_BINARY
+/Applications/Ollama.app/Contents/Resources/ollama: go1.26.5
+	path	github.com/ollama/ollama
+	mod	github.com/ollama/ollama	v0.32.6-0.20260914084704-eb8c93da6ab2	
+	dep	github.com/agnivade/levenshtein	v1.1.1	h1:QY8M92nrzkmr798gCo3kmMyqXFzdQVpxLlGPRBij0P8=
+	dep	github.com/apache/arrow/go/arrow	v0.0.0-20211112161151-bc219186db40	h1:q4dksr6ICHXqG5hm0ZW5IHyeEJXoIJSOZeBLmWPNeIQ=
+	dep	github.com/aymanbagabas/go-osc52/v2	v2.0.1	h1:HwpRHbFMcZLEVr42D4p7XBqjyuxQH5SMiErDT4WkJ2k=
+	dep	github.com/bahlo/generic-list-go	v0.2.0	h1:5sz/EEAK+ls5wF+NeqDpk5+iNdMDXrh3z3nPnH1Wvgk=
+	dep	github.com/buger/jsonparser	v1.1.1	h1:2PnMjfWD7wBILjqQbt530v576A/cAbQvEW9gGIpYMUs=
+	dep	github.com/charmbracelet/bubbletea	v1.3.10	h1:otUDHWMMzQSB0Pkc87rm691KZ3SWa4KUlvF9nRvCICw=
+	dep	github.com/charmbracelet/colorprofile	v0.2.3-0.20250311203215-f60798e515dc	h1:4pZI35227imm7yK2bGPcfpFEmuY1gc2YSTShr4iJBfs=
+	dep	github.com/charmbracelet/lipgloss	v1.1.0	h1:vYXsiLHVkK7fp74RkV7b2kq9+zDLoEU4MZoFqR/noCY=
+	dep	github.com/charmbracelet/x/ansi	v0.10.1	h1:rL3Koar5XvX0pHGfovN03f5cxLbCF2YvLeyz7D2jVDQ=
+	dep	github.com/charmbracelet/x/cellbuf	v0.0.13-0.20250311204145-2c3ea96c31dd	h1:vy0GVL4jeHEwG5YOXDmi86oYw2yuYUGqz6a8sLwg0X8=
+	dep	github.com/charmbracelet/x/term	v0.2.1	h1:AQeHeLZ1OqSXhrAWpYUtZyX1T3zVxfpZuEQMIQaGIAQ=
+	dep	github.com/chewxy/hm	v1.0.0	h1:zy/TSv3LV2nD3dwUEQL2VhXeoXbb9QkpmdRAVUFiA6k=
+	dep	github.com/chewxy/math32	v1.11.0	h1:8sek2JWqeaKkVnHa7bPVqCEOUPbARo4SGxs6toKyAOo=
+	dep	github.com/containerd/console	v1.0.3	h1:lIr7SlA5PxZyMV30bDW0MGbiOPXwc63yRuCP0ARubLw=
+	dep	github.com/d4l3k/go-bfloat16	v0.0.0-20211005043715-690c3bdd05f1	h1:cBzrdJPAFBsgCrDPnZxlp1dF2+k4r1kVpD7+1S1PVjY=
+	dep	github.com/emirpasic/gods/v2	v2.0.0-alpha	h1:dwFlh8pBg1VMOXWGipNMRt8v96dKAIvBehtCt6OtunU=
+	dep	github.com/gabriel-vasile/mimetype	v1.4.3	h1:in2uUcidCuFcDKtdcBxlR0rJ1+fsokWf+uqxgUFjbI0=
+	dep	github.com/gin-contrib/cors	v1.7.2	h1:oLDHxdg8W/XDoN/8zamqk/Drgt4oVZDvaV0YmvVICQw=
+	dep	github.com/gin-contrib/sse	v0.1.0	h1:Y/yl/+YNO8GZSjAhjMsSuLt29uWRFHdHYUb5lYOV9qE=
+	dep	github.com/gin-gonic/gin	v1.10.0	h1:nTuyha1TYqgedzytsKYqna+DfLos46nTv2ygFy86HFU=
+	dep	github.com/go-playground/locales	v0.14.1	h1:EWaQ/wswjilfKLTECiXz7Rh+3BjFhfDFKv/oXslEjJA=
+	dep	github.com/go-playground/universal-translator	v0.18.1	h1:Bcnm0ZwsGyWbCzImXv+pAJnYK9S473LQFuzCbDbfSFY=
+	dep	github.com/go-playground/validator/v10	v10.20.0	h1:K9ISHbSaI0lyB2eWMPJo+kOS/FBExVwjEviJTixqxL8=
+	dep	github.com/gogo/protobuf	v1.3.2	h1:Ov1cvc58UF3b5XjBnZv7+opcTcQFZebYjWzi34vdm4Q=
+	dep	github.com/golang/protobuf	v1.5.4	h1:i7eJL8qZTpSEXOPTxNKhASYpMn+8e5Q6AdndVa1dWek=
+	dep	github.com/google/flatbuffers	v24.3.25+incompatible	h1:CX395cjN9Kke9mmalRoL3d81AtFUxJM+yDthflgJGkI=
+	dep	github.com/google/jsonschema-go	v0.4.3	h1:/DBOLZTfDow7pe2GmaJNhltueGTtDKICi8V8p+DQPd0=
+	dep	github.com/google/uuid	v1.6.0	h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
+	dep	github.com/klauspost/compress	v1.18.3	h1:9PJRvfbmTabkOX8moIpXPbMMbYN60bWImDDU7L+/6zw=
+	dep	github.com/leodido/go-urn	v1.4.0	h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=
+	dep	github.com/lucasb-eyer/go-colorful	v1.2.0	h1:1nnpGOrhyZZuNyfu1QjKiUICQ74+3FNCN69Aj6K7nkY=
+	dep	github.com/mailru/easyjson	v0.7.7	h1:UGYAvKxe3sBsEDzO8ZeWOSlIQfWFlxbzLZe7hwFURr0=
+	dep	github.com/mattn/go-isatty	v0.0.20	h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
+	dep	github.com/mattn/go-runewidth	v0.0.16	h1:E5ScNMtiwvlvB5paMFdw9p4kSQzbXFikJ5SQO6TULQc=
+	dep	github.com/mattn/go-sqlite3	v1.14.24	h1:tpSp2G2KyMnnQu99ngJ47EIkWVmliIizyZBfPrBWDRM=
+	dep	github.com/modelcontextprotocol/go-sdk	v1.7.0	h1:yqjY2dsbKAC0LSuWZVBMrHgiG8ukXv6NRo0JiALay44=
+	dep	github.com/muesli/ansi	v0.0.0-20230316100256-276c6243b2f6	h1:ZK8zHtRHOkbHy6Mmr5D264iyp3TiX5OmNcI5cIARiQI=
+	dep	github.com/muesli/cancelreader	v0.2.2	h1:3I4Kt4BQjOR54NavqnDogx/MIoWBFa0StPA8ELUXHmA=
+	dep	github.com/muesli/termenv	v0.16.0	h1:S5AlUN9dENB57rsbnkPyfdGuWIlkmzJjbFf0Tf5FWUc=
+	dep	github.com/nlpodyssey/gopickle	v0.3.0	h1:BLUE5gxFLyyNOPzlXxt6GoHEMMxD0qhsE4p0CIQyoLw=
+	dep	github.com/olekukonko/tablewriter	v0.0.5	h1:P2Ga83D34wi1o9J6Wh1mRuqd4mF/x/lgBS7N7AbDhec=
+	dep	github.com/pdevine/tensor	v0.0.0-20240510204454-f88f4562727c	h1:GwiUUjKefgvSNmv3NCvI/BL0kDebW6Xa+kcdpdc1mTY=
+	dep	github.com/pelletier/go-toml/v2	v2.2.2	h1:aYUidT7k73Pcl9nb2gScu7NSrKCSHIDE89b3+6Wq+LM=
+	dep	github.com/pkg/browser	v0.0.0-20240102092130-5ac0b6a4141c	h1:+mdjkGKdHQG3305AYmdv1U2eRNDiU2ErMBj1gwrq8eQ=
+	dep	github.com/pkg/errors	v0.9.1	h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
+	dep	github.com/rivo/uniseg	v0.4.7	h1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=
+	dep	github.com/segmentio/asm	v1.1.3	h1:WM03sfUOENvvKexOLp+pCqgb/WDjsi7EK8gIsICtzhc=
+	dep	github.com/segmentio/encoding	v0.5.4	h1:OW1VRern8Nw6ITAtwSZ7Idrl3MXCFwXHPgqESYfvNt0=
+	dep	github.com/spf13/cobra	v1.7.0	h1:hyqWnYt1ZQShIddO5kBpj3vu05/++x6tJ6dg8EC572I=
+	dep	github.com/spf13/pflag	v1.0.5	h1:iy+VFUOCP1a+8yFto/drg2CJ5u0yRoB7fZw3DKv/JXA=
+	dep	github.com/ugorji/go/codec	v1.2.12	h1:9LC83zGrHhuUA9l16C9AHXAqEV/2wBQ4nkvumAE65EE=
+	dep	github.com/wk8/go-ordered-map/v2	v2.1.8	h1:5h/BUHu93oj4gIdvHHHGsScSTMijfx5PeYkE/fJgbpc=
+	dep	github.com/x448/float16	v0.8.4	h1:qLwI1I70+NjRFUR3zs1JPUCgaCXSh3SW62uAKT1mSBM=
+	dep	github.com/xo/terminfo	v0.0.0-20220910002029-abceb7e1c41e	h1:JVG44RsyaB9T2KIHavMF/ppJZNG9ZpyihvCd0w101no=
+	dep	github.com/xtgo/set	v1.0.0	h1:6BCNBRv3ORNDQ7fyoJXRv+tstJz3m1JVFQErfeZz2pY=
+	dep	github.com/yosida95/uritemplate/v3	v3.0.2	h1:Ed3Oyj9yrmi9087+NczuL5BwkIc4wvTb5zIM+UJPGz4=
+	dep	go4.org/unsafe/assume-no-moving-gc	v0.0.0-20231121144256-b99613f794b6	h1:lGdhQUN/cnWdSH3291CUuxSEqc+AsGTiDxPP3r2J0l4=
+	dep	golang.org/x/crypto	v0.43.0	h1:dduJYIi3A3KOfdGOHX8AVZ/jGiyPa3IbBozJ5kNuE04=
+	dep	golang.org/x/exp	v0.0.0-20250218142911-aa4b98e5adaa	h1:t2QcU6V556bFjYgu4L6C+6VrCPyJZ+eyRsABUPs1mz4=
+	dep	golang.org/x/image	v0.22.0	h1:UtK5yLUzilVrkjMAZAZ34DXGpASN8i8pj8g+O+yd10g=
+	dep	golang.org/x/mod	v0.30.0	h1:fDEXFVZ/fmCKProc/yAXXUijritrDzahmwwefnjoPFk=
+	dep	golang.org/x/net	v0.46.0	h1:giFlY12I07fugqwPuWJi68oOnpfqFnJIJzaIIm2JVV4=
+	dep	golang.org/x/oauth2	v0.36.0	h1:peZ/1z27fi9hUOFCAZaHyrpWG5lwe0RJEEEeH0ThlIs=
+	dep	golang.org/x/sync	v0.20.0	h1:e0PTpb7pjO8GAtTs2dQ6jYa5BWYlMuX047Dco/pItO4=
+	dep	golang.org/x/sys	v0.41.0	h1:Ivj+2Cp/ylzLiEU89QhWblYnOE9zerudt9Ftecq2C6k=
+	dep	golang.org/x/term	v0.36.0	h1:zMPR+aF8gfksFprF/Nc/rd1wRS1EI6nDBGyWAvDzx2Q=
+	dep	golang.org/x/text	v0.30.0	h1:yznKA/E9zq54KzlzBEAWn1NXSQ8DIp/NYMy88xJjl4k=
+	dep	golang.org/x/time	v0.15.0	h1:bbrp8t3bGUeFOx08pvsMYRTCVSMk89u4tKbNOZbp88U=
+	dep	golang.org/x/xerrors	v0.0.0-20200804184101-5ec99f83aff1	h1:go1bK/D/BFZV2I8cIQd1NKEZ+0owSTG1fDTci4IqFcE=
+	dep	gonum.org/v1/gonum	v0.15.0	h1:2lYxjRbTYyxkJxlhC+LvJIx3SsANPdRybu1tGj9/OrQ=
+	dep	google.golang.org/protobuf	v1.34.1	h1:9ddQBjfCyZPOHPUiPxpYESBLc+T8P3E+Vo4IbKZgFWg=
+	dep	gopkg.in/yaml.v3	v3.0.1	h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
+	dep	gorgonia.org/vecf32	v0.9.0	h1:PClazic1r+JVJ1dEzRXgeiVl4g1/Hf/w+wUSqnco1Xg=
+	dep	gorgonia.org/vecf64	v0.9.0	h1:bgZDP5x0OzBF64PjMGC3EvTdOoMEcmfAh1VCUnZFm1A=
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	-trimpath=true
+	build	CGO_ENABLED=1
+	build	GOARCH=amd64
+	build	GOOS=darwin
+	build	GOAMD64=v1
+	build	vcs=git
+	build	vcs.revision=eb8c93da6ab20b980449226029a9bf5cf40a6306
+	build	vcs.time=2026-09-14T08:47:04Z
+	build	vcs.modified=false
+  exit=0
+
+SOURCE_ERROR_CALLERS
+app/store/store_test.go:206:		retrieved, err := s.Chat("test-chat-1")
+app/store/store_test.go:253:		_, err := s.Chat("test-chat-1")
+app/ui/ui.go:304:	mux.Handle("GET /api/v1/chats", handle(s.listChats))
+app/ui/ui.go:305:	mux.Handle("GET /api/v1/chat/{id}", handle(s.getChat))
+app/ui/ui.go:306:	mux.Handle("POST /api/v1/chat/{id}", handle(s.chat))
+app/ui/ui.go:307:	mux.Handle("DELETE /api/v1/chat/{id}", handle(s.deleteChat))
+app/ui/ui.go:308:	mux.Handle("POST /api/v1/chat/{id}/approval", handle(s.chatApproval))
+app/ui/ui.go:321:	mux.Handle("POST /api/v1/create-chat", handle(s.createChat))
+app/ui/ui.go:322:	mux.Handle("PUT /api/v1/chat/{id}/rename", handle(s.renameChat))
+app/ui/ui.go:728:	chat, err := s.Store.ChatWithOptions(cid, true)
+app/ui/ui.go:978:		err = c.Chat(ctx, chatReq, func(res api.ChatResponse) error {
+app/ui/ui.go:1340:	chat, err := s.Store.Chat(cid)
+app/ui/ui.go:1406:	chat, err := s.Store.ChatWithOptions(cid, false)
+app/ui/ui.go:1592:	_, err := s.Store.ChatWithOptions(cid, false)
+

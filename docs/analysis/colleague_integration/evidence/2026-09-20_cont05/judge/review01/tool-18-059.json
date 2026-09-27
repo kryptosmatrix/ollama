@@ -1,0 +1,16 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "path": "app/store/store_test.go",
+    "start": 1,
+    "count": 80
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/store/store_test.go",
+    "file_sha256": "7b027124adf72c5cf3bf3038c796b0c078ac76c6ed60bacf1f7169d7da0fda04",
+    "start": 1,
+    "end": 80,
+    "total_lines": 287,
+    "text": "1: //go:build windows || darwin\n2: \n3: package store\n4: \n5: import (\n6: \t\"path/filepath\"\n7: \t\"testing\"\n8: )\n9: \n10: func TestStore(t *testing.T) {\n11: \ts, cleanup := setupTestStore(t)\n12: \tdefer cleanup()\n13: \n14: \tt.Run(\"default id\", func(t *testing.T) {\n15: \t\t// ID should be automatically generated\n16: \t\tid, err := s.ID()\n17: \t\tif err != nil {\n18: \t\t\tt.Fatal(err)\n19: \t\t}\n20: \t\tif id == \"\" {\n21: \t\t\tt.Error(\"expected non-empty ID\")\n22: \t\t}\n23: \n24: \t\t// Verify ID is persisted\n25: \t\tid2, err := s.ID()\n26: \t\tif err != nil {\n27: \t\t\tt.Fatal(err)\n28: \t\t}\n29: \t\tif id != id2 {\n30: \t\t\tt.Errorf(\"expected ID %s, got %s\", id, id2)\n31: \t\t}\n32: \t})\n33: \n34: \tt.Run(\"has completed first run\", func(t *testing.T) {\n35: \t\t// Default should be false (hasn't completed first run yet)\n36: \t\thasCompleted, err := s.HasCompletedFirstRun()\n37: \t\tif err != nil {\n38: \t\t\tt.Fatal(err)\n39: \t\t}\n40: \t\tif hasCompleted {\n41: \t\t\tt.Error(\"expected has completed first run to be false by default\")\n42: \t\t}\n43: \n44: \t\tif err := s.SetHasCompletedFirstRun(true); err != nil {\n45: \t\t\tt.Fatal(err)\n46: \t\t}\n47: \n48: \t\thasCompleted, err = s.HasCompletedFirstRun()\n49: \t\tif err != nil {\n50: \t\t\tt.Fatal(err)\n51: \t\t}\n52: \t\tif !hasCompleted {\n53: \t\t\tt.Error(\"expected has completed first run to be true\")\n54: \t\t}\n55: \t})\n56: \n57: \tt.Run(\"settings\", func(t *testing.T) {\n58: \t\tsc := Settings{\n59: \t\t\tExpose:           true,\n60: \t\t\tBrowser:          true,\n61: \t\t\tSurvey:           true,\n62: \t\t\tModels:           \"/tmp/models\",\n63: \t\t\tAgent:            true,\n64: \t\t\tTools:            false,\n65: \t\t\tWorkingDir:       \"/tmp/work\",\n66: \t\t\tAutoApproveTools: true,\n67: \t\t}\n68: \n69: \t\tif err := s.SetSettings(sc); err != nil {\n70: \t\t\tt.Fatal(err)\n71: \t\t}\n72: \n73: \t\tloaded, err := s.Settings()\n74: \t\tif err != nil {\n75: \t\t\tt.Fatal(err)\n76: \t\t}\n77: \t\t// Compare fields individually since Models might get a default\n78: \t\tif loaded.Expose != sc.Expose || loaded.Browser != sc.Browser ||\n79: \t\t\tloaded.Agent != sc.Agent || loaded.Survey != sc.Survey ||\n80: \t\t\tloaded.Tools != sc.Tools || loaded.WorkingDir != sc.WorkingDir ||"
+  }
+}

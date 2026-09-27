@@ -1,0 +1,16 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "path": "app/ui/tts_test.go",
+    "start": 1,
+    "count": 80
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/tts_test.go",
+    "file_sha256": "1d18445991670de7ad9d239626e43af19809ca8c2d725fdb562ae1d4147649b0",
+    "start": 1,
+    "end": 80,
+    "total_lines": 136,
+    "text": "1: //go:build windows || darwin\n2: \n3: package ui\n4: \n5: import (\n6: \t\"bytes\"\n7: \t\"context\"\n8: \t\"encoding/json\"\n9: \t\"net/http\"\n10: \t\"net/http/httptest\"\n11: \t\"os\"\n12: \t\"path/filepath\"\n13: \t\"strings\"\n14: \t\"sync/atomic\"\n15: \t\"testing\"\n16: \n17: \t\"github.com/ollama/ollama/app/tts\"\n18: )\n19: \n20: func TestMain(m *testing.M) {\n21: \tdir, err := os.MkdirTemp(\"\", \"ollama-ui-tts-\")\n22: \tif err != nil {\n23: \t\tos.Exit(1)\n24: \t}\n25: \tos.Setenv(tts.SecretsPathEnv, filepath.Join(dir, \"secrets.json\"))\n26: \tos.Setenv(tts.PrefsPathEnv, filepath.Join(dir, \"prefs.json\"))\n27: \tos.Setenv(tts.CachePathEnv, filepath.Join(dir, \"cache\"))\n28: \tcode := m.Run()\n29: \tos.RemoveAll(dir)\n30: \tos.Exit(code)\n31: }\n32: \n33: type countingSynth struct {\n34: \thits atomic.Int32\n35: }\n36: \n37: func (c *countingSynth) Synthesize(ctx context.Context, req tts.SynthesisRequest, apiKey string) ([]byte, error) {\n38: \tc.hits.Add(1)\n39: \treturn []byte(\"ID3fake-mpeg\"), nil\n40: }\n41: \n42: func (c *countingSynth) ListVoices(ctx context.Context, apiKey string) ([]tts.Voice, error) {\n43: \tc.hits.Add(1)\n44: \treturn []tts.Voice{{ID: \"v1\", Name: \"Ada\"}}, nil\n45: }\n46: \n47: func ttsServer(t *testing.T, synth *countingSynth) *Server {\n48: \tt.Helper()\n49: \tsvc := tts.Isolated(t.TempDir())\n50: \tsvc.Client = synth\n51: \tif err := svc.PutKey(\"sk-test\"); err != nil {\n52: \t\tt.Fatal(err)\n53: \t}\n54: \tvoice := \"voice_one\"\n55: \tif err := svc.PatchSettings(tts.SettingsPatch{VoiceID: &voice}); err != nil {\n56: \t\tt.Fatal(err)\n57: \t}\n58: \treturn &Server{Token: \"test-token-123\", Dev: false, TTS: svc}\n59: }\n60: \n61: func TestSpeakWithoutCookieNeverReachesElevenLabs(t *testing.T) {\n62: \tsynth := &countingSynth{}\n63: \thandler := ttsServer(t, synth).Handler()\n64: \treq := httptest.NewRequest(http.MethodPost, \"/api/v1/tts/speak\", strings.NewReader(`{\"text\":\"Hello\",\"chunk_index\":0}`))\n65: \treq.Header.Set(\"Content-Type\", \"application/json\")\n66: \trec := httptest.NewRecorder()\n67: \thandler.ServeHTTP(rec, req)\n68: \tif rec.Code != http.StatusForbidden {\n69: \t\tt.Fatalf(\"status %d body %s\", rec.Code, rec.Body.String())\n70: \t}\n71: \tif !strings.Contains(rec.Body.String(), \"Token is required\") {\n72: \t\tt.Fatalf(\"body %s\", rec.Body.String())\n73: \t}\n74: \tif synth.hits.Load() != 0 {\n75: \t\tt.Fatalf(\"ElevenLabs was contacted %d times without a cookie\", synth.hits.Load())\n76: \t}\n77: }\n78: \n79: func TestSpeakWithCookieReachesSynthesizer(t *testing.T) {\n80: \tsynth := &countingSynth{}"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "sources": [
+    {
+      "file": "../TECHNE/Method/04_Implementation_Proof_Method.md",
+      "sha256": "261e9c16f3041bca0fe19f98f1ff9cf06acdfe914152094eaf8e6c8cf964d64a",
+      "total_lines": 482,
+      "read_range": [
+        135,
+        260
+      ]
+    },
+    {
+      "file": "../TECHNE/Method/21_Branch_And_Merge_Discipline.md",
+      "sha256": "59bf8294cdcda7b53f31769d5b80164c1ae5741426c7b6028c76bb15e244f92c",
+      "total_lines": 213,
+      "read_range": [
+        1,
+        213
+      ]
+    },
+    {
+      "file": "app/webview/webview.h",
+      "sha256": "8c8b6ac9adc1d51ff579bf692603f34ce61cf8a332064d825f315dc2d6bd31e6",
+      "total_lines": 3997,
+      "read_range": [
+        1550,
+        1620
+      ]
+    },
+    {
+      "file": "app/webview/webview.go",
+      "sha256": "d09a5d549297286de09fc6033c57909d5a0b236f920aaf56c76ae7ff31291bca",
+      "total_lines": 368,
+      "read_range": [
+        1,
+        110
+      ]
+    },
+    {
+      "file": "app/cmd/app/app_darwin.go",
+      "sha256": "1f8945e2bb44f75ec622a19ee852b9e6270eae5db198ec4afc7b92b36bd2719c",
+      "total_lines": 262,
+      "read_range": [
+        1,
+        70
+      ]
+    },
+    {
+      "file": "app/ui/app/package.json",
+      "sha256": "ba4a16db941ae31c7d33daf5fc4396b05e20cc1906ca731648d3859eb81a029d",
+      "total_lines": 82,
+      "read_range": [
+        1,
+        82
+      ]
+    }
+  ],
+  "candidate": "281dcaa06c7cd8b299c6045a248dd6b6ac85f954",
+  "timestamp_brisbane": "2026-09-21T10:37:39.512009+10:00",
+  "command_session": "1dd284e91e084a1cbf36aa6e16187f97",
+  "scope": "Native-warning and bounded frontend type/lint maintenance; no Keychain retry, no credentials, no integration or installation until gates pass."
+}

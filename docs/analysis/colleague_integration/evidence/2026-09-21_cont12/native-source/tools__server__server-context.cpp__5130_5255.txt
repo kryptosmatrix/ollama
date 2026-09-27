@@ -1,0 +1,126 @@
+5130:     return res;
+5131: }
+5132: 
+5133: std::unique_ptr<server_res_generator> server_routes::handle_slots_restore(const server_http_req & req, int id_slot) {
+5134:     auto res = create_response();
+5135:     const json request_data = json::parse(req.body);
+5136:     std::string filename = request_data.at("filename");
+5137:     if (!fs_validate_filename(filename)) {
+5138:         res->error(format_error_response("Invalid filename", ERROR_TYPE_INVALID_REQUEST));
+5139:         return res;
+5140:     }
+5141:     std::string filepath = params.slot_save_path + filename;
+5142: 
+5143:     auto & rd = res->rd;
+5144:     {
+5145:         server_task task(SERVER_TASK_TYPE_SLOT_RESTORE);
+5146:         task.id = rd.get_new_id();
+5147:         task.slot_action.id_slot  = id_slot;
+5148:         task.slot_action.filename = filename;
+5149:         task.slot_action.filepath = filepath;
+5150:         rd.post_task(std::move(task));
+5151:     }
+5152: 
+5153:     auto result = rd.next(req.should_stop);
+5154:     if (!result) {
+5155:         // connection was closed
+5156:         GGML_ASSERT(req.should_stop());
+5157:         return res;
+5158:     }
+5159: 
+5160:     if (result->is_error()) {
+5161:         res->error(result->to_json());
+5162:         return res;
+5163:     }
+5164: 
+5165:     GGML_ASSERT(dynamic_cast<server_task_result_slot_save_load*>(result.get()) != nullptr);
+5166:     res->ok(result->to_json());
+5167:     return res;
+5168: }
+5169: 
+5170: std::unique_ptr<server_res_generator> server_routes::handle_slots_erase(const server_http_req & req, int id_slot) {
+5171:     auto res = create_response();
+5172:     auto & rd = res->rd;
+5173:     {
+5174:         server_task task(SERVER_TASK_TYPE_SLOT_ERASE);
+5175:         task.id = rd.get_new_id();
+5176:         task.slot_action.id_slot = id_slot;
+5177:         rd.post_task(std::move(task));
+5178:     }
+5179: 
+5180:     auto result = rd.next(req.should_stop);
+5181:     if (!result) {
+5182:         // connection was closed
+5183:         GGML_ASSERT(req.should_stop());
+5184:         return res;
+5185:     }
+5186: 
+5187:     if (result->is_error()) {
+5188:         res->error(result->to_json());
+5189:         return res;
+5190:     }
+5191: 
+5192:     GGML_ASSERT(dynamic_cast<server_task_result_slot_erase*>(result.get()) != nullptr);
+5193:     res->ok(result->to_json());
+5194:     return res;
+5195: }
+5196: 
+5197: std::unique_ptr<server_res_generator> server_routes::handle_embeddings_impl(const server_http_req & req, task_response_type res_type) {
+5198:     auto res = create_response();
+5199:     if (!params.embedding) {
+5200:         res->error(format_error_response("This server does not support embeddings. Start it with `--embeddings`", ERROR_TYPE_NOT_SUPPORTED));
+5201:         return res;
+5202:     }
+5203: 
+5204:     if (res_type != TASK_RESPONSE_TYPE_NONE && meta->pooling_type == LLAMA_POOLING_TYPE_NONE) {
+5205:         res->error(format_error_response("Pooling type 'none' is not OAI compatible. Please use a different pooling type", ERROR_TYPE_INVALID_REQUEST));
+5206:         return res;
+5207:     }
+5208: 
+5209:     const json body = json::parse(req.body);
+5210: 
+5211:     // for the shape of input/content, see tokenize_input_prompts()
+5212:     json prompt;
+5213:     if (body.count("input") != 0) {
+5214:         prompt = body.at("input");
+5215:     } else if (body.contains("content")) {
+5216:         res_type = TASK_RESPONSE_TYPE_NONE; // "content" field is not OAI compatible
+5217:         prompt = body.at("content");
+5218:     } else {
+5219:         res->error(format_error_response("\"input\" or \"content\" must be provided", ERROR_TYPE_INVALID_REQUEST));
+5220:         return res;
+5221:     }
+5222: 
+5223:     bool use_base64 = false;
+5224:     if (body.count("encoding_format") != 0) {
+5225:         const std::string & format = body.at("encoding_format");
+5226:         if (format == "base64") {
+5227:             use_base64 = true;
+5228:         } else if (format != "float") {
+5229:             res->error(format_error_response("The format to return the embeddings in. Can be either float or base64", ERROR_TYPE_INVALID_REQUEST));
+5230:             return res;
+5231:         }
+5232:     }
+5233: 
+5234:     auto tokenized_prompts = tokenize_input_prompts(ctx_server.vocab, ctx_server.mctx, prompt, true, true);
+5235:     for (const auto & tokens : tokenized_prompts) {
+5236:         // this check is necessary for models that do not add BOS token to the input
+5237:         if (tokens.empty()) {
+5238:             res->error(format_error_response("Input content cannot be empty", ERROR_TYPE_INVALID_REQUEST));
+5239:             return res;
+5240:         }
+5241:     }
+5242: 
+5243:     int embd_normalize = params.embd_normalize;
+5244:     if (body.count("embd_normalize") != 0) {
+5245:         embd_normalize = body.at("embd_normalize");
+5246:         if (meta->pooling_type == LLAMA_POOLING_TYPE_NONE) {
+5247:             SRV_DBG("embd_normalize is not supported by pooling type %d, ignoring it\n", meta->pooling_type);
+5248:         }
+5249:     }
+5250: 
+5251:     // create and queue the task
+5252:     json responses = json::array();
+5253:     auto & rd = res->rd;
+5254:     {
+5255:         std::vector<server_task> tasks;

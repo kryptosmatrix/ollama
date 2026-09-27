@@ -1,0 +1,62 @@
+[
+  {
+    "path": "server/prompt.go",
+    "sha256": "79411c4e15ff27fb8bac4dcd96076407e035ec407c0ab1a1840035f9668b4654",
+    "start": 1,
+    "end": 156
+  },
+  {
+    "path": "server/routes.go",
+    "sha256": "47b8e89a73ef76d118c89c101dbd9f74b0a63777ba3cbac153b46002b5397ec2",
+    "start": 2310,
+    "end": 2330
+  },
+  {
+    "path": "server/routes.go",
+    "sha256": "47b8e89a73ef76d118c89c101dbd9f74b0a63777ba3cbac153b46002b5397ec2",
+    "start": 2450,
+    "end": 2710
+  },
+  {
+    "path": "server/routes.go",
+    "sha256": "47b8e89a73ef76d118c89c101dbd9f74b0a63777ba3cbac153b46002b5397ec2",
+    "start": 2898,
+    "end": 3075
+  },
+  {
+    "path": "llm/server.go",
+    "sha256": "a695536408125cb1b27aaba36aade99c6ae04f7e4c07adc1dc48f0c2db036154",
+    "start": 1,
+    "end": 110
+  },
+  {
+    "path": "llm/llama_server.go",
+    "sha256": "eb6b90eab5122a509a841b54c57fb08ce91a000591d6abd18bd51cda625db46e",
+    "start": 230,
+    "end": 331
+  },
+  {
+    "path": "llm/llama_server.go",
+    "sha256": "eb6b90eab5122a509a841b54c57fb08ce91a000591d6abd18bd51cda625db46e",
+    "start": 1470,
+    "end": 1550
+  },
+  {
+    "path": "llm/llama_server.go",
+    "sha256": "eb6b90eab5122a509a841b54c57fb08ce91a000591d6abd18bd51cda625db46e",
+    "start": 1820,
+    "end": 1880
+  },
+  {
+    "path": "llm/llama_server.go",
+    "sha256": "eb6b90eab5122a509a841b54c57fb08ce91a000591d6abd18bd51cda625db46e",
+    "start": 2040,
+    "end": 2145
+  },
+  {
+    "path": "api/types.go",
+    "sha256": "2155658af3cdb27fc0f44d772ce94a7b52f8da1b51d7b26aa0d158d08ee5791d",
+    "start": 126,
+    "end": 186
+  }
+]

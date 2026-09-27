@@ -1,0 +1,60 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "created_at": "2026-09-20T12:33:01.234086765Z",
+  "message": {
+    "role": "assistant",
+    "content": "I'll start by reading the evidence records and running the verification.",
+    "tool_calls": [
+      {
+        "id": "call_fsh26pyt",
+        "function": {
+          "index": 0,
+          "name": "read_evidence",
+          "arguments": {
+            "name": "baseline_rules",
+            "start": 0,
+            "count": 200
+          }
+        }
+      },
+      {
+        "id": "call_whksuzr1",
+        "function": {
+          "index": 1,
+          "name": "read_evidence",
+          "arguments": {
+            "name": "candidate_rules",
+            "start": 0,
+            "count": 200
+          }
+        }
+      },
+      {
+        "id": "call_sq1npvpc",
+        "function": {
+          "index": 2,
+          "name": "read_evidence",
+          "arguments": {
+            "name": "controller",
+            "start": 0,
+            "count": 200
+          }
+        }
+      },
+      {
+        "id": "call_01y2sc30",
+        "function": {
+          "index": 3,
+          "name": "verify_ignore_rules",
+          "arguments": {}
+        }
+      }
+    ]
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 1112972312,
+  "prompt_eval_count": 750,
+  "prompt_eval_cached_count": 0,
+  "eval_count": 226
+}

@@ -1,0 +1,62 @@
+{
+  "api_version": "0.32.5-47-geb8c93d",
+  "approval": "approve-local-content",
+  "elapsed_seconds": 47.562831,
+  "endpoint": "http://127.0.0.1:11434",
+  "error": "generation stopped at the token limit",
+  "exit_code": 5,
+  "finished_at": "2026-09-20T08:53:37.208149Z",
+  "format_schema_bytes": 0,
+  "format_schema_sha256": null,
+  "format_schema_source": null,
+  "implementation_sha256": "096573d0f859ac56fa81eaa72aedfdb244bee0f236db9a54daba763f4472b3e9",
+  "launcher_sha256": "8914376e9f68973ec48c2142f3966c2f17cdc027f8fedc8fe6eabd4fe852b1ca",
+  "model_capabilities": [
+    "completion",
+    "thinking",
+    "tools",
+    "vision"
+  ],
+  "model_details": {
+    "context_length": 1048576,
+    "family": "",
+    "format": "",
+    "parameter_size": "763B",
+    "quantization_level": "FP8"
+  },
+  "model_digest_before": "e04da138d31e0c9468e982e1ae9503d06cb7e170caa16a90c17d931c4aa140f8",
+  "model_expected_digest": "e04da138d31e0c9468e982e1ae9503d06cb7e170caa16a90c17d931c4aa140f8",
+  "model_identity_status": "PINNED",
+  "model_modified_at": "2026-09-20T18:29:39.390211061+10:00",
+  "model_requested": "deepseek-v4.1-flash:cloud",
+  "model_show": {
+    "parameters_bytes": 0,
+    "parameters_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "system_bytes": 0,
+    "system_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "template_bytes": 0,
+    "template_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "model_size": 326,
+  "outcome": "TRUNCATED_RESPONSE",
+  "parameters": {
+    "max_response_bytes": 16777216,
+    "num_ctx": 262144,
+    "num_gpu": "auto",
+    "num_predict": 12288,
+    "seed": 0,
+    "temperature": 0.0,
+    "think": "on",
+    "timeout_seconds": 420
+  },
+  "prompt_bytes": 241390,
+  "prompt_sha256": "4e7215e1cab331398a98a34973a708af2d0ba98c8079c9f8571282be72d9377e",
+  "prompt_source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont02/deepseek-review/prompt.txt",
+  "python_executable": "/opt/homebrew/opt/python@3.14/bin/python3.14",
+  "python_version": "3.14.6",
+  "raw_response_bytes": 52795,
+  "raw_response_sha256": "8ffaef953a640d25ec7fa9430860c1afe92f13f4fcd90dfa904e8ce449eee032",
+  "started_at": "2026-09-20T08:52:49.630508Z",
+  "template_reserve_upper_bound": 2048,
+  "wrapper_version": "1.1.0"
+}

@@ -1,0 +1,146 @@
+{
+  "record_type": "ollama_colleague_integration_control_state",
+  "checkpoint_date_brisbane": "2026-09-20",
+  "task_id": "eko-ollama-20260920-initial-recon",
+  "controller": {
+    "name": "Eko",
+    "model": "GPT-6 Astra Pro",
+    "host": "ChatGPT",
+    "is_founded_ollama_colleague": false,
+    "background_execution": false
+  },
+  "commission": {
+    "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+    "revision": "R3",
+    "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec",
+    "read_complete": true,
+    "read_ranges": [[1, 492], [490, 590]],
+    "partial_final_line_recovered_by_overlap": true,
+    "required_item_count": 31,
+    "accepted_item_count": 0,
+    "index": "REQUIREMENTS.md"
+  },
+  "progress": {
+    "active_item": "OI-01",
+    "phase": "initial source reconnaissance and execution preflight",
+    "status": "blocked",
+    "disposition": "PARKED",
+    "stop_token": "PACK_PREREQUISITE_MISSING",
+    "blocker_id": "bridge-command-archive-full",
+    "recon_complete": false,
+    "design_readiness": null,
+    "active_blueprint": null,
+    "active_implementation_pack": null,
+    "runtime_features_delivered": [],
+    "runtime_files_changed": [],
+    "test_files_changed": []
+  },
+  "repository": {
+    "root": "/Users/krypto/GitHub/ollama",
+    "observed_head": "953de98d408a9697fa20a48c23973b9dc8eee921",
+    "observed_branch": "main",
+    "local_tracking_upstream": "origin/main",
+    "remote_fetched": false,
+    "verified_remote_tip": null,
+    "exclusive_checkout_ownership_verified": false,
+    "task_branch_created": null,
+    "task_worktree_created": null,
+    "commits_created": [],
+    "pushes_performed": 0,
+    "checkpoint_custody": "Local untracked files; not committed, pushed, integrated or remotely backed up by this task.",
+    "preserved_external_untracked_files": [
+      "docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+      "docs/OLLAMA_CROSS_MODEL_COLLEAGUES_AND_CAPABILITY_ROUTING_HANDOFF.md"
+    ],
+    "concurrent_handoff_read": false,
+    "installed_or_running_app_identity": null
+  },
+  "execution": {
+    "bridge_profile": "Eko Write Bridge",
+    "bridge_version": "0.3.0",
+    "execution_state_id": "dfbd69b42df2453aae7bfa1c5a7af704",
+    "command_admission": "COMMAND_ARCHIVE_FULL",
+    "attempted_request_ids": [
+      "eko-ollama-20260920-arrival-01",
+      "eko-ollama-20260920-execution-recheck-01"
+    ],
+    "accepted_job_ids": [],
+    "task_commands_in_flight": [],
+    "builds_run": 0,
+    "test_runs": 0,
+    "discovered_test_count": null,
+    "passed_test_count": null,
+    "failed_test_count": null,
+    "skipped_test_count": null,
+    "warning_baseline": null,
+    "git_diff_check_run": false,
+    "archive_maintenance_authorised_in_this_task": false,
+    "jobs_forgotten": 0,
+    "service_configuration_changed": false
+  },
+  "review": {
+    "independent_colleagues_invoked": 0,
+    "reviewed_candidate": null,
+    "blueprint_judge_verdict": null,
+    "code_judge_verdict": null,
+    "reality_gate_verdict": null,
+    "notes": "Source reading and role changes within Eko do not constitute independent review."
+  },
+  "routing_receipt": {
+    "routes_used": ["RECON", "DOCS", "GIT", "HANDOFF"],
+    "read_ledger": "SOURCE_MAP.md",
+    "full_arrival_reads_recorded": true,
+    "source_read_scope": "Bounded excerpts only; exact file ranges and hashes in SOURCE_MAP.md.",
+    "not_completed": [
+      "Installed/running application reconciliation and host toolchain baseline",
+      "Full relevant source and acceptance-test reconnaissance",
+      "Applicable blueprint-authoring, readiness and pack gates",
+      "Independent review",
+      "Lineage registration and predecessor observation",
+      "LETHE document-pointer recording",
+      "Git checkpoint and remote closeout"
+    ]
+  },
+  "records": {
+    "handoff": "HANDOFF.md",
+    "requirements": "REQUIREMENTS.md",
+    "decisions": "DECISIONS.md",
+    "source_map": "SOURCE_MAP.md",
+    "blockers": "BLOCKERS.md",
+    "evidence": [
+      "evidence/2026-09-20_eko_execution_blocker.json",
+      "evidence/2026-09-20_eko_execution_recheck.json"
+    ]
+  },
+  "record_file_sha256": {
+    "HANDOFF.md": "7458fbca2591ae606b694472fdfe42b90c025018036c1162fbd8cfaed4244cd6",
+    "REQUIREMENTS.md": "a8e35a5b772fde807700d53d1c7b78ddd32fb9b49c3f36a7f89ef039707d7719",
+    "DECISIONS.md": "9c7286888d69fb9ec6aa589d15addb09c5ba41a2280021a0d49f725439c56f68",
+    "SOURCE_MAP.md": "ff6a6f738b9d5cf018df7ee8aa839baccfd41fcb641c906a58fb9fdf984ee1bb",
+    "BLOCKERS.md": "4d190157a66311c7339e6fddb6c6d56a1804f7de7b225c355580eeae3545ca71",
+    "evidence/2026-09-20_eko_execution_blocker.json": "4b01ac2aac752589e0cbc0599d0ae941b9a6cd46969ff20bcef3ab1044806e8d",
+    "evidence/2026-09-20_eko_execution_recheck.json": "0129cdcb20852a8e2890b8a15621590336a6938b341f26443ddf6c469d085e0e"
+  },
+  "post_write_containment": {
+    "tool": "Eko_Write_Bridge.git_status",
+    "request_id": "007bcd26e41b4f5db682380d4a5eb49b",
+    "head_commit": "953de98d408a9697fa20a48c23973b9dc8eee921",
+    "branch": "main",
+    "staged": 0,
+    "unstaged": 0,
+    "conflicted": 0,
+    "untracked_total": 10,
+    "pre_existing_or_concurrent_untracked": 2,
+    "new_task_report_files": 8,
+    "truncated": false,
+    "original_work_list_hash_recheck_request": "80bd2a8eee22430b88b472b6a176ccb3",
+    "original_work_list_hash_unchanged": true,
+    "scope_note": "Snapshot after all eight task files were created. No tracked source or index changes. Does not prove exclusive ownership or inspect ignored material. This state-file annotation is the only subsequent planned edit."
+  },
+  "next_action": {
+    "title": "Continue OI-01 after restoring Bridge execution",
+    "first_dependency": "Obtain approval for preservation-first archive maintenance or have the Bridge owner restore command capacity; then verify a real no-op job completes.",
+    "then": "Recheck task hash, Git state and occupancy; read the concurrent handoff; finish source/test and installed-app reconnaissance before design promotion or runtime changes.",
+    "revisit_trigger": "Ash authorises Bridge maintenance or reports restored execution and prompts continuation."
+  }
+}

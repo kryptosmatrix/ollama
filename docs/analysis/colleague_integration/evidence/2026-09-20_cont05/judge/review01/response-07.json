@@ -1,0 +1,40 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "created_at": "2026-09-20T11:58:06.024358853Z",
+  "message": {
+    "role": "assistant",
+    "content": "Let me continue reading the test file and find the `chat` handler in ui.go.",
+    "tool_calls": [
+      {
+        "id": "call_vesz7tsg",
+        "function": {
+          "index": 0,
+          "name": "read_source",
+          "arguments": {
+            "path": "app/ui/chat_read_errors_test.go",
+            "start": 200,
+            "count": 170
+          }
+        }
+      },
+      {
+        "id": "call_20lnr3vy",
+        "function": {
+          "index": 1,
+          "name": "read_source",
+          "arguments": {
+            "path": "app/ui/ui.go",
+            "start": 660,
+            "count": 200
+          }
+        }
+      }
+    ]
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 2142745275,
+  "prompt_eval_count": 27788,
+  "prompt_eval_cached_count": 15744,
+  "eval_count": 158
+}

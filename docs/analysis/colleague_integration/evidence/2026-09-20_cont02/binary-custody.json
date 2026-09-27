@@ -1,0 +1,23 @@
+{
+  "action": "rename task-generated binaries to verified Git-ignored build directory; no bytes deleted; original execution records remain unchanged",
+  "moves": [
+    {
+      "original_path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont02/ollama-baseline",
+      "retained_path": "/Users/krypto/GitHub/ollama/build/eko-colleague-integration-20260920/ollama-baseline",
+      "bytes": 51340482,
+      "sha256": "d634cb2187f62a0f6a84c8c0e56d296de4c98ac15bab9c5d3ea7f3e61a275b10"
+    },
+    {
+      "original_path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont02/chat-read-probe",
+      "retained_path": "/Users/krypto/GitHub/ollama/build/eko-colleague-integration-20260920/chat-read-probe",
+      "bytes": 33734866,
+      "sha256": "943e9b3a48a4eb34f7d106915ad9ffc862d8328a707b4aa07d64c244e6cc1d17"
+    },
+    {
+      "original_path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont02/chat-read-probe-v2",
+      "retained_path": "/Users/krypto/GitHub/ollama/build/eko-colleague-integration-20260920/chat-read-probe-v2",
+      "bytes": 33734866,
+      "sha256": "d736ab8e6d6b4482a3ffc8dba41d53748ede25a6d5a76ae875cc584cb49e559c"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{"Time":"2026-09-20T19:57:26.343895+10:00","Action":"start","Package":"github.com/ollama/ollama/app/store"}
+{"Time":"2026-09-20T19:57:27.317869+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadMissingHeaderIsNotFound"}
+{"Time":"2026-09-20T19:57:27.31797+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadMissingHeaderIsNotFound","Output":"=== RUN   TestChatReadMissingHeaderIsNotFound\n"}
+{"Time":"2026-09-20T19:57:27.330978+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadMissingHeaderIsNotFound","Output":"--- PASS: TestChatReadMissingHeaderIsNotFound (0.01s)\n"}
+{"Time":"2026-09-20T19:57:27.331+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadMissingHeaderIsNotFound","Elapsed":0.01}
+{"Time":"2026-09-20T19:57:27.331023+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause"}
+{"Time":"2026-09-20T19:57:27.331026+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause","Output":"=== RUN   TestChatReadPreservesDatabaseErrorCause\n"}
+{"Time":"2026-09-20T19:57:27.339015+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause","Output":"    chat_read_errors_test.go:45: R-02: database failure became absence: not found: chat existing-chat\n"}
+{"Time":"2026-09-20T19:57:27.339041+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause","Output":"    chat_read_errors_test.go:48: R-02: database error identity lost: got=not found: chat existing-chat cause=sql: database is closed\n"}
+{"Time":"2026-09-20T19:57:27.339052+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause","Output":"    chat_read_errors_test.go:45: R-02: database failure became absence: not found: chat existing-chat\n"}
+{"Time":"2026-09-20T19:57:27.339056+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause","Output":"    chat_read_errors_test.go:48: R-02: database error identity lost: got=not found: chat existing-chat cause=sql: database is closed\n"}
+{"Time":"2026-09-20T19:57:27.340233+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause","Output":"--- FAIL: TestChatReadPreservesDatabaseErrorCause (0.01s)\n"}
+{"Time":"2026-09-20T19:57:27.340262+10:00","Action":"fail","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause","Elapsed":0.01}
+{"Time":"2026-09-20T19:57:27.340339+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Output":"FAIL\n"}
+{"Time":"2026-09-20T19:57:27.3423+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Output":"FAIL\tgithub.com/ollama/ollama/app/store\t0.998s\n"}
+{"Time":"2026-09-20T19:57:27.342328+10:00","Action":"fail","Package":"github.com/ollama/ollama/app/store","Elapsed":0.998}

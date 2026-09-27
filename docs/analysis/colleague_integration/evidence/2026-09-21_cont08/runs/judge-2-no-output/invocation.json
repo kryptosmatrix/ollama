@@ -1,0 +1,24 @@
+{
+  "case": "no-output",
+  "head": "d559da25a4db89fa9369d8be4106100803e82a58",
+  "baseline": "d559da25a4db89fa9369d8be4106100803e82a58",
+  "controller_sha256": "76f9e131b609191188acbd20af9397577cf24e61a9e55660323ea326975d0ae6",
+  "environment_overrides": {
+    "PATH": "/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "CI": "true"
+  },
+  "scope": "Real Node SSR renderer, Shiki, remark; not browser styling, app launch or live services",
+  "fault": {
+    "case": "no-output",
+    "file": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-2-no-output/frontend/src/components/StreamingMarkdownContent.tsx",
+    "edits": [
+      [
+        "{content}\n          </Streamdown>",
+        "{\"\"}\n          </Streamdown>"
+      ]
+    ],
+    "before_sha256": "983e3aa6e4273b861623a97ae5fe5bf9782294a1d0bcb4449e67f808ac7d32a0",
+    "after_sha256": "c49514f676aa085c1c747909ea7cd1593a37ed78d48c7fa8ed32444ac9fbff43",
+    "required_failure_title": "renders distinct upstream Markdown rather than fixed or empty output"
+  }
+}

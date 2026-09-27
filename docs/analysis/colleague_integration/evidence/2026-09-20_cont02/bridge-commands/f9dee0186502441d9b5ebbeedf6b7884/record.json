@@ -1,0 +1,35 @@
+{
+  "created": 1789894460.210387,
+  "cwd": "/Users/krypto/GitHub/ollama",
+  "exit_code": 0,
+  "finished": 1789894488.0770419,
+  "job_id": "f9dee0186502441d9b5ebbeedf6b7884",
+  "output_complete": 1,
+  "request_hash": "a272f84dbda2ec9a57e3e6298cf981a89262e8e05ba8b5ba70128b4bd16c4bfe",
+  "request_id": "eko-ollama-20260920-cont02-deepseek-review-retry",
+  "spec": {
+    "columns": 100,
+    "command": "/usr/bin/python3 - <<'PY'\nfrom pathlib import Path\nimport os,json,subprocess,hashlib,time\nr=Path.cwd();base=r/'docs/analysis/colleague_integration/evidence/2026-09-20_cont02';prior=base/'deepseek-review';review=base/'deepseek-review-retry';review.mkdir(mode=0o700,exist_ok=False);os.umask(0o077)\nfailed=r.parent/'TECHNE/Tools/ollama/_runs/2026-09-20T08-52-49Z_eko-ollama-chat-read-20260920__b0iiatc'\nfor name in ['meta.json','raw_response.json','request.json']:\n if (failed/name).exists():(prior/name).write_bytes((failed/name).read_bytes())\nargs=json.loads((prior/'invocation.json').read_text())['args']\nfor flag,value in [('--num-predict','16384'),('--think','off'),('--run-id','eko-ollama-chat-read-20260920-retry')]:args[args.index(flag)+1]=value\n(review/'invocation.json').write_text(json.dumps({'args':args,'same_prompt_sha256':hashlib.sha256((prior/'prompt.txt').read_bytes()).hexdigest(),'reason':'Prior response truncated; no verdict accepted. Same source snapshot and prompt; no prior reasoning provided to the reviewer.'},indent=2)+'\\n')\nstart=time.monotonic()\nwith (review/'wrapper.stdout').open('xb') as so,(review/'wrapper.stderr').open('xb') as se:p=subprocess.run(args,cwd=r,stdout=so,stderr=se,timeout=455)\nreceipt={'exit_code':p.returncode,'seconds':time.monotonic()-start,'stdout':(review/'wrapper.stdout').read_text(),'stderr':(review/'wrapper.stderr').read_text()};(review/'result.json').write_text(json.dumps(receipt,indent=2)+'\\n');print(json.dumps(receipt),flush=True)\nif p.returncode==0:\n artifact=Path(receipt['stdout'].strip());assert artifact.parent==(r.parent/'TECHNE/Tools/ollama/_runs').resolve()\n for name in ['meta.json','response.txt','request.json','raw_response.json']:(review/name).write_bytes((artifact/name).read_bytes())\n print('META', (review/'meta.json').read_text(),flush=True);print('RESPONSE', (review/'response.txt').read_text(),flush=True)\nraise SystemExit(p.returncode)\nPY",
+    "cwd": "/Users/krypto/GitHub/ollama",
+    "env": {},
+    "login": false,
+    "rows": 30,
+    "shell": "bash",
+    "timeout_seconds": 470,
+    "tty": false
+  },
+  "started": 1789894460.410252,
+  "state": "exited",
+  "stderr_bytes": 0,
+  "stdout_bytes": 37493,
+  "streams": {
+    "stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 37493,
+      "sha256": "712823df4ef5a36a22353718fc4acbbe37bc2b816000b0f5f755fc6488974ee2"
+    }
+  }
+}

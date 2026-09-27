@@ -1,0 +1,14 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "name": "selector_correction",
+    "start": 1,
+    "count": 120
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/entry-selector-correction.json",
+    "file_sha256": "872f81f7657874279da4240ae6eb8f6d0dc27cb64759933d674a89b4b70ba3b0",
+    "total_lines": 9,
+    "text": "1: {\n2:   \"finding\": \"Eko used an incorrect go generate -run selector. Go matched the full directive line; ^node selected nothing and exited 0. The receipt gate correctly rejected it.\",\n3:   \"failed_run\": \"runs/author-11-normal-entry/result.json\",\n4:   \"evidence\": \"entry-selector-diagnosis/\",\n5:   \"repair\": \"Change only the proof command selector to ^//go:generate node. Production unchanged; no positive assertion changed.\",\n6:   \"impact\": \"Independent review was not launched; no acceptance, merge or installation was declared.\",\n7:   \"public_primary_reference\": \"https://go.dev/src/cmd/go/alldocs.go (generate -run full original source text)\",\n8:   \"disposition\": \"Test-instrument defect corrected; failed run preserved, rerun required.\"\n9: }"
+  }
+}

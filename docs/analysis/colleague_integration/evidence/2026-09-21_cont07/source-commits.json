@@ -1,0 +1,38 @@
+{
+  "baseline": "281dcaa06c7cd8b299c6045a248dd6b6ac85f954",
+  "commits": [
+    {
+      "commit": "abeb2e5e29d838f7252b271f25c3b40d1bdff41c",
+      "subject": "fix: modernise native literal declarations without codegen changes",
+      "files": [
+        "app/webview/webview.h"
+      ]
+    },
+    {
+      "commit": "acd8bb3de93ea01d43dd8783bbeff036113f9ab9",
+      "subject": "wip: type message rendering and citations; runtime proof blocked",
+      "files": [
+        "app/ui/app/src/components/MessageList.tsx",
+        "app/ui/app/src/components/StreamingMarkdownContent.integration.test.tsx",
+        "app/ui/app/src/components/StreamingMarkdownContent.tsx",
+        "app/ui/app/src/lib/highlighter.ts",
+        "app/ui/app/src/utils/remarkCitationParser.test.ts",
+        "app/ui/app/src/utils/remarkCitationParser.ts"
+      ]
+    }
+  ],
+  "source_sha256": {
+    "app/webview/webview.h": "60b93d50eefa841c61a37e2c9425107dc720fbb2b112455129776547c2e8eef0",
+    "app/ui/app/src/components/StreamingMarkdownContent.tsx": "983e3aa6e4273b861623a97ae5fe5bf9782294a1d0bcb4449e67f808ac7d32a0",
+    "app/ui/app/src/components/MessageList.tsx": "98fb52e407dab24248f3635bec515e6ace897f779a159d649ea6664af149d02e",
+    "app/ui/app/src/utils/remarkCitationParser.ts": "fda18778386aecda5aac3d49d1cb36bc9593500761dd29f1fb3e9a80011af92c",
+    "app/ui/app/src/lib/highlighter.ts": "e9975a7555a435cd3e899bf4f344cb6fc7f29b10cee8ed2bd2904f53c87848aa",
+    "app/ui/app/src/utils/remarkCitationParser.test.ts": "26981cfea4df53329e5f70933173f006c8b866de2986b9dcbff9101b1cd74cc5",
+    "app/ui/app/src/components/StreamingMarkdownContent.integration.test.tsx": "0cd48db543a398ce45a4978772562c9497e3988d5c044640e7a61c3ebf1e619a"
+  },
+  "branch": "eko/chat-read-integrity-20260920",
+  "worktree_clean": true,
+  "main_merged": false,
+  "installed": false,
+  "timestamp_brisbane": "2026-09-21T10:56:49.143638+10:00"
+}

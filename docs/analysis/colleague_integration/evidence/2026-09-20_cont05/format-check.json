@@ -1,0 +1,15 @@
+{
+  "args": [
+    "/opt/homebrew/bin/gofmt",
+    "-d",
+    "app/store/store.go",
+    "app/store/database.go",
+    "app/store/chat_read_errors_test.go",
+    "app/ui/chat_read_errors_test.go"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+  "exit_code": 0,
+  "elapsed_seconds": 0.47537450000000003,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

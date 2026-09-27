@@ -1,0 +1,1 @@
+{"model":"glm-5.2","created_at":"2026-09-26T10:39:34.310004861Z","message":{"role":"assistant","content":"CARRIER=77C99FDC; FIRST=424217; LAST=633653"},"done":true,"done_reason":"stop","total_duration":1178273907,"prompt_eval_count":25004,"prompt_eval_cached_count":20,"eval_count":22}

@@ -1,0 +1,13 @@
+# Independent review reconciliation
+
+The selected reviewer requested eleven fresh runs on source `6a3778184d43b23c5cba14e0379922377f615f52`. Every required execution completed and met its declared expectation. The final source/log addendum confirms the bounded pass; original reports are preserved unchanged.
+
+The initial transport stopped on line-zero reads before any source or test execution. Ten executed argument-validation checks prove the repair returns errors without permitting zero-based reads or expanding access. The same saved conversation was resumed. The next transport exhausted its 26-round budget after all eleven runs, without a verdict. The recovered history contained every response/tool result, not a new implementer summary; finalisation allowed at most six more reporting/read rounds with the original source and run limits preserved.
+
+Filename-only read coverage was insufficient. The reviewer had missed six required source surfaces, then read only the renderer prefix rather than its body. Those gaps prevented Eko's acceptance until the missing sources and full 353-line renderer/full 197-line inherited transport were delivered and judged. Full raw ESLint output from the reviewer's own fourth execution was also delivered, with its original hash and exit; both Eko and the reviewer counted 99 error findings. This is source/log completion of existing fresh execution, not new execution or a replacement judge.
+
+The addendum corrects the directive spelling, four response metadata tags plus one store tag, normalised diagnostic equality rather than raw stdout-byte equality, AST-bounded erased text edits rather than an AST-printer rewrite, and actual inspection/execution chronology. It also supplies the correct renderer content line anchor (288–289); the source supplement's approximate 293–294 reference is superseded by SOURCE_ANCHORS.json and the numbered full source.
+
+One further attribution precision: only execute/save/digest from the 197-line continuation-08 instrument are imported. The current eleven cases use validate_codegen.py::run, not continuation-08's legacy run function. The addendum's references to wrong-page/no-citations describe those older source controls, NOT additional controls executed in continuation 10. The current executed faults are raw-generator, no-messages and fixed-content. The separate source/returned-run records disambiguate this without changing any result.
+
+No production code, acceptance assertion or fixture was changed during review. No original failure or verdict was rewritten. Report/source observations are limited to the declared generated-model maintenance contract. Full app lint, Keychain/root/package/integration/installation and memory/autonomy remain outside the pass.

@@ -1,0 +1,77 @@
+{
+  "api_version": "0.32.5-47-geb8c93d",
+  "approval": "approve-local-content",
+  "done_reason": "stop",
+  "elapsed_seconds": 21.457978,
+  "endpoint": "http://127.0.0.1:11434",
+  "exit_code": 0,
+  "finished_at": "2026-09-20T09:41:42.307957Z",
+  "format_schema_bytes": 0,
+  "format_schema_sha256": null,
+  "format_schema_source": null,
+  "implementation_sha256": "096573d0f859ac56fa81eaa72aedfdb244bee0f236db9a54daba763f4472b3e9",
+  "launcher_sha256": "8914376e9f68973ec48c2142f3966c2f17cdc027f8fedc8fe6eabd4fe852b1ca",
+  "metrics": {
+    "eval_count": 2724,
+    "prompt_eval_count": 55292,
+    "total_duration": 20712577219
+  },
+  "model_capabilities": [
+    "completion",
+    "thinking",
+    "tools",
+    "vision"
+  ],
+  "model_details": {
+    "context_length": 1048576,
+    "family": "",
+    "format": "",
+    "parameter_size": "763B",
+    "quantization_level": "FP8"
+  },
+  "model_digest_after": "e04da138d31e0c9468e982e1ae9503d06cb7e170caa16a90c17d931c4aa140f8",
+  "model_digest_before": "e04da138d31e0c9468e982e1ae9503d06cb7e170caa16a90c17d931c4aa140f8",
+  "model_expected_digest": "e04da138d31e0c9468e982e1ae9503d06cb7e170caa16a90c17d931c4aa140f8",
+  "model_identity_status": "PINNED",
+  "model_modified_at": "2026-09-20T18:29:39.390211061+10:00",
+  "model_requested": "deepseek-v4.1-flash:cloud",
+  "model_show": {
+    "parameters_bytes": 0,
+    "parameters_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "system_bytes": 0,
+    "system_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "template_bytes": 0,
+    "template_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "model_size": 326,
+  "outcome": "OK",
+  "parameters": {
+    "max_response_bytes": 16777216,
+    "num_ctx": 262144,
+    "num_gpu": "auto",
+    "num_predict": 8192,
+    "seed": 0,
+    "temperature": 0.0,
+    "think": "off",
+    "timeout_seconds": 420
+  },
+  "prompt_bytes": 223263,
+  "prompt_sha256": "13dea2a5bc6aca10d83b56b2b23024f80cf78ae0fdab58e178c6b58c10ba1fe9",
+  "prompt_source": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont03/routing-review-prompt.txt",
+  "ps_observation": {
+    "status": "not_listed"
+  },
+  "python_executable": "/opt/homebrew/opt/python@3.14/bin/python3.14",
+  "python_version": "3.14.6",
+  "raw_response_bytes": 11505,
+  "raw_response_sha256": "57a3f30518d4ca4f8e57f045675ce9c969e3d7c140f0bc5d6f3da84c74737441",
+  "response_bytes": 11153,
+  "response_created_at": "2026-09-20T09:41:42.373650084Z",
+  "response_sha256": "ee18a1c46704fa8e7e4814e6715d41fe2496ff803e27e2756c141c40a3a4988e",
+  "served_model": "deepseek-v4.1-flash",
+  "started_at": "2026-09-20T09:41:20.847663Z",
+  "template_reserve_upper_bound": 2048,
+  "thinking_bytes": 0,
+  "thinking_sha256": null,
+  "wrapper_version": "1.1.0"
+}

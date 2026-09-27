@@ -1,0 +1,17 @@
+{
+  "name": "read_run_output",
+  "arguments": {
+    "ordinal": 7,
+    "stream": "stdout",
+    "offset": 47000,
+    "count": 2000
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-7-full/tests.stdout",
+    "file_sha256": "212b82fb93b9dcf3db5c15c7ab7f7aa63b184a8adaf591db9b31d122d3ecf935",
+    "total_bytes": 49849,
+    "offset": 47000,
+    "next_offset": 49000,
+    "content": "sitive units\",\"status\":\"passed\",\"title\":\"should handle case insensitive units\",\"duration\":0.747124999999869,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"VRAM Utilities\",\"parseVRAM\"],\"fullName\":\"VRAM Utilities parseVRAM should return null for invalid inputs\",\"status\":\"passed\",\"title\":\"should return null for invalid inputs\",\"duration\":0.3291250000002037,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"VRAM Utilities\",\"parseVRAM\"],\"fullName\":\"VRAM Utilities parseVRAM should handle edge cases\",\"status\":\"passed\",\"title\":\"should handle edge cases\",\"duration\":0.19683299999996962,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"VRAM Utilities\",\"Integration tests\"],\"fullName\":\"VRAM Utilities Integration tests should parse various VRAM formats consistently\",\"status\":\"passed\",\"title\":\"should parse various VRAM formats consistently\",\"duration\":1.077874999999949,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"VRAM Utilities\",\"getTotalVRAM\"],\"fullName\":\"VRAM Utilities getTotalVRAM should sum VRAM values from multiple computes\",\"status\":\"passed\",\"title\":\"should sum VRAM values from multiple computes\",\"duration\":7.5081249999993815,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"VRAM Utilities\",\"getTotalVRAM\"],\"fullName\":\"VRAM Utilities getTotalVRAM should handle MB and MiB conversions correctly\",\"status\":\"passed\",\"title\":\"should handle MB and MiB conversions correctly\",\"duration\":1.2898329999998168,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"VRAM Utilities\",\"getTotalVRAM\"],\"fullName\":\"VRAM Utilities getTotalVRAM should handle mixed units\",\"status\":\"passed\",\"title\":\"should handle mixed units\",\"duration\":0.34704099999999016,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"VRAM Utilities\",\"getTotalVRAM\"],\"fullName\":\"VRAM Utilities getTotalVRAM should skip invalid VRAM strings\",\"status\":\"passed\",\"title\":\"should skip invalid VRAM strings\",\"duration\":0.22287499999947613,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"VRAM Utilities\",\"getTotalVRAM\"],\"fu"
+  }
+}

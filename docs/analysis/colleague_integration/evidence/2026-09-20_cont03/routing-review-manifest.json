@@ -1,0 +1,154 @@
+[
+  {
+    "path": "docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+    "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec",
+    "lines": 590,
+    "ranges": [
+      [
+        1,
+        145
+      ]
+    ]
+  },
+  {
+    "path": "../TECHNE/00_START_HERE.md",
+    "file_sha256": "e0779d39073b56ae823b4868565c19330289188a0bec0fe15322835b49dff525",
+    "lines": 173,
+    "ranges": [
+      [
+        1,
+        106
+      ]
+    ]
+  },
+  {
+    "path": "../TECHNE/CONSTITUTION.md",
+    "file_sha256": "38230c5cd06f26bfd2d0aa16422bec265aab2d796c6a0f209ba9acdbcf171062",
+    "lines": 699,
+    "ranges": [
+      [
+        1,
+        122
+      ],
+      [
+        271,
+        310
+      ],
+      [
+        582,
+        646
+      ]
+    ]
+  },
+  {
+    "path": "../TECHNE/Method/16_Implementation_Ready_Standard.md",
+    "file_sha256": "df589510432ba5e60848feca4eed9d93b5fb031f7bd07dee03e1d46b2daed564",
+    "lines": 573,
+    "ranges": [
+      [
+        1,
+        573
+      ]
+    ]
+  },
+  {
+    "path": "../TECHNE/Method/04_Implementation_Proof_Method.md",
+    "file_sha256": "261e9c16f3041bca0fe19f98f1ff9cf06acdfe914152094eaf8e6c8cf964d64a",
+    "lines": 482,
+    "ranges": [
+      [
+        1,
+        181
+      ]
+    ]
+  },
+  {
+    "path": "docs/_design/CHAT_READ_ERROR_INTEGRITY.md",
+    "file_sha256": "b691c8004ed82674c82ebcde3a2f876cd85f65cb5f8167ffadc5e3fd6e6e0570",
+    "lines": 82,
+    "ranges": [
+      [
+        1,
+        82
+      ]
+    ]
+  },
+  {
+    "path": "app/types/not/found.go",
+    "file_sha256": "c3aa0def96031735b4ee82e60613261890a01f9d35260099d267f697605f4225",
+    "lines": 28,
+    "ranges": [
+      [
+        1,
+        28
+      ]
+    ]
+  },
+  {
+    "path": "app/store/store.go",
+    "file_sha256": "af324196245292ab5b6ee65abbb8de2f1db5e3d07772db0f98d273c53848349f",
+    "lines": 542,
+    "ranges": [
+      [
+        418,
+        441
+      ]
+    ]
+  },
+  {
+    "path": "app/store/database.go",
+    "file_sha256": "16bde5746f671f7f83c5e4b952186c698f306cd70508d547f7bc91c93ae0a099",
+    "lines": 1371,
+    "ranges": [
+      [
+        675,
+        774
+      ]
+    ]
+  },
+  {
+    "path": "app/ui/ui.go",
+    "file_sha256": "dbba86f3d90ec5edac5b23458fec00f25e39f4d9f3ef43ac124571e0c1a0d48e",
+    "lines": 2004,
+    "ranges": [
+      [
+        232,
+        254
+      ],
+      [
+        304,
+        307
+      ],
+      [
+        365,
+        384
+      ],
+      [
+        721,
+        801
+      ]
+    ]
+  },
+  {
+    "path": "docs/analysis/colleague_integration/evidence/2026-09-20_cont03/testdata/chat_read_errors_test.go",
+    "file_sha256": "ad7709a2dfb693856e8e2be822052ff2c174b4c43f57566dacc4e2c9400f9d28",
+    "lines": 347,
+    "ranges": [
+      [
+        1,
+        347
+      ]
+    ]
+  },
+  {
+    "path": "docs/analysis/colleague_integration/evidence/2026-09-20_cont03/authenticated-baseline.json",
+    "file_sha256": "f730185a113c7bdb075fbb62cd871c53c18d108c864f7882bbe387c65155610a",
+    "lines": 43,
+    "ranges": [
+      [
+        1,
+        43
+      ]
+    ]
+  }
+]

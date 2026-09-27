@@ -1,0 +1,146 @@
+2980: 
+2981:         // generate the actual drafts (if any)
+2982:         {
+2983:             common_speculative_draft(spec.get());
+2984:         }
+2985: 
+2986:         // make checkpoints if needed
+2987:         iterate(drafting, [&](server_slot & slot) {
+2988:             auto & draft = slot.spec_draft;
+2989:             auto & ckpt  = slot.spec_ckpt;
+2990: 
+2991:             slot.n_draft_total += draft.size();
+2992: 
+2993:             // TODO: avoid restoring the draft context and re-evaluating the drafted tokens when not needed [TAG_SPEC_AVOID_DRAFT_REEVAL]
+2994:             const bool use_ckpt_dft = ctx_dft_seq_rm_type == COMMON_CONTEXT_SEQ_RM_TYPE_FULL;
+2995: 
+2996:             if (ctx_dft) {
+2997:                 if (use_ckpt_dft) {
+2998:                     ckpt.load_dft(ctx_dft, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY);
+2999:                 }
+3000: 
+3001:                 common_context_seq_rm(ctx_dft, slot.id, ckpt.pos_max + 1, -1);
+3002:             }
+3003: 
+3004:             if (!draft.empty()) {
+3005:                 const bool use_ckpt_tgt =
+3006:                     ctx_tgt_seq_rm_type == COMMON_CONTEXT_SEQ_RM_TYPE_FULL ||
+3007:                    (ctx_tgt_seq_rm_type == COMMON_CONTEXT_SEQ_RM_TYPE_RS && draft.size() > llama_n_rs_seq(ctx_tgt));
+3008: 
+3009:                 const bool use_ckpt_dft =
+3010:                    (ctx_dft_seq_rm_type == COMMON_CONTEXT_SEQ_RM_TYPE_RS && draft.size() > llama_n_rs_seq(ctx_dft));
+3011: 
+3012:                 if (use_ckpt_tgt) {
+3013:                     //const int64_t t_start = ggml_time_us();
+3014: 
+3015:                     ckpt.update_tgt(ctx_tgt, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY);
+3016: 
+3017:                     //const int64_t t_total = ggml_time_us() - t_start;
+3018:                     //printf("checkpoint total: %f ms\n", t_total / 1000.0);
+3019: 
+3020:                     SLT_DBG(slot, "created speculative checkpoint (pos_min = %d, pos_max = %d, n_tokens = %d, size = %.3f MiB, draft = %.3f MiB)\n",
+3021:                             ckpt.pos_min, ckpt.pos_max, slot.prompt.n_tokens(),
+3022:                             (float) ckpt.size() / 1024 / 1024,
+3023:                             (float) ckpt.data_dft.size() / 1024 / 1024);
+3024:                 }
+3025: 
+3026:                 if (use_ckpt_dft) {
+3027:                     ckpt.update_dft(ctx_dft, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY);
+3028:                 }
+3029:             }
+3030:         });
+3031: 
+3032:         // update the batch with the sampled/drafted tokens
+3033:         iterate(generating, [&](server_slot & slot) {
+3034:             slot.handle_last_sampled_token(batch);
+3035:         });
+3036: 
+3037:         // process in chunks of params.n_batch
+3038:         int32_t n_batch  = llama_n_batch(ctx_tgt);
+3039:         int32_t n_ubatch = llama_n_ubatch(ctx_tgt);
+3040: 
+3041:         auto & alora_scale       = batch.alora_scale;
+3042:         auto & alora_disabled_id = batch.alora_disabled_id;
+3043: 
+3044:         // next, batch any pending prompts without exceeding n_batch
+3045:         if (params_base.cont_batching || batch.size() == 0) {
+3046:             bool add_ok = true; // false means the batch is full, skip remaining slots
+3047: 
+3048:             iterate(slots, [&](server_slot & slot) {
+3049:                 if (!add_ok || batch.size() >= n_batch) {
+3050:                     return; // batch is full, skip remaining slots
+3051:                 }
+3052: 
+3053:                 if (!slot.is_processing()) {
+3054:                     return;
+3055:                 }
+3056: 
+3057:                 // check if we can batch this slot with the previous one
+3058:                 if (slot_batched && !slot_batched->can_batch_with(slot)) {
+3059:                     return;
+3060:                 }
+3061: 
+3062:                 // check if this is a child slot
+3063:                 if (slot.state == SLOT_STATE_WAIT_OTHER) {
+3064:                     SLT_DBG(slot, "%s", "waiting for parent slot to complete\n");
+3065:                     return;
+3066:                 }
+3067: 
+3068:                 // this slot still has a prompt to be processed
+3069:                 if (slot.state == SLOT_STATE_PROCESSING_PROMPT || slot.state == SLOT_STATE_STARTED) {
+3070:                     const auto & input_tokens = slot.task->tokens;
+3071: 
+3072:                     // used to determine the number of tokens added to the batch for the current slot
+3073:                     const auto n_tokens_prev = batch.size();
+3074: 
+3075:                     // TODO: maybe move branch to outside of this loop in the future
+3076:                     if (slot.state == SLOT_STATE_STARTED) {
+3077:                         slot.t_start_process_prompt = ggml_time_us();
+3078:                         slot.t_start_generation = 0;
+3079: 
+3080:                         slot.state = SLOT_STATE_PROCESSING_PROMPT;
+3081: 
+3082:                         SLT_TRC(slot, "new prompt, n_ctx_slot = %d, n_keep = %d, task.n_tokens = %d\n",
+3083:                                 slot.n_ctx, slot.task->params.n_keep, slot.task->n_tokens());
+3084: 
+3085:                         // print prompt tokens (for debugging)
+3086:                         /*if (1) {
+3087:                             // first 16 tokens (avoid flooding logs)
+3088:                             for (int i = 0; i < std::min<int>(16, input_tokens.size()); i++) {
+3089:                                 SLT_DBG(slot, "prompt token %3d: %6d '%s'\n", i, input_tokens[i], common_token_to_piece(ctx_tgt, input_tokens[i]).c_str());
+3090:                             }
+3091:                         } else {
+3092:                             // all
+3093:                             for (int i = 0; i < (int) input_tokens.size(); i++) {
+3094:                                 SLT_DBG(slot, "prompt token %3d: %6d '%s'\n", i, input_tokens[i], common_token_to_piece(ctx_tgt, input_tokens[i]).c_str());
+3095:                             }
+3096:                         }*/
+3097: 
+3098:                         // keep track how many tokens we can reuse from the previous state
+3099:                         int n_past = 0;
+3100: 
+3101:                         // empty prompt passed -> release the slot and send empty response
+3102:                         if (input_tokens.empty()) {
+3103:                             SLT_WRN(slot, "%s", "empty prompt - releasing slot\n");
+3104: 
+3105:                             slot.print_timings();
+3106:                             send_final_response(slot);
+3107:                             slot.release();
+3108: 
+3109:                             return;
+3110:                         }
+3111: 
+3112:                         // TODO: support memory-less logits computation
+3113:                         if (slot.task->need_logits() && !llama_get_memory(ctx_tgt)) {
+3114:                             send_error(slot, "the current context does not logits computation. skipping", ERROR_TYPE_SERVER);
+3115:                             slot.release();
+3116:                             return;
+3117:                         }
+3118: 
+3119:                         if (!slot.can_split()) {
+3120:                             if (slot.task->n_tokens() > n_ubatch) {
+3121:                                 send_error(slot,
+3122:                                            string_format(
+3123:                                                "input (%d tokens) is too large to process. increase the physical batch "
+3124:                                                "size (current batch size: %d)",
+3125:                                                slot.task->n_tokens(), n_ubatch),

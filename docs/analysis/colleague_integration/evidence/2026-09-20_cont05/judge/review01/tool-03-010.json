@@ -1,0 +1,16 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "path": "app/ui/ui.go",
+    "start": 1,
+    "count": 60
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/ui.go",
+    "file_sha256": "dbba86f3d90ec5edac5b23458fec00f25e39f4d9f3ef43ac124571e0c1a0d48e",
+    "start": 1,
+    "end": 60,
+    "total_lines": 2004,
+    "text": "1: //go:build windows || darwin\n2: \n3: // package ui implements a chat interface for Ollama\n4: package ui\n5: \n6: import (\n7: \t\"context\"\n8: \t\"encoding/base64\"\n9: \t\"encoding/json\"\n10: \t\"errors\"\n11: \t\"fmt\"\n12: \t\"log/slog\"\n13: \t\"net/http\"\n14: \t\"net/http/httputil\"\n15: \t\"os\"\n16: \t\"runtime\"\n17: \t\"runtime/debug\"\n18: \t\"slices\"\n19: \t\"strconv\"\n20: \t\"strings\"\n21: \t\"sync\"\n22: \t\"time\"\n23: \n24: \t\"github.com/google/uuid\"\n25: \t\"github.com/ollama/ollama/api\"\n26: \t\"github.com/ollama/ollama/app/server\"\n27: \t\"github.com/ollama/ollama/app/store\"\n28: \t\"github.com/ollama/ollama/app/tools\"\n29: \t\"github.com/ollama/ollama/app/tts\"\n30: \t\"github.com/ollama/ollama/app/types/not\"\n31: \t\"github.com/ollama/ollama/app/ui/responses\"\n32: \t\"github.com/ollama/ollama/app/updater\"\n33: \t\"github.com/ollama/ollama/app/version\"\n34: \tollamaAuth \"github.com/ollama/ollama/auth\"\n35: \t\"github.com/ollama/ollama/envconfig\"\n36: \t\"github.com/ollama/ollama/manifest\"\n37: \t\"github.com/ollama/ollama/mcp\"\n38: \t\"github.com/ollama/ollama/types/model\"\n39: \t_ \"github.com/tkrajina/typescriptify-golang-structs/typescriptify\"\n40: )\n41: \n42: //go:generate tscriptify -package=github.com/ollama/ollama/app/ui/responses -target=./app/codegen/gotypes.gen.ts responses/types.go\n43: //go:generate npm --prefix ./app run build\n44: \n45: var CORS = envconfig.Bool(\"OLLAMA_CORS\")\n46: \n47: // OllamaDotCom returns the URL for ollama.com, allowing override via environment variable\n48: var OllamaDotCom = func() string {\n49: \tif url := os.Getenv(\"OLLAMA_DOT_COM_URL\"); url != \"\" {\n50: \t\treturn url\n51: \t}\n52: \treturn \"https://ollama.com\"\n53: }()\n54: \n55: type statusRecorder struct {\n56: \thttp.ResponseWriter\n57: \tcode int\n58: }\n59: \n60: func (r *statusRecorder) Written() bool {"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "path": "app/store/database.go",
+    "start": 1,
+    "count": 60
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/store/database.go",
+    "file_sha256": "6905b4e6146f76e0aed66f97e17a39245d27a0182f0051d06642389de042b551",
+    "start": 1,
+    "end": 60,
+    "total_lines": 1373,
+    "text": "1: //go:build windows || darwin\n2: \n3: package store\n4: \n5: import (\n6: \t\"database/sql\"\n7: \t\"encoding/json\"\n8: \t\"fmt\"\n9: \t\"strings\"\n10: \t\"time\"\n11: \n12: \t_ \"github.com/mattn/go-sqlite3\"\n13: \n14: \t\"github.com/ollama/ollama/app/types/not\"\n15: )\n16: \n17: // currentSchemaVersion defines the current database schema version.\n18: // Increment this when making schema changes that require migrations.\n19: const currentSchemaVersion = 17\n20: \n21: // database wraps the SQLite connection.\n22: // SQLite handles its own locking for concurrent access:\n23: // - Multiple readers can access the database simultaneously\n24: // - Writers are serialized (only one writer at a time)\n25: // - WAL mode allows readers to not block writers\n26: // This means we don't need application-level locks for database operations.\n27: type database struct {\n28: \tconn *sql.DB\n29: }\n30: \n31: func newDatabase(dbPath string) (*database, error) {\n32: \t// Open database connection\n33: \tconn, err := sql.Open(\"sqlite3\", dbPath+\"?_foreign_keys=on&_journal_mode=WAL&_busy_timeout=5000&_txlock=immediate\")\n34: \tif err != nil {\n35: \t\treturn nil, fmt.Errorf(\"open database: %w\", err)\n36: \t}\n37: \n38: \t// Test the connection\n39: \tif err := conn.Ping(); err != nil {\n40: \t\tconn.Close()\n41: \t\treturn nil, fmt.Errorf(\"ping database: %w\", err)\n42: \t}\n43: \n44: \tdb := &database{conn: conn}\n45: \n46: \t// Initialize schema\n47: \tif err := db.init(); err != nil {\n48: \t\tconn.Close()\n49: \t\treturn nil, fmt.Errorf(\"initialize database: %w\", err)\n50: \t}\n51: \n52: \treturn db, nil\n53: }\n54: \n55: func (db *database) Close() error {\n56: \t_, _ = db.conn.Exec(\"PRAGMA wal_checkpoint(TRUNCATE);\")\n57: \n58: \treturn db.conn.Close()\n59: }\n60: "
+  }
+}

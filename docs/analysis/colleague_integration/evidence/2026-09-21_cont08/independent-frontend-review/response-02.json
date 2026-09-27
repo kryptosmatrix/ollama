@@ -1,0 +1,64 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "created_at": "2026-09-21T03:38:57.299020253Z",
+  "message": {
+    "role": "assistant",
+    "content": "Now the configs and production source.",
+    "tool_calls": [
+      {
+        "id": "call_x8v9veoj",
+        "function": {
+          "index": 0,
+          "name": "read_source",
+          "arguments": {
+            "count": 120,
+            "name": "vitest_config",
+            "start": 1
+          }
+        }
+      },
+      {
+        "id": "call_gbhsy1cs",
+        "function": {
+          "index": 1,
+          "name": "read_source",
+          "arguments": {
+            "count": 120,
+            "name": "vite_config",
+            "start": 1
+          }
+        }
+      },
+      {
+        "id": "call_c5kg97x2",
+        "function": {
+          "index": 2,
+          "name": "read_source",
+          "arguments": {
+            "count": 200,
+            "name": "renderer",
+            "start": 1
+          }
+        }
+      },
+      {
+        "id": "call_uahu8rn3",
+        "function": {
+          "index": 3,
+          "name": "read_source",
+          "arguments": {
+            "count": 200,
+            "name": "parser",
+            "start": 1
+          }
+        }
+      }
+    ]
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 1422683250,
+  "prompt_eval_count": 5478,
+  "prompt_eval_cached_count": 930,
+  "eval_count": 262
+}

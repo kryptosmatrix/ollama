@@ -1,0 +1,16 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "path": "mutant_always-error",
+    "start": 424,
+    "count": 20
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/always-error/store.go",
+    "file_sha256": "074e77e150b650bb99dab8a69c557f65bb77fd9a1a162ddb20005c53b659f486",
+    "start": 424,
+    "end": 443,
+    "total_lines": 537,
+    "text": "424: func (s *Store) Chat(id string) (*Chat, error) {\n425: \treturn s.ChatWithOptions(id, true)\n426: }\n427: \n428: func (s *Store) ChatWithOptions(id string, loadAttachmentData bool) (*Chat, error) {\n429: \tif err := s.ensureDB(); err != nil {\n430: \t\treturn nil, err\n431: \t}\n432: \n433: \treturn nil, fmt.Errorf(\"deliberate always-error getter\")\n434: }\n435: \n436: func (s *Store) SetChat(chat Chat) error {\n437: \tif err := s.ensureDB(); err != nil {\n438: \t\treturn err\n439: \t}\n440: \n441: \treturn s.db.saveChat(chat)\n442: }\n443: "
+  }
+}

@@ -1,0 +1,440 @@
+[
+  {
+    "run": "author-1-candidate",
+    "case": "candidate",
+    "result": "runs/author-1-candidate/result.json",
+    "result_sha256": "a5f9d36319a8ca625585774daac7958ee46537183ef31be4cf06f36f7b5ea08a",
+    "expectation_met": true,
+    "counts": {
+      "passed": 10,
+      "failed": 0,
+      "pending": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "test_exit": 0,
+    "compile_exit": 0,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "author-10-build",
+    "case": "build",
+    "result": "runs/author-10-build/result.json",
+    "result_sha256": "5500448b4ffcda8010b391144a732336349ba8b14f484d0e57ab3fc13c662c69",
+    "expectation_met": true,
+    "counts": null,
+    "test_exit": 0,
+    "compile_exit": null,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "author-11-normal-entry",
+    "case": "normal-entry",
+    "result": "runs/author-11-normal-entry/result.json",
+    "result_sha256": "d0d84de06338e87e8ac0697389ae04e1dd4f1a462ed42f73e6ceb23d0dd37171",
+    "expectation_met": false,
+    "counts": null,
+    "test_exit": 0,
+    "compile_exit": null,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Instrument selector defect; preserved as failure. Corrected source-identical run: author-13-normal-entry-corrected."
+  },
+  {
+    "run": "author-12-before-corrected-controls",
+    "case": "candidate",
+    "result": "runs/author-12-before-corrected-controls/result.json",
+    "result_sha256": "9567aeeaa28d907459eae48d8f0859240890492c3292427f78d4ea3a09099b13",
+    "expectation_met": true,
+    "counts": {
+      "passed": 10,
+      "failed": 0,
+      "pending": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "test_exit": 0,
+    "compile_exit": 0,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "author-13-normal-entry-corrected",
+    "case": "normal-entry",
+    "result": "runs/author-13-normal-entry-corrected/result.json",
+    "result_sha256": "7af0ca22d6c4e1d1fa9a36daee0d8051deee4f05495baee2911b9e49fe5baf7e",
+    "expectation_met": true,
+    "counts": null,
+    "test_exit": 0,
+    "compile_exit": null,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "author-14-raw-lint",
+    "case": "raw-generator",
+    "result": "runs/author-14-raw-lint/result.json",
+    "result_sha256": "50216b880c06f36e168b96c2569858e53e2ac213d7e029716818ca90090e6e35",
+    "expectation_met": true,
+    "counts": {
+      "passed": 9,
+      "failed": 1,
+      "pending": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "test_exit": 1,
+    "compile_exit": 0,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "author-15-final",
+    "case": "candidate",
+    "result": "runs/author-15-final/result.json",
+    "result_sha256": "88e544f5633d75a2b2a1c17492e30f750dedb965cfc5dcc199da6ef0eec11a04",
+    "expectation_met": true,
+    "counts": {
+      "passed": 10,
+      "failed": 0,
+      "pending": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "test_exit": 0,
+    "compile_exit": 0,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "author-16-final-instrument",
+    "case": "gate-self-checks",
+    "result": "runs/author-16-final-instrument/result.json",
+    "result_sha256": "a245de68dfee0c5e0b38cde975522d1c43d5990cf99f66a2edc02b021cb0dbc8",
+    "expectation_met": true,
+    "counts": null,
+    "test_exit": 7,
+    "compile_exit": null,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "author-2-generation",
+    "case": "generation",
+    "result": "runs/author-2-generation/result.json",
+    "result_sha256": "f0f6c8aaddc208939fa5d72160e2c84e6604408984400496018c085c3183f8f4",
+    "expectation_met": true,
+    "counts": {
+      "tests": 22,
+      "pass": 22,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "test_exit": 0,
+    "compile_exit": null,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "author-3-raw-generator",
+    "case": "raw-generator",
+    "result": "runs/author-3-raw-generator/result.json",
+    "result_sha256": "a351a92d9124cba2a6c7fccaf1f29d342d88cb4206cdea4f846030c02cb8ebb4",
+    "expectation_met": true,
+    "counts": {
+      "passed": 9,
+      "failed": 1,
+      "pending": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "test_exit": 1,
+    "compile_exit": 0,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "author-4-no-messages",
+    "case": "no-messages",
+    "result": "runs/author-4-no-messages/result.json",
+    "result_sha256": "103465f7ba92180fcfdee148fd98ca732a6a7821a427eacae02c718e7419261c",
+    "expectation_met": true,
+    "counts": {
+      "passed": 7,
+      "failed": 3,
+      "pending": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "test_exit": 1,
+    "compile_exit": 0,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "author-5-fixed-content",
+    "case": "fixed-content",
+    "result": "runs/author-5-fixed-content/result.json",
+    "result_sha256": "b282acaf15aaa800d7eee9d9e32850863ee1727660894f6ed2ac809eba03d431",
+    "expectation_met": true,
+    "counts": {
+      "passed": 8,
+      "failed": 2,
+      "pending": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "test_exit": 1,
+    "compile_exit": 0,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "author-6-candidate",
+    "case": "candidate",
+    "result": "runs/author-6-candidate/result.json",
+    "result_sha256": "b41b9e3c1fd944533a1673fadef973b3a27d09d72b22d5b02cd4d8e89b847cae",
+    "expectation_met": true,
+    "counts": {
+      "passed": 10,
+      "failed": 0,
+      "pending": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "test_exit": 0,
+    "compile_exit": 0,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "author-7-full",
+    "case": "full",
+    "result": "runs/author-7-full/result.json",
+    "result_sha256": "40e6f84b00f12aacec677af879ce0a438ded736d75dca87ffaf7517f3f303540",
+    "expectation_met": true,
+    "counts": {
+      "passed": 164,
+      "failed": 0,
+      "pending": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "test_exit": 0,
+    "compile_exit": 0,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "author-8-go-store",
+    "case": "go-store",
+    "result": "runs/author-8-go-store/result.json",
+    "result_sha256": "321077c3ef1ae823c97c1696e2c62853407d8a9623786da90b5732148cb1d170",
+    "expectation_met": true,
+    "counts": {
+      "started": 42,
+      "passed": 42,
+      "top_level": 17,
+      "bad": 0
+    },
+    "test_exit": 0,
+    "compile_exit": null,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "author-9-gate-self-checks",
+    "case": "gate-self-checks",
+    "result": "runs/author-9-gate-self-checks/result.json",
+    "result_sha256": "7ca03371c3c9dca4cc4e96320ca86ad4823e6dde83178b827b8aa9fd97b97299",
+    "expectation_met": true,
+    "counts": null,
+    "test_exit": 7,
+    "compile_exit": null,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "judge-1-candidate",
+    "case": "candidate",
+    "result": "runs/judge-1-candidate/result.json",
+    "result_sha256": "0f2b180e1d0133fd2553ffd042a852db4d3a16cc98eb8c95808f13890f52fcab",
+    "expectation_met": true,
+    "counts": {
+      "passed": 10,
+      "failed": 0,
+      "pending": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "test_exit": 0,
+    "compile_exit": 0,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "judge-10-build",
+    "case": "build",
+    "result": "runs/judge-10-build/result.json",
+    "result_sha256": "96ea667e040f3a50edc723c508c3cfdc7c67e220d0180ec5adebd13bfd925671",
+    "expectation_met": true,
+    "counts": null,
+    "test_exit": 0,
+    "compile_exit": null,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "judge-11-candidate",
+    "case": "candidate",
+    "result": "runs/judge-11-candidate/result.json",
+    "result_sha256": "66b5a8cc8f1ec9243bf31d9335b2e858bb7b40416cd09285ec5dbe63fde88794",
+    "expectation_met": true,
+    "counts": {
+      "passed": 10,
+      "failed": 0,
+      "pending": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "test_exit": 0,
+    "compile_exit": 0,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "judge-2-generation",
+    "case": "generation",
+    "result": "runs/judge-2-generation/result.json",
+    "result_sha256": "d1a56b18a23a7e1e91b7adaf2971f9e3ade817f791cf911fa7d2f434119511bd",
+    "expectation_met": true,
+    "counts": {
+      "tests": 22,
+      "pass": 22,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "test_exit": 0,
+    "compile_exit": null,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "judge-3-normal-entry",
+    "case": "normal-entry",
+    "result": "runs/judge-3-normal-entry/result.json",
+    "result_sha256": "7007af416d97a3c48632e70ef34bb58cefa0b8f6659de801851664db2a7bc99a",
+    "expectation_met": true,
+    "counts": null,
+    "test_exit": 0,
+    "compile_exit": null,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "judge-4-raw-generator",
+    "case": "raw-generator",
+    "result": "runs/judge-4-raw-generator/result.json",
+    "result_sha256": "e9854e51836c1452134a6fe6046af31edce018829f48d144e724adb868443e29",
+    "expectation_met": true,
+    "counts": {
+      "passed": 9,
+      "failed": 1,
+      "pending": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "test_exit": 1,
+    "compile_exit": 0,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "judge-5-no-messages",
+    "case": "no-messages",
+    "result": "runs/judge-5-no-messages/result.json",
+    "result_sha256": "26107ba20375d6b86bfffb0228903b08cbb431a7db3711edeb6f8c9ab4326035",
+    "expectation_met": true,
+    "counts": {
+      "passed": 7,
+      "failed": 3,
+      "pending": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "test_exit": 1,
+    "compile_exit": 0,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "judge-6-fixed-content",
+    "case": "fixed-content",
+    "result": "runs/judge-6-fixed-content/result.json",
+    "result_sha256": "6d26106137b4daa025c869b5df3ade259aa95423fb7a1a84892427412668e375",
+    "expectation_met": true,
+    "counts": {
+      "passed": 8,
+      "failed": 2,
+      "pending": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "test_exit": 1,
+    "compile_exit": 0,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "judge-7-full",
+    "case": "full",
+    "result": "runs/judge-7-full/result.json",
+    "result_sha256": "974236b57db234d67f4e8c74b18c33093efe97433a57ea51af75ff88a2020cfc",
+    "expectation_met": true,
+    "counts": {
+      "passed": 164,
+      "failed": 0,
+      "pending": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "test_exit": 0,
+    "compile_exit": 0,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "judge-8-go-store",
+    "case": "go-store",
+    "result": "runs/judge-8-go-store/result.json",
+    "result_sha256": "401b7de0bac1abddfb72258a91007fe2ba8e83a5d5e4716419fb6fe516c2ab9c",
+    "expectation_met": true,
+    "counts": {
+      "started": 42,
+      "passed": 42,
+      "top_level": 17,
+      "bad": 0
+    },
+    "test_exit": 0,
+    "compile_exit": null,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  },
+  {
+    "run": "judge-9-gate-self-checks",
+    "case": "gate-self-checks",
+    "result": "runs/judge-9-gate-self-checks/result.json",
+    "result_sha256": "b8b086261484d384063a2f64d976d19dd9e3a7aa4a4ab0bb600ea58e96ce22a1",
+    "expectation_met": true,
+    "counts": null,
+    "test_exit": 7,
+    "compile_exit": null,
+    "source_and_dependencies_unchanged": true,
+    "disposition": "Observed result; negative controls require intended child failure, not a clean success."
+  }
+]

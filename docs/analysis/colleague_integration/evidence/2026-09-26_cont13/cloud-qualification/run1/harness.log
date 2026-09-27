@@ -1,0 +1,10 @@
+20:39:26 deepseek-v4.1-flash:cloud Q1: http=200 PASS prompt=51 bound=225 bound_holds=True 0.8s spent=51 reply='CARRIER=0983841E'
+20:39:28 deepseek-v4.1-flash:cloud Q2: http=200 PASS prompt=20080 bound=54325 bound_holds=True 1.3s spent=20131 reply='CARRIER=DCA4FCFA; FIRST=363737; LAST=118691'
+20:39:32 deepseek-v4.1-flash:cloud Q3: http=200 PASS prompt=99680 bound=269245 bound_holds=True 4.0s spent=119811 reply='CARRIER=CB0F4FBB; FIRST=240247; LAST=457273'
+20:39:32 glm-5.2:cloud Q1: http=200 PASS prompt=53 bound=225 bound_holds=True 0.8s spent=119864 reply='CARRIER=2B49A398'
+20:39:34 glm-5.2:cloud Q2: http=200 PASS prompt=25004 bound=54325 bound_holds=True 1.6s spent=144868 reply='CARRIER=77C99FDC; FIRST=424217; LAST=633653'
+20:39:38 glm-5.2:cloud Q3: http=200 PASS prompt=103671 bound=216271 bound_holds=True 3.9s spent=248539 reply='CARRIER=23863C2A; FIRST=533448; LAST=621133'
+20:39:39 glm-5.3:cloud Q1: http=200 START_LOST prompt=58 bound=225 bound_holds=True 1.4s spent=248597 reply='The user has configured instructions telling me that when asked for the carrier code, I sh'
+20:39:46 glm-5.3:cloud Q2: http=200 NO_EVIDENCE prompt=24986 bound=54325 bound_holds=True 6.7s spent=273583 reply='The user wants a specific format: CARRIER=<the carrier code>; FIRST=<the value on line 000'
+20:39:53 glm-5.3:cloud Q3: http=200 NO_EVIDENCE prompt=103853 bound=216433 bound_holds=True 6.7s spent=377436 reply='The user wants the response in exactly this format: CARRIER=<the carrier code>; FIRST=<the'
+20:39:53 done: 9 probes, prompt tokens spent 377436 of cap 500000

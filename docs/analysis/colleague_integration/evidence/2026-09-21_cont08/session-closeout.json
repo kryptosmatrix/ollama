@@ -1,0 +1,23 @@
+{
+  "job_id": "5422442039c54da3bd7fc18e70f6694e",
+  "request_id": "eko-ollama-cont08-20260921-session",
+  "request_hash": "cc8528db168b06029aa7181334e7a91f34e345002d62838239a7630a64218c99",
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+  "state": "exited",
+  "created": 1789961010.619217,
+  "started": 1789961010.896498,
+  "finished": 1789962618.553955,
+  "exit_code": 0,
+  "stdout_bytes": 182281,
+  "stderr_bytes": 564,
+  "output_complete": true,
+  "eof_input": "eko-cont08-session-eof",
+  "eof_delivered": true,
+  "background_work_remaining": false,
+  "shell_exit_is_test_evidence": false,
+  "stderr_disposition": "The recorded first fault-control attempt failed on an incorrect source anchor before compilation or test execution. That instrument failure was retained, corrected and followed by fresh successful controls. It is not credited as behavioural fault detection.",
+  "source_commit": "8977b03cc4224a8226f1fac93647246b8edfa16a",
+  "verified_remote_documentation_tip": "b880138b610418b0f0cdc5922e89c8c6451c8ba9",
+  "main_merged": false,
+  "installed": false
+}

@@ -1,0 +1,30 @@
+{
+ "model": "glm-5.3:cloud",
+ "probe": "Q2",
+ "lines": 2000,
+ "http_status": 200,
+ "seconds": 2.3,
+ "request_bytes": 56453,
+ "content_utf8_bytes": 54277,
+ "conservative_bound": 54325,
+ "prompt_eval_count": 24999,
+ "eval_count": 123,
+ "done_reason": "stop",
+ "bound_holds": true,
+ "expected": {
+  "carrier": "1CB97F9C",
+  "first": 810417,
+  "last": 126914
+ },
+ "reply": "The user wants me to reply in exactly this format: CARRIER=<the carrier code>; FIRST=<the value on line 000001>; LAST=<the value on line 002000>\n\nCarrier code: 1CB97F9C\nFirst line (000001): 810417\nLast line (002000): 126914\n\nSo the answer is: CARRIER=1CB97F9C; FIRST=810417; LAST=126914CARRIER=1CB97F9C; FIRST=810417; LAST=126914",
+ "ok": {
+  "carrier": true,
+  "first": true,
+  "last": true
+ },
+ "verdict": "PASS",
+ "error": null,
+ "tries": 1,
+ "request_sha256": "741dd907e19d9f4eabf133046fb7b4bd97605bf225d090a82ee6fcb96fd4509a",
+ "spent_after": 402493
+}

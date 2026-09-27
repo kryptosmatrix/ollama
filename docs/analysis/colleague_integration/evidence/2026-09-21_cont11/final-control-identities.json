@@ -1,0 +1,10 @@
+{
+  "checkpoint": "baedaf58a711606f343c9c83e13bb68a0169528f",
+  "blueprint_sha256": "24d76eb771d94d64979dbeed74aa6c1b706bab98edad56280399a521f292645c",
+  "concept_sha256": "9396cd684d47d3e6e200c227e75e1a0114d7cd8a20107db528c4bc26871fb241",
+  "requirements_sha256": "ba7655da025f220df2a09d7a16ca400e7286fa68c23bac607228ed961b195986",
+  "state_sha256": "35fb491bada0f3fd743cada82137fe7938b5f837a3baedc893b4d87a2129985a",
+  "report_sha256": "6d0e6aa17e60b6feb200dec4b2948a54b3bd6b0cd5c7bed07ff567bae817997c",
+  "live_controls_include_post_commit_closeout": true,
+  "timestamp_brisbane": "2026-09-21T18:51:23.461092+10:00"
+}

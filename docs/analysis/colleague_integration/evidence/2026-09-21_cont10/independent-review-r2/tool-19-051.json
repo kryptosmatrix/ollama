@@ -1,0 +1,17 @@
+{
+  "name": "read_run_output",
+  "arguments": {
+    "ordinal": 4,
+    "stream": "stdout",
+    "offset": 1200,
+    "count": 2000
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-4-raw-generator/tests.stdout",
+    "file_sha256": "fd33ca8d5f0588e8999eb91e2e3c6f67743d0a33ddd58ac0a5122e27f6d52e43",
+    "total_bytes": 5457,
+    "offset": 1200,
+    "next_offset": 3200,
+    "content": " the real Markdown renderer\",\"duration\":137.98266700000022,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"generated model production consumers\"],\"fullName\":\"generated model production consumers keeps string and object constructor inputs equivalent without mutating their values\",\"status\":\"passed\",\"title\":\"keeps string and object constructor inputs equivalent without mutating their values\",\"duration\":12.471083000000363,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"generated model production consumers\"],\"fullName\":\"generated model production consumers preserves optional nested values without inventing arrays or objects\",\"status\":\"passed\",\"title\":\"preserves optional nested values without inventing arrays or objects\",\"duration\":0.8140419999999722,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"generated model production consumers\"],\"fullName\":\"generated model production consumers performs declared Date transforms on real generated classes\",\"status\":\"passed\",\"title\":\"performs declared Date transforms on real generated classes\",\"duration\":1.4244589999998425,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"generated model production consumers\"],\"fullName\":\"generated model production consumers preserves primitive and structured JSON payloads\",\"status\":\"passed\",\"title\":\"preserves primitive and structured JSON payloads\",\"duration\":1.3957919999993464,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"generated model production consumers\"],\"fullName\":\"generated model production consumers retains nested Settings construction and false or zero values\",\"status\":\"passed\",\"title\":\"retains nested Settings construction and false or zero values\",\"duration\":0.8515840000000026,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"generated model production consumers\"],\"fullName\":\"generated model production consumers retains map conversion and its existing reference behaviour\",\"status\":\"passed\",\"title\":\"retains map conversion and its existing reference behaviour\",\"duration"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "args": [
+    "npm",
+    "run",
+    "build"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+  "exit_code": 0,
+  "head": "ea3ba51e93fddf048a516e0ad9d9e680dab83254"
+}

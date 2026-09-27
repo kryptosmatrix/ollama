@@ -1,0 +1,28 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "created_at": "2026-09-20T12:33:07.398054921Z",
+  "message": {
+    "role": "assistant",
+    "content": "Now let me read the summary fields at the end of lint_delta.",
+    "tool_calls": [
+      {
+        "id": "call_wtw340ha",
+        "function": {
+          "index": 0,
+          "name": "read_evidence",
+          "arguments": {
+            "name": "lint_delta",
+            "start": 10200,
+            "count": 163
+          }
+        }
+      }
+    ]
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 2921564716,
+  "prompt_eval_count": 11456,
+  "prompt_eval_cached_count": 1586,
+  "eval_count": 88
+}

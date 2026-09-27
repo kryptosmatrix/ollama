@@ -1,0 +1,9 @@
+{
+  "app/store/store.go": "71097b8bc6664c0c9eb87bedfab5c0b79acc2768df20e0dd0319af2fbd5c0862",
+  "app/store/database.go": "6905b4e6146f76e0aed66f97e17a39245d27a0182f0051d06642389de042b551",
+  "app/store/chat_read_errors_test.go": "78adbad3f024feb30e912722026aa9bb8f6ea1f96b08fc241e5ab0c121b57c99",
+  "app/ui/chat_read_errors_test.go": "299356bec304683503fe4410f19f2f0496307ff64848ebaf0f13fd854421440a",
+  "app/ui/ui.go": "dbba86f3d90ec5edac5b23458fec00f25e39f4d9f3ef43ac124571e0c1a0d48e",
+  "app/ui/app/package.json": "ba4a16db941ae31c7d33daf5fc4396b05e20cc1906ca731648d3859eb81a029d",
+  "app/ui/app/package-lock.json": "ffdee0821030410855d6b432e0c6bac936ad712c0f2689622bd9b56f09ca6fa3"
+}

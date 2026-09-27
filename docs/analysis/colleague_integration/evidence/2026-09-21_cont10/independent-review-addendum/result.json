@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "scope": "Generated-model maintenance only; not whole-programme/main/installation acceptance",
+  "source_commit": "6a3778184d43b23c5cba14e0379922377f615f52",
+  "requested_model": "deepseek-v4.1-flash:cloud",
+  "served_model": "deepseek-v4.1-flash",
+  "tag_manifest": "e04da138d31e0c9468e982e1ae9503d06cb7e170caa16a90c17d931c4aa140f8",
+  "prior_review": "independent-review-final/result.json",
+  "prior_report_unchanged": true,
+  "source_and_dependencies_unchanged": true,
+  "complete_renderer_delivered": true,
+  "complete_execution_transport_delivered": true,
+  "full_reviewer_raw_lint_delivered": true,
+  "raw_lint_findings_independently_recounted": 99,
+  "evidence_sha256": "6eaa41794e93519803cfc5571578b2b1a966b2cf191e733aae456160254e85b9",
+  "report_sha256": "b30952557cbdfcca45a593b5a73709e53b244730ca4da60c7ca805a1672cf95d",
+  "limit": "Source/raw-log addendum to already completed fresh reviewer-directed execution; no new executions or broader approval claimed."
+}

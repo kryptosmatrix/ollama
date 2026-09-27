@@ -1,0 +1,16 @@
+{
+  "commit": "f1d12c7820309cbda29b651a409db7850a079d1b",
+  "parent": "b880138b610418b0f0cdc5922e89c8c6451c8ba9",
+  "files": [
+    "app/ui/app/src/utils/generatedModels.test.tsx"
+  ],
+  "test_source_sha256": "86db34cc04c9dd5996f2251a47610fc218745bbde303fe3abd885b093603d4a5",
+  "source_declared_cases": 10,
+  "tests_executed": false,
+  "production_changed": false,
+  "accepted": false,
+  "main_merged": false,
+  "installed": false,
+  "worktree_clean": true,
+  "timestamp_brisbane": "2026-09-21T14:59:34.691907+10:00"
+}

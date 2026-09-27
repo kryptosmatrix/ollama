@@ -1,0 +1,13 @@
+{
+  "case": "no-messages",
+  "path": "codegen/gotypes.gen.ts",
+  "edits": [
+    {
+      "old": "this.messages = this.convertValues((source as Record<string, unknown>)[\"messages\"], Message) as Chat[\"messages\"];",
+      "new": "this.messages = [] as Chat[\"messages\"];"
+    }
+  ],
+  "before_sha256": "e42678b57046bcbfbb50bb9b1d71aab9a917d06a2cb3ca4dd6ac4d49302c26b5",
+  "after_sha256": "de9cf12f9cc52f2e5fa177af15691febdc6f402777bbad7c55e68709e88b9ee8",
+  "required_failure_title": "materialises nested chat models through the real API consumer"
+}

@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "-I",
+    "-B",
+    "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/review_frontend.py"
+  ],
+  "exit_code": 0,
+  "timed_out": false,
+  "seconds": 205.78320975007955,
+  "controller_sha256": "9bfef2bf5c0982fe9538f029d0adcda8befd55970f33ce79ffcf587b3417d30a"
+}

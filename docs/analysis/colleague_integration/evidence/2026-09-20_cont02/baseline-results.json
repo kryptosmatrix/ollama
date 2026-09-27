@@ -1,0 +1,98 @@
+{
+  "environment_overrides": {
+    "HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/ollama-eko-baseline-p32tal5w",
+    "USERPROFILE": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/ollama-eko-baseline-p32tal5w",
+    "OLLAMA_HOST": "http://127.0.0.1:1",
+    "GOTOOLCHAIN": "local",
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "UV_OFFLINE": "1",
+    "CI": "true"
+  },
+  "commands": [
+    {
+      "name": "go-build",
+      "args": [
+        "/opt/homebrew/bin/go",
+        "build",
+        "-o",
+        "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont02/ollama-baseline",
+        "."
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 163.192035334,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "go-affected",
+      "args": [
+        "/opt/homebrew/bin/go",
+        "test",
+        "-count=1",
+        "-json",
+        "-timeout=180s",
+        "./agent/...",
+        "./cmd/tui/chat/...",
+        "./app/store",
+        "./app/ui",
+        "./app/tools"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 54.12496625,
+      "stdout_sha256": "105f13aea15f98d02e6338f59859ef9c73932e0c01140708eae244d72f969089",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ui-test",
+      "args": [
+        "/opt/homebrew/bin/npm",
+        "test",
+        "--",
+        "--run"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama/app/ui/app",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 24.938277083000003,
+      "stdout_sha256": "0e7285fa6305010abd540993341f96c7641d3852df35616a080f3b3f6c469375",
+      "stderr_sha256": "6ba0024e805372e7eea47d158b2c11d60505f3383c7ae253f9947c6f4bcf1939"
+    },
+    {
+      "name": "ui-typecheck",
+      "args": [
+        "/opt/homebrew/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--build",
+        "--pretty",
+        "false"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama/app/ui/app",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 16.561884958000007,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ui-lint",
+      "args": [
+        "/opt/homebrew/bin/npm",
+        "run",
+        "lint"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama/app/ui/app",
+      "exit_code": 1,
+      "timed_out": false,
+      "elapsed_seconds": 8.431312332999994,
+      "stdout_sha256": "b1fb972d3dac80532bc855c5f62215173cdeb3bc30b08f0cab4113a5f23ffb54",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "full_root_suite_run": false,
+  "full_root_suite_not_run_reason": "Default Darwin MCP tests write the real login keychain; broad suite remains pending scope/safety review, not waived."
+}

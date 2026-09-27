@@ -1,0 +1,11 @@
+<bos><|turn>system
+<|think|>
+User-configured instructions; revision 1; selection 1:
+Use Australian English. Keep answers short. Finish with ZEBRA-7Q.<turn|>
+<|turn>user
+Is 91 prime?<turn|>
+<|turn>model
+No.<turn|>
+<|turn>user
+Is 97 prime?<turn|>
+<|turn>model

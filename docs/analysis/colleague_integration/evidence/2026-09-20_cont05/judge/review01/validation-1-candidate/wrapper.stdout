@@ -1,0 +1,123 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/go",
+    "test",
+    "-count=1",
+    "-json",
+    "-timeout=150s",
+    "-run=^TestChatRead",
+    "./app/store",
+    "./app/ui"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+  "exit_code": 0,
+  "timed_out": false,
+  "elapsed_seconds": 3.838696583,
+  "stdout_sha256": "a8ed4bbdaced3cb7b153acaea596033e8e5e609ff165efb3f904f9c7ef2154a3",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment_overrides": {
+    "HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-xl0ciuik",
+    "USERPROFILE": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-xl0ciuik",
+    "LOCALAPPDATA": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-xl0ciuik",
+    "OLLAMA_HOST": "http://127.0.0.1:1",
+    "GOTOOLCHAIN": "local",
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "CI": "true",
+    "OLLAMA_MCP_CONFIG": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-xl0ciuik/mcp.json",
+    "OLLAMA_MCP_APPROVALS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-xl0ciuik/approvals.json",
+    "OLLAMA_MCP_TOKENS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-chat-read-proof-xl0ciuik/mcp-tokens.json"
+  },
+  "cache_locations": {
+    "GOCACHE": "/Users/krypto/Library/Caches/go-build",
+    "GOMODCACHE": "/Users/krypto/go/pkg/mod",
+    "GOPATH": "/Users/krypto/go"
+  },
+  "source_head": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+  "runner_sha256": "8a1f06496c6e25e43fe7a0e46cc00c971f1d0df3c965ced2210ad90c31b67e0f",
+  "overlay": null,
+  "source_unchanged_during_run": true,
+  "test_results": {
+    "started": [
+      "TestChatReadInitialisationFailureIsNotAbsence",
+      "TestChatReadIntegrityAcrossProcesses",
+      "TestChatReadIntegrityAcrossProcesses/fault",
+      "TestChatReadIntegrityAcrossProcesses/positive",
+      "TestChatReadIntegrityAcrossProcesses/recover",
+      "TestChatReadIntegrityAcrossProcesses/seed",
+      "TestChatReadMissingHeaderIsNotFound",
+      "TestChatReadPreservesDatabaseErrorCause",
+      "TestChatReadRejectsMalformedMessage",
+      "TestChatReadValidEmptyAndPopulated"
+    ],
+    "finished": {
+      "TestChatReadMissingHeaderIsNotFound": "pass",
+      "TestChatReadValidEmptyAndPopulated": "pass",
+      "TestChatReadRejectsMalformedMessage": "pass",
+      "TestChatReadInitialisationFailureIsNotAbsence": "pass",
+      "TestChatReadPreservesDatabaseErrorCause": "pass",
+      "TestChatReadIntegrityAcrossProcesses/seed": "pass",
+      "TestChatReadIntegrityAcrossProcesses/fault": "pass",
+      "TestChatReadIntegrityAcrossProcesses/recover": "pass",
+      "TestChatReadIntegrityAcrossProcesses/positive": "pass",
+      "TestChatReadIntegrityAcrossProcesses": "pass"
+    },
+    "missing": [],
+    "unfinished": [],
+    "counts": {
+      "pass": 10,
+      "fail": 0,
+      "skip": 0
+    },
+    "build_failures": []
+  },
+  "expectation": "pass",
+  "expectation_met": true
+}
+=== RUN   TestChatReadMissingHeaderIsNotFound
+--- PASS: TestChatReadMissingHeaderIsNotFound (0.01s)
+=== RUN   TestChatReadValidEmptyAndPopulated
+--- PASS: TestChatReadValidEmptyAndPopulated (0.01s)
+=== RUN   TestChatReadRejectsMalformedMessage
+--- PASS: TestChatReadRejectsMalformedMessage (0.01s)
+=== RUN   TestChatReadInitialisationFailureIsNotAbsence
+--- PASS: TestChatReadInitialisationFailureIsNotAbsence (0.00s)
+=== RUN   TestChatReadPreservesDatabaseErrorCause
+--- PASS: TestChatReadPreservesDatabaseErrorCause (0.01s)
+PASS
+ok  	github.com/ollama/ollama/app/store	1.017s
+=== RUN   TestChatReadIntegrityAcrossProcesses
+=== RUN   TestChatReadIntegrityAcrossProcesses/seed
+    chat_read_errors_test.go:54: phase=seed
+        === RUN   TestChatReadIntegrityAcrossProcesses
+        CHAT_READ_PHASE=seed
+        --- PASS: TestChatReadIntegrityAcrossProcesses (0.01s)
+        PASS
+--- PASS: TestChatReadIntegrityAcrossProcesses/seed (0.03s)
+=== RUN   TestChatReadIntegrityAcrossProcesses/fault
+    chat_read_errors_test.go:54: phase=fault
+        === RUN   TestChatReadIntegrityAcrossProcesses
+            chat_read_errors_test.go:36: R-03/R-04: http=500 model_requests=0 all_records_unchanged=true
+        CHAT_READ_PHASE=fault
+        --- PASS: TestChatReadIntegrityAcrossProcesses (0.06s)
+        PASS
+--- PASS: TestChatReadIntegrityAcrossProcesses/fault (0.08s)
+=== RUN   TestChatReadIntegrityAcrossProcesses/recover
+    chat_read_errors_test.go:54: phase=recover
+        === RUN   TestChatReadIntegrityAcrossProcesses
+        CHAT_READ_PHASE=recover
+        --- PASS: TestChatReadIntegrityAcrossProcesses (0.04s)
+        PASS
+--- PASS: TestChatReadIntegrityAcrossProcesses/recover (0.06s)
+=== RUN   TestChatReadIntegrityAcrossProcesses/positive
+    chat_read_errors_test.go:54: phase=positive
+        === RUN   TestChatReadIntegrityAcrossProcesses
+        CHAT_READ_PHASE=positive
+        --- PASS: TestChatReadIntegrityAcrossProcesses (0.05s)
+        PASS
+--- PASS: TestChatReadIntegrityAcrossProcesses/positive (0.07s)
+--- PASS: TestChatReadIntegrityAcrossProcesses (0.25s)
+PASS
+ok  	github.com/ollama/ollama/app/ui	0.864s
+
+EKO_PROOF_EXPECTATION=PASS

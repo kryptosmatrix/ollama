@@ -1,0 +1,29 @@
+<|start|>system<|message|>You are ChatGPT, a large language model trained by OpenAI.
+Knowledge cutoff: 2024-06
+Current date: 2026-09-26
+
+# Valid channels: analysis, commentary, final. Channel must be included for every message.
+Calls to these tools must go to the commentary channel: 'functions'.<|end|><|start|>developer<|message|># Tools
+
+## functions
+
+namespace functions {
+
+// Current weather for a city
+type get_weather = (_: {
+  // City name
+  city: string,
+}) => any;
+
+// Add two integers
+type add = (_: {
+  a: number,
+  b: number,
+}) => any;
+
+} // namespace functions
+
+# Instructions
+
+User-configured instructions; revision 1; selection 1:
+Use Australian English. Keep answers short. Finish with ZEBRA-7Q.<|end|><|start|>user<|message|>Add 17 and 25, then tell me.<|end|><|start|>assistant<|channel|>commentary to=functions.add <|constrain|>json<|message|>{"a":17,"b":25}<|call|><|start|>functions.add to=assistant<|message|>42<|end|><|start|>user<|message|>Thanks. Now double it.<|end|><|start|>assistant

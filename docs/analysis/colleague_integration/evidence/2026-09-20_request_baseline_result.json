@@ -1,0 +1,86 @@
+{
+  "started_utc": "2026-09-20T07:42:13.906155+00:00",
+  "ended_utc": "2026-09-20T07:42:24.139653+00:00",
+  "commit": "953de98d408a9697fa20a48c23973b9dc8eee921",
+  "command": [
+    "/opt/homebrew/bin/go",
+    "test",
+    "-mod=readonly",
+    "./agent",
+    "-run",
+    "^(TestSessionAddsSystemPromptOnlyToRequest|TestSessionChatRequestMatchesRunRequest)$",
+    "-count=1",
+    "-json",
+    "-timeout=90s"
+  ],
+  "environment_overrides": {
+    "GOTOOLCHAIN": "local",
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "GOTELEMETRY": "off"
+  },
+  "child_exit_code": 0,
+  "timeout": false,
+  "expected_tests": [
+    "TestSessionAddsSystemPromptOnlyToRequest",
+    "TestSessionChatRequestMatchesRunRequest"
+  ],
+  "started": [
+    "TestSessionAddsSystemPromptOnlyToRequest",
+    "TestSessionChatRequestMatchesRunRequest"
+  ],
+  "passed": [
+    "TestSessionAddsSystemPromptOnlyToRequest",
+    "TestSessionChatRequestMatchesRunRequest"
+  ],
+  "failed": [],
+  "skipped": [],
+  "checks": {
+    "child_exit_zero": true,
+    "not_timed_out": true,
+    "json_parse_complete": true,
+    "expected_discovery": true,
+    "expected_completion": true,
+    "no_failed_or_skipped": true,
+    "package_completed": true,
+    "source_unchanged": true,
+    "no_stderr": true
+  },
+  "source_before": {
+    "agent/approval.go": "c0e963495d0a0cc28aa4162373971f830b5180efd591c29117848cf4d93988de",
+    "agent/approval_test.go": "ae9d1e2010b8bc64c9a31ebd18607245d5bd4382049b408b1af8b1fda7a37248",
+    "agent/compactor.go": "9852a78dd0df4744c7a67a46b7798a2ccf536aece27aa94b2ce9813db2cdf989",
+    "agent/compactor_test.go": "9dca71599b495b62cbb97af73e68836b371008a8018133b61b069236b9cb0b66",
+    "agent/events.go": "c1927a9ddaa62c4573d3fc328504c069c0882b495bd3eafab1054c7add24e799",
+    "agent/registry.go": "bbcaeb36df46fde557dfb26e7959c69ac493ff3de454b396cea6138519f2259a",
+    "agent/session.go": "0a2521b18c99b043c8f91af37605a827bdc4d50b380e904013a5959d859d3cec",
+    "agent/session_test.go": "1526f012c4980fc918f4b8a2381d642662815e0d26453f337a830680bc9e5592",
+    "agent/skill_activation.go": "adb8dfb099d30e11211cea33740120f6d4799ef3960711b37a9e5710e8900b25",
+    "agent/skill_activation_test.go": "9aa3cbf51976fc6390b93960a801ab47dede9c54360d1e3c307228803ac6591d",
+    "agent/skills.go": "f1db48eeff9a493136c26a6deb59243fdf2d199042a8297c8b5e4d258b8cd91f",
+    "agent/skills_test.go": "8cfcd2baaa1a14559ff83ee72d28cf24caaca7bb63109133e3137300cd5e5c30",
+    "go.mod": "afdaa0389e35bcf8497ffd0898b3f4ea936c523ae8526964f7b41d7c7f5d094f",
+    "go.sum": "2b74ae620d6fe1d9d09bd0b54b1372305b6a0b26058039117f4e80c3cd29004f"
+  },
+  "source_after": {
+    "agent/approval.go": "c0e963495d0a0cc28aa4162373971f830b5180efd591c29117848cf4d93988de",
+    "agent/approval_test.go": "ae9d1e2010b8bc64c9a31ebd18607245d5bd4382049b408b1af8b1fda7a37248",
+    "agent/compactor.go": "9852a78dd0df4744c7a67a46b7798a2ccf536aece27aa94b2ce9813db2cdf989",
+    "agent/compactor_test.go": "9dca71599b495b62cbb97af73e68836b371008a8018133b61b069236b9cb0b66",
+    "agent/events.go": "c1927a9ddaa62c4573d3fc328504c069c0882b495bd3eafab1054c7add24e799",
+    "agent/registry.go": "bbcaeb36df46fde557dfb26e7959c69ac493ff3de454b396cea6138519f2259a",
+    "agent/session.go": "0a2521b18c99b043c8f91af37605a827bdc4d50b380e904013a5959d859d3cec",
+    "agent/session_test.go": "1526f012c4980fc918f4b8a2381d642662815e0d26453f337a830680bc9e5592",
+    "agent/skill_activation.go": "adb8dfb099d30e11211cea33740120f6d4799ef3960711b37a9e5710e8900b25",
+    "agent/skill_activation_test.go": "9aa3cbf51976fc6390b93960a801ab47dede9c54360d1e3c307228803ac6591d",
+    "agent/skills.go": "f1db48eeff9a493136c26a6deb59243fdf2d199042a8297c8b5e4d258b8cd91f",
+    "agent/skills_test.go": "8cfcd2baaa1a14559ff83ee72d28cf24caaca7bb63109133e3137300cd5e5c30",
+    "go.mod": "afdaa0389e35bcf8497ffd0898b3f4ea936c523ae8526964f7b41d7c7f5d094f",
+    "go.sum": "2b74ae620d6fe1d9d09bd0b54b1372305b6a0b26058039117f4e80c3cd29004f"
+  },
+  "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_request_baseline.jsonl",
+  "stdout_sha256": "ddff080c1638fb3d134f1be8893f8bf00fd9d7a69bdbae7f17f702e080fc85a2",
+  "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_request_baseline.stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "proof_scope": "Existing Session request-assembly baseline with fakeClient. Not real inference, terminal/UI bootstrap, saved instructions, restart continuity, independent review or OI-01 completion."
+}

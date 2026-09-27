@@ -1,0 +1,52 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "created_at": "2026-09-20T11:58:49.909014054Z",
+  "message": {
+    "role": "assistant",
+    "content": "The rewrap and consumer-bypass failures are behavioural. Let me read the rest of the rewrap output and the always-error/empty-success outputs.",
+    "tool_calls": [
+      {
+        "id": "call_cph871v9",
+        "function": {
+          "index": 0,
+          "name": "read_run_output",
+          "arguments": {
+            "ordinal": 2,
+            "start": 120,
+            "count": 40
+          }
+        }
+      },
+      {
+        "id": "call_sbvjc0rl",
+        "function": {
+          "index": 1,
+          "name": "read_run_output",
+          "arguments": {
+            "ordinal": 4,
+            "start": 88,
+            "count": 60
+          }
+        }
+      },
+      {
+        "id": "call_5ivgv8r5",
+        "function": {
+          "index": 2,
+          "name": "read_run_output",
+          "arguments": {
+            "ordinal": 5,
+            "start": 88,
+            "count": 60
+          }
+        }
+      }
+    ]
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 3361545035,
+  "prompt_eval_count": 63644,
+  "prompt_eval_cached_count": 58368,
+  "eval_count": 226
+}

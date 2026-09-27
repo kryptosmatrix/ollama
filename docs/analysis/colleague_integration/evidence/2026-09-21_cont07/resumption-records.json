@@ -1,0 +1,21 @@
+{
+  "timestamp_brisbane": "2026-09-21T11:04:53.938089+10:00",
+  "previous_bytes": {
+    "HANDOFF.md": "aea19934952fba20c9567c2d896a461ea6b471770a28fa86cce2024c4912ba99",
+    "BLOCKERS.md": "d552aaab8dba4f0ee9cb74d25ea7bc6d1274496a6ae01317607128a24662b04d",
+    "DECISIONS.md": "dc5438e711ec2c138b1fb815762b2cc5999cbbfb0fa7b7058495c8114012790f",
+    "SOURCE_MAP.md": "b8cf59b85c3241d514c623ae3943af307e0ac4fc39a7531b4bbc4deef6a6768a",
+    "STATE.json": "97e41684261818463fccec35eb718f250c3b00e7a9d1137eb941d0556a52f6cf"
+  },
+  "updated": {
+    "HANDOFF.md": "779c5dfb5ce1ec78585b37aaedfa971335790ca61834377e9c0fe5cf0eddb835",
+    "BLOCKERS.md": "19ee467bbb39898d0aa96e5eab7e40c1aa5931b5bb98edb97b5ea202b2569d26",
+    "DECISIONS.md": "9c5bd00f75a0b78adb08e937308004b10eb2e3bae7354928ab57cc7a440e98d0",
+    "SOURCE_MAP.md": "b9e46576895492f5af1264afad6f080487a09d1e0a1b5a1b033f005d11e70e0d",
+    "STATE.json": "5a28554f8a41e56c4c1fca1495201105ff281ae73b10005cd96f9883b29ef660"
+  },
+  "backup": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/checkpoint_before_cont07",
+  "verified_task_remote_tip": "d559da25a4db89fa9369d8be4106100803e82a58",
+  "main_merged": false,
+  "installed": false
+}

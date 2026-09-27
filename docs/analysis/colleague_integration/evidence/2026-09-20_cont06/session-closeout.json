@@ -1,0 +1,23 @@
+{
+  "job_id": "b261d7be2bf44a19a2797fce7a232177",
+  "request_id": "eko-ollama-cont06-session-20260920",
+  "request_hash": "cc8528db168b06029aa7181334e7a91f34e345002d62838239a7630a64218c99",
+  "state": "exited",
+  "created": 1789906746.7318242,
+  "started": 1789906748.279829,
+  "finished": 1789908012.989929,
+  "exit_code": 0,
+  "output_complete": true,
+  "stdout_bytes": 245479,
+  "stderr_bytes": 159,
+  "all_13_inputs_delivered": true,
+  "eof_delivered": true,
+  "session_lifecycle_only": "Exit 0 closes the shell. The app-suite child exited 1; both lint children exited 1. The shell exit is not a validation verdict.",
+  "controller_warning": "A Python source-inspection heredoc emitted SyntaxWarning for an invalid escape sequence in the grep expression \\( at <stdin>:22. The inspection completed; the warning was not an app/compiler diagnostic or a test result.",
+  "stderr_chunk_sha256": "1cc124fae05f32c6fb1e84849cee6898cb999838a1d160008b7e155f35621648",
+  "verified_remote_tip": "281dcaa06c7cd8b299c6045a248dd6b6ac85f954",
+  "main_merged": false,
+  "installed": false,
+  "disposition": "PARKED",
+  "background_work_scheduled": false
+}

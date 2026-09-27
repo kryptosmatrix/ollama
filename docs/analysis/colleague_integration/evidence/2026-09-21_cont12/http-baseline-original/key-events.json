@@ -1,0 +1,42 @@
+[
+  {
+    "Time": "2026-09-21T19:37:17.03795+10:00",
+    "Action": "run",
+    "Package": "command-line-arguments",
+    "Test": "TestG1BaselineExistingAuthenticatedSettingsControl"
+  },
+  {
+    "Time": "2026-09-21T19:37:17.066318+10:00",
+    "Action": "output",
+    "Package": "command-line-arguments",
+    "Test": "TestG1BaselineExistingAuthenticatedSettingsControl",
+    "Output": "    instructions_http_baseline_test.go:70: G1_EXISTING_HTTP_CONTROL=PASS; real authenticated router and synthetic store; inference=0\n"
+  },
+  {
+    "Time": "2026-09-21T19:37:17.069575+10:00",
+    "Action": "pass",
+    "Package": "command-line-arguments",
+    "Test": "TestG1BaselineExistingAuthenticatedSettingsControl",
+    "Elapsed": 0.03
+  },
+  {
+    "Time": "2026-09-21T19:37:17.069633+10:00",
+    "Action": "run",
+    "Package": "command-line-arguments",
+    "Test": "TestG1BaselineInstructionSaveBoundary"
+  },
+  {
+    "Time": "2026-09-21T19:37:17.076423+10:00",
+    "Action": "output",
+    "Package": "command-line-arguments",
+    "Test": "TestG1BaselineInstructionSaveBoundary",
+    "Output": "    instructions_http_baseline_test.go:85: G1_SAVE_BOUNDARY_MISSING: authenticated PUT status=200 decoded=false revision=\"\"; response=<!doctype html>\n"
+  },
+  {
+    "Time": "2026-09-21T19:37:17.098625+10:00",
+    "Action": "fail",
+    "Package": "command-line-arguments",
+    "Test": "TestG1BaselineInstructionSaveBoundary",
+    "Elapsed": 0.01
+  }
+]

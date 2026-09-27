@@ -1,0 +1,53 @@
+probe-v2-build exit=0
+
+
+probe-v2-run exit=1
+[
+  {
+    "case": "healthy",
+    "store_error": "",
+    "classified_not_found": false,
+    "http_status": 200,
+    "http_body": "{\"eventName\":\"chat\",\"content\":\"acknowledged\"}\n{\"eventName\":\"done\"}\n",
+    "original_messages_before": 2,
+    "original_messages_after": 2,
+    "model_requests": 3,
+    "contents_after": [
+      "original user message",
+      "original assistant message",
+      "new message",
+      "acknowledged"
+    ]
+  },
+  {
+    "case": "malformed",
+    "store_error": "not found: chat probe-chat",
+    "classified_not_found": true,
+    "http_status": 200,
+    "http_body": "{\"eventName\":\"chat\",\"content\":\"acknowledged\"}\n{\"eventName\":\"done\"}\n",
+    "original_messages_before": 2,
+    "original_messages_after": 0,
+    "model_requests": 3,
+    "contents_after": [
+      "new message",
+      "acknowledged"
+    ]
+  },
+  {
+    "case": "missing",
+    "store_error": "not found: chat probe-chat",
+    "classified_not_found": true,
+    "http_status": 200,
+    "http_body": "{\"eventName\":\"chat\",\"content\":\"acknowledged\"}\n{\"eventName\":\"done\"}\n",
+    "original_messages_before": 0,
+    "original_messages_after": 0,
+    "model_requests": 3,
+    "contents_after": [
+      "new message",
+      "acknowledged"
+    ]
+  }
+]
+
+CHAT_READ_INTEGRITY=FAIL
+

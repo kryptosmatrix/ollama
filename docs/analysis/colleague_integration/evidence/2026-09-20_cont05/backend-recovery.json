@@ -1,0 +1,8 @@
+{
+  "commit": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+  "files": {
+    "app/ui/mcp_discover.go": "37fefe52f44fb278e1350c52ec5ceec25b2e3778f4c33513340e51c965eefb99",
+    "app/ui/mcp_discover_test.go": "4d5a90fbc7890741b281eb8c4db05906958229d72748578819eff4f89f824ec0"
+  },
+  "originals_unchanged": true
+}

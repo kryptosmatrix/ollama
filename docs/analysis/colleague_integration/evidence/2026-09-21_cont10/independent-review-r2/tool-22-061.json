@@ -1,0 +1,17 @@
+{
+  "name": "read_run_output",
+  "arguments": {
+    "ordinal": 7,
+    "stream": "stdout",
+    "offset": 400,
+    "count": 2000
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-7-full/tests.stdout",
+    "file_sha256": "212b82fb93b9dcf3db5c15c7ab7f7aa63b184a8adaf591db9b31d122d3ecf935",
+    "total_bytes": 49849,
+    "offset": 400,
+    "next_offset": 2400,
+    "content": "matched\":0,\"filesUpdated\":0,\"matched\":0,\"total\":0,\"unchecked\":0,\"uncheckedKeysByFile\":[],\"unmatched\":0,\"updated\":0,\"didUpdate\":false},\"startTime\":1789972106147,\"success\":true,\"testResults\":[{\"assertionResults\":[{\"ancestorTitles\":[\"respondToToolApproval\"],\"fullName\":\"respondToToolApproval posts the answer to the chat's approval endpoint\",\"status\":\"passed\",\"title\":\"posts the answer to the chat's approval endpoint\",\"duration\":11.631334000000606,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"respondToToolApproval\"],\"fullName\":\"respondToToolApproval never sends a refusal as any kind of agreement\",\"status\":\"passed\",\"title\":\"never sends a refusal as any kind of agreement\",\"duration\":1.0471669999997175,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"respondToToolApproval\"],\"fullName\":\"respondToToolApproval reports a call that is no longer waiting rather than doing nothing\",\"status\":\"passed\",\"title\":\"reports a call that is no longer waiting rather than doing nothing\",\"duration\":6.352708999999777,\"failureMessages\":[],\"meta\":{}},{\"ancestorTitles\":[\"respondToToolApproval\"],\"fullName\":\"respondToToolApproval reports any other failure\",\"status\":\"passed\",\"title\":\"reports any other failure\",\"duration\":0.5447500000000218,\"failureMessages\":[],\"meta\":{}}],\"startTime\":1789972113396,\"endTime\":1789972113418.5447,\"status\":\"passed\",\"message\":\"\",\"name\":\"/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/src/api.approval.test.ts\"},{\"assertionResults\":[{\"ancestorTitles\":[\"speakMessageChunk\"],\"fullName\":\"speakMessageChunk does not treat a JSON body as audio\",\"status\":\"passed\",\"title\":\"does not treat a JSON body as audio\",\"duration\":118.90470800000003,\"failureMessages\":[],\"meta\":{}}],\"startTime\":1789972116459,\"endTime\":1789972116577.9048,\"status\":\"passed\",\"message\":\"\",\"name\":\"/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/src/api.tts.test.ts\"},{\"assertionResults\":[{\"ancestorTitles\":[\"DiscoveredRow\"],\"fullName\":\"DiscoveredRow shows what would be added, verbati"
+  }
+}

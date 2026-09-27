@@ -1,0 +1,36 @@
+{
+  "purpose": "Preserve the original request from this conversation, fresh terminal metadata and complete output before retiring this completed task-only Bridge record. No source artefacts are removed.",
+  "original_request": {
+    "request_id": "eko-ollama-cont03-20260920-scoped-review-packet",
+    "cwd": "/Users/krypto/GitHub/ollama",
+    "timeout_seconds": 60,
+    "command": "python3 -I -B - <<'PY'\nfrom pathlib import Path\nimport hashlib,json,re\nr=Path('/Users/krypto/GitHub/ollama');e=r/'docs/analysis/colleague_integration/evidence/2026-09-20_cont03'\nbrief='''You are the independent adversarial reviewer of a bounded Ollama chat-persistence repair. This is a SOURCE-BASED ROUTING AND PROOF REVIEW, not a formal Method16 promotion round and not permission to edit code. The operator asked Eko to continue the programme and explicitly selected deepseek-v4.1-flash:cloud as primary judge. Do not assume Eko's draft classification is right. Do not issue BLUEPRINT_JUDGE=PASS or a release verdict. No tools are available in this text call: distinguish source inspection from execution records, never claim you ran anything.\nAnswer three bounded questions, at most 1600 words total:\n1. Which existing authorised TECHNE route applies? Does the supplied commission plus current method allow CODE/TEST/REVIEW against an existing specification, without inventing a NEW implementation blueprint, or is Tier2 promotion of the draft required? Quote exact authority and conditions. A new capability or waiver must not be smuggled in as maintenance. The proposal is only to wrap not.Found for a genuinely absent chat-header row in database.getChatWithOptions and return every other database error unchanged from Store.ChatWithOptions. Existing Server.chat then aborts instead of recreating saved history. No schema, signature, permission policy or valid-success-path change. The draft's six requirements remain binding.\n2. For the NEW-blueprint route, interpret Method16 R-3.1/R-3.2 for a repair estimated at 12 added/changed production lines across two existing files (database.go 1371 total lines, store.go 542 total lines). Draft=10541 bytes. Is counting all existing target-file lines actually supported, or does it artificially inflate the estimate? Is the ratio a real blocker? Identify an existing applicable branch, never invent an exemption or call repaired behaviour AS-BUILT before it exists. State the smallest explicit operator decision needed if rules cannot be satisfied together. Explicitly distinguish a rule for blueprint promotion from one for all maintenance work.\n3. What does the new diagnostic establish? It obtains normal authenticated router from existing ttsServer fixture. Inference alone is explicitly simulated; store and HTTP router are real. Baseline fails with title changed, original messages lost, attachment/tool records deleted. Independent healthy/absent controls pass. Four separate processes prevent surviving Store objects from faking persistence. Test is compiler-overlaid into app/ui, not yet permanent/default. Identify finite remaining test/deployment/acceptance gaps. A red baseline is not post-repair proof.\nReturn routing verdict with source anchors; ratio arithmetic; finite proof gaps; evidence limits. Source excerpts are explicitly ranged; missing text is not proof of absence. No prior judge verdict or reasoning is included. Do not invent a rule that demands a new blueprint if existing canon does not, and do not grant the author a waiver.\\n'''\nitems=[('docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md',[(1,145)]),('../TECHNE/00_START_HERE.md',[(1,106)]),('../TECHNE/CONSTITUTION.md',[(1,122),(271,310),(582,646)]),('../TECHNE/Method/16_Implementation_Ready_Standard.md',None),('../TECHNE/Method/04_Implementation_Proof_Method.md',[(1,181)]),('docs/_design/CHAT_READ_ERROR_INTEGRITY.md',None),('app/types/not/found.go',None),('app/store/store.go',[(418,441)]),('app/store/database.go',[(675,774)]),('app/ui/ui.go',[(232,254),(304,307),(365,384),(721,801)]),('docs/analysis/colleague_integration/evidence/2026-09-20_cont03/testdata/chat_read_errors_test.go',None),('docs/analysis/colleague_integration/evidence/2026-09-20_cont03/authenticated-baseline.json',None)]\nparts=[brief];manifest=[]\nfor name,ranges in items:\n p=r/name;b=p.read_bytes();lines=b.decode().splitlines();ranges=ranges or [(1,len(lines))];manifest.append({'path':name,'file_sha256':hashlib.sha256(b).hexdigest(),'lines':len(lines),'ranges':ranges})\n for a,z in ranges:\n  parts.append('\\nSOURCE '+name+' file_sha256='+hashlib.sha256(b).hexdigest()+f' lines={a}-{z}\\n'+'\\n'.join(f'{i}: {lines[i-1]}' for i in range(a,min(z,len(lines))+1)))\ndata='\\n'.join(parts).encode();print('PROMPT_BYTES',len(data));assert len(data)+8192+2048<=262144\n(e/'routing-review-prompt.txt').write_bytes(data);(e/'routing-review-manifest.json').write_text(json.dumps(manifest,indent=2)+'\\n')\nreqs=[l for l in (r/'docs/_design/CHAT_READ_ERROR_INTEGRITY.md').read_text().splitlines() if re.match(r'R-0[1-6]\\.',l)]\nprint('FROZEN_REQUIREMENTS_BYTES',len(('\\n'.join(reqs)+'\\n').encode()),'COUNT',len(reqs));print('PROMPT_SHA256',hashlib.sha256(data).hexdigest());print('No production source or default tests changed.')\nPY"
+  },
+  "terminal_metadata": {
+    "job_id": "e6dacbb4d6ab483cb536d212e16fea95",
+    "request_id": "eko-ollama-cont03-20260920-scoped-review-packet",
+    "request_hash": "5b08867a0830a75e38e2c9d82cd494975f1344e897b5e2c1a9c0d3b46df18be7",
+    "cwd": "/Users/krypto/GitHub/ollama",
+    "state": "exited",
+    "created": 1789897244.048356,
+    "started": 1789897244.217364,
+    "finished": 1789897244.4058251,
+    "exit_code": 0,
+    "cancel_requested": 0,
+    "stdout_bytes": 184,
+    "stderr_bytes": 0,
+    "error_code": null,
+    "output_complete": 1,
+    "terminal": true,
+    "succeeded": true,
+    "authority": "macos-user",
+    "execution_state_id": "dfbd69b42df2453aae7bfa1c5a7af704",
+    "effects_rolled_back": false,
+    "tty": false,
+    "inputs": []
+  },
+  "stdout": "PROMPT_BYTES 223263\nFROZEN_REQUIREMENTS_BYTES 625 COUNT 6\nPROMPT_SHA256 13dea2a5bc6aca10d83b56b2b23024f80cf78ae0fdab58e178c6b58c10ba1fe9\nNo production source or default tests changed.\n",
+  "stdout_sha256": "43dc108bfca3c0171f6f45f2977b73f2f248a2398ac549c3d94829bba51abd99",
+  "stderr": "",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

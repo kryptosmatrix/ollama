@@ -1,0 +1,61 @@
+1820: 		return "", fmt.Errorf("llama-server apply-template error: %w", err)
+1821: 	}
+1822: 	defer res.Body.Close()
+1823: 
+1824: 	bodyBytes, err := io.ReadAll(res.Body)
+1825: 	if err != nil {
+1826: 		return "", fmt.Errorf("failed reading llama-server template response: %w", err)
+1827: 	}
+1828: 	if res.StatusCode >= 400 {
+1829: 		return "", api.StatusError{StatusCode: res.StatusCode, ErrorMessage: s.statusErrorMessage(bodyBytes)}
+1830: 	}
+1831: 
+1832: 	var lsResp llamaServerApplyTemplateResponse
+1833: 	if err := json.Unmarshal(bodyBytes, &lsResp); err != nil {
+1834: 		return "", fmt.Errorf("error unmarshalling llama-server template response: %v", err)
+1835: 	}
+1836: 	if lsResp.Error != nil {
+1837: 		return "", fmt.Errorf("llama-server template error: %v", lsResp.Error)
+1838: 	}
+1839: 
+1840: 	return lsResp.Prompt, nil
+1841: }
+1842: 
+1843: func (s *llamaServerRunner) Chat(ctx context.Context, req ChatRequest, fn func(ChatResponse)) error {
+1844: 	slog.Debug("llama-server chat request", "messages", len(req.Messages), "tools", len(req.Tools))
+1845: 
+1846: 	if req.Options == nil {
+1847: 		opts := api.DefaultOptions()
+1848: 		req.Options = &opts
+1849: 	}
+1850: 
+1851: 	if err := s.sem.Acquire(ctx, 1); err != nil {
+1852: 		if errors.Is(err, context.Canceled) {
+1853: 			slog.Info("aborting chat request due to client closing the connection")
+1854: 		}
+1855: 		return err
+1856: 	}
+1857: 	defer s.sem.Release(1)
+1858: 
+1859: 	req.Options.NumPredict = boundedNumPredict(req.Options.NumPredict, s.options.NumCtx)
+1860: 
+1861: 	status, err := s.getServerStatusRetry(ctx)
+1862: 	if err != nil {
+1863: 		return err
+1864: 	} else if status != ServerStatusReady {
+1865: 		return fmt.Errorf("unexpected server status: %s", status)
+1866: 	}
+1867: 
+1868: 	lsReq, err := s.llamaServerChatRequest(req, true)
+1869: 	if err != nil {
+1870: 		return err
+1871: 	}
+1872: 
+1873: 	buffer := &bytes.Buffer{}
+1874: 	enc := json.NewEncoder(buffer)
+1875: 	enc.SetEscapeHTML(false)
+1876: 	if err := enc.Encode(lsReq); err != nil {
+1877: 		return fmt.Errorf("failed to marshal chat request: %v", err)
+1878: 	}
+1879: 
+1880: 	endpoint := fmt.Sprintf("http://127.0.0.1:%d/v1/chat/completions", s.port)

@@ -1,0 +1,16 @@
+{
+  "name": "read_run_output",
+  "arguments": {
+    "ordinal": 6,
+    "start": 88,
+    "count": 60
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/judge/review01/validation-6-candidate/wrapper.stdout",
+    "file_sha256": "78154bae9074b56dac534880155dda1287129ba6f264ea48d52cfdc062702f76",
+    "start": 88,
+    "end": 123,
+    "total_lines": 123,
+    "text": "88: ok  \tgithub.com/ollama/ollama/app/store\t0.520s\n89: === RUN   TestChatReadIntegrityAcrossProcesses\n90: === RUN   TestChatReadIntegrityAcrossProcesses/seed\n91:     chat_read_errors_test.go:54: phase=seed\n92:         === RUN   TestChatReadIntegrityAcrossProcesses\n93:         CHAT_READ_PHASE=seed\n94:         --- PASS: TestChatReadIntegrityAcrossProcesses (0.01s)\n95:         PASS\n96: --- PASS: TestChatReadIntegrityAcrossProcesses/seed (0.03s)\n97: === RUN   TestChatReadIntegrityAcrossProcesses/fault\n98:     chat_read_errors_test.go:54: phase=fault\n99:         === RUN   TestChatReadIntegrityAcrossProcesses\n100:             chat_read_errors_test.go:36: R-03/R-04: http=500 model_requests=0 all_records_unchanged=true\n101:         CHAT_READ_PHASE=fault\n102:         --- PASS: TestChatReadIntegrityAcrossProcesses (0.05s)\n103:         PASS\n104: --- PASS: TestChatReadIntegrityAcrossProcesses/fault (0.07s)\n105: === RUN   TestChatReadIntegrityAcrossProcesses/recover\n106:     chat_read_errors_test.go:54: phase=recover\n107:         === RUN   TestChatReadIntegrityAcrossProcesses\n108:         CHAT_READ_PHASE=recover\n109:         --- PASS: TestChatReadIntegrityAcrossProcesses (0.05s)\n110:         PASS\n111: --- PASS: TestChatReadIntegrityAcrossProcesses/recover (0.07s)\n112: === RUN   TestChatReadIntegrityAcrossProcesses/positive\n113:     chat_read_errors_test.go:54: phase=positive\n114:         === RUN   TestChatReadIntegrityAcrossProcesses\n115:         CHAT_READ_PHASE=positive\n116:         --- PASS: TestChatReadIntegrityAcrossProcesses (0.05s)\n117:         PASS\n118: --- PASS: TestChatReadIntegrityAcrossProcesses/positive (0.07s)\n119: --- PASS: TestChatReadIntegrityAcrossProcesses (0.24s)\n120: PASS\n121: ok  \tgithub.com/ollama/ollama/app/ui\t0.839s\n122: \n123: EKO_PROOF_EXPECTATION=PASS"
+  }
+}

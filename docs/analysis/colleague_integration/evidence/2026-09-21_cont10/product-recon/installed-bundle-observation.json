@@ -1,0 +1,29 @@
+{
+  "bundle": "/Applications/Ollama.app/Contents",
+  "exists": true,
+  "live_app_launched": false,
+  "user_stores_opened": false,
+  "info_plist_sha256": "c1e429ab8914c780f30a780550bfb9e3aaa5f4cd225bd4132b05a68e47ffdea0",
+  "declared": {
+    "CFBundleIdentifier": "com.electron.ollama",
+    "CFBundleShortVersionString": "0.32.5-47-geb8c93d",
+    "CFBundleVersion": "0.32.5-47-geb8c93d",
+    "CFBundleExecutable": "Ollama"
+  },
+  "executable": {
+    "path": "/Applications/Ollama.app/Contents/MacOS/Ollama",
+    "bytes": 55163378,
+    "sha256": "4c8139e32e25645e5bbde7cef7b56384ed4a6501c7f74398341d131212d4bb25"
+  },
+  "go_build_info": {
+    "argv": [
+      "/opt/homebrew/bin/go",
+      "version",
+      "-m",
+      "/Applications/Ollama.app/Contents/MacOS/Ollama"
+    ],
+    "exit_code": 0,
+    "stdout": "/Applications/Ollama.app/Contents/MacOS/Ollama: go1.26.5\n\tpath\tgithub.com/ollama/ollama/app/cmd/app\n\tmod\tgithub.com/ollama/ollama\tv0.32.6-0.20260914084704-eb8c93da6ab2\t\n\tdep\tgithub.com/bahlo/generic-list-go\tv0.2.0\th1:5sz/EEAK+ls5wF+NeqDpk5+iNdMDXrh3z3nPnH1Wvgk=\n\tdep\tgithub.com/buger/jsonparser\tv1.1.1\th1:2PnMjfWD7wBILjqQbt530v576A/cAbQvEW9gGIpYMUs=\n\tdep\tgithub.com/google/jsonschema-go\tv0.4.3\th1:/DBOLZTfDow7pe2GmaJNhltueGTtDKICi8V8p+DQPd0=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20250511090121-5959a4027728\th1:QwWKgMY28TAXaDl+ExRDqGQltzXqN/xypdKP86niVn8=\n\tdep\tgithub.com/mailru/easyjson\tv0.7.7\th1:UGYAvKxe3sBsEDzO8ZeWOSlIQfWFlxbzLZe7hwFURr0=\n\tdep\tgithub.com/mattn/go-sqlite3\tv1.14.24\th1:tpSp2G2KyMnnQu99ngJ47EIkWVmliIizyZBfPrBWDRM=\n\tdep\tgithub.com/modelcontextprotocol/go-sdk\tv1.7.0\th1:yqjY2dsbKAC0LSuWZVBMrHgiG8ukXv6NRo0JiALay44=\n\tdep\tgithub.com/segmentio/asm\tv1.1.3\th1:WM03sfUOENvvKexOLp+pCqgb/WDjsi7EK8gIsICtzhc=\n\tdep\tgithub.com/segmentio/encoding\tv0.5.4\th1:OW1VRern8Nw6ITAtwSZ7Idrl3MXCFwXHPgqESYfvNt0=\n\tdep\tgithub.com/tkrajina/go-reflector\tv0.5.5\th1:gwoQFNye30Kk7NrExj8zm3zFtrGPqOkzFMLuQZg1DtQ=\n\tdep\tgithub.com/tkrajina/typescriptify-golang-structs\tv0.2.0\th1:ZedWk82egydDspGTryAatbX0/1NZDQbdiZLoCbOk4f8=\n\tdep\tgithub.com/wk8/go-ordered-map/v2\tv2.1.8\th1:5h/BUHu93oj4gIdvHHHGsScSTMijfx5PeYkE/fJgbpc=\n\tdep\tgithub.com/yosida95/uritemplate/v3\tv3.0.2\th1:Ed3Oyj9yrmi9087+NczuL5BwkIc4wvTb5zIM+UJPGz4=\n\tdep\tgolang.org/x/crypto\tv0.43.0\th1:dduJYIi3A3KOfdGOHX8AVZ/jGiyPa3IbBozJ5kNuE04=\n\tdep\tgolang.org/x/oauth2\tv0.36.0\th1:peZ/1z27fi9hUOFCAZaHyrpWG5lwe0RJEEEeH0ThlIs=\n\tdep\tgolang.org/x/sync\tv0.20.0\th1:e0PTpb7pjO8GAtTs2dQ6jYa5BWYlMuX047Dco/pItO4=\n\tdep\tgolang.org/x/sys\tv0.41.0\th1:Ivj+2Cp/ylzLiEU89QhWblYnOE9zerudt9Ftecq2C6k=\n\tdep\tgolang.org/x/time\tv0.15.0\th1:bbrp8t3bGUeFOx08pvsMYRTCVSMk89u4tKbNOZbp88U=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-ldflags=\"-s -w -X=github.com/ollama/ollama/app/version.Version=0.32.5-47-geb8c93d\"\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\"-O3 -mmacosx-version-min=14.0\"\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\"-O3 -mmacosx-version-min=14.0\"\n\tbuild\tCGO_LDFLAGS=-mmacosx-version-min=14.0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=darwin\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=eb8c93da6ab20b980449226029a9bf5cf40a6306\n\tbuild\tvcs.time=2026-09-14T08:47:04Z\n\tbuild\tvcs.modified=false\n",
+    "stderr": ""
+  }
+}

@@ -1,0 +1,63 @@
+729:  * use tokenize_input_prompts() if the input could be an array.
+730:  * this supports these cases:
+731:  * - "prompt": "string"
+732:  * - "prompt": [12, 34, 56]
+733:  * - "prompt": [12, 34, "string", 56, 78]
+734:  * - "prompt": { "prompt_string": "string", "multimodal_data": [ "base64" ] }
+735:  */
+736: static server_tokens tokenize_input_subprompt(const llama_vocab * vocab, mtmd_context * mctx, const json & json_prompt, bool add_special, bool parse_special) {
+737:     constexpr char JSON_STRING_PROMPT_KEY[] = "prompt_string";
+738:     constexpr char JSON_MTMD_DATA_KEY[] = "multimodal_data";
+739:     const bool has_mtmd = mctx != nullptr;
+740:     if (json_prompt.is_string() || json_is_array_of_mixed_numbers_strings(json_prompt)) {
+741:         // string or mixed
+742:         llama_tokens tmp = tokenize_mixed(vocab, json_prompt, add_special, parse_special);
+743:         return server_tokens(tmp, false);
+744:     } else if (json_is_array_of_numbers(json_prompt)) {
+745:         // array of tokens
+746:         llama_tokens tmp = json_prompt.get<llama_tokens>();
+747:         return server_tokens(tmp, false);
+748:     } else if (json_prompt.contains(JSON_STRING_PROMPT_KEY)) {
+749:         // JSON object with prompt key.
+750:         if (json_prompt.contains(JSON_MTMD_DATA_KEY)) {
+751:             if (!has_mtmd)
+752:                 throw std::runtime_error("Multimodal data provided, but model does not support multimodal requests.");
+753: 
+754:             // JSON object with prompt and multimodal key.
+755:             std::vector<raw_buffer> files;
+756:             for (const auto & entry : json_prompt.at(JSON_MTMD_DATA_KEY)) {
+757:                 files.push_back(base64_decode(entry));
+758:             }
+759:             return process_mtmd_prompt(mctx, json_prompt.at(JSON_STRING_PROMPT_KEY), files);
+760:         } else {
+761:             // Not multimodal, but contains a subobject.
+762:             llama_tokens tmp = tokenize_mixed(vocab, json_prompt.at(JSON_STRING_PROMPT_KEY), add_special, parse_special);
+763:             return server_tokens(tmp, false);
+764:         }
+765:    } else {
+766:        throw std::runtime_error("\"prompt\" elements must be a string, a list of tokens, a JSON object containing a prompt string, or a list of mixed strings & tokens.");
+767:    }
+768: }
+769: 
+770: std::vector<server_tokens> tokenize_input_prompts(const llama_vocab * vocab, mtmd_context * mctx, const json & json_prompt, bool add_special, bool parse_special) {
+771:     std::vector<server_tokens> result;
+772:     if (json_prompt.is_array() && !json_is_array_and_contains_numbers(json_prompt)) {
+773:         result.reserve(json_prompt.size());
+774:         for (const auto & p : json_prompt) {
+775:             result.push_back(tokenize_input_subprompt(vocab, mctx, p,add_special, parse_special));
+776:         }
+777:     } else {
+778:         result.push_back(tokenize_input_subprompt(vocab, mctx, json_prompt, add_special, parse_special));
+779:     }
+780:     if (result.empty()) {
+781:         throw std::runtime_error("\"prompt\" must not be empty");
+782:     }
+783:     return result;
+784: }
+785: 
+786: //
+787: // OAI utils
+788: //
+789: 
+790: // used by /completions endpoint
+791: json oaicompat_completion_params_parse(const json & body) {

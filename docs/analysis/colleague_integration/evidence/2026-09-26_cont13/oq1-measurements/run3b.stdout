@@ -1,0 +1,28 @@
+20:15:19 [native] longreply_default: starting fresh daemon
+20:15:29 [native] longreply_default: http=200 done=length prompt=494 eval=300 shift_lines=2 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 494}
+20:15:31 teardown: no sandbox process left
+20:15:31 [native] longreply_shift_false: starting fresh daemon
+20:15:35 [native] longreply_shift_false: http=200 done=length prompt=494 eval=18 shift_lines=0 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 494}
+20:15:37 teardown: no sandbox process left
+20:15:37 [native] longreply_keep_all: starting fresh daemon
+20:15:43 [native] longreply_keep_all: http=200 done=stop prompt=494 eval=56 shift_lines=5 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 494}
+20:15:46 teardown: no sandbox process left
+20:15:46 [native] clampedge_keep_all: starting fresh daemon
+20:15:49 clamp calibration: filler words=found tokens=see result
+20:15:53 [native] clampedge_keep_all: http=200 done=length prompt=510 eval=120 shift_lines=118 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 510}
+20:15:55 teardown: no sandbox process left
+20:15:55 [rendered] longreply_default: starting fresh daemon
+20:16:04 [rendered] longreply_default: http=200 done=length prompt=498 eval=300 shift_lines=3 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 498}
+20:16:07 teardown: no sandbox process left
+20:16:07 [rendered] longreply_shift_false: starting fresh daemon
+20:16:13 [rendered] longreply_shift_false: http=200 done=length prompt=498 eval=14 shift_lines=1 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 498}
+20:16:15 teardown: no sandbox process left
+20:16:15 [rendered] longreply_keep_all: starting fresh daemon
+20:16:20 [rendered] longreply_keep_all: http=200 done=stop prompt=498 eval=62 shift_lines=9 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 498}
+20:16:22 teardown: no sandbox process left
+20:16:22 [rendered] clampedge_keep_all: starting fresh daemon
+20:16:26 clamp calibration: filler words=found tokens=see result
+20:16:29 [rendered] clampedge_keep_all: http=200 done=length prompt=510 eval=120 shift_lines=118 props={'n_ctx': 512, 'total_slots': 1} span={'carrier_first_token_index': 16, 'carrier_end_token_index': 67, 'prompt_tokens_runner_count': 510}
+20:16:32 teardown: no sandbox process left
+20:16:32 done: 8 probe records
+harness-exit=0

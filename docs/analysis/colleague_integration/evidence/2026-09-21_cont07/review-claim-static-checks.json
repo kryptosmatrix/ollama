@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/node",
+    "-e",
+    "const ts=require('./node_modules/typescript');const fs=require('node:fs');const path=require('node:path');const crypto=require('node:crypto');\nconst target=path.resolve('src/utils/remarkCitationParser.ts');const current=fs.readFileSync(target,'utf8');\nconst block='declare module \"mdast\" {\\n  interface PhrasingContentMap {\\n    customCitation: CitationNode;\\n  }\\n  interface RootContentMap {\\n    customCitation: CitationNode;\\n  }\\n}';\nif(!current.includes(block))throw new Error('Exact registration missing');\nconst cases=[['unchanged',current],['registration-removed',current.replace(block,'')]];\nconst config=ts.readConfigFile('tsconfig.app.json',ts.sys.readFile);const parsed=ts.parseJsonConfigFileContent(config.config,ts.sys,process.cwd());const results=[];\nfor(const [name,text] of cases){const host=ts.createCompilerHost(parsed.options);const read=host.readFile.bind(host);host.readFile=file=>path.resolve(file)===target?text:read(file);const program=ts.createProgram(parsed.fileNames,parsed.options,host);const diagnostics=ts.getPreEmitDiagnostics(program);results.push({name,source_sha256:crypto.createHash('sha256').update(text).digest('hex'),diagnostics:diagnostics.map(d=>({file:d.file?.fileName,line:d.file&&d.start!=null?d.file.getLineAndCharacterOfPosition(d.start).line+1:null,code:d.code,message:ts.flattenDiagnosticMessageText(d.messageText,'\\n')}))});}\nconst registrationMatters=results[0].diagnostics.length===0&&results[1].diagnostics.some(d=>d.file===target&&d.message.includes('custom-citation'));\nconsole.log(JSON.stringify({kind:'Static compiler-host counterexample; no frontend runtime tests',results,registrationMatters,reviewer_literal_contains_color:'style=\"color:#fff\"'.includes('color:')},null,2));process.exitCode=registrationMatters?0:1;"
+  ],
+  "exit_code": 0,
+  "stdout_sha256": "956535e1437c8edacb506abf7ec340ddee3093c6b6e85bdef4541815fe3e7c24",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "purpose": "Discriminate source-review type claims only; no blocked runtime tests executed"
+}

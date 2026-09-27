@@ -1,0 +1,2 @@
+src/components/StreamingMarkdownContent.tsx(61,13): error TS2322: Type '"one-dark"' is not assignable to type '"none" | BundledTheme | ThemeRegistrationAny | undefined'.
+src/components/StreamingMarkdownContent.tsx(61,13): error TS2322: Type '"one-dark"' is not assignable to type 'BundledTheme | ThemeRegistrationAny | "none" | undefined'.

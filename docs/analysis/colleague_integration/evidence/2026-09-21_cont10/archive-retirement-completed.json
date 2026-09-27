@@ -1,0 +1,6 @@
+{
+  "retired_job_id": "d506226d597c46b8a3239cea7aeb16ba",
+  "prepared_custody": "../CONT10_ARCHIVE_RETIREMENT.json",
+  "actual_forget_result": "Earlier current-turn forget_command returned successful completed-job retirement; no generated project artefact was removed.",
+  "active_session_retained": "35a5b7b379654957a908c7f0d8c6825c"
+}

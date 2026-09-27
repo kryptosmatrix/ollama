@@ -1,0 +1,34 @@
+[
+  {
+    "case": "ordinary-headroom",
+    "requested_model": "deepseek-v4.1-flash:cloud",
+    "served_model": "deepseek-v4.1-flash",
+    "requested_num_ctx": 4096,
+    "http_status": 200,
+    "prompt_eval_count": 25,
+    "eval_count": 2,
+    "done": true,
+    "done_reason": "stop",
+    "error": null,
+    "response_sha256": "7cb5a532b0f30a328bad07cdb40bd24a99486fe9158a67be4e0436f8d129bf33",
+    "request_sha256": "6f5f497f7f87579073596adb408fcd46c8838ccb1952f2cc5aabb2d66a8e2c52",
+    "elapsed_seconds": 2.4758746250299737,
+    "limit": "A small synthetic transport observation; not a general proof of provider truncation or true maximum context."
+  },
+  {
+    "case": "deliberately-small-requested-context",
+    "requested_model": "deepseek-v4.1-flash:cloud",
+    "served_model": "deepseek-v4.1-flash",
+    "requested_num_ctx": 8,
+    "http_status": 200,
+    "prompt_eval_count": 25,
+    "eval_count": 2,
+    "done": true,
+    "done_reason": "stop",
+    "error": null,
+    "response_sha256": "cce5f3aaf16cb6a79780e46726cded843f68ade08e80dd94ee73eebc8a2aa58b",
+    "request_sha256": "540d02c65b45254c184635643d68e34133f5651312b6a13ca15f582b2a4f7a0b",
+    "elapsed_seconds": 1.4855383329559118,
+    "limit": "A small synthetic transport observation; not a general proof of provider truncation or true maximum context."
+  }
+]

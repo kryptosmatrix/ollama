@@ -1,0 +1,163 @@
+{
+  "commands": [
+    {
+      "name": "go-regression",
+      "args": [
+        "/opt/homebrew/bin/go",
+        "test",
+        "-count=1",
+        "-json",
+        "-timeout=180s",
+        "./agent/...",
+        "./cmd/tui/chat/...",
+        "./app/store",
+        "./app/ui",
+        "./app/tools"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 36.175650375,
+      "source_head": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+      "stdout_sha256": "3b0f1069aaf207e150f3db247d91af22edc92c68beb2d68b0de70ae1d50b650c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "counts": {
+        "pass": 603,
+        "fail": 0,
+        "skip": 1
+      },
+      "unfinished": [],
+      "nonpasses": [
+        {
+          "package": "github.com/ollama/ollama/agent/tools",
+          "test": "TestNormalizeBashWorkingDirWindowsDriveLetter",
+          "result": "skip"
+        }
+      ],
+      "package_terminals": [
+        {
+          "Time": "2026-09-20T21:59:49.010738+10:00",
+          "Action": "pass",
+          "Package": "github.com/ollama/ollama/agent",
+          "Elapsed": 1.821
+        },
+        {
+          "Time": "2026-09-20T21:59:52.922199+10:00",
+          "Action": "pass",
+          "Package": "github.com/ollama/ollama/cmd/tui/chat",
+          "Elapsed": 1.036
+        },
+        {
+          "Time": "2026-09-20T21:59:54.575812+10:00",
+          "Action": "pass",
+          "Package": "github.com/ollama/ollama/app/store",
+          "Elapsed": 2.689
+        },
+        {
+          "Time": "2026-09-20T21:59:58.08375+10:00",
+          "Action": "pass",
+          "Package": "github.com/ollama/ollama/agent/tools",
+          "Elapsed": 9.147
+        },
+        {
+          "Time": "2026-09-20T21:59:59.732364+10:00",
+          "Action": "pass",
+          "Package": "github.com/ollama/ollama/app/tools",
+          "Elapsed": 7.845
+        },
+        {
+          "Time": "2026-09-20T22:00:17.579176+10:00",
+          "Action": "pass",
+          "Package": "github.com/ollama/ollama/app/ui",
+          "Elapsed": 25.692
+        }
+      ]
+    },
+    {
+      "name": "ui-tests",
+      "args": [
+        "/opt/homebrew/bin/npm",
+        "test",
+        "--",
+        "--run"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 16.691157667,
+      "source_head": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+      "stdout_sha256": "40832e53b53725c98022d94f5091999a3fe09f31c5b42380a5d3b5f58da1cd27",
+      "stderr_sha256": "ead6c1c1ffb12c9da59cea53746f2288c7091aed06cff89477420ae661bc33c3"
+    },
+    {
+      "name": "ui-typecheck",
+      "args": [
+        "/opt/homebrew/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--build",
+        "--pretty",
+        "false"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 12.173562917000005,
+      "source_head": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ui-lint",
+      "args": [
+        "/opt/homebrew/bin/npm",
+        "run",
+        "lint",
+        "--",
+        "--format",
+        "json"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+      "exit_code": 1,
+      "timed_out": false,
+      "seconds": 7.078425250000009,
+      "source_head": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+      "stdout_sha256": "f0d3923687a9b93440bb550d780f7a4a59a267793ea21bd369855dbc74caa0f4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "errors": 137,
+      "warnings": 11
+    },
+    {
+      "name": "core-build",
+      "args": [
+        "/opt/homebrew/bin/go",
+        "build",
+        "-o",
+        "/Users/krypto/GitHub/ollama/build/eko-validation-cont05/ollama",
+        "."
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 35.909587791999996,
+      "source_head": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "full_app_suite_run": false,
+  "full_root_suite_run": false,
+  "omission": "app/tts includes a direct Keychain test and the full-root suite has the earlier Keychain isolation gap; no required gate is waived.",
+  "environment_overrides": {
+    "HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-cont05-regression-fox6gecb",
+    "USERPROFILE": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-cont05-regression-fox6gecb",
+    "LOCALAPPDATA": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-cont05-regression-fox6gecb",
+    "OLLAMA_HOST": "http://127.0.0.1:1",
+    "OLLAMA_MCP_CONFIG": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-cont05-regression-fox6gecb/mcp.json",
+    "OLLAMA_MCP_APPROVALS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-cont05-regression-fox6gecb/approvals.json",
+    "OLLAMA_MCP_TOKENS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-cont05-regression-fox6gecb/tokens.json",
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "GOTOOLCHAIN": "local",
+    "CI": "true"
+  }
+}

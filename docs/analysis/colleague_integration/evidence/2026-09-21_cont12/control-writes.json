@@ -1,0 +1,13 @@
+{
+  "timestamp_brisbane": "2026-09-21T20:32:36.504328+10:00",
+  "written": {
+    "CONTINUATION_12_REPORT.md": "1848765f6015936b247f658b636623b27bea148724ee6d0137b962e96d57cacf",
+    "HANDOFF.md": "1bddde27e400c543608c1e2e0810dfda91c51f138405a79e16cbb3ecce5e25c0",
+    "STATE.json": "aaceb2e1eee8533458ed965b9c50c696f66e3161d18ca2cfa6769e16ea398f19",
+    "DECISIONS.md": "449ec981077a5d5dce858c65026c2af70a11dba25a1d40a7b9e3572428c2a5e3",
+    "BLOCKERS.md": "bbf1396227b6cfad04e05cefc3ae560afa727ba6b9276b2b8a22d1a3dc39d810",
+    "REQUIREMENTS.md": "56b00b70c38d2ea595563ee7b63c1489f549fc8cfdccf780701b16d0bb0ab850"
+  },
+  "previous_bytes": "checkpoint_before_cont12/",
+  "remote_closeout_and_shell_stop": "pending, not yet claimed"
+}

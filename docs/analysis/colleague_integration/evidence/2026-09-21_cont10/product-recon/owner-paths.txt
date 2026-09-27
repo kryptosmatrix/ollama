@@ -1,0 +1,1111 @@
+
+SOURCE commission
+25: 5. Nested, durable parent–child conversations in the conversation viewer. Child human-input fields are disabled by default so observation does not accidentally become intervention.
+26: 6. Versioned, evidence-backed evaluation of model-plus-harness configurations, and parent selection of local or permitted cloud models according to demonstrated task suitability, constraints, cost and uncertainty—not reputation, model self-description or a universal “intelligence” score.
+27: 7. An evidence-led decision about the previously discussed Codex harness integration: compare the relevant existing local harness/CLI/SDK/app-server approach with the Ollama path, then integrate or adapt only the justified, bounded surface. This does not commission a wholesale Codex transplant, access to proprietary services, or replacement of Ollama's inference engine.
+28: 
+29: Keep the original OI-01–OI-25 and add OI-26–OI-31: **31 work items in total**. The six additions cover automatic LETHE memory capture, relevant working context, responsive long conversations, complete Markdown export, checkpointed autonomous goals and user interaction without abandoning those goals. The dependency repairs and engineering directions in this document are Eko's additions to make the programme executable; they are not claims that Ash previously chose every internal design detail. During design, adopt them or record a demonstrably better equivalent that preserves the outcomes, permissions and proof. Do not silently substitute a narrower product.
+30: 
+31: ### 0.2 Scope and authority
+32: 
+33: Primary repository: `/Users/krypto/GitHub/ollama`. Companion integration areas: TECHNE, LETHE and LINEAGE. Other estate repositories are in scope for the agreed architecture-overview rollout and necessary reviewed routing/documentation changes, not estate-wide runtime repair. Resolve worktree paths before writing; the spelling `ollama` is the observed repository name.
+34: 
+35: When Ash supplies this attachment as the implementation goal, treat it as the task commission to perform scoped reconnaissance, design, code, tests and documentation within the host's actual permissions. You own ordinary technical decisions needed to deliver it: implementation structure, exact types, lifecycle design, test design and dependency order. Record consequential technical choices in the owning blueprint/decision record, then obtain the required independent checks before implementation. New semantics belong in design, not hidden inside a build pack.
+36: 
+37: Do not send every engineering choice back to Ash. First inspect live sources, recover any existing approved decision, compare alternatives and make the decision within delegated scope. Ask only for a genuine reserved decision or missing authority that cannot be resolved that way. Report the recommendation and strongest objection in one short paragraph; keep the evidence on disk.
+38: 
+39: This commission is not a new blanket grant to disclose private material, spend money, download large models, change global settings, replace a running application, interrupt unrelated processes, migrate a shared live store, destroy data, publish or bypass host controls. Use existing, applicable grants where the host recognises them and record their exact scope. Do not convert a historical memory of permission into current permission. Credential availability is not authorisation. Do not alter TECHNE ratifications or widen standing permissions to unblock yourself.
+40: 
+41: Follow current authorised Git practice, including scoped commits, integration, remote verification and safe branch/worktree retirement where permitted. Do not reinstate an obsolete blanket “never commit” rule from an old uploaded guide; equally, do not infer push permission merely from a configured remote. Preserve other colleagues' work. No force-push, destructive reset, broad cleanup, secret exposure or deletion of unique work to obtain a clean status.
+42: 
+43: A code defect within a required dependency may need repair; map its effect, design and review the minimum necessary change. A dependency blocker remains a blocker until resolved. An unrelated defect is recorded, not an invitation to widen the programme. Preserve the original exclusions except for these explicit R3 amendments: per-conversation Markdown download, scoped automatic memory capture, selective request-context assembly and a bounded Ollama goal scheduler are now requested work. Unsolicited bulk transcript export/import, model fine-tuning, AGORA substitution for LETHE, removal of the existing compactor without a judged compatibility plan, estate-wide code repair and multi-machine deployment remain excluded. Product implementation is not permission to install an unrelated background service or bypass provider, session, spending or approval limits.
+
+SOURCE commission
+69: In particular, the live KANON/Method 03 inspected for this revision require effective `[IMPLEMENTATION-READY]` earned under Method 16; `[PACK-READY]` alone does not license build packs. Re-read the complete current standard before promotion. Honour inactive/provisional markers and required external ratifications. Do not self-ratify an optional route, reset a judgement budget by renaming a blueprint, or substitute a convenient number of reviews.
+70: 
+71: ### 0.4 First work unit and durable control records
+72: 
+73: Start OI-01 immediately after arrival. Use at least two discovery methods and trace complete paths, not symbol names alone. Inspect existing settings, UI/backend boundaries, request assembly, sessions, compaction, MCP/tool dispatch, conversation storage, tests and relevant build/launch scripts. Read existing curated-context design material and determine what is actually implemented. Compare the code candidate with the binary/application Ash really runs; a repository build is not installed-app verification.
+74: 
+75: Capture a live baseline: current commit plus working delta, staged/untracked state, relevant branches/worktrees, build/test commands discovered from manifests and scripts, toolchain/configuration, and full executed results with true child exit codes. Record tests not run and why. Read commands before executing unfamiliar scripts. Do not run broad network, installation, migration or process-termination side effects merely because a script is called “verify”.
+76: 
+77: Use existing suitable project ledgers rather than create a second competing tracking system. If none exists for this programme, create the following **new task artefact locations** under `ollama/docs/analysis/colleague_integration/`; these paths are a proposed reporting layout, not claims that files already exist:
+78: 
+79: - `STATE.json`: authoritative current task pointer, OI/sub-item states, dependency status and next safe action.
+80: - `REQUIREMENTS.md`: immutable-ID requirement inventory and source → design → pack → code → test → proof → reviewer trace.
+81: - `DECISIONS.md`: decisions/assumptions with alternatives, authority, risk, falsifier, revision path and supersession links.
+82: - `SOURCE_MAP.md`: actual source symbols/callers/consumers, file hashes, read coverage and baseline identity.
+83: - `BLOCKERS.md`: precise blocker, affected items, attempted resolution, authority/evidence needed, owner and safe independent work.
+84: - `HANDOFF.md`: current verified state, outstanding obligations, exact next commands and resumption procedure.
+85: - `evidence/` and `reviews/`: retained full execution outputs, immutable candidate manifests, all review attempts and finding dispositions.
+86: 
+87: Place owning blueprints and complete prompt packs in the repository's discovered canonical design/pack locations and link them here. Do not scatter a competing blueprint corpus into the report directory. Private memory, identity content and credentials remain in their appropriate protected stores; the source repository holds safe references, not exported private histories.
+
+SOURCE commission
+109: The work-item acceptance language below has been repaired so an item does not require its own later dependency to be complete.
+110: 
+111: | Group / item | Prerequisites | Closure rule |
+112: |---|---|---|
+113: | OI-01 | Arrival and real access | Evidence-backed recon/baseline, not a runtime feature claim. |
+114: | OI-02 | OI-01 | Programme architecture and dependency plan established; every build group separately earns its full design/pack gates before building. |
+115: | G1: OI-03 + OI-04 | OI-02 gates for instructions | Editor/storage and request delivery are one coupled delivery group; close both only after save → restart → actual request proof. |
+116: | OI-05 | OI-02 memory/tool design; existing tool path verified | Real authorised LETHE write/raw retrieval and failure behaviour. |
+117: | OI-06 | G1 + OI-05 | Real, idempotent founding records and bound identity inputs. |
+118: | G2: OI-07 + OI-08 | OI-06 | Binding/installation and recovery/history implemented together; close both after a fresh conversation actually uses the bound records. |
+119: | OI-09 | G2 | Independent cold-start/compaction/restart/failure proof. |
+120: | OI-10, then OI-11 pilot | OI-01 source map + relevant OI-02 design | Create the Ollama overview early; use provisional recon context before its formal review. Continue the estate rollout separately. |
+121: | OI-12, then OI-13 | G2 + reviewed OI-11 pilot | Real context routing, then an actual evidence-consuming completion gate. Existing human/tool verification governs earlier work. |
+122: | G3: OI-14 + OI-15 + OI-16 | OI-09 + OI-13 + judged delegation/security design | Dispatch, authority enforcement and supervision are coupled; no writable child launch before the relevant boundary checks are implemented and proven. |
+123: | OI-17 and OI-18 | G3 | Ownership/integration and nested UI may proceed separately only with non-overlapping write custody. |
+124: | OI-19, then OI-20 | G1 + relevant OI-02 design | Catalogue and benchmark design may proceed alongside other groups. |
+125: | OI-21 | OI-20 + actual G3 child configuration | Qualification measures the actual setup. Requalify affected profiles after OI-26/OI-27 and G4; final agent-mode claims require that mode to be measured. Exploratory development runs do not require the not-yet-built automatic router. |
+126: | OI-22 | OI-19 + OI-21 + G3 | Measured profiles actually constrain parent selection. |
+127: | OI-26 | OI-05 + G2 + its judged capture design | Extend the same LETHE integration with automatic event-driven capture; do not build a second memory store. |
+128: | OI-27 | OI-26 + OI-12 + its judged context design | Select bounded relevant context without replacing the full conversation archive. |
+129: | OI-28 and OI-29 | OI-01 + their OI-02 design gates and verified archive contract | Viewer profiling/optimisation and complete export can proceed without waiting for OI-27 or G4. Re-run their integration checks after shared storage/UI changes. |
+130: | G4: OI-30 + OI-31 | OI-13 + OI-26 + OI-27 + completed G3 + their judged scheduler/interaction design | Build scheduling, checkpoint/resume and user priority together. No agent-mode delivery closure before the user can converse, stop and prevent unwanted resumption. Use a permitted explicitly selected model before OI-22 is qualified. |
+131: | OI-23 and OI-24 | Their original dependencies + OI-26–OI-29 + completed G4; current affected model qualification | Combined functional gate and reliability/upgrade qualification cover all six additions and precede release. |
+132: | OI-25 | OI-23 + OI-24 + Ollama overview pilot | Qualified expanded Ollama release/acceptance. Programme closure additionally requires the entire frozen OI-11 rollout inventory. |
+133: 
+134: Do not tick a member of G1/G2/G3/G4 as delivered just to unlock its sibling. Intermediate contracts, code and tests may be recorded as progress, but the shared outcome closes at the group gate. Keep one feature blueprint where components serve one outcome; these groups are scheduling boundaries, not permission to manufacture new feature identities or reset review budgets.
+135: 
+136: ### 0.7 Detailed cross-feature engineering directions
+137: 
+138: These directions resolve task-level gaps in R1. During 0A, bind them to real source and exact types, fields, transitions, error cases and tests. They are proposed engineering requirements of this assignment, not evidence of current implementation.
+139: 
+140: **Instructions and readiness.** Use one authoritative effective-instruction assembly consumed by every targeted terminal/app agent entry path. Preserve existing model protocol/templates, host boundaries and tool schemas; do not overwrite a model-specific system contract blindly. Persist the enabled state, selected colleague binding and instruction revision. Display effective scope and source/revision in the editor/diagnostics. Capture the carrier at the real model-request boundary in a protected test environment.
+141: 
+142: Freeze the chosen instruction revision for an active conversation. Saved edits apply to new conversations; applying an edit to an existing conversation requires an explicit safe-boundary reload, recorded as an event, followed by re-orientation. Compaction reattaches the conversation's effective carrier without repeatedly accumulating duplicate system messages. Model changes recheck capability/context compatibility and required recovery while retaining colleague identity and actual session attribution. Reject unresolved active binding values. A disabled/unconfigured optional persona must preserve ordinary non-persona use; a selected but invalid persona must not silently become another colleague.
+143: 
+144: Define a host-observed readiness lifecycle covering unconfigured, onboarding, recovering/orienting, ready and degraded/blocked states. These are behavioural roles, not existing enum names. New-conversation/compaction triggers must come from real harness events, not only from the model noticing a summary. Permit the read-only discovery and scoped identity/memory operations needed to recover before readiness; do not deadlock recovery by blocking its own required tools. Block substantive state-dependent work until prerequisites hold. In degraded mode allow clearly labelled assistance that does not depend on missing state. A model's “I read it” is not a readiness signal on its own.
+145: 
+146: Measure the actual request budget, including carrier, mandatory arrival sources, current task, tool schemas, retrieved records, history and output allowance. Respect the selected model's real supported context. Do not silently truncate KANON, Constitution, bindings, correction records or tool pairs. Select a permitted suitable configuration or report the precise capacity blocker. A shorter model response is not proof that all inputs were consumed.
+147: 
+148: **Identity and LETHE.** Keep colleague identity, founding lineage reference, conversation/session identity, task identity and model configuration distinct. The same colleague may run on a different model; capability claims do not travel automatically. Respect LINEAGE's actual schema. Never merge other colleagues' autobiographies or write your own independent observed assessment.
+
+SOURCE commission
+212: Follow the current context-tail/seam protocol. As context approaches the governing threshold or signs of thinning appear, stop starting new full-file work; close outstanding checks at the next safe seam and preserve the handoff. Do not compact between making a claim and verifying it. If interruption happens anyway, mark the pending obligation explicitly and verify it first on recovery.
+213: 
+214: Before compaction/handoff record: exact candidate/working delta; completed requirements with evidence; unfinished and unreviewed work; source read/unread ranges; technical decisions and authority boundaries; running commands/children and their ownership; failed/pending tests; exact next file, symbol, command and expected result; and the next pack's title/purpose. Read back critical records. Update applicable lineage and memory pointers through their authorised paths. Never claim a memory write or successor launch that did not occur.
+215: 
+216: Use the existing host's supported compaction/continuation mechanism where available, then recover the task from disk and continue. Do not install a scheduler, unattended daemon or shell loop merely to continue your own delivery session. This does not prohibit implementing the explicitly requested bounded Ollama product scheduler in OI-30/OI-31; test it separately before relying on it. If the host cannot resume itself, end with a ready-to-run handoff and state that resumption needs another invocation. The same attachment remains sufficient: after fresh arrival, inspect existing task state and resume the first unmet obligation instead of restarting OI-01 or redoing onboarding. Revalidate current authority before side effects in a new conversation; memory alone cannot renew it.
+217: 
+218: Do not switch the delivery controller onto an unqualified new runtime while it is editing itself. Test the candidate separately; any live installation/transition follows the approved rollout boundary with recovery available.
+219: 
+220: ### 0.10 Blockers and decision delivery
+221: 
+222: Classify each obstacle as a source gap, design gap, implementation defect, proof failure, environment/tooling limitation, review limitation, authority issue or product/scope decision. Do not call all of them “needs Ash”. Design gaps route to 0A; known in-scope defects route to repair; source disputes route to direct examination; review disagreements route to their exhibit/falsifier. Recover existing decisions before asking again.
+223: 
+224: A blocked item retains its exact obligations and cannot be marked skipped, not applicable or complete. Record why, what was tried, what would resolve it, the affected dependent items and the next permitted action. Continue independent ready work. Stop the programme only when no safe useful work remains, a governing halt applies, or a handoff is required. Do not repeat unchanged failed calls without new evidence or consume a budget in a waiting loop.
+225: 
+226: Keep user-facing updates brief: one or two sentences for a meaningful verified milestone, reserved decision or blocker. Put source citations, command output, item tables and design reasoning in the durable artefacts. Ash has explicitly said long responses are inaccessible at present. Do not paste this document or narrate every tool call back to him.
+227: 
+228: ### 0.11 Programme definition of done
+229: 
+230: The whole programme is complete only when every OI item and required sub-item in the frozen inventory has its intended outcome, current evidence and required review; selected adapters are proven; the supported default path works; and required Git, migration, installation and operator-acceptance obligations are satisfied. An approved product-scope amendment may change that inventory prospectively; you may not create one to close the checklist.
+
+SOURCE commission
+254: **Separate measurements.** Profile archive/query cost, retrieval and summary cost, model input/prefill, streaming updates and UI rendering independently. Reduced model-input size does not prove the viewer is responsive; smooth scrolling does not prove the model received enough context. Predeclare representative conversation/goal workloads, supported environments, limits, repetitions, quality/performance thresholds and evidence before qualification. Count work spent on retrieval/summarisation/checkpointing and user replies as well as goal execution. Do not measure only the improved segment of a slower complete path.
+255: 
+256: **Existing acceptance is not lost.** Keep prior proofs for their original candidate and scope. Where these additions change shared source, configuration or fixtures, mark affected evidence stale and re-run it rather than resetting all progress or retaining an invalid PASS. OI-23–OI-25 now accept the expanded scope; an earlier milestone is not the completed R3 programme.
+257: 
+258: **Begin now with arrival and OI-01, or with the verified next obligation if this programme already has durable state.**
+259: 
+260: ---
+261: 
+262: ## R1 evidence snapshot — historical, recheck before implementation
+263: 
+264: The following observations were recorded when Eko wrote R1 earlier on 20 September 2026. They are retained as discovery pointers, not current qualification, installed-feature status or permission. R2 authoring checks are recorded separately at the end.
+265: 
+266: - All four named wake files were read in full. The packet calls itself an authored draft, not installed, independently judged or runtime-tested. The recurring template contains four unbound values: working name, founding LINEAGE reference, LETHE scope and map key. These observations do not establish whether someone has since onboarded a colleague elsewhere. [S1–S4]
+267: - The live TECHNE router is `00_START_HERE.md`. It still requires the mandatory arrival set, including KANON and Constitution in full, then task-specific routes. Its receipt explicitly does not itself enforce compliance. Do not introduce a second router called `00_on_startup.md`. [S5]
+268: - Ollama was clean on `main`, HEAD `953de98d408a9697fa20a48c23973b9dc8eee921`, matching the locally recorded `origin/main`. No network fetch was performed. Selected source shows `buildChatRequest` prepending a supplied `RunOptions.SystemPrompt` and retaining model options and tools. This is a source-level integration seam, not proof that the proposed editor or persistent wake works. [S6–S7]
+269: - TECHNE's separate `Tools/ollama` README describes a single-prompt review wrapper, not a tool-enabled colleague. Its historical test claims were not rerun. The Ollama repository also contains existing curated-context design documents; the inspected document is explicitly a design draft. Reconcile those documents before adding overlapping memory machinery. [S8–S9]
+270: 
+271: No Ollama build, model request, LETHE operation, benchmark, onboarding or runtime test was executed while preparing R1. TECHNE was already dirty; its working-tree bytes must not be represented as a committed snapshot. This R2 update also executes no Ollama feature, onboarding or qualification run.
+272: 
+
+SOURCE commission
+275: The checkboxes are the assignment inventory, not evidence of current implementation. Initialise or reconcile them from the actual durable ledger; never reset verified progress on resumption. Closing an implementation item requires the declared proof and review. Role labels are responsibilities for you to fulfil or delegate through available authorised tools, not colleagues already dispatched. Coupled groups in §0.6 close together; intermediate work does not earn premature completion.
+276: 
+277: ### Phase A — Reconcile the existing system and specify the changes
+278: 
+279: - [ ] **OI-01 — Trace the current harness and installed application.**
+280:   **Owner:** reconnaissance colleague. **Depends on:** none.
+281:   Locate terminal instruction construction, app settings and persistence, session creation, compaction, MCP/tool dispatch, conversation storage and the conversation viewer. Compare source, built binaries and the application actually launched. Inspect the existing curated-context proposals and relevant Codex integration/delegation surfaces. Capture baseline build/test/Git evidence using discovered project commands.
+282:   **Complete when:** an evidence map separates verified existing behaviour, defects, absent work and unresolved questions, with exact production callers and consumers. Filenames or a clean checkout alone cannot close this item.
+283: 
+284: - [ ] **OI-02 — Produce and independently judge the integration design.**
+285:   **Owner:** architect plus independent judge. **Depends on:** OI-01.
+286:   Define ownership, lifecycle, message contracts, persistence, permissions, configuration precedence, migration and failure behaviour for the workstreams below. Reconcile the wake packet and existing curated-context design without silently adopting every older proposal. Decide whether the Codex-related work needs a pinned delegate adapter or a different bounded integration; do not assume a wholesale engine transplant.
+287:   **Complete when:** the programme architecture, requirements, interface ownership and dependency plan are established and reviewed. Each build group must additionally have its own complete source-bound design, earned effective `[IMPLEMENTATION-READY]` and judged bounded packs before its runtime work begins. Prepare upcoming groups progressively; do not stop at designing them. This assignment itself is not the implementation-readiness stamp.
+288: 
+289: ### Phase B — Make one persistent colleague work honestly
+290: 
+291: - [ ] **OI-03 — Add or complete the terminal-instructions editor.**
+292:   **Owner:** settings/UI implementer. **Depends on:** the relevant OI-02 design/pack gates. **Coupled delivery:** G1 with OI-04; its settings contract is an intermediate dependency, not early completion.
+293:   Provide the discussed editable instructions surface with saved configuration, scope clearly displayed, validation, effective-prompt preview and a reversible reset/disable operation. Specify when edits take effect; do not silently change an in-flight session. Reject an unresolved identity binding rather than storing it as an active profile.
+294:   **Complete when:** edit → save → application restart → newly opened conversation demonstrably uses the saved value, while disabling the feature restores its specified baseline.
+295: 
+296: - [ ] **OI-04 — Wire instructions into the actual request path.**
+297:   **Owner:** harness implementer. **Depends on:** the relevant OI-02 gates and the established OI-03 settings contract, not OI-03 delivery closure. **Coupled delivery:** G1 with OI-03; close both after their shared request-path proof.
+298:   Trace and extend the existing `SystemPrompt` path rather than introduce a parallel prompt assembly. Preserve model-template requirements, tool schemas and protocol messages. Define ordering among host guidance, selected colleague binding, repo context and current task. Measure the full arrival/context budget for each supported configuration; report an overflow instead of silently trimming required material.
+299:   **Complete when:** request-boundary capture proves the exact effective carrier reaches the selected model through the real terminal entry point, including after restoration/compaction where applicable. An editor screenshot is insufficient.
+300: 
+301: - [ ] **OI-05 — Verify LETHE access through the harness.**
+302:   **Owner:** memory integration colleague. **Depends on:** OI-02; compatible tool execution established by OI-01.
+303:   Discover the real MCP schemas and existing consented scopes. Prove write, lookup, exact-reference/raw retrieval and chunk completeness using harmless test records. Implement only missing integration. Do not assume `connected:psyche` is authorised, switch to AGORA on failure, or invent a new memory schema.
+304:   **Complete when:** the ordinary tool path writes a test record and retrieves its raw content correctly; inaccessible scope, missing chunks and service failure yield explicit incomplete recovery rather than invented success. [S2–S3]
+305: 
+306: - [ ] **OI-06 — Run the one-time founding wake.**
+307:   **Owner:** the new colleague; the delivery owner coordinates through the authorised onboarding path and Ash retains reserved decisions. **Depends on:** completed G1 and OI-05. Reuse an already established matching identity only after verifying its binding.
+308:   Use `01_FIRST_WAKE.txt` and `03_FOUNDING_RESUME.md`. Complete the routed arrival, skim accessible estate colleague names/rationales/contribution summaries with coverage recorded, check the candidate name and aliases, and register a unique non-human/non-brand working name through current LINEAGE conventions. Separate proposed remit, inherited lessons and actual achievements. Recheck collisions immediately before registration; repeated onboarding must resume safely rather than duplicate identity.
+309:   **Complete when:** real founding/session references and an attributed charter exist, the colleague has chosen its own name, and its actual contribution record starts at onboarding. Do not rename Eko or an unrelated colleague. [S2, S4]
+310: 
+311: - [ ] **OI-07 — Bind and install the recurring wake message.**
+312:   **Owner:** onboarding colleague produces the binding; authorised harness/operator path installs it. **Depends on:** OI-06 and the relevant design gates. **Coupled delivery:** G2 with OI-08. Binding preparation and safe test installation can proceed before recurring recovery is complete; neither item closes until the shared fresh-conversation proof passes.
+313:   Establish the three layers: permanent carrier, exact-key LETHE map and raw anchor records. Fill all four placeholders in `02_RECURRING_WAKE_TEMPLATE.txt` with returned, verified values. Keep the generic template separate from the bound message; reject unresolved values and identity mismatches. The first-wake prompt must not become the every-session prompt.
+314:   **Complete when:** a fresh conversation selects the established binding, reaches the exact map/anchors and retains the working name with correct new-session attribution. The founding prompt does not authorise the colleague to install its own message. [S1–S3]
+315: 
+316: - [ ] **OI-08 — Implement recurring recovery and earned history.**
+317:   **Owner:** harness/memory colleague. **Depends on:** OI-06, G1, OI-05 and the established OI-07 binding contract, not OI-07 delivery closure. **Coupled delivery:** G2 with OI-07; build recovery against the bound contract and close both together.
+318:   Recover identity, applicable live-thread revisions, corrections and task-relevant anchors before substantive work on a new conversation or detected compaction. New conversations have their own session attribution; in-place compaction keeps the same session. Preserve evidence-backed contributions, reflections and correction links at meaningful boundaries. Keep parallel live threads separate. Old tasks and permissions are context, not automatic authority.
+319:   **Complete when:** recovery, correction uptake and history write/readback work through ordinary use, including a model change. An unavailable record causes an honest bounded failure, not a new identity or fabricated memory. [S3]
+320: 
+321: - [ ] **OI-09 — Pass the continuity falsification suite.**
+322:   **Owner:** independent verifier. **Depends on:** completed G2.
+323:   Test a genuinely cold conversation, process/application restart, compaction, missing memory, wrong identity, superseded record, interrupted onboarding and concurrent sessions. Store a discriminating harmless anchor only in LETHE; exclude it from the prompt, chat history and continuation summary. Require unprompted retrieval and correct functional use after a bland greeting.
+324:   **Complete when:** real cold-start and restart trials pass and severing the memory path makes the intended memory-dependent check fail. Same-session readback, familiar phrasing and model self-report are not continuity proof. [S1, acceptance checks]
+325: 
+326: ### Phase C — Supply architectural context and enforce integration proof
+327: 
+328: - [ ] **OI-10 — Specify the repo-overview and estate-map format.**
+329:   **Owner:** architecture colleague. **Depends on:** OI-02.
+330:   Keep a short canonical overview in each repo root and an estate relationship/index map in the parent workspace. Separate approved intended behaviour, actual runtime journeys and verified present state. Include boundaries, owners, producers, consumers, defaults, persistence and evidence links. The overview points to owning blueprints; it does not acquire authority to invent runtime semantics.
+331:   **Complete when:** a reader can distinguish intended, verified, broken and unknown connections without mistaking a future-state picture for existing code.
+332: 
+333: - [ ] **OI-11 — Populate a pilot overview, then the repo rollout.**
+334:   **Owner:** repo architects/reviewers. **Depends on:** OI-10 and access to each repo's approved intentions/live source.
+335:   Pilot on Ollama so this integration work has its own system map. Inventory the estate repos to receive overviews and process them in a controlled order, with one owner per overview and cross-repo boundary checks. Reuse an adequate existing overview. Do not require every estate overview to finish before the Ollama pilot can proceed.
+336:   **Complete when:** Ollama's overview is source-grounded and reviewed; the full item closes only when every repo in the recorded rollout inventory has a reviewed overview or an explicitly agreed exclusion. Missing evidence remains visible.
+337: 
+338: - [ ] **OI-12 — Route context at wake, task start and resumption.**
+339:   **Owner:** TECHNE/harness integration colleague. **Depends on:** completed G2 and the reviewed OI-11 Ollama pilot.
+340:   Connect `00_START_HERE.md` to the relevant overview and task-specific source paths. Refresh the working context when repo, task, specification or configuration changes and after compaction. Future child packets receive their own scope and affected integration chain, not the parent's entire history. Preserve the router's mandatory arrival obligations unless a separate method change is approved.
+341:   **Complete when:** captured context and task records show the correct current repo and upstream/downstream surfaces; stale or missing mandatory context blocks the affected action. A recorded file hash is not proof of comprehension. [S5]
+342: 
+343: - [ ] **OI-13 — Make completion depend on integration evidence.**
+
+SOURCE commission
+347: 
+348: ### Phase D — Give the active colleague supervised children
+349: 
+350: - [ ] **OI-14 — Build the parent-owned delegation interface.**
+351:   **Owner:** orchestration implementer. **Depends on:** the relevant OI-02 gates, OI-09 and OI-13. **Coupled delivery:** G3 with OI-15 and OI-16; no early completion before authorised execution and supervision are proven together.
+352:   Add or complete child start, status, result, message, cancellation and closure operations through the chosen native/adapter boundary. Bind each child to the actual active parent session and a bounded task packet containing repo, ownership, acceptance conditions and limits. Keep identity, session, task and model attribution distinct.
+353:   **Complete when:** the active colleague launches a real child, receives its real artefacts/evidence and incorporates the result without a human copying text between conversations. An existing text-only review wrapper must not be relabelled as an agent. [S8]
+354: 
+355: - [ ] **OI-15 — Enforce tool inheritance and no grandchildren.**
+356:   **Owner:** runtime-boundary/security implementer. **Depends on:** the judged G3 contracts. Implement/prove the applicable authorisation boundary before enabling writable child execution. **Coupled delivery:** G3 with OI-14 and OI-16; final proof uses their real dispatch path.
+357:   Give children the parent's applicable tools, subject to current task scope and approval controls, but deny child-creation authority at execution dispatch as well as schema exposure. Prevent role spoofing and unauthorised peer-session access. Inspect shell, MCP and external delegate routes for bypasses: unrestricted execution cannot be declared constrained merely because one tool is hidden.
+358:   **Complete when:** real child tool use succeeds where authorised, while attempted grandchild creation and authority escalation are rejected by enforced boundaries. Resolve any broad-shell conflict explicitly rather than silently narrowing the promised tool set.
+359: 
+360: - [ ] **OI-16 — Add durable supervision and steering.**
+361:   **Owner:** orchestration/session implementer. **Depends on:** the judged G3 contracts and ready intermediate dispatch/authorisation surfaces, not OI-14/OI-15 delivery closure. **Coupled delivery:** G3 with OI-14 and OI-15.
+362:   Persist parent/child ownership, lifecycle and ordered conversation/tool events. Allow the parent to observe progress, send corrections, pause/resume where supported, and cancel. Distinguish queued steering from delivered/acknowledged steering; define the safe point where it affects the next action. Bound concurrency, retries, runtime, context and resource consumption.
+363:   **Complete when:** a parent correction changes the child's subsequent action, cancellation prevents further authorised work, and restart/reconnect recovers accurate state without duplicate dispatch or invented progress. In-flight side effects need explicit outcomes, not assumed rollback.
+364: 
+365: - [ ] **OI-17 — Coordinate file ownership and result integration.**
+
+SOURCE commission
+374: 
+375: ### Phase E — Measure capabilities, then route tasks
+376: 
+377: - [ ] **OI-19 — Build an exact-configuration model catalogue.**
+378:   **Owner:** model integration colleague. **Depends on:** the relevant OI-02 gates and completed G1.
+379:   Discover available local and permitted cloud models. Record reported model/revision or digest, provider/destination, quantisation where applicable, actual context configuration, tools/structured-output support and resource observations. Probe required capabilities through the harness; advertised metadata alone is not a capability result. Keep the colleague's identity independent of the selected model.
+380:   **Complete when:** the catalogue distinguishes advertised, measured, unsupported and unknown properties, and changed configurations invalidate affected profiles. Cloud revision limits remain explicit rather than being described as reproducibly pinned weights.
+381: 
+382: - [ ] **OI-20 — Design the task-capability benchmark.**
+383:   **Owner:** evaluator plus independent reviewer. **Depends on:** OI-19.
+384:   Measure the abilities needed here: basic coding, Swift/Python work, repo navigation, cross-file integration, reasoning, testing, tool/MCP use, long-context instruction retention, correction uptake and failure honesty. Use versioned representative tasks, held-out variants, objective tests where possible, repeated trials and independently reviewed rubrics. Include tasks that require declining or escalating when evidence is insufficient.
+385:   **Complete when:** scoring, minimum evidence, uncertainty and eligibility thresholds are fixed before qualification runs. Report measured task capability of the model-plus-harness configuration, not universal intelligence, an IQ score or résumé-based competence.
+386: 
+387: - [ ] **OI-21 — Run qualification and retain attributable results.**
+388:   **Owner:** evaluation runner/verifier. **Depends on:** OI-20 and the actual completed G3 child-role configuration for child qualification.
+389:   Execute in disposable workspaces with the actual wake/context/tool configuration. Record all attempts, success/failure causes, latency including loading where relevant, token use, resource use, observed cost and raw evidence. Separate infrastructure failure from task failure. Calibrate the evaluator with known-good and deliberately broken controls; keep qualification answers inaccessible to evaluated colleagues.
+390:   **Complete when:** results can be independently checked, sample counts and uncertainty are visible, and no model is qualified using hidden retries, self-grading or an untested configuration. Cloud runs require current disclosure/spending authority.
+391: 
+392: - [ ] **OI-22 — Connect measured profiles to parent model selection.**
+
+SOURCE commission
+395:   **Complete when:** controlled task differences produce the expected evidence-backed selections, and an attractive but ineligible model is never chosen. Begin with advisory/shadow choices; automatic routing follows demonstrated agreement with the approved selection policy.
+396: 
+397: ### Phase E2 — Automatic memory, working context and continuous agent mode
+398: 
+399: These are six additional required items, not replacements for OI-01–OI-25. Their numbers preserve the old identifiers; execute by the dependency graph, not by numerical order. All six receive the same design, pack, independent-review and production-path proof requirements as the original work.
+400: 
+401: - [ ] **OI-26 — Automatically capture colleague memories through LETHE.**
+402:   **Owner:** memory/harness implementer. **Depends on:** OI-05, G2 and the judged automatic-capture contract. **Extends:** OI-05/OI-08; one memory integration, not a duplicate engine.
+403:   **Required outcome:** the harness automatically preserves useful, attributable memories during ordinary colleague/agent use, without needing the model or Ash to remember to call a store tool. Attach capture to committed turns and meaningful decisions, corrections, verified results and task checkpoints. Keep exact conversation persistence separate from curated memories. Define selection/extraction, source references, eligibility and disabled/excluded-content rules in the design; label model-derived interpretations and self-reports rather than promoting them to verified facts. Provide visible memory status and review/correction controls through the existing suitable surface.
+404:   **Implementation obligations:** reuse real LETHE storage/retrieval and consent; choose a service adapter rather than copying the engine unless a reviewed, justified integration requires it. Use a durable bounded capture queue/outbox with source-event identity and deduplication so retry/restart does not silently lose or multiply a memory. Distinguish captured/pending/stored/failed states from verified raw readback. Do not claim a queued write is persisted. Recover interrupted capture, expose errors and prevent an outage from freezing unrelated chat; memory-dependent work must still honour its readiness rules. Store referenced technical evidence and subsequent corrections without destroying authorship. Never generate a new automatic memory event solely from storing that same memory, creating a feedback loop. Automatic operation is enabled in the configured, authorised colleague profile after qualification, not merely shipped as an unused API.
+405:   **Complete when:** ordinary messages/decisions cause retained memory without any model-issued store call; a fresh process/conversation retrieves and correctly uses it; corrections supersede the relevant prior claim; duplicate events are deduplicated; denied scope, disabled capture and service outage behave as specified. Execute a control disconnecting the capture hook, then restore it: the later memory-dependent assertion must fail and then pass. A stored transcript or a successful MCP probe alone does not close this item.
+406: 
+407: - [ ] **OI-27 — Build relevant working context instead of whole-history replay.**
+408:   **Owner:** context/memory implementer. **Depends on:** OI-26, OI-12 and the judged context-assembly contract. **Extends:** the existing request assembly and curated-context proposals.
+409:   **Required outcome:** each new user prompt and autonomous continuation receives enough current context to make sense, plus relevant information from the current and authorised past chats, principally as bounded source-linked summaries rather than the complete conversation every time. Retain the current prompt, standing instructions, active goal/step, applicable exact constraints, necessary recent exchanges and outstanding tool pairs. Clarify references such as “that change” using current thread/goal context before retrieval; latest-prompt similarity alone is not the relevance policy.
+410:   **Implementation obligations:** filter by permission/scope before ranking; retrieve, deduplicate and rank bounded candidates using the actual supported interfaces; preserve corrections and evidence provenance. Summary entries point to exact recoverable source messages. Do not replace raw authoritative facts with an unsupported synthesis or regenerate an ever-growing summary of summaries. Permit exact source expansion when needed and declare insufficient context instead of guessing. Cache/index incrementally with invalidation for edits, corrections and access changes; do not scan or resummarise the entire archive for every request. Preserve the complete archive and export independently. Bound every stage and reserve room for output/tools; when mandatory content cannot fit, expose the precise capacity issue. Integrate startup recovery and compaction coherently, keep a tested rollback/compatibility path, and make selective context the qualified normal path for the new colleague/agent mode—not an unused toggle. A failure must not silently send an unbounded or unauthorised archive as fallback.
+411:   **Complete when:** captured actual requests omit unrelated/old bulk history, remain within the declared budget as the archive grows, and answer controlled context-dependent tasks correctly using current and past-chat evidence. Include exact-code/constraint, pronoun-reference, correction, multi-turn goal, no-hit, contradictory-memory, unavailable-retrieval and denied-scope cases. Use held-out questions, all attempts and predeclared quality/latency thresholds, with full-history reference where it fits. Removing retrieval or corrupting a relevant summary must fail its specific behavioural check. Smaller prompts alone do not establish quality or UI improvement.
+412: 
+413: - [ ] **OI-28 — Make long conversations responsive to load, read and navigate.**
+414:   **Owner:** UI/storage performance implementer. **Depends on:** OI-01 and its judged performance/archive contract. **Independent of:** OI-27 delivery; diagnose and fix the viewer separately.
+415:   **Required outcome:** growing conversation history does not force all messages and expensive content into the UI at once or make normal navigation unresponsive within the tested operating envelope. Begin with profiling, then use appropriate paged/cursor archive loading, virtualised/windowed rendering, incremental updates, memoisation and lazy Markdown/code/attachment rendering where the measurements justify them. Do not assume a particular library is installed or prescribe a rewrite merely to obtain these mechanisms.
+416:   **Implementation obligations:** bound initial query/transfer size, loaded message pages, mounted elements and cached rendered content; rendering only nearby messages is insufficient when the frontend still loads/parses the entire transcript. Use stable message identifiers and cursor/order semantics, not array-index identity across paging. Handle variable heights and streaming without repeatedly reprocessing every earlier message. Preserve scroll anchors when older pages arrive, navigation/search to older messages, keyboard/accessibility behaviour, edits, attachments and the user's chosen reading position. New messages must not drag a user away from older text; provide a deliberate return-to-latest path. Account for nested child conversations and large individual messages, not just many short messages. Profile before and after using the same representative fixtures, hardware/build and cache conditions; predeclare load/interaction latency, memory, frame/long-task and mounted-count bounds.
+417:   **Complete when:** real UI tests and measurements meet the predeclared bounds at increasing history sizes while all saved content remains reachable. Include mixed text, long code blocks, tool activity, attachments, nested children and live streaming; distinguish cold/open, warm/reopen and older-page navigation. Run with model generation idle as well as active to isolate rendering cost. A deliberately non-windowed/unbounded-loading control must violate the relevant count or performance assertion for the intended reason. Do not claim unlimited-length performance or pass by truncating/deleting the archive.
+418: 
+419: - [ ] **OI-29 — Add a top-left Download conversation control for complete Markdown export.**
+420:   **Owner:** conversation UI/export implementer. **Depends on:** OI-01, the verified archive contract and its judged export design. **Independent of:** OI-27/OI-28 closure; coordinate shared UI/file ownership.
+421:   **Required outcome:** a labelled, accessible button at the **top left of the conversation window** lets the user download/save a UTF-8 `.md` version of the entire selected conversation. Read the canonical saved archive, never only mounted/loaded messages, selected model context or a generated summary. Preserve actual message text, speaker attribution, order, code fences, available timestamps, relevant visible tool/result events and attachment references. Do not fabricate unavailable content, hidden reasoning, attachment bytes or missing history.
+422:   **Implementation obligations:** use a stable export snapshot boundary while a conversation is streaming; state whether an in-progress message is included and label any partial content. Use stable IDs to prevent duplicates/omissions across pages. Preserve content containing backticks, Unicode, long code, empty messages and edits according to the existing conversation-branch/version policy. The selected conversation's full saved transcript is always included; child conversations are a separately labelled opt-in inclusion/export scope so the button does not silently export other conversations. That export choice does not modify the viewer's read-only child-input default. Produce a safe default filename, proper Markdown/media type, save/cancel/failure behaviour and a clear error rather than a silently truncated success. Stream/chunk from storage with bounded memory where supported. Export only the requested user-visible authorised content, not unrelated credentials, internal bindings or other users' private stores. Never fetch remote attachments merely to complete a local transcript export.
+423:   **Complete when:** the real top-left button saves a readable `.md` whose ordered message IDs/count and content match an independently enumerated archive snapshot, including messages never loaded in the UI and messages outside the model context. Test pagination boundaries, large histories, streaming, code/Unicode, unavailable attachments, cancellation and write failure. A visible-page-only exporter and an exporter with a missing/misordered message must fail the completeness checks. UI visibility or a non-empty file alone is not export proof.
+424: 
+425: - [ ] **OI-30 — Add durable, time-bounded autonomous goal execution.**
+426:   **Owner:** goal scheduler/runtime implementer. **Depends on:** OI-13, OI-26, OI-27, completed G3 and judged scheduler/interaction contracts. **Coupled delivery:** G4 with OI-31; this is scheduling existing authorised runs, not another tool executor.
+427:   **Required outcome:** after the user enables agent mode and supplies a goal, the model makes a durable plan of steps, performs dependency-ready work, checks results and advances towards the goal without a new “continue” prompt each period. A work period is bounded by the actual current maximum working time and other effective limits. Before that deadline, yield safely, record completed and unfinished work, then review the next eligible goal and its existing progress and start the next required step automatically. Expired time never counts as completed work. Preserve multiple queued goals and partial steps; a long unfinished step must be resumed rather than silently skipped or marked done.
+428:   **Implementation obligations:** discover and record the exact current time/deadline controls, their source/configuration and host/provider meaning; do not substitute the known tool-round cap for elapsed time or invent a number. Define a checkpoint reserve and safe-boundary/deadline policy in the design. Do not start an operation that cannot safely finish/checkpoint/cancel within its remaining authorised budget. At forced interruption persist pending/uncertain side effects for reconciliation rather than blindly reissue them. Persist goal/step IDs, dependencies, priority/order, owner, plan revision, outcomes/evidence, checkpoint, retries, scheduling eligibility, paused/stopped/completed/blocked state and current authority. Use one logical scheduler owner with durable dispatch deduplication; recover without duplicate workers. Define a deterministic queue/fairness policy and revisit unfinished goals without starvation. Reuse G3 events/cancellation and the ordinary execution path; scheduling the same child again is not permission for a child to spawn descendants.
+429:   **Continuation boundary:** renew only a per-work-period budget where the actual host contract permits another run. Keep cumulative time, spend, retry and no-progress limits across periods. Never rotate sessions, accounts or credentials to evade usage, authorisation or safety limits. Stop or block on genuine completion, user stop, denied/revoked permission, exhausted overall budget or irreconcilable side effects. Prove step/goal completion with the relevant acceptance criteria, not model narration or an empty queue. Use an explicitly selected permitted model during development; evaluate the final scheduler/context configuration before automatic routing claims. Expose goal and checkpoint status in the product and define app-exit/sleep/restart behaviour under §0.12.
+430:   **Complete when:** a real goal spans multiple bounded work periods and resumes from persisted progress without repeated human input; queued goals are selected as specified and unfinished steps retain their identities. Verify durable recovery after process interruption, deduplicated dispatch and uncertain-side-effect reconciliation within the declared boundary, failed-checkpoint handling, no-progress/budget stops and no skipped/duplicated side effects. A clock/deadline test uses declared smaller test limits plus a production-configuration smoke. A control removing checkpoint restore or next-period scheduling must fail actual progress assertions. Close G4 only after OI-31's conversation/stop proofs also pass.
+431: 
+432: - [ ] **OI-31 — Let the user converse during agent mode and resume work automatically.**
+433:   **Owner:** interaction/runtime implementer. **Depends on:** the judged G4 contracts and ready OI-30 intermediate scheduler/checkpoint surfaces, not OI-30 delivery closure. **Coupled delivery:** G4 with OI-30.
+434:   **Required outcome:** while the agent is pursuing its goals, the user can send a normal prompt, receive a substantive response and have the agent return automatically to its tasks, unless the user asks it to stop or changes the task. This must work during a long work period, not only after the goal finishes. Continuing a task means preserving its durable state; simultaneous model inference is not required.
+
+SOURCE commission
+454:   **Complete when:** the installed build is the verified candidate, Ash's actual workflow passes, restart/uninstall/rollback instructions are checked, and no unverified feature or unrun test is presented as complete. Close Git work under current scoped authority.
+455: 
+456: ## 2. Delivery checkpoints
+457: 
+458: **Checkpoint 1 — One colleague with real continuity:** OI-01–OI-09. Do not wait for the benchmark system to prove this.
+459: 
+460: **Checkpoint 2 — Architecture-aware work:** OI-10, the Ollama portion of OI-11, OI-12 and OI-13. Continue the estate-wide overview rollout independently with explicit coverage.
+461: 
+462: **Checkpoint 3 — One supervised child:** OI-14–OI-18, initially with explicit model choice. Parallelism comes after control and recovery work.
+463: 
+464: **Checkpoint 4 — Evidence-backed model choice:** OI-19–OI-22. Catalogue and benchmark design can proceed alongside delegation, but child qualification must measure the configuration actually used.
+465: 
+466: **Checkpoint 5 — Memory and conversation upgrades:** OI-26–OI-29. Viewer and export work may proceed earlier against the verified archive contract; selective context is not a prerequisite to fixing UI responsiveness.
+467: 
+468: **Checkpoint 6 — Continuing, interactive agent mode:** G4 (OI-30/OI-31), followed by affected OI-21/OI-22 qualification. Prove automatic goal continuation and durable user stop together.
+469: 
+470: **Checkpoint 7 — Qualified expanded release:** OI-23–OI-25, including all six R3 additions. Each earlier feature still needs its own proof; this final gate is not permission to defer all testing.
+471: 
+472: ## 3. Decisions assigned to design before dependent implementation
+473: 
+474: Resolve these under §0.2/§0.5 and the engineering directions in §0.7. They are assigned work for OI-01/OI-02 and the owning feature designs, not a questionnaire Ash must answer before you begin: exact editor/settings ownership and scope; instruction precedence; startup/compaction readiness gating; LETHE scope and identity binding; parent/child persistence and cancellation semantics; shell/MCP enforcement limits; human intervention semantics; Codex adapter scope; model qualification thresholds; approved cloud destinations/budgets; operating limits; and migration/rollback contracts. Existing approved decisions should be recovered before asking Ash to decide again.
+475: 
+476: For OI-26–OI-31 also settle: automatic capture eligibility/outbox semantics; retrieval scope and summarisation/raw-source policy; archive/cursor and UI performance bounds; exact Markdown export contents/snapshot policy; the actual current work-time limit and checkpoint reserve; goal queue/fairness and cumulative budgets; user-message priority, pause/stop targets and restart behaviour. Technical choices are assigned design work, not a mandatory questionnaire for Ash.
+477: 
+478: R3 explicitly adds selective working context, per-conversation local export and the bounded product scheduler. Full removal/replacement of the compactor still requires a judged compatibility decision; blanket unsolicited transcript export/import, model fine-tuning, AGORA substitution, estate-wide code repair and multi-machine deployment remain excluded. Bring any genuinely required new dependency back into design with its reason and boundary.
+479: 
+480: ## 4. Historical R1 source ledger and evidence limits
+481: 
+482: The following are the R1 authoring record of local working-tree reads on 20 September 2026 via Eko Write Bridge, retained for provenance and discovery. They are not new R2 execution evidence. The separate read Bridge returned HTTP 404. Raw `file_sha256` values below identify complete files, even where only a selected range was read; they are not the returned excerpt `content_sha256` and not proof of execution.
+483: 
+484: **S1 — Wake packet.** `TECHNE/docs/prompts/PSYCHE_RECURRING_COLLEAGUE_WAKE_PACKET.md`, lines 1–311, complete; especially Use and Proposed acceptance checks. Raw SHA-256 `39a3af5147559ee48d3906657118657f342f914f4fed0c221f59b975e46d7a6b`; request `30a2b8e7410f48ef8d5307256b200bba`.
+485: 
+486: **S2 — First wake.** `TECHNE/docs/prompts/01_FIRST_WAKE.txt`, lines 1–86, complete. Raw SHA-256 `63f8c9c2224c9cd95c588cf9493a71ee14539b2e37e02ab8e910d65e0ae733bf`; request `e5113c4242c74150a4a50f0f702695fe`.
+487: 
+488: **S3 — Recurring template.** `TECHNE/docs/prompts/02_RECURRING_WAKE_TEMPLATE.txt`, lines 1–61, complete. Raw SHA-256 `7d2b31137f4f28d72c9c7b834de791919ec3cedf3102bc1fb51476c8e8da97e9`; request `1b6a9a3819f443f5a9a9ee03c4691194`.
+
+SOURCE commission
+517: |---|---|
+518: | Goal, identity, parent ownership, inherited tools, no grandchildren, nested UI and capability selection | Kept in §0.1 and the OI items; detailed in §0.7. |
+519: | Planning-only metadata | Replaced by direct execution-assignment metadata; low-level design and independent proof are still owed. |
+520: | Permission exclusions | Kept in §0.2, distinguished from the new task commission for local scoped design/implementation. Existing applicable Git/review authority is not silently revoked or widened. |
+521: | OI-01 reconnaissance | Kept; startup, evidence identity and installed-versus-built distinction expanded in §0.3–§0.4. |
+522: | OI-02 design/judgement | Amended to programme architecture plus progressively completed per-group readiness; no blanket permission to build from this file. |
+523: | OI-03 editor | Kept; G1 joint closure removes dependency on a not-yet-wired request path. |
+524: | OI-04 request wiring | Kept; starts from OI-03's ready settings contract, not its delivery closure. |
+525: | OI-05 LETHE tool path | Kept; actual scopes/raw access/failure boundaries expanded in §0.7. |
+526: | OI-06 founding | Kept; completed G1 is prerequisite, existing matching identity must be checked before new registration. |
+527: | OI-07 binding/installation | Kept; G2 preparation and delivery are separated. No self-install authority invented for the founding colleague. |
+528: | OI-08 recovery/history | Kept; implementation consumes the binding contract without requiring OI-07 already to have proven this recovery. |
+529: | OI-09 continuity proof | Kept; runs after complete G2, with uncontaminated LETHE-only content. |
+530: | OI-10 overview format | Kept; design directions and early provisional source map added. |
+531: | OI-11 pilot and full rollout | Kept; finite canonical-repo inventory and whole-programme closure distinction made explicit. |
+532: | OI-12 context routing | Kept; prerequisite is complete G2 rather than premature OI-07 closure. |
+533: | OI-13 evidence enforcement | Kept; forged/stale/missing evidence controls and independent early verification added. |
+534: | OI-14 delegation interface | Kept; joined to G3 so message/cancellation claims do not close before their supervision/authority dependencies. |
+535: | OI-15 child authority | Kept; enforcement precedes writable execution, final proof uses real G3 dispatch. |
+536: | OI-16 supervision | Kept; operates from intermediate G3 contracts and closes jointly with OI-14/OI-15. |
+537: | OI-17 custody/integration | Kept; prerequisite is complete G3. |
+538: | OI-18 nested viewer | Kept; prerequisite is complete G3, read-only default and actual event provenance preserved. |
+539: | OI-19 model catalogue | Kept; prerequisite is complete G1, exact configuration evidence expanded. |
+540: | OI-20 benchmark design | Kept; predeclared metrics, sample counts, variability and evaluator controls expanded. |
+541: | OI-21 qualification | Kept; depends on the actual completed G3 configuration rather than an assumed future child role. |
+542: | OI-22 selection | Kept; requires complete G3, actual measured profiles and hard-constraint checks. |
+543: | OI-23 combined gate | Kept; detailed real workflow and per-link falsification expanded in §0.11. |
+544: | OI-24 reliability | Kept; in-flight uncertainty, resource limits and migration/rollback semantics expanded. |
+545: | OI-25 release | Kept; installed candidate, operator acceptance and remaining estate rollout are distinct. |
+546: | R1 checkpoints and unresolved decisions | Kept in §§2–3, operationalised by §§0.5–0.11. |
+547: | R1 source ledger S1–S11 | Kept as historical provenance, not upgraded to new execution evidence. |
+548: | R1 S12 external-reference claim | Re-labelled historical/not rechecked; implementation must verify an external API when actually relying on it. |
+549: | R1 exclusions | Kept in §0.2 and §3. No new inference engine, blanket memory export, training programme or estate-wide repair implied. |
+550: 
+551: ### R2 authoring evidence, scoped honestly
+552: 
+553: The supplied R1 attachment and the live Mac work-list file matched raw SHA-256 `f3b5266d253555c972bd9408656c2e30e25acd21bfe83fa1c8c7ad549bc3e949`. The live work list was read in full, lines 1–212, request `d8df453c9e3041db84b59d5282e6cc80`, at reported Ollama HEAD `953de98d408a9697fa20a48c23973b9dc8eee921` with a dirty working tree. These are the input bytes to this revision, not a claim that the repository is runtime-qualified.
+
+SOURCE commission
+572: 
+573: | Requested feature | Owning new item | Existing work reused / extended | Required discriminating proof |
+574: |---|---|---|---|
+575: | Automatic memory storage using LETHE | OI-26 | OI-05, OI-08, OI-09 | No model store call; real capture, process restart and useful recall; disconnected capture fails. |
+576: | Relevant current/past-chat summaries for each prompt | OI-27 | OI-04, OI-12, existing curated-context designs | Actual bounded request, source-grounded correct use, correction/privacy controls; retrieval removal fails. |
+577: | Fast long-conversation loading and navigation | OI-28 | OI-01 archive/UI recon, OI-18 nested conversations | Real UI latency/resource/mounted-content bounds with complete archive; unbounded loading/rendering control fails. |
+578: | Top-left entire-conversation Markdown download | OI-29 | Existing transcript storage and UI | Saved file matches an independently enumerated full snapshot, including never-loaded messages; page-only export fails. |
+579: | Plan, work, checkpoint at current limit and continue goals automatically | OI-30 | G3, OI-13, OI-26/OI-27 | Multiple work periods from durable state without repeated prompts; missing restore/dispatch fails. |
+580: | Respond to the user and return to tasks unless stopped | OI-31 | G3, OI-30; joint G4 acceptance | Mid-goal answer plus real subsequent progress; stop remains stopped across late events and restart. |
+581: 
+582: **Preservation and explicit amendments.** All original OI-01–OI-25 identifiers remain. Items OI-01–OI-22 and OI-25 retain their item bodies; OI-23/OI-24 gain the six-feature acceptance/reliability coverage and dependencies. The wider 25-item programme is not replaced by these six. Earlier source ledgers remain historical, not reissued runtime evidence. The recurring colleague's four TECHNE wake inputs and the scope/permission safeguards remain in place.
+583: 
+584: The title advances R2 → R3; §0.1 names all 31 items; §0.6 adds dependencies/G4 and affected model requalification; §0.11 expands the final workflow; §0.12 names shared storage/context/scheduling boundaries; Phase E2 adds six complete work items before final gates; §§2–3 update checkpoints and design obligations. §0.2/§3 distinguish requested local per-conversation export from excluded bulk export and selective context from unapproved compactor removal. §0.9 distinguishes implementing the requested product scheduler from installing a mechanism to keep the present delivery host running. These are explicit scope reconciliations, not weakened permission or proof gates.
+585: 
+586: **Qualification remains owed.** “Enough context”, “responsive” and “goal achieved” require the declared task-quality, performance and acceptance evidence. No arbitrary timer, test count, model score or universal guarantee is introduced here. There is no claim that shrinking prompts alone fixes UI latency, that external memory updates model weights, or that an automatic scheduler can continue through a stopped execution service or an exhausted host limit.
+587: 
+588: **R3 authoring evidence.** The live canonical file at `ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md` and the supplied sandbox copy were compared before editing and both had raw SHA-256 `35236b8a22011c89374db39670c6b8d0cb8e2990bbac7eb8b2d0dd46190dad21` (83,326 bytes). Bridge read request `abac08680bc94a969ee352a4cbea9022` supplied lines 1–42 and the full raw file hash; authoring used the complete byte-matching attachment. This is not a claim that a 42-line read covered the whole file. Git-status request `58f903f53cd7486f97428e69a7133ac0` recorded Ollama HEAD `953de98d408a9697fa20a48c23973b9dc8eee921`, dirty `main`, with this document and `docs/prompts/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST-2.md` untracked. The separate prompts copy is outside this edit; do not assume it has been synchronised.
+589: 
+590: This amendment changes only the canonical integration document and its downloadable copy. It does not implement runtime features, change wake files, install anything, dispatch colleagues or run a software qualification/independent blueprint judgement. The delivery colleague must re-read live source and earn the required gates; no external library/API claim from a previous discussion is used as current implementation evidence here.
+
+SOURCE app/store/store.go
+120: 	}
+121: }
+122: 
+123: type Settings struct {
+124: 	// Expose is a boolean that indicates if the ollama server should
+125: 	// be exposed to the network
+126: 	Expose bool
+127: 
+128: 	// Browser is a boolean that indicates if the ollama server should
+129: 	// be exposed to browser windows (e.g. CORS set to allow all origins)
+130: 	Browser bool
+131: 
+132: 	// Survey is a boolean that indicates if the user allows anonymous
+133: 	// inference information to be shared with Ollama
+134: 	Survey bool
+135: 
+136: 	// Models is a string that contains the models to load on startup
+137: 	Models string
+138: 
+139: 	// TODO(parthsareen): temporary for experimentation
+140: 	// Agent indicates if the app should use multi-turn tools to fulfill user requests
+141: 	Agent bool
+142: 
+143: 	// Tools indicates if the app should use single-turn tools to fulfill user requests
+144: 	Tools bool
+145: 
+146: 	// WorkingDir specifies the working directory for all agent operations
+147: 	WorkingDir string
+148: 
+149: 	// ContextLength specifies the context length for the ollama server (using OLLAMA_CONTEXT_LENGTH)
+150: 	ContextLength int
+151: 
+152: 	// TurboEnabled indicates if Ollama Turbo features are enabled
+153: 	TurboEnabled bool
+154: 
+155: 	// Maps gpt-oss specific frontend name' BrowserToolEnabled' to db field 'websearch_enabled'
+156: 	WebSearchEnabled bool
+157: 
+
+SOURCE app/store/store.go
+370: func (s *Store) SetHasCompletedFirstRun(hasCompleted bool) error {
+371: 	if err := s.ensureDB(); err != nil {
+372: 		return err
+373: 	}
+374: 
+375: 	return s.db.setHasCompletedFirstRun(hasCompleted)
+376: }
+377: 
+378: func (s *Store) Settings() (Settings, error) {
+379: 	if err := s.ensureDB(); err != nil {
+380: 		return Settings{}, fmt.Errorf("load settings: %w", err)
+381: 	}
+382: 
+383: 	settings, err := s.db.getSettings()
+384: 	if err != nil {
+385: 		return Settings{}, err
+386: 	}
+387: 
+388: 	// Set default models directory if not set
+389: 	if settings.Models == "" {
+390: 		dir := os.Getenv("OLLAMA_MODELS")
+391: 		if dir != "" {
+392: 			settings.Models = dir
+393: 		} else {
+394: 			home, err := os.UserHomeDir()
+395: 			if err == nil {
+396: 				settings.Models = filepath.Join(home, ".ollama", "models")
+397: 			}
+398: 		}
+399: 	}
+400: 
+401: 	if settings.LastHomeView == "" {
+402: 		settings.LastHomeView = "launch"
+403: 	}
+404: 
+405: 	return settings, nil
+406: }
+407: 
+408: func (s *Store) SetSettings(settings Settings) error {
+409: 	if err := s.ensureDB(); err != nil {
+410: 		return err
+411: 	}
+412: 
+413: 	return s.db.setSettings(settings)
+414: }
+415: 
+416: func (s *Store) Chats() ([]Chat, error) {
+417: 	if err := s.ensureDB(); err != nil {
+418: 		return nil, err
+419: 	}
+420: 
+421: 	return s.db.getAllChats()
+422: }
+423: 
+424: func (s *Store) Chat(id string) (*Chat, error) {
+425: 	return s.ChatWithOptions(id, true)
+426: }
+427: 
+428: func (s *Store) ChatWithOptions(id string, loadAttachmentData bool) (*Chat, error) {
+429: 	if err := s.ensureDB(); err != nil {
+430: 		return nil, err
+431: 	}
+432: 
+433: 	return s.db.getChatWithOptions(id, loadAttachmentData)
+434: }
+435: 
+436: func (s *Store) SetChat(chat Chat) error {
+437: 	if err := s.ensureDB(); err != nil {
+438: 		return err
+439: 	}
+440: 
+
+SOURCE app/ui/ui.go
+1680: 	return responses.ChatInfo{
+1681: 		ID:          chat.ID,
+1682: 		Title:       chat.Title,
+1683: 		UserExcerpt: userExcerpt,
+1684: 		CreatedAt:   chat.CreatedAt,
+1685: 		UpdatedAt:   updatedAt,
+1686: 	}
+1687: }
+1688: 
+1689: func (s *Server) getSettings(w http.ResponseWriter, r *http.Request) error {
+1690: 	settings, err := s.Store.Settings()
+1691: 	if err != nil {
+1692: 		return fmt.Errorf("failed to load settings: %w", err)
+1693: 	}
+1694: 
+1695: 	// set default models directory if not set
+1696: 	if settings.Models == "" {
+1697: 		settings.Models = envconfig.Models()
+1698: 	}
+1699: 
+1700: 	// Include current runtime settings
+1701: 	settings.Agent = s.Agent
+1702: 	settings.Tools = s.Tools
+1703: 	settings.WorkingDir = s.WorkingDir
+1704: 
+1705: 	w.Header().Set("Content-Type", "application/json")
+1706: 	return json.NewEncoder(w).Encode(responses.SettingsResponse{
+1707: 		Settings: settings,
+1708: 	})
+1709: }
+1710: 
+1711: func (s *Server) settings(w http.ResponseWriter, r *http.Request) error {
+1712: 	old, err := s.Store.Settings()
+1713: 	if err != nil {
+1714: 		return fmt.Errorf("failed to load settings: %w", err)
+1715: 	}
+1716: 
+1717: 	var settings store.Settings
+1718: 	if err := json.NewDecoder(r.Body).Decode(&settings); err != nil {
+1719: 		return fmt.Errorf("invalid request body: %w", err)
+1720: 	}
+1721: 
+1722: 	if err := s.Store.SetSettings(settings); err != nil {
+1723: 		return fmt.Errorf("failed to save settings: %w", err)
+1724: 	}
+1725: 
+1726: 	// Handle auto-update toggle changes
+1727: 	if old.AutoUpdateEnabled != settings.AutoUpdateEnabled {
+1728: 		if !settings.AutoUpdateEnabled {
+1729: 			// Auto-update disabled: cancel any ongoing download
+1730: 			if s.Updater != nil {
+1731: 				s.Updater.CancelOngoingDownload()
+1732: 			}
+1733: 		} else {
+1734: 			// Auto-update re-enabled: show notification if update is already staged, or trigger immediate check
+1735: 			if (updater.IsUpdatePending() || updater.UpdateDownloaded) && s.UpdateAvailableFunc != nil {
+1736: 				s.UpdateAvailableFunc()
+1737: 			} else if s.Updater != nil {
+1738: 				// Trigger the background checker to run immediately
+1739: 				s.Updater.TriggerImmediateCheck()
+1740: 			}
+1741: 		}
+1742: 	}
+1743: 
+1744: 	if old.ContextLength != settings.ContextLength ||
+1745: 		old.Models != settings.Models ||
+1746: 		old.Expose != settings.Expose {
+1747: 		s.Restart()
+1748: 	}
+1749: 
+1750: 	w.Header().Set("Content-Type", "application/json")
+1751: 	return json.NewEncoder(w).Encode(responses.SettingsResponse{
+1752: 		Settings: settings,
+1753: 	})
+1754: }
+1755: 
+1756: func (s *Server) cloudSetting(w http.ResponseWriter, r *http.Request) error {
+1757: 	var req struct {
+1758: 		Enabled bool `json:"enabled"`
+1759: 	}
+1760: 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+1761: 		return fmt.Errorf("invalid request body: %w", err)
+1762: 	}
+1763: 
+1764: 	if err := s.Store.SetCloudEnabled(req.Enabled); err != nil {
+1765: 		return fmt.Errorf("failed to persist cloud setting: %w", err)
+1766: 	}
+1767: 
+1768: 	s.Restart()
+1769: 
+1770: 	return s.writeCloudStatus(w)
+1771: }
+1772: 
+1773: func (s *Server) getCloudSetting(w http.ResponseWriter, r *http.Request) error {
+1774: 	return s.writeCloudStatus(w)
+1775: }
+1776: 
+1777: func (s *Server) writeCloudStatus(w http.ResponseWriter) error {
+1778: 	disabled, source, err := s.Store.CloudStatus()
+1779: 	if err != nil {
+1780: 		return fmt.Errorf("failed to load cloud status: %w", err)
+1781: 	}
+1782: 
+1783: 	w.Header().Set("Content-Type", "application/json")
+1784: 	return json.NewEncoder(w).Encode(map[string]any{
+1785: 		"disabled": disabled,
+1786: 		"source":   source,
+1787: 	})
+1788: }
+1789: 
+1790: func (s *Server) getInferenceCompute(w http.ResponseWriter, r *http.Request) error {
+1791: 	ctx, cancel := context.WithTimeout(r.Context(), 500*time.Millisecond)
+1792: 	defer cancel()
+1793: 	info, err := server.GetInferenceInfo(ctx)
+1794: 	if err != nil {
+1795: 		s.log().Error("failed to get inference info", "error", err)
+1796: 		return fmt.Errorf("failed to get inference info: %w", err)
+1797: 	}
+1798: 
+1799: 	inferenceComputes := make([]responses.InferenceCompute, len(info.Computes))
+1800: 	for i, ic := range info.Computes {
+1801: 		inferenceComputes[i] = responses.InferenceCompute{
+1802: 			Library: ic.Library,
+1803: 			Variant: ic.Variant,
+1804: 			Compute: ic.Compute,
+1805: 			Driver:  ic.Driver,
+1806: 			Name:    ic.Name,
+1807: 			VRAM:    ic.VRAM,
+1808: 		}
+1809: 	}
+1810: 
+1811: 	response := responses.InferenceComputeResponse{
+1812: 		InferenceComputes:    inferenceComputes,
+1813: 		DefaultContextLength: info.DefaultContextLength,
+1814: 	}
+1815: 
+1816: 	w.Header().Set("Content-Type", "application/json")
+1817: 	return json.NewEncoder(w).Encode(response)
+1818: }
+1819: 
+1820: func (s *Server) modelUpstream(w http.ResponseWriter, r *http.Request) error {
+1821: 	if r.Method != "POST" {
+1822: 		return fmt.Errorf("method not allowed")
+1823: 	}
+1824: 
+1825: 	var req struct {
+1826: 		Model string `json:"model"`
+1827: 	}
+1828: 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+1829: 		return fmt.Errorf("invalid request body: %w", err)
+1830: 	}
+1831: 
+1832: 	if req.Model == "" {
+1833: 		return fmt.Errorf("model is required")
+1834: 	}
+1835: 
+1836: 	digest, pushTime, err := s.checkModelUpstream(r.Context(), req.Model, 5*time.Second)
+1837: 	if err != nil {
+1838: 		s.log().Warn("failed to check upstream digest", "error", err, "model", req.Model)
+1839: 		response := responses.ModelUpstreamResponse{
+1840: 			Error: err.Error(),
+1841: 		}
+1842: 		w.Header().Set("Content-Type", "application/json")
+1843: 		return json.NewEncoder(w).Encode(response)
+1844: 	}
+1845: 
+1846: 	n := model.ParseName(req.Model)
+1847: 	stale := true
+1848: 	if m, err := manifest.ParseNamedManifest(n); err == nil {
+1849: 		if m.Digest() == digest {
+1850: 			stale = false
+1851: 		} else if pushTime > 0 && m.FileInfo().ModTime().Unix() >= pushTime {
+1852: 			stale = false
+1853: 		}
+1854: 	}
+1855: 
+1856: 	response := responses.ModelUpstreamResponse{
+1857: 		Stale: stale,
+1858: 	}
+1859: 
+1860: 	w.Header().Set("Content-Type", "application/json")
+
+SOURCE app/ui/ui.go
+1900: // ptr is a convenience function for &literal
+1901: func ptr[T any](v T) *T { return &v }
+1902: 
+1903: // Browser tools simulate a full browser environment, allowing for actions like searching, opening, and interacting with web pages (e.g., "browser_search", "browser_open", "browser_find"). Currently only gpt-oss models support browser tools.
+1904: func supportsBrowserTools(model string) bool {
+1905: 	return strings.HasPrefix(strings.ToLower(model), "gpt-oss")
+1906: }
+1907: 
+1908: // buildChatRequest converts store.Chat to api.ChatRequest
+1909: func (s *Server) buildChatRequest(chat *store.Chat, model string, think any, availableTools api.Tools, mcpInstructions string) (*api.ChatRequest, error) {
+1910: 	var msgs []api.Message
+1911: 	// The servers' own words, ahead of the conversation. A tool definition says
+1912: 	// what one call does; this is the only place a server can say what it is
+1913: 	// for, which is what decides whether a model reaches for it unprompted.
+1914: 	if strings.TrimSpace(mcpInstructions) != "" {
+1915: 		msgs = append(msgs, api.Message{Role: "system", Content: mcpInstructions})
+1916: 	}
+1917: 	for _, m := range chat.Messages {
+1918: 		// Skip empty messages if present
+1919: 		if m.Content == "" && m.Thinking == "" && len(m.ToolCalls) == 0 && len(m.Attachments) == 0 {
+1920: 			continue
+1921: 		}
+1922: 
+1923: 		apiMsg := api.Message{Role: m.Role, Thinking: m.Thinking}
+1924: 
+1925: 		sb := strings.Builder{}
+1926: 		sb.WriteString(m.Content)
+1927: 
+1928: 		var images []api.ImageData
+1929: 		if m.Role == "user" && len(m.Attachments) > 0 {
+1930: 			for _, a := range m.Attachments {
+1931: 				if isImageAttachment(a.Filename) {
+1932: 					images = append(images, api.ImageData(a.Data))
+1933: 				} else {
+1934: 					content := convertBytesToText(a.Data, a.Filename)
+1935: 					sb.WriteString(fmt.Sprintf("\n--- File: %s ---\n%s\n--- End of %s ---",
+1936: 						a.Filename, content, a.Filename))
+1937: 				}
+1938: 			}
+1939: 		}
+1940: 
+1941: 		apiMsg.Content = sb.String()
+1942: 		apiMsg.Images = images
+1943: 
+1944: 		switch m.Role {
+1945: 		case "assistant":
+1946: 			if len(m.ToolCalls) > 0 {
+1947: 				var toolCalls []api.ToolCall
+1948: 				for _, tc := range m.ToolCalls {
+1949: 					var args api.ToolCallFunctionArguments
+1950: 					if err := json.Unmarshal([]byte(tc.Function.Arguments), &args); err != nil {
+1951: 						s.log().Error("failed to parse tool call arguments", "error", err, "function_name", tc.Function.Name, "arguments", tc.Function.Arguments)
+1952: 						continue
+1953: 					}
+1954: 
+1955: 					toolCalls = append(toolCalls, api.ToolCall{
+1956: 						Function: api.ToolCallFunction{
+1957: 							Name:      tc.Function.Name,
+1958: 							Arguments: args,
+1959: 						},
+1960: 					})
+1961: 				}
+1962: 				apiMsg.ToolCalls = toolCalls
+1963: 			}
+1964: 		case "tool":
+1965: 			apiMsg.Role = "tool"
+1966: 			apiMsg.Content = m.Content
+1967: 			apiMsg.ToolName = m.ToolName
+1968: 		case "user", "system":
+1969: 			// User and system messages are handled normally
+1970: 		default:
+1971: 			// Log unknown roles but still include them
+1972: 			s.log().Debug("unknown message role", "role", m.Role)
+1973: 		}
+1974: 
+1975: 		msgs = append(msgs, apiMsg)
+1976: 	}
+1977: 
+1978: 	var thinkValue *api.ThinkValue
+1979: 	if think != nil {
+1980: 		// Only set Think if it's actually requesting thinking
+1981: 		if boolValue, ok := think.(bool); ok {
+1982: 			if boolValue {
+1983: 				thinkValue = &api.ThinkValue{Value: boolValue}
+1984: 			}
+1985: 		} else if stringValue, ok := think.(string); ok {
+1986: 			if stringValue != "" && stringValue != "none" {
+1987: 				thinkValue = &api.ThinkValue{Value: stringValue}
+1988: 			}
+1989: 		}
+1990: 	}
+1991: 
+1992: 	req := &api.ChatRequest{
+1993: 		Model:    model,
+1994: 		Messages: msgs,
+1995: 		Stream:   ptr(true),
+1996: 		Think:    thinkValue,
+1997: 	}
+1998: 
+1999: 	if len(availableTools) > 0 {
+2000: 		req.Tools = availableTools
+2001: 	}
+2002: 
+2003: 	return req, nil
+2004: }
+
+SOURCE app/ui/app/src/api.ts
+185: }
+186: 
+187: export async function getModelCapabilities(
+188:   modelName: string,
+189: ): Promise<ModelCapabilitiesResponse> {
+190:   try {
+191:     const showResponse = await ollama.show({ model: modelName });
+192: 
+193:     return new ModelCapabilitiesResponse({
+194:       capabilities: Array.isArray(showResponse.capabilities)
+195:         ? showResponse.capabilities
+196:         : [],
+197:     });
+198:   } catch (error) {
+199:     // Model might not be downloaded yet, return empty capabilities
+200:     console.error(`Failed to get capabilities for ${modelName}:`, error);
+201:     return new ModelCapabilitiesResponse({ capabilities: [] });
+202:   }
+203: }
+204: 
+205: export type ChatEventUnion = ChatEvent | DownloadEvent | ErrorEvent;
+206: 
+207: export async function* sendMessage(
+208:   chatId: string,
+209:   message: string,
+210:   model: Model,
+211:   attachments?: Array<{ filename: string; data: Uint8Array }>,
+212:   signal?: AbortSignal,
+213:   index?: number,
+214:   webSearch?: boolean,
+215:   fileTools?: boolean,
+216:   forceUpdate?: boolean,
+217:   think?: boolean | string,
+218: ): AsyncGenerator<ChatEventUnion> {
+219:   // Convert Uint8Array to base64 for JSON serialization
+220:   const serializedAttachments = attachments?.map((att) => ({
+221:     filename: att.filename,
+222:     data: uint8ArrayToBase64(att.data),
+223:   }));
+224: 
+225:   // Send think parameter when it's explicitly set (true, false, or a non-empty string).
+226:   const shouldSendThink =
+227:     think !== undefined &&
+228:     (typeof think === "boolean" || (typeof think === "string" && think !== ""));
+229: 
+230:   const response = await fetch(`${API_BASE}/api/v1/chat/${chatId}`, {
+231:     method: "POST",
+232:     headers: {
+233:       "Content-Type": "application/json",
+234:     },
+235:     body: JSON.stringify(
+236:       new ChatRequest({
+237:         model: model.model,
+238:         prompt: message,
+239:         ...(index !== undefined ? { index } : {}),
+240:         ...(serializedAttachments !== undefined
+241:           ? { attachments: serializedAttachments }
+242:           : {}),
+243:         // Always send web_search as a boolean value (default to false)
+244:         web_search: webSearch ?? false,
+245:         file_tools: fileTools ?? false,
+246:         ...(forceUpdate !== undefined ? { forceUpdate } : {}),
+247:         ...(shouldSendThink ? { think } : {}),
+248:       }),
+249:     ),
+250:     signal,
+251:   });
+252: 
+253:   for await (const event of parseJsonlFromResponse<ChatEventUnion>(response)) {
+254:     switch (event.eventName) {
+255:       case "download":
+256:         yield new DownloadEvent(event);
+257:         break;
+258:       case "error":
+259:         yield new ErrorEvent(event);
+260:         break;
+261:       default:
+262:         yield new ChatEvent(event);
+263:         break;
+264:     }
+265:   }
+266: }
+267: 
+268: /**
+269:  * Answers a tool call that is waiting for approval.
+270:  *
+271:  * The waiting call is inside a different, still-open response, so this request
+272:  * is the only way it ever resumes. A 409 means it is no longer waiting — it was
+273:  * already answered, it timed out, or the chat ended — which is reported rather
+274:  * than swallowed, because a button that silently did nothing would leave the
+275:  * user believing they had answered.
+276:  */
+277: export async function respondToToolApproval(
+278:   chatId: string,
+279:   approvalId: string,
+280:   decision: ApprovalDecision,
+281: ): Promise<void> {
+282:   const response = await fetch(`${API_BASE}/api/v1/chat/${chatId}/approval`, {
+283:     method: "POST",
+284:     headers: { "Content-Type": "application/json" },
+285:     body: JSON.stringify(approvalRequestBody(approvalId, decision)),
+
+SOURCE cmd/agent_tui.go
+70: 	return info, nil
+71: }
+72: 
+73: func GenerateAgentTUI(cmd *cobra.Command, client *api.Client, opts agentTUIOptions) error {
+74: 	cwd := agentWorkingDir()
+75: 	contextWindowForModel := func(ctx context.Context, model string, fallback int) int {
+76: 		return agentContextWindowForModel(ctx, client, model, fallback)
+77: 	}
+78: 
+79: 	var skillCatalog *coreagent.SkillCatalog
+80: 	reloadSkills := func() (*coreagent.SkillCatalog, error) {
+81: 		catalog, err := coreagent.LoadDefaultSkills(cwd)
+82: 		if err != nil {
+83: 			return nil, err
+84: 		}
+85: 		if ignored := catalog.ExcludeNames(agentchat.BuiltinSlashCommandNames()); len(ignored) > 0 {
+86: 			fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m ignoring agent skill(s): %s\n", strings.Join(ignored, ", "))
+87: 		}
+88: 		for _, diagnostic := range catalog.Diagnostics() {
+89: 			fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m ignored invalid agent skill: %v\n", diagnostic)
+90: 		}
+91: 		skillCatalog = catalog
+92: 		return catalog, nil
+93: 	}
+94: 	if _, err := reloadSkills(); err != nil {
+95: 		return fmt.Errorf("load agent skills: %w", err)
+96: 	}
+97: 	// One manager for the session, not one per registry: the registry is
+98: 	// rebuilt whenever the model changes, and reconnecting every MCP server on
+99: 	// a model switch would restart their processes for no reason.
+100: 	mcpManager := agentMCPManager(cmd.Context())
+101: 	if mcpManager != nil {
+102: 		defer mcpManager.Close()
+103: 	}
+104: 
+105: 	var registry *coreagent.Registry
+106: 	registryForModel := func(ctx context.Context, model string) *coreagent.Registry {
+107: 		return agentToolsRegistry(ctx, client, model, skillCatalog, mcpManager)
+108: 	}
+109: 	if opts.Model != "" {
+110: 		registry = agentToolsRegistry(cmd.Context(), client, opts.Model, skillCatalog, mcpManager)
+111: 	}
+112: 	systemPrompt := agentSystemPromptWithWorkingDir(opts.Model, opts.System, agentSkillSystemContext(skillCatalog, registry, opts.ToolsDisabled), cwd)
+113: 
+114: 	_, err := agentchat.Run(cmd.Context(), agentchat.Options{
+115: 		Model:                opts.Model,
+116: 		Client:               client,
+117: 		Tools:                registry,
+118: 		ToolRegistryForModel: registryForModel,
+119: 		MCPServers: func() []mcp.ServerState {
+120: 			if mcpManager == nil {
+121: 				return nil
+122: 			}
+123: 			return mcpManager.States()
+124: 		},
+125: 		SetMCPEnabled: func(ctx context.Context, name string, enabled bool) error {
+126: 			return setAgentMCPEnabled(ctx, mcpManager, name, enabled)
+127: 		},
+128: 		ToolsDisabled: opts.ToolsDisabled,
+129: 		MultiModalForModel: func(ctx context.Context, model string) bool {
+130: 			return agentModelSupportsMultimodal(ctx, client, model)
+131: 		},
+132: 		ModelOptions: func(ctx context.Context) ([]agentchat.ModelOption, error) {
+133: 			return agentModelOptions(ctx, client)
+134: 		},
+135: 		OnModelSelected: func(_ context.Context, model string) error {
+136: 			return config.SetLastModel(model)
+137: 		},
+138: 		SystemPromptForModel: func(ctx context.Context, model string, registry *coreagent.Registry, toolsDisabled bool) string {
+139: 			return agentSystemPromptWithWorkingDir(model, agentSystemFromShow(ctx, client, model), agentSkillSystemContext(skillCatalog, registry, toolsDisabled), cwd)
+140: 		},
+141: 		Skills:              skillCatalog,
+142: 		ImportSkills:        coreagent.ImportSkills,
+143: 		ReloadSkills:        reloadSkills,
+144: 		SystemPrompt:        systemPrompt,
+145: 		WorkingDir:          cwd,
+146: 		Format:              opts.Format,
+147: 		Options:             opts.Options,
+148: 		Think:               opts.Think,
+149: 		KeepAlive:           opts.KeepAlive,
+150: 		MultiModal:          opts.MultiModal,
+151: 		AllowAllTools:       opts.AllowAllTools,
+152: 		ContextWindowTokens: opts.ContextWindowTokens,
+153: 		Compactor: &coreagent.SimpleCompactor{
+154: 			Client:  client,
+155: 			Options: coreagent.CompactionOptions{ContextWindowTokens: opts.ContextWindowTokens},
+
+SOURCE cmd/agent_tui.go
+200: 	}
+201: 	return items
+202: }
+203: 
+204: var agentGetwd = os.Getwd
+205: 
+206: func agentWorkingDir() string {
+207: 	cwd, err := agentGetwd()
+208: 	if err != nil {
+209: 		return ""
+210: 	}
+211: 	return cwd
+212: }
+213: 
+214: func agentSystemPromptWithWorkingDir(modelName string, modelSystem string, extra string, workingDir string) string {
+215: 	return agentSystemPromptAtWithWorkingDir(time.Now(), modelName, modelSystem, extra, workingDir)
+216: }
+217: 
+218: func agentSystemPromptAtWithWorkingDir(now time.Time, modelName string, modelSystem string, extra string, workingDir string) string {
+219: 	var parts []string
+220: 	parts = append(parts, agentDefaultSystemPromptWithWorkingDir(now, modelName, workingDir))
+221: 	if strings.TrimSpace(modelSystem) != "" {
+222: 		parts = append(parts, strings.TrimSpace(modelSystem))
+223: 	}
+224: 	if strings.TrimSpace(extra) != "" {
+225: 		parts = append(parts, strings.TrimSpace(extra))
+226: 	}
+227: 	return strings.Join(parts, "\n\n")
+228: }
+229: 
+230: func agentDefaultSystemPromptWithWorkingDir(now time.Time, modelName string, workingDir string) string {
+231: 	date := now.Format("Monday, January 2, 2006")
+232: 	shellName := "bash"
+233: 	if runtime.GOOS == "windows" {
+234: 		shellName = "PowerShell"
+235: 	}
+236: 	parts := []string{
+237: 		"You are running in Ollama, in a harness to help the user accomplish tasks, and the model is " + modelName + ".",
+238: 		"",
+239: 		"Current date: " + date + ".",
+240: 		"",
+241: 	}
+242: 	parts = append(parts,
+243: 		"Be concise, practical, and action-oriented. Use tools when they materially help. Verify current or fast-changing facts with web tools when available; otherwise state uncertainty.",
+244: 		"",
+245: 		"Use "+shellName+" carefully. Prefer read-only inspection first. Stay within the current working directory unless explicitly asked. Surface intent before risky actions such as writes, deletes, moves, installs, git state changes, service changes, sudo, secrets access, network scripts, or commands outside the working directory. Request approval when required and do not work around denied approvals.",
+246: 		"",
+247: 		"Tell the user about meaningful changes, verification, failures, blockers, assumptions, and risks. Summarize routine tool output instead of dumping it.",
+248: 	)
+249: 	if workingDir != "" {
+250: 		parts = append(parts, "Current working directory: "+strconv.Quote(workingDir)+".")
+251: 	}
+252: 	return strings.Join(parts, "\n")
+253: }
+254: 
+255: func agentSystemFromShow(ctx context.Context, client *api.Client, modelName string) string {
+256: 	if client == nil || strings.TrimSpace(modelName) == "" {
+257: 		return ""
+258: 	}
+259: 	resp, err := client.Show(ctx, &api.ShowRequest{Model: modelName})
+260: 	if err != nil {
+
+SOURCE agent/session.go
+420: 		if len(response.Message.ToolCalls) > 0 {
+421: 			assistant.ToolCalls = append(assistant.ToolCalls, response.Message.ToolCalls...)
+422: 			pendingToolCalls = append(pendingToolCalls, response.Message.ToolCalls...)
+423: 			if err := s.emit(newToolCallDetected(meta, response.Message.ToolCalls)); err != nil {
+424: 				return err
+425: 			}
+426: 		}
+427: 
+428: 		*latest = response
+429: 		return nil
+430: 	})
+431: 	if err != nil {
+432: 		if isContextCanceledError(ctx, err) {
+433: 			return assistant, pendingToolCalls, true, nil
+434: 		}
+435: 		return assistant, pendingToolCalls, false, err
+436: 	}
+437: 
+438: 	return assistant, pendingToolCalls, false, nil
+439: }
+440: 
+441: func buildChatRequest(opts RunOptions, messages []api.Message, tools api.Tools) api.ChatRequest {
+442: 	requestMessages := sanitizeMessagesForRequest(messages)
+443: 	if strings.TrimSpace(opts.SystemPrompt) != "" {
+444: 		withSystem := make([]api.Message, 0, len(requestMessages)+1)
+445: 		withSystem = append(withSystem, api.Message{Role: "system", Content: opts.SystemPrompt})
+446: 		requestMessages = append(withSystem, requestMessages...)
+447: 	}
+448: 
+449: 	format := opts.Format
+450: 	if format == "json" {
+451: 		format = `"` + format + `"`
+452: 	}
+453: 
+454: 	req := api.ChatRequest{
+455: 		Model:    opts.Model,
+456: 		Messages: requestMessages,
+457: 		Format:   json.RawMessage(format),
+458: 		Options:  opts.Options,
+459: 		Think:    opts.Think,
+460: 	}
+461: 	if opts.KeepAlive != nil {
+462: 		req.KeepAlive = opts.KeepAlive
+463: 	}
+464: 	if len(tools) > 0 {
+465: 		req.Tools = tools
+466: 	}
+467: 	return req
+468: }
+469: 
+470: func (s *Session) executeToolCalls(ctx context.Context, runID string, opts RunOptions, messages []api.Message, calls []api.ToolCall) (toolBatchResult, error) {
+471: 	meta := newEventMetadata(runID, opts)
+472: 	batch := toolBatchResult{
+473: 		messages: make([]api.Message, 0, len(calls)),
+474: 	}
+475: 	// Pre-compute the full-history token estimate once per batch instead of
+476: 	// re-marshaling the entire history for each tool call. Per-call deltas
+477: 	// (tool messages already appended this batch) are tracked in batchTokens
+
+SOURCE cmd/tui/chat/input.go
+1715: 	)
+1716: 	return strings.Join(lines, "\n")
+1717: }
+1718: 
+1719: func (m chatModel) systemPrompt(extra string) string {
+1720: 	var parts []string
+1721: 	if !m.systemPromptDisabled && strings.TrimSpace(m.opts.SystemPrompt) != "" {
+1722: 		parts = append(parts, strings.TrimSpace(m.opts.SystemPrompt))
+1723: 	}
+1724: 	if strings.TrimSpace(extra) != "" {
+1725: 		parts = append(parts, strings.TrimSpace(extra))
+1726: 	}
+1727: 	return strings.Join(parts, "\n\n")
+1728: }

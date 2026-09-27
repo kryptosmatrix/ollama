@@ -1,0 +1,16 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "path": "app/store/store_test.go",
+    "start": 250,
+    "count": 40
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/store/store_test.go",
+    "file_sha256": "7b027124adf72c5cf3bf3038c796b0c078ac76c6ed60bacf1f7169d7da0fda04",
+    "start": 250,
+    "end": 287,
+    "total_lines": 287,
+    "text": "250: \t\t}\n251: \n252: \t\t// Verify it's gone\n253: \t\t_, err := s.Chat(\"test-chat-1\")\n254: \t\tif err == nil {\n255: \t\t\tt.Error(\"expected error retrieving deleted chat\")\n256: \t\t}\n257: \n258: \t\t// Verify other chat still exists\n259: \t\tchats, err := s.Chats()\n260: \t\tif err != nil {\n261: \t\t\tt.Fatalf(\"failed to list chats: %v\", err)\n262: \t\t}\n263: \t\tif len(chats) != 1 {\n264: \t\t\tt.Fatalf(\"expected 1 chat after deletion, got %d\", len(chats))\n265: \t\t}\n266: \t})\n267: }\n268: \n269: // setupTestStore creates a temporary store for testing\n270: func setupTestStore(t *testing.T) (*Store, func()) {\n271: \tt.Helper()\n272: \n273: \ttmpDir := t.TempDir()\n274: \n275: \t// Override legacy config path to ensure no migration happens\n276: \toldLegacyConfigPath := legacyConfigPath\n277: \tlegacyConfigPath = filepath.Join(tmpDir, \"config.json\")\n278: \n279: \ts := &Store{DBPath: filepath.Join(tmpDir, \"db.sqlite\")}\n280: \n281: \tcleanup := func() {\n282: \t\ts.Close()\n283: \t\tlegacyConfigPath = oldLegacyConfigPath\n284: \t}\n285: \n286: \treturn s, cleanup\n287: }"
+  }
+}

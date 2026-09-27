@@ -1,0 +1,12 @@
+{
+  "input_id": "eko-cont07-frontend-baseline",
+  "job_id": "1dd284e91e084a1cbf36aa6e16187f97",
+  "action": "Save baseline copies and run npm test -- --run src/components/StreamingMarkdownContent.integration.test.tsx src/utils/remarkCitationParser.test.ts --reporter=json",
+  "status": "blocked_before_execution",
+  "message": "This tool call was blocked by OpenAI because we couldn't determine the safety status of the request.",
+  "rerouted": false,
+  "frontend_runtime_tests_run_this_continuation": false,
+  "new_test_files": 2,
+  "new_cases_written": 11,
+  "new_cases_executed": 0
+}

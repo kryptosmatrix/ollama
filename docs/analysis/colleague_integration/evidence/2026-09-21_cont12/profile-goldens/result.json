@@ -1,0 +1,64 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/go",
+    "test",
+    "-count=1",
+    "-json",
+    "-timeout=15s",
+    "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont12/profile-goldens/canonical_profile_test.go"
+  ],
+  "exit_code": 0,
+  "timed_out": false,
+  "elapsed_seconds": 2.832617957959883,
+  "environment_overrides": {
+    "HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-g1-goldens-dbautn2f",
+    "USERPROFILE": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-g1-goldens-dbautn2f",
+    "LOCALAPPDATA": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-g1-goldens-dbautn2f",
+    "G1_GOLDEN_ROOT": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont12/profile-goldens",
+    "GOTOOLCHAIN": "local",
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "OLLAMA_HOST": "http://127.0.0.1:1"
+  },
+  "cache": {
+    "GOCACHE": "/Users/krypto/Library/Caches/go-build",
+    "GOMODCACHE": "/Users/krypto/go/pkg/mod",
+    "GOPATH": "/Users/krypto/go"
+  },
+  "test_sha256": "1e9bbb2186f18046688cb6ac2a26890c6cef88814668265bd71c1d5c8e29ccfc",
+  "stdout_sha256": "7c054569e40dad3a824b06be1876bf3c749f332fd7014e7781aae493185795bf",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "started": [
+    "TestG1CanonicalProfileGoldenBytes",
+    "TestG1CanonicalProfileGoldenBytes/zero",
+    "TestG1CanonicalProfileGoldenBytes/unicode",
+    "TestG1CanonicalProfileGoldenBytes/escapes",
+    "TestG1CanonicalProfileDistinguishesLineEndings"
+  ],
+  "finished": [
+    {
+      "Action": "pass",
+      "Test": "TestG1CanonicalProfileGoldenBytes/zero"
+    },
+    {
+      "Action": "pass",
+      "Test": "TestG1CanonicalProfileGoldenBytes/unicode"
+    },
+    {
+      "Action": "pass",
+      "Test": "TestG1CanonicalProfileGoldenBytes/escapes"
+    },
+    {
+      "Action": "pass",
+      "Test": "TestG1CanonicalProfileGoldenBytes"
+    },
+    {
+      "Action": "pass",
+      "Test": "TestG1CanonicalProfileDistinguishesLineEndings"
+    },
+    {
+      "Action": "pass"
+    }
+  ],
+  "production_implementation_test": false
+}

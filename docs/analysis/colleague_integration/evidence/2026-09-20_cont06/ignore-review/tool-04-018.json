@@ -1,0 +1,16 @@
+{
+  "name": "read_evidence",
+  "arguments": {
+    "name": "lint_delta",
+    "start": 1,
+    "count": 10
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont06/lint-delta.json",
+    "file_sha256": "82a82a27a94e97443a6d1a898237ca13c140d3671ef25901b4a78d3e63ee8fc7",
+    "start": 1,
+    "end": 10,
+    "total_lines": 10363,
+    "text": "1: {\n2:   \"runs\": [\n3:     {\n4:       \"label\": \"main-baseline\",\n5:       \"exit_code\": 1,\n6:       \"seconds\": 12.469415707979351,\n7:       \"errors\": 137,\n8:       \"warnings\": 11,\n9:       \"messages\": [\n10:         {"
+  }
+}

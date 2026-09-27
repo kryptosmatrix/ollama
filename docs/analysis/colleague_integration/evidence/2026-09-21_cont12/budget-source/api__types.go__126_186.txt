@@ -1,0 +1,61 @@
+126: 	// TopLogprobs is the number of most likely tokens to return at each token position,
+127: 	// each with an associated log probability. Only applies when Logprobs is true.
+128: 	// Valid values are 0-20. Default is 0 (only return the selected token's logprob).
+129: 	TopLogprobs int `json:"top_logprobs,omitempty"`
+130: }
+131: 
+132: // ChatRequest describes a request sent by [Client.Chat].
+133: type ChatRequest struct {
+134: 	// Model is the model name, as in [GenerateRequest].
+135: 	Model string `json:"model"`
+136: 
+137: 	// Messages is the messages of the chat - can be used to keep a chat memory.
+138: 	Messages []Message `json:"messages"`
+139: 
+140: 	// Stream enables streaming of returned responses; true by default.
+141: 	Stream *bool `json:"stream,omitempty"`
+142: 
+143: 	// Format is the format to return the response in (e.g. "json").
+144: 	Format json.RawMessage `json:"format,omitempty"`
+145: 
+146: 	// KeepAlive controls how long the model will stay loaded into memory
+147: 	// following the request.
+148: 	KeepAlive *Duration `json:"keep_alive,omitempty"`
+149: 
+150: 	// Tools is an optional list of tools the model has access to.
+151: 	Tools `json:"tools,omitempty"`
+152: 
+153: 	// Options lists model-specific options.
+154: 	Options map[string]any `json:"options"`
+155: 
+156: 	// Think controls whether thinking/reasoning models will think before
+157: 	// responding. Can be a boolean (true/false) or a string ("high", "medium", "low")
+158: 	// for supported models.
+159: 	Think *ThinkValue `json:"think,omitempty"`
+160: 
+161: 	// Truncate is a boolean that, when set to true, truncates the chat history messages
+162: 	// if the rendered prompt exceeds the context length limit.
+163: 	Truncate *bool `json:"truncate,omitempty"`
+164: 
+165: 	// Shift is a boolean that, when set to true, shifts the chat history
+166: 	// when hitting the context length limit instead of erroring.
+167: 	Shift *bool `json:"shift,omitempty"`
+168: 
+169: 	// DebugRenderOnly is a debug option that, when set to true, returns the rendered
+170: 	// template instead of calling the model.
+171: 	DebugRenderOnly bool `json:"_debug_render_only,omitempty"`
+172: 
+173: 	// Logprobs specifies whether to return log probabilities of the output tokens.
+174: 	Logprobs bool `json:"logprobs,omitempty"`
+175: 
+176: 	// TopLogprobs is the number of most likely tokens to return at each token position,
+177: 	// each with an associated log probability. Only applies when Logprobs is true.
+178: 	// Valid values are 0-20. Default is 0 (only return the selected token's logprob).
+179: 	TopLogprobs int `json:"top_logprobs,omitempty"`
+180: }
+181: 
+182: type Tools []Tool
+183: 
+184: func (t Tools) String() string {
+185: 	bts, _ := json.Marshal(t)
+186: 	return string(bts)

@@ -1,0 +1,10 @@
+{
+  "taken": "2026-09-27T09:57:38+10:00",
+  "by": "Treadle (Claude Opus 5.5)",
+  "purpose": "control records before the continuation-15 closeout edit",
+  "sha256": {
+    "DECISIONS.md": "77771868b7da976c01f528290bcfbd9532835be6a1b92d6e7a34cb9d23c254db",
+    "STATE.json": "8d7a6ff6aa702d6506b26306610f692f6df360e86191cfebdd4576396888cea5",
+    "HANDOFF.md": "61a9c23ac8f7b122928c096c4cbd7c6675d3f98526aa205627283df7d1ee1077"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "kind": "Static compiler-host counterexample; no frontend runtime tests",
+  "results": [
+    {
+      "name": "unchanged",
+      "source_sha256": "fda18778386aecda5aac3d49d1cb36bc9593500761dd29f1fb3e9a80011af92c",
+      "diagnostics": []
+    },
+    {
+      "name": "registration-removed",
+      "source_sha256": "08c1c623079aa8f8da61f57d4980688f8497a3c7859c0ed6db11fd8b8275337e",
+      "diagnostics": [
+        {
+          "file": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/src/utils/remarkCitationParser.ts",
+          "line": 5,
+          "code": 6196,
+          "message": "'CitationNode' is declared but never used."
+        },
+        {
+          "file": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/src/utils/remarkCitationParser.ts",
+          "line": 37,
+          "code": 2322,
+          "message": "Type '\"custom-citation\"' is not assignable to type '\"code\" | \"text\" | \"delete\" | \"list\" | \"link\" | \"blockquote\" | \"html\" | \"strong\" | \"table\" | \"image\" | \"definition\" | \"heading\" | \"break\" | \"emphasis\" | \"footnoteDefinition\" | \"footnoteReference\" | ... 8 more ... | \"yaml\"'."
+        },
+        {
+          "file": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/src/utils/remarkCitationParser.ts",
+          "line": 64,
+          "code": 2322,
+          "message": "Type '\"custom-citation\"' is not assignable to type '\"code\" | \"text\" | \"delete\" | \"list\" | \"link\" | \"blockquote\" | \"html\" | \"strong\" | \"table\" | \"image\" | \"definition\" | \"heading\" | \"break\" | \"emphasis\" | \"footnoteDefinition\" | \"footnoteReference\" | ... 8 more ... | \"yaml\"'."
+        },
+        {
+          "file": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/src/utils/remarkCitationParser.ts",
+          "line": 100,
+          "code": 2367,
+          "message": "This comparison appears to be unintentional because the types '\"code\" | \"text\" | \"delete\" | \"list\" | \"link\" | \"blockquote\" | \"html\" | \"strong\" | \"table\" | \"image\" | \"definition\" | \"heading\" | \"root\" | \"break\" | \"emphasis\" | \"footnoteDefinition\" | ... 9 more ... | \"yaml\"' and '\"custom-citation\"' have no overlap."
+        },
+        {
+          "file": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/src/utils/remarkCitationParser.ts",
+          "line": 101,
+          "code": 2367,
+          "message": "This comparison appears to be unintentional because the types '\"code\" | \"text\" | \"delete\" | \"list\" | \"link\" | \"blockquote\" | \"html\" | \"strong\" | \"table\" | \"image\" | \"definition\" | \"heading\" | \"break\" | \"emphasis\" | \"footnoteDefinition\" | \"footnoteReference\" | ... 8 more ... | \"yaml\"' and '\"custom-citation\"' have no overlap."
+        },
+        {
+          "file": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/src/utils/remarkCitationParser.ts",
+          "line": 102,
+          "code": 2339,
+          "message": "Property 'data' does not exist on type 'never'."
+        },
+        {
+          "file": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/src/utils/remarkCitationParser.ts",
+          "line": 103,
+          "code": 2339,
+          "message": "Property 'data' does not exist on type 'never'."
+        }
+      ]
+    }
+  ],
+  "registrationMatters": true,
+  "reviewer_literal_contains_color": true
+}

@@ -1,0 +1,14 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "count": 120,
+    "name": "vitest_config",
+    "start": 1
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/vitest.config.ts",
+    "file_sha256": "75350a798fcfb9249d36980728ee517f57b7c882f7e9ef603a636a0dd51e2fc2",
+    "total_lines": 26,
+    "text": "1: import { defineConfig, mergeConfig } from \"vite\";\n2: import path from \"path\";\n3: import baseConfig from \"./vite.config\";\n4: \n5: export default defineConfig((configEnv) =>\n6:   mergeConfig(\n7:     baseConfig(configEnv),\n8:     defineConfig({\n9:       resolve: {\n10:         alias: {\n11:           \"@\": path.resolve(__dirname, \"./src\"),\n12:           \"@/gotypes\": path.resolve(__dirname, \"./codegen/gotypes.gen.ts\"),\n13:         },\n14:       },\n15:       test: {\n16:         environment: \"node\",\n17:         globals: true,\n18:         server: {\n19:           deps: {\n20:             inline: [\"streamdown\"],\n21:           },\n22:         },\n23:       },\n24:     }),\n25:   ),\n26: );"
+  }
+}

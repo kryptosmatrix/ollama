@@ -1,0 +1,9 @@
+{
+  "job_id": "95a46d7323694b5c91b8f50d1239e127",
+  "input_id": "eko-cont11-http-fixture-check",
+  "attempted_action": "Read app/ui/tts_test.go lines 1-101 for the existing authenticated HTTP test fixture",
+  "platform_message": "This tool call was blocked by OpenAI because we couldn't determine the safety status of the request.",
+  "executed": false,
+  "child_result": null,
+  "disposition": "No retry or alternative route; the fixture-dependent HTTP failure-baseline task is blocked. Independent design/source review continues."
+}

@@ -1,0 +1,23 @@
+{
+  "job_id": "a6aa410f9266449f8ae223aab8fb32f2",
+  "request_id": "eko-ollama-cont05-validation-session",
+  "request_hash": "f5dcad40df1820749cb29aadc390de631636ccb32743ab8164533def947b8982",
+  "state": "exited",
+  "exit_code": 0,
+  "output_complete": 1,
+  "finished_unix": 1789906342.613708,
+  "stdout_bytes": 50751,
+  "stderr_bytes": 360,
+  "eof_input_id": "eko-cont05-session-eof",
+  "eof_delivered": true,
+  "active_task_commands_remaining": [],
+  "meaning": "The controlled shell exited after its queued commands completed. Its exit 0 is not a whole-programme test verdict: the regression batch exited 1 because ESLint failed.",
+  "bounded_repair_review": "REPAIR_REVIEW=PASS",
+  "broader_acceptance": "OPEN",
+  "tested_source": "18ecd2e2bcd8f5593eea4dbdeda8b9dca512514c",
+  "remote_verified_documentation_checkpoint": "13139f8d36ec5f447c67ad634c8ad65b713a49db",
+  "disposition": "PARKED",
+  "main_merged": false,
+  "installed": false,
+  "command_archive_retained": true
+}

@@ -1,0 +1,14 @@
+In file included from webview.cc:1:
+./webview.h:1589:22: error: identifier '_cls' preceded by whitespace in a literal operator declaration is deprecated [-Werror,-Wdeprecated-literal-operator]
+ 1589 | inline id operator"" _cls(const char *s, std::size_t) {
+      |           ~~~~~~~~~~~^~~~
+      |           operator""_cls
+./webview.h:1592:23: error: identifier '_sel' preceded by whitespace in a literal operator declaration is deprecated [-Werror,-Wdeprecated-literal-operator]
+ 1592 | inline SEL operator"" _sel(const char *s, std::size_t) {
+      |            ~~~~~~~~~~~^~~~
+      |            operator""_sel
+./webview.h:1595:22: error: identifier '_str' preceded by whitespace in a literal operator declaration is deprecated [-Werror,-Wdeprecated-literal-operator]
+ 1595 | inline id operator"" _str(const char *s, std::size_t) {
+      |           ~~~~~~~~~~~^~~~
+      |           operator""_str
+3 errors generated.

@@ -1,0 +1,20 @@
+docs: recover G1 entry evidence and locate the actual context guard
+
+Preserve the interrupted design checkpoint and verify its actual remote custody.
+Recover the missing authenticated HTTP baseline: settings control passes, while
+instructions PUT returns HTML200 rather than a saved Profile. The real CLI builds
+and its help works; instructions is correctly recorded as not yet implemented.
+
+Fix three reference JSON/hash vectors without claiming production persistence.
+Locate the pinned native count-only endpoint and existing actual-token/selected-
+slot admission guard; reject auxiliary one-token inference and correct premature
+pre-queue semantics. Keep output policy, versioned ingress and backend coverage
+open. Preserve all 18 frozen requirements and SPEC-DRAFT status.
+
+Source-only DeepSeek consultations, author instrument failures and the native
+version timeout/platform-refused diagnostic are retained with their limitations.
+No production/default-test/dependency change, feature acceptance, main merge or
+installation is included. Lossless text encoding keeps proof-only Go snapshots
+out of default test discovery.
+
+Co-Authored-By: Eko (GPT-6 Astra Pro)

@@ -1,0 +1,12 @@
+{"Time":"2026-09-20T17:42:18.386087+10:00","Action":"start","Package":"github.com/ollama/ollama/agent"}
+{"Time":"2026-09-20T17:42:19.226882+10:00","Action":"run","Package":"github.com/ollama/ollama/agent","Test":"TestSessionAddsSystemPromptOnlyToRequest"}
+{"Time":"2026-09-20T17:42:19.227239+10:00","Action":"output","Package":"github.com/ollama/ollama/agent","Test":"TestSessionAddsSystemPromptOnlyToRequest","Output":"=== RUN   TestSessionAddsSystemPromptOnlyToRequest\n"}
+{"Time":"2026-09-20T17:42:19.227349+10:00","Action":"output","Package":"github.com/ollama/ollama/agent","Test":"TestSessionAddsSystemPromptOnlyToRequest","Output":"--- PASS: TestSessionAddsSystemPromptOnlyToRequest (0.00s)\n"}
+{"Time":"2026-09-20T17:42:19.227398+10:00","Action":"pass","Package":"github.com/ollama/ollama/agent","Test":"TestSessionAddsSystemPromptOnlyToRequest","Elapsed":0}
+{"Time":"2026-09-20T17:42:19.227429+10:00","Action":"run","Package":"github.com/ollama/ollama/agent","Test":"TestSessionChatRequestMatchesRunRequest"}
+{"Time":"2026-09-20T17:42:19.227451+10:00","Action":"output","Package":"github.com/ollama/ollama/agent","Test":"TestSessionChatRequestMatchesRunRequest","Output":"=== RUN   TestSessionChatRequestMatchesRunRequest\n"}
+{"Time":"2026-09-20T17:42:19.227839+10:00","Action":"output","Package":"github.com/ollama/ollama/agent","Test":"TestSessionChatRequestMatchesRunRequest","Output":"--- PASS: TestSessionChatRequestMatchesRunRequest (0.00s)\n"}
+{"Time":"2026-09-20T17:42:19.227912+10:00","Action":"pass","Package":"github.com/ollama/ollama/agent","Test":"TestSessionChatRequestMatchesRunRequest","Elapsed":0}
+{"Time":"2026-09-20T17:42:19.227932+10:00","Action":"output","Package":"github.com/ollama/ollama/agent","Output":"PASS\n"}
+{"Time":"2026-09-20T17:42:19.229838+10:00","Action":"output","Package":"github.com/ollama/ollama/agent","Output":"ok  \tgithub.com/ollama/ollama/agent\t0.843s\n"}
+{"Time":"2026-09-20T17:42:19.229945+10:00","Action":"pass","Package":"github.com/ollama/ollama/agent","Elapsed":0.844}

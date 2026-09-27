@@ -1,0 +1,17 @@
+{
+  "case": "no-citations",
+  "file": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont08/runs/judge-3-no-citations/frontend/src/components/StreamingMarkdownContent.tsx",
+  "edits": [
+    [
+      "import remarkCitationParser from \"@/utils/remarkCitationParser\";\n",
+      ""
+    ],
+    [
+      "        remarkCitationParser,\n",
+      ""
+    ]
+  ],
+  "before_sha256": "983e3aa6e4273b861623a97ae5fe5bf9782294a1d0bcb4449e67f808ac7d32a0",
+  "after_sha256": "c2a43438831aeee05c1aab8786046583184b5736fd8ffad0b282bf16150cc579",
+  "required_failure_title": "uses the citation cursor to select the correct upstream page"
+}

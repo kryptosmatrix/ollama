@@ -1,0 +1,14 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "count": 120,
+    "name": "vite_config",
+    "start": 1
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/vite.config.ts",
+    "file_sha256": "132a1edc07e0eb633e449d6e9afaebd3ef391fb93af76208d367b9f8a0b82022",
+    "total_lines": 67,
+    "text": "1: import { defineConfig } from \"vite\";\n2: import react from \"@vitejs/plugin-react\";\n3: import { TanStackRouterVite } from \"@tanstack/router-plugin/vite\";\n4: import tailwindcss from \"@tailwindcss/vite\";\n5: import tsconfigPaths from \"vite-tsconfig-paths\";\n6: import postcssPresetEnv from \"postcss-preset-env\";\n7: import { resolve } from \"path\";\n8: \n9: export default defineConfig(() => ({\n10:   base: \"/\",\n11: \n12:   plugins: [\n13:     TanStackRouterVite({ target: \"react\" }),\n14:     react(),\n15:     tailwindcss(),\n16:     tsconfigPaths(),\n17:   ],\n18: \n19:   resolve: {\n20:     alias: {\n21:       \"@/gotypes\": resolve(__dirname, \"codegen/gotypes.gen.ts\"),\n22:       \"@\": resolve(__dirname, \"src\"),\n23:       \"micromark-extension-math\": \"micromark-extension-llm-math\",\n24:     },\n25:   },\n26: \n27:   css: {\n28:     postcss: {\n29:       plugins: [\n30:         postcssPresetEnv({\n31:           stage: 1, // Include more experimental features that Safari 14 needs\n32:           browsers: [\"Safari >= 14\"],\n33:           // autoprefixer: false,\n34:           features: {\n35:             \"custom-properties\": true, // Let TailwindCSS handle this\n36:             \"nesting-rules\": true,\n37:             \"logical-properties-and-values\": true, // Polyfill logical properties\n38:             \"media-query-ranges\": true, // Modern media query syntax\n39:             \"color-function\": true, // CSS color functions\n40:             \"double-position-gradients\": true,\n41:             \"gap-properties\": true, // This is key for flexbox gap!\n42:             \"place-properties\": true,\n43:             \"overflow-property\": true,\n44:             \"focus-visible-pseudo-class\": true, // Focus-visible support\n45:             \"focus-within-pseudo-class\": true, // Focus-within support\n46:             \"any-link-pseudo-class\": true, // :any-link pseudo-class\n47:             \"not-pseudo-class\": true, // Enhanced :not() support\n48:             \"dir-pseudo-class\": true, // :dir() pseudo-class\n49:             \"all-property\": true, // CSS 'all' property\n50:             \"image-set-function\": true, // image-set() function\n51:             \"hwb-function\": true, // hwb() color function\n52:             \"lab-function\": true, // lab() color function\n53:             \"oklab-function\": true, // oklab() color function\n54:           },\n55:         }),\n56:       ],\n57:     },\n58:   },\n59: \n60:   build: {\n61:     target: \"es2017\",\n62:   },\n63: \n64:   esbuild: {\n65:     target: \"es2017\",\n66:   },\n67: }));"
+  }
+}

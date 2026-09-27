@@ -1,0 +1,20 @@
+{
+  "cause": "Line-zero tool request raised ValueError and stopped the first reviewer turn before any source read/test run.",
+  "repair": "Return a bounded non-executed tool error; retain and resume the same reviewer history. Do not permit line zero or widen source access.",
+  "checks": {
+    "valid_one_based_read": true,
+    "line_zero_returns_error": true,
+    "over_limit_returns_error": true,
+    "unknown_source_rejected": true,
+    "boolean_not_line_integer": true,
+    "valid_validation": true,
+    "unknown_execution_rejected": true,
+    "missing_run_output_rejected": true,
+    "valid_requested_output": true,
+    "unknown_tool_rejected": true
+  },
+  "old_controller_sha256": "4b9c4b733655b5756e68591055b9e6559f19f35e1073aab6637eef090d048daa",
+  "new_controller_sha256": "3dbcf79162e88c11b43557aa1c3ac4c49fb4929ef6b3055549d289024df3113a",
+  "original_attempt": "independent-review/",
+  "resumed_attempt": "independent-review-r2/"
+}

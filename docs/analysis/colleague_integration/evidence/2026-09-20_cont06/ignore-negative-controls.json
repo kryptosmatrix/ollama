@@ -1,0 +1,17 @@
+[
+  {
+    "path": "app/ui/app/src/components/FutureDiscovery.tsx",
+    "old_rule_ignored": true,
+    "new_rule_ignored": false
+  },
+  {
+    "path": "app/ui/app/src/utils/recoverConversation.ts",
+    "old_rule_ignored": true,
+    "new_rule_ignored": false
+  },
+  {
+    "path": "app/ui/recover_history_test.go",
+    "old_rule_ignored": true,
+    "new_rule_ignored": false
+  }
+]

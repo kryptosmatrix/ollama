@@ -1,0 +1,22 @@
+{"ImportPath":"github.com/ollama/ollama/app/cmd/app.test","Action":"build-output","Output":"# github.com/ollama/ollama/app/cmd/app.test\nld: warning: ignoring duplicate libraries: '-lobjc'\n"}
+{"Time":"2026-09-21T10:50:15.487055+10:00","Action":"start","Package":"github.com/ollama/ollama/app/cmd/app"}
+{"Time":"2026-09-21T10:50:16.449266+10:00","Action":"run","Package":"github.com/ollama/ollama/app/cmd/app","Test":"TestManagerExistsWithAnEmptyConfiguration"}
+{"Time":"2026-09-21T10:50:16.449353+10:00","Action":"output","Package":"github.com/ollama/ollama/app/cmd/app","Test":"TestManagerExistsWithAnEmptyConfiguration","Output":"=== RUN   TestManagerExistsWithAnEmptyConfiguration\n"}
+{"Time":"2026-09-21T10:50:16.451321+10:00","Action":"output","Package":"github.com/ollama/ollama/app/cmd/app","Test":"TestManagerExistsWithAnEmptyConfiguration","Output":"--- PASS: TestManagerExistsWithAnEmptyConfiguration (0.00s)\n"}
+{"Time":"2026-09-21T10:50:16.451417+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/cmd/app","Test":"TestManagerExistsWithAnEmptyConfiguration","Elapsed":0}
+{"Time":"2026-09-21T10:50:16.451449+10:00","Action":"run","Package":"github.com/ollama/ollama/app/cmd/app","Test":"TestAServerAddedAfterLaunchCanBeConnected"}
+{"Time":"2026-09-21T10:50:16.451456+10:00","Action":"output","Package":"github.com/ollama/ollama/app/cmd/app","Test":"TestAServerAddedAfterLaunchCanBeConnected","Output":"=== RUN   TestAServerAddedAfterLaunchCanBeConnected\n"}
+{"Time":"2026-09-21T10:50:16.460668+10:00","Action":"output","Package":"github.com/ollama/ollama/app/cmd/app","Test":"TestAServerAddedAfterLaunchCanBeConnected","Output":"--- PASS: TestAServerAddedAfterLaunchCanBeConnected (0.01s)\n"}
+{"Time":"2026-09-21T10:50:16.461531+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/cmd/app","Test":"TestAServerAddedAfterLaunchCanBeConnected","Elapsed":0.01}
+{"Time":"2026-09-21T10:50:16.461549+10:00","Action":"run","Package":"github.com/ollama/ollama/app/cmd/app","Test":"TestManagerIsRefusedWhenMCPIsSwitchedOff"}
+{"Time":"2026-09-21T10:50:16.461553+10:00","Action":"output","Package":"github.com/ollama/ollama/app/cmd/app","Test":"TestManagerIsRefusedWhenMCPIsSwitchedOff","Output":"=== RUN   TestManagerIsRefusedWhenMCPIsSwitchedOff\n"}
+{"Time":"2026-09-21T10:50:16.464107+10:00","Action":"output","Package":"github.com/ollama/ollama/app/cmd/app","Test":"TestManagerIsRefusedWhenMCPIsSwitchedOff","Output":"--- PASS: TestManagerIsRefusedWhenMCPIsSwitchedOff (0.00s)\n"}
+{"Time":"2026-09-21T10:50:16.464269+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/cmd/app","Test":"TestManagerIsRefusedWhenMCPIsSwitchedOff","Elapsed":0}
+{"Time":"2026-09-21T10:50:16.464278+10:00","Action":"run","Package":"github.com/ollama/ollama/app/cmd/app","Test":"TestManagerConnectsWhatIsAlreadyConfigured"}
+{"Time":"2026-09-21T10:50:16.464281+10:00","Action":"output","Package":"github.com/ollama/ollama/app/cmd/app","Test":"TestManagerConnectsWhatIsAlreadyConfigured","Output":"=== RUN   TestManagerConnectsWhatIsAlreadyConfigured\n"}
+{"Time":"2026-09-21T10:50:16.467538+10:00","Action":"output","Package":"github.com/ollama/ollama/app/cmd/app","Test":"TestManagerConnectsWhatIsAlreadyConfigured","Output":"2026/09/21 10:50:16 WARN mcp server is not approved to run server=at-launch runs=definitely-not-a-real-command\n"}
+{"Time":"2026-09-21T10:50:16.468389+10:00","Action":"output","Package":"github.com/ollama/ollama/app/cmd/app","Test":"TestManagerConnectsWhatIsAlreadyConfigured","Output":"--- PASS: TestManagerConnectsWhatIsAlreadyConfigured (0.00s)\n"}
+{"Time":"2026-09-21T10:50:16.468404+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/cmd/app","Test":"TestManagerConnectsWhatIsAlreadyConfigured","Elapsed":0}
+{"Time":"2026-09-21T10:50:16.468407+10:00","Action":"output","Package":"github.com/ollama/ollama/app/cmd/app","Output":"PASS\n"}
+{"Time":"2026-09-21T10:50:16.470129+10:00","Action":"output","Package":"github.com/ollama/ollama/app/cmd/app","Output":"ok  \tgithub.com/ollama/ollama/app/cmd/app\t0.983s\n"}
+{"Time":"2026-09-21T10:50:16.470146+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/cmd/app","Elapsed":0.983}

@@ -1,0 +1,11 @@
+{
+  "draft_file_sha256": "b691c8004ed82674c82ebcde3a2f876cd85f65cb5f8167ffadc5e3fd6e6e0570",
+  "draft_bytes": 10541,
+  "current_aggregate_added_changed_production_LOC_estimate": 12,
+  "ratio_bytes_per_LOC": 40,
+  "resulting_ceiling_bytes": 480,
+  "frozen_requirement_lines_bytes": 625,
+  "requirements_count": 6,
+  "per_file_estimate_still_owed": true,
+  "scope": "Current draft and frozen wording at its current estimate; not a universal impossibility claim or an operator waiver."
+}

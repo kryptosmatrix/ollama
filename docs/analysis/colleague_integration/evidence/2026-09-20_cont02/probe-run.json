@@ -1,0 +1,10 @@
+{
+  "args": [
+    "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont02/chat-read-probe",
+    "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont02/history-probe-baseline"
+  ],
+  "exit_code": 1,
+  "seconds": 1.2615173330000005,
+  "home": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/ollama-eko-probe-0lbzpfgn",
+  "scope": "Development-mode production HTTP handler, real temporary SQLite, injected invalid stream value, simulated loopback inference. Authentication and installed application are not under test."
+}

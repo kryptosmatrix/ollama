@@ -1,0 +1,73 @@
+{
+  "diagnostic-baseline": {
+    "exit_code": 1,
+    "named_results": [
+      {
+        "test": "TestChatReadIntegrityAcrossProcesses/seed",
+        "action": "pass"
+      },
+      {
+        "test": "TestChatReadIntegrityAcrossProcesses/fault",
+        "action": "fail"
+      },
+      {
+        "test": "TestChatReadIntegrityAcrossProcesses/recover",
+        "action": "fail"
+      },
+      {
+        "test": "TestChatReadIntegrityAcrossProcesses/positive",
+        "action": "pass"
+      },
+      {
+        "test": "TestChatReadIntegrityAcrossProcesses",
+        "action": "fail"
+      }
+    ],
+    "build_failed": false
+  },
+  "authenticated-baseline": {
+    "exit_code": 1,
+    "named_results": [
+      {
+        "test": "TestChatReadIntegrityAcrossProcesses/seed",
+        "action": "pass"
+      },
+      {
+        "test": "TestChatReadIntegrityAcrossProcesses/fault",
+        "action": "fail"
+      },
+      {
+        "test": "TestChatReadIntegrityAcrossProcesses/recover",
+        "action": "fail"
+      },
+      {
+        "test": "TestChatReadIntegrityAcrossProcesses/positive",
+        "action": "pass"
+      },
+      {
+        "test": "TestChatReadIntegrityAcrossProcesses",
+        "action": "fail"
+      }
+    ],
+    "build_failed": false
+  },
+  "store-baseline": {
+    "exit_code": 1,
+    "named_results": [],
+    "build_failed": true
+  },
+  "store-baseline-v2": {
+    "exit_code": 1,
+    "named_results": [
+      {
+        "test": "TestChatReadMissingHeaderIsNotFound",
+        "action": "pass"
+      },
+      {
+        "test": "TestChatReadPreservesDatabaseErrorCause",
+        "action": "fail"
+      }
+    ],
+    "build_failed": false
+  }
+}

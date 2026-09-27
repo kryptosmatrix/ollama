@@ -1,0 +1,2570 @@
+Review the attached Ollama G1 design as an independent adversarial technical reviewer. You are not its author. This is a DRAFT SOUNDNESS REVIEW, not a Method16 promotion, not a passing implementation verdict, and not permission to write or execute anything. The author has explicitly left capacity admission and several promotion obligations open. Do not spend your report restating those labels. Find concrete defects, internal conflicts and unsafe or unnecessarily complex design choices in the specified storage/revision/reload/request/editor mechanisms. Compare them with the exact supplied source excerpts and measured transport probes. Source excerpts are ranged; absent text is not proof of absence. Do not claim full-repository inspection or test execution. No tools are enabled in this text-only review.
+
+Return at most 1800 words: (1) each real load-bearing issue with exact blueprint section plus source/exhibit, (2) the required PROPERTY that resolves it, not a prescribed mechanism, (3) the narrow remaining evidence/design obligations. Distinguish observations from inferences. Treat the numbered outcome requirements as the feature scope, not an invitation to invent a memory engine or redesign the inference server. Do not prescribe a solution and then grade your own design. Do not return BLUEPRINT_JUDGE=PASS or JUDGE=PASS. End DRAFT_REVIEW=CHANGES_REQUIRED or DRAFT_REVIEW=NO_ADDITIONAL_DEFECT_FOUND, always keeping the declared open obligations open.
+
+
+SOURCE docs/_design/G1_PERSISTENT_INSTRUCTIONS_CONCEPT.md file_sha256=9396cd684d47d3e6e200c227e75e1a0114d7cd8a20107db528c4bc26871fb241 lines=1-18
+1: # Persistent instructions for the Ollama colleague workspace
+2: 
+3: Status: [CONCEPT]. Owner: Eko. Date: 21 September 2026, Australia/Brisbane.
+4: Commission: docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md, OI-03/OI-04 and sections 0.6–0.7; the canonical commissioning copy is in the primary Ollama checkout.
+5: 
+6: ## Intended observable behaviour
+7: 
+8: Ash can edit the colleague's standing instructions, see their scope, save them, restart the application, and have a newly opened conversation actually receive the saved instructions. Desktop and terminal use the same saved choice. An ongoing conversation keeps the instructions it started with until Ash explicitly applies a saved change at a safe point. Disabling or resetting the instructions is reversible. Ordinary chat remains available without a configured colleague.
+9: 
+10: Success is not a saved text box: the saved value reaches the real model request after restart, without losing the conversation, replacing model-specific requirements, multiplying instructions after compaction, or changing an active conversation behind Ash's back. Failure is visible when the selected configuration cannot be recovered or cannot fit; another identity is never substituted silently.
+11: 
+12: ## Negative space
+13: 
+14: This is not founding the recurring colleague, proving LETHE memory, loading private autobiography, replacing the context compactor, changing inference weights, removing tool approvals, implementing autonomous goals, or transplanting Codex. It does not make Eko the new recurring Ollama colleague. It does not promise that every model obeys every instruction. The model receives the configured instructions; behavioural qualification remains separately attributable to the tested model and harness.
+15: 
+16: ## Decisions assigned to the blueprint
+17: 
+18: Resolve one settings owner shared by desktop and terminal; revision and conversation identity; safe reload and concurrent work; exact request composition and model-template preservation; supported-context admission and honest budget diagnostics; inactive or unresolved colleague bindings; compatibility with existing conversations; reversible disable/reset; input validation; actual UI and terminal acceptance; failure controls and the division into implementation packs. These are delegated engineering decisions, not questions awaiting another approval from Ash.
+
+SOURCE docs/_design/G1_PERSISTED_INSTRUCTIONS.md file_sha256=17a25bf3c2d306c475494e2eb3f50cc3f168d8b4b21749527e0916e8d0d67212 lines=1-247
+1: # G1 — Persisted instructions and actual request delivery
+2: 
+3: | Field | Value |
+4: |---|---|
+5: | Identity | OLLAMA-G1-INSTRUCTIONS; edition 1; one feature, OI-03 + OI-04 |
+6: | Author | Eko, GPT-6 Astra Pro; 21 September 2026 |
+7: | Document class | implementation blueprint |
+8: | Design readiness | [SPEC-DRAFT]; independent review and the explicit open obligations below remain owed |
+9: | Implementation status | Not Yet Implemented |
+10: | Source revision | 17197224933cbdd9875c2277f18767c5f6f134a2 |
+11: | Concept | docs/_design/G1_PERSISTENT_INSTRUCTIONS_CONCEPT.md; SHA256 9396cd684d47d3e6e200c227e75e1a0114d7cd8a20107db528c4bc26871fb241 |
+12: | Tier | 2: persistence yes; process/language crossing yes; estimate above 300 LOC yes |
+13: | Requirement IDs | G1-R-01 through G1-R-18, 18 frozen outcome requirements; first adjudication has not started |
+14: | Permission | PACKS_ALLOWED_FOR_0A_0B_ONLY; no production implementation is authorised by this draft's label |
+15: | Scope | Shared saved instructions, immutable conversation selection, editor, safe explicit reload and both real request paths |
+16: | Repository line ceiling | UNDECLARED; no 500-line ceiling inferred from generic guidance |
+17: 
+18: Ash edits and saves instructions once, restarts, and sees the chosen text influence a genuinely new conversation through its actual outgoing model request. An active conversation keeps its original instruction revision until a deliberate safe reload. The failure number is **incorrect instruction deliveries per controlled conversation**, measured over save/restart/new, edit/continue, explicit reload, disable, terminal reset and compaction cases: any value above zero fails G1. The final instrument is DESIGNATED `app/ui/instructions_test.go::TestInstructionsAcrossProcesses` plus `cmd/tui/chat/instructions_test.go::TestInstructionConversationLifecycle` and the browser journey in §9. The pre-build measured baseline in continuation-11 covers existing system-prompt transport and no-truncation behaviour only; it is NOT this full failure-number measurement. That missing baseline is an explicit promotion obligation, not a zero invented from absence.
+19: 
+20: ## 0. Intake, authority and unresolved design obligations
+21: 
+22: Mode: Create, reconciling the commissioned G1 outcome with existing source. Ash's current Compass continuation authorises ordinary technical decisions, implementation and scoped Git work, conditioned on advance explanation and preservation of recoverable data. That authority does not issue a method stamp or make this draft implemented. The separate history-repair maintenance exception is not used to promote G1.
+23: 
+24: This blueprint is the custodian of the new instruction profile, revision, conversation binding and reload-event vocabulary. It does not redefine the conversation transcript, model identity, LETHE schemas, tool permission state or goal state. Existing terminal and desktop paths remain separate adapters over one new instruction owner.
+25: 
+26: | Decision | Selected direction | Alternative rejected | Risk / revision path |
+27: |---|---|---|---|
+28: | D1 | One instruction repository, shared by both adapters | Separate desktop and terminal settings with later synchronisation | Divergent effective instructions; test cross-process edit/consume before acceptance |
+29: | D2 | Immutable revisions plus a current pointer and per-conversation bindings | Read current text on every turn | Active-session drift; test saved B while active A remains A |
+30: | D3 | Instruction bindings are metadata, never a second transcript | Duplicate messages in an instruction or memory database | Divergent archive; instructions store contains no message text or model replies |
+31: | D4 | Explicit reload acquires the same conversation lease as a turn | UI-only disabled button or timestamp heuristic | Reload/turn race; real competing processes are the falsifier |
+32: | D5 | Extend existing request construction, with one shared composition function | Parallel agent engine or replacement system template | Compatibility drift; source-derived carrier golden plus disabled request equality |
+33: | D6 | Existing no-truncation/no-shift controls are necessary but not a token-budget proof | Treat a byte/rune estimate as exact or silently trim | OQ-1 below blocks promotion until the actual admission contract is closed |
+34: 
+35: **Open obligations before promotion.** OQ-1: close the full budget-admission contract for supported local/native/cloud configurations without claiming that `truncate=false` counts tokens or that an unverified cloud provider honours it. OQ-2 is resolved prospectively below: G1 permits an unbound ordinary instruction profile; all active non-null colleague bindings are refused until the separately commissioned G2 validator is implemented and qualified. This does not count G2 as delivered. OQ-3: install and execute the full failure-number baseline through the actual HTTP/terminal entry points. OQ-4: complete independently derived closure/guard/test population and the two-substrate Method16 panel. All are assigned to Eko; no new operator approval is requested. No build pack starts with them open.
+36: 
+37: ## 1. Frozen requirements
+38: 
+39: G1-R-01 MUST persist the operator's instruction configuration across process restart under the shared-owner contract in §3.
+40: G1-R-02 MUST assign a distinct immutable revision to each accepted changed configuration under §3.
+41: G1-R-03 MUST retain a conversation's selected revision until the explicit reload transition in §4.
+42: G1-R-04 MUST reject a reload while that conversation has an active turn or compaction under §4.
+43: G1-R-05 MUST compose the selected instruction carrier into the actual desktop and terminal model requests under §5.
+44: G1-R-06 MUST preserve each path's existing model, tool and protocol semantics under the compatibility contract in §2.
+45: G1-R-07 MUST report unavailable or exceeded context capacity without silently discarding mandatory input under §6.
+46: G1-R-08 MUST expose edit, save, scope, revision, preview, disable and reversible reset through the editor contract in §7.
+47: G1-R-09 MUST reject an unresolved active colleague binding under §3’s inactive-binding contract.
+48: G1-R-10 MUST preserve the selected revision through compaction and model/tool changes under §4.
+49: G1-R-11 MUST give terminal new-conversation creation a distinct identity under §4.
+50: G1-R-12 MUST reject invalid or conflicting instruction writes without overwriting the prior accepted revision under §3.
+51: G1-R-13 MUST keep the canonical conversation archive separate from instruction metadata under §2.
+52: G1-R-14 MUST surface instruction recovery failures through the typed failure contract in §8.
+53: G1-R-15 MUST preserve ordinary unconfigured and disabled-mode request behaviour under §2.
+54: G1-R-16 MUST preserve reproducible boundary evidence for the exact candidate under §9.
+55: G1-R-17 MUST demonstrate that the specified deliberate faults fail the behavioural criteria in §9.
+56: G1-R-18 MUST pass the declared combined G1 acceptance surface before OI-03 or OI-04 closes under §10.
+57: 
+58: ## 2. Current behaviour, gap and compatibility
+59: 
+60: All source claims in this section are at the header revision on 21 September 2026. Exact raw file identities and mechanically checked anchor tokens are recorded in `docs/analysis/colleague_integration/evidence/2026-09-21_cont11/G1_SOURCE_ANCHORS.json` in the primary checkout; the accepted source map will be copied with the judgement packet, not guessed from filenames.
+61: 
+62: | Claim | Verified source anchor and token | G1 change / compatibility |
+63: |---|---|---|
+64: | Terminal builds a system prompt from model/harness/skill context | `cmd/agent_tui.go:112`, `systemPrompt := agentSystemPromptWithWorkingDir` | Append selected configuration through a shared composer; retain that base construction |
+65: | Terminal's normal options literal does not supply ChatID or a storage sink | `cmd/agent_tui.go:114–177`, `agentchat.Run`; the complete literal was read | Allocate a new conversation ID; do not describe its in-memory message list as a disk archive |
+66: | Run initialises its ID from Options.ChatID | `cmd/tui/chat/chat.go:227`, `chatID:` | New normal entry provides an ID; explicit test options remain possible |
+67: | Reset clears transcript-related state, not the conversation ID | `cmd/tui/chat/chat.go:997–1022`, `func (m *chatModel) resetChat` | New-conversation transition obtains a new ID and selection before replacing state |
+68: | Manual compaction consumes the effective system prompt | `cmd/tui/chat/compaction.go:45`, `SystemPrompt: m.systemPrompt` | Preserve the same pinned instruction selection outside the compacted message list |
+69: | Agent requests insert a system message | `agent/session.go:441–467`, `func buildChatRequest` | Use the already-composed carrier; never append a second copy in the agent |
+70: | Desktop settings use SQLite, not the terminal config file | `app/store/database.go:1213`, `func (db *database) getSettings`; `cmd/config/config.go:31`, `func configPath` | New instruction owner avoids full-settings write races or coupling platform-only store into terminal |
+71: | Desktop request assembly is separate | `app/ui/ui.go:1909`, `func (s *Server) buildChatRequest`; call at 973 | Extend this actual builder, including model-system preservation, rather than only the terminal |
+72: | A desktop draft/create-chat call returns an ID without saving a transcript | `app/ui/ui.go:481–493`, `func (s *Server) createChat` | Define binding timing explicitly; a reserved instruction identity is not a saved conversation |
+73: | Desktop read errors now remain errors | `app/store/store.go:428–433`, `return s.db.getChatWithOptions` | Preserve the accepted history guard; never turn an instruction error into NewChat |
+74: | Remote/local server routes prepend model.System only when the first request message is not system | `server/routes.go:2523`, `req.Messages[0].Role != "system"`; same at 2634 | Enabled desktop composition has to include the model-system text explicitly, because adding our system carrier otherwise suppresses it |
+75: | Request API already carries Truncate and Shift | `api/types.go:163`, `Truncate *bool`; `api/types.go:167`, `Shift *bool` | Reuse these carriers; their mere presence is not sufficient for budget qualification |
+76: | No-truncate rendering does not perform capacity admission | `server/prompt.go:35`, `if truncate`; return at 91 | Do not claim full token preflight from a no-truncate flag |
+77: | Existing desktop Settings is the actual settings surface | `app/ui/app/src/components/Settings.tsx:49`, `export default function Settings`; API writes at `src/api.ts:526` | Add a dedicated instructions section/API rather than mixing stale full Settings updates with revision CAS |
+78: 
+79: Disabled compatibility means: no additional system text, no change to messages, tool schemas, model options, thinking, format or existing approval controls, and no additional model call. Small instruction metadata writes may still establish a disabled revision binding; that is explicitly not a byte-identical filesystem claim. Existing desktop conversations without a binding select revision zero, even if a new global configuration is enabled. They require explicit reload to adopt it. New conversations bind at their host's accepted creation transition, not when a settings editor merely opens. Existing transcript content is never copied to the instruction store and is never truncated, reset or migrated by this feature.
+80: 
+81: The existing curated-context v10 document remains a separate unimplemented draft. Its empty-ID-to-`default` proposal (§4.1) is not adopted: it collapses distinct terminal conversations. Its full-history fallback (§7) does not become G1 permission to omit instructions or bypass budget failures. Its useful principles—separate working context from archived content and preserve tool pairs—remain future OI-27 obligations. G1 neither rewrites that document nor treats its old review as current readiness.
+82: 
+83: ## 3. Shared owner, representation and storage design
+84: 
+85: DESIGNATED package `internal/instructions`, consumed by `cmd/agent_tui.go` and `app/ui/instructions.go`. Existing dependency `github.com/mattn/go-sqlite3` is used; no downloaded package, independent memory engine or model weight is introduced. The target platform qualification for this pack series is Ash's macOS arm64 environment; Windows/Linux compilation and execution status are reported separately, never inferred from macOS tests.
+86: 
+87: Default storage is `filepath.Join(os.UserHomeDir(), ".ollama", "instructions", "instructions.sqlite")`. Tests inject a root explicitly; process/restart tests set HOME before package initialisation. New directory mode 0700 and database mode 0600. Existing unrelated paths, symlinks and incompatible schemas are refused, not overwritten. This database holds only user-authored instruction revisions and bindings/events, not chat messages, retrieval memories, secrets or tool outputs. Read-only Current on an absent, genuinely uninitialised root returns revision zero disabled. A database missing from an already initialised root is an unavailable-store error, not an invitation to initialise over lost state. Precise initialisation-marker/transaction ordering is a build-facing detail to finish with OQ-4 before promotion.
+88: 
+89: | NEW TYPE / field | Wire representation / allowed value | Producer → consumer |
+90: |---|---|---|
+91: | `Profile.schema_version` | integer 1 | repository decoder → schema admission |
+92: | `Profile.revision` | decimal string, non-negative signed-64-bit range | committed revision sequence → CAS, bindings, diagnostics |
+93: | `Profile.enabled` | boolean, default false | accepted operator edit → composer |
+94: | `Profile.text` | exact valid UTF-8 string, 0–65536 bytes, NUL refused | editor → store → composer |
+95: | `Profile.binding` | null or inactive `Binding` below | operator binding selection → active-binding rejection and status display |
+96: | `Profile.content_sha256` | 64 lowercase hex characters | canonical profile encoder → decoder validation |
+97: | `Binding.working_name` | non-empty UTF-8 string, maximum 128 bytes when supplied | selected identity → active-binding validator |
+98: | `Binding.founding_reference` | non-empty opaque LINEAGE reference, maximum 1024 UTF-8 bytes | selected identity → active-binding validator |
+99: | `Binding.lethe_scope` | non-empty opaque scope string, maximum 256 UTF-8 bytes | selected identity → active-binding validator |
+100: | `Binding.map_key` | non-empty opaque map key, maximum 1024 UTF-8 bytes | selected identity → active-binding validator |
+101: | `ConversationKey.namespace` | `desktop:<canonical-store-path SHA256>` or `terminal` | host adapter → binding lookup and lock key |
+102: | `ConversationKey.id` | non-empty UTF-8 ID, maximum 128 bytes | existing desktop ID or new terminal UUID → binding lookup |
+103: | `Selection.revision` | revision decimal string | creation/reload transaction → request composer |
+104: | `Selection.generation` | decimal string, starts at 1 | reload transaction → stale-apply rejection |
+105: | `Selection.profile` | complete decoded Profile | revision lookup → request composition; never inferred from model replies |
+106: | `ReloadEvent.kind` | `opened` or `reloaded` | binding transaction → next request orientation/diagnostics |
+107: | `ReloadEvent.from_revision`, `to_revision`, `generation` | decimal strings | binding transition → event/recovery validation |
+108: | `Error.code` | §8 closed string set | boundary validation → HTTP/TUI/UI errors |
+109: 
+110: G1 binding admission: `binding=null` supports ordinary user-authored instructions. A supplied binding is retained only in a disabled profile when all four bounded strings are non-empty, valid UTF-8 and NUL-free; this stores a proposed reference, not verified identity. Every attempt to enable a non-null binding returns `binding_unresolved`, including plausible-looking names and references. There is no always-success identity validator. The UI labels retained references `Inactive — continuity setup required`. G2 owns the later separately judged change that resolves real LINEAGE/LETHE records before enabling them. The G1 profile editor does not fabricate or preselect Eko.
+111: 
+112: Canonical digest input: a declared-order Go struct containing schema_version, revision, enabled, text and binding, marshalled by `encoding/json` with no trailing newline; digest field omitted. Binding uses its four fields in the listed order. UTF-8 and line endings are not normalised. Map iteration is not part of this representation. The read path recalculates the hash from actual fields before using text. Encoding `text="line one\nline two — café", enabled=true, revision="2"` and decoding recovers exact bytes; the expected hash is computed from independently supplied fixture bytes, not by calling the implementation's digest function in both arms. Concrete golden hashes are owed before promotion.
+113: 
+114: Repository API declarations, DESIGNATED in `internal/instructions/store.go`:
+115: `Open(root string) (*Store,error)`; `(*Store).Current(context.Context) (Profile,error)`; `(*Store).Save(context.Context, expectedRevision string, next Edit) (Profile,error)`; `(*Store).Begin(context.Context, ConversationKey, CreationKind) (*Lease,error)`; `(*Store).Reload(context.Context, ConversationKey, expectedGeneration string, expectedRevision string) (Selection,error)`; `(*Lease).Close() error`. `Edit` carries enabled, text and binding only; clients cannot author a revision or digest. `CreationKind` is `NewConversation` or `LegacyConversation`, supplied by the host's actual transcript lookup, not by an untrusted request field. `Lease.Selection` is immutable for the lifetime of the lease.
+116: 
+117: Tables: `metadata` has one schema/current-revision row; `revisions` has immutable sequence/enabled/text/binding/digest rows; `conversations` has the unique `(namespace,id)` selection; `events` has an ordered generation-keyed transition record. All foreign keys are enforced. Save and reload use immediate SQLite transactions and compare expected values inside the transaction. A stale editor does not win by arriving last. A no-change Save returns the same revision. Reset is a new disabled empty revision, not deletion; previous accepted revisions remain recoverable. Restoring an earlier value creates a new current revision referencing the chosen content; immutable history is never edited in place.
+118: 
+119: Declared capacity: 1024 non-zero revisions, 65536 text bytes per revision, 20000 conversation bindings, 256 reload events per conversation. Revision zero is the fixed disabled empty profile and does not consume the 1024 count. Exceeding any cap yields `capacity_exceeded` before transaction commit; no eviction, truncation or partial-success count. These are design choices, not measured existing workload. The consequences are visible and testing uses smaller injected capacities with identical transitions. Their operational adequacy and recovery/export path are OQ-4 review obligations rather than a hidden promise of unlimited history.
+120: 
+121: ## 4. Conversation lifecycle and concurrency
+122: 
+123: The instruction store owns selections; the original desktop store and terminal model own transcripts. First creation, failed first turn, existing conversation, `/new`, model switch, tool switch, compaction, explicit reload and process restart are distinct events.
+124: 
+125: A per-conversation process-safe advisory lease is held across a turn or compaction, including pending tools and approval waits. It is keyed by SHA256 of length-prefixed namespace and ID and represented by a lock file under the instruction root. Lock-file contents are not an authority record. OS lock release on process exit handles abandonment; no timestamp is interpreted as proof a worker died. Darwin/Linux and Windows lock implementations are DESIGNATED `lease_unix.go`/`lease_windows.go`; a failed nonblocking acquire returns `conversation_busy` without replacing a running operation. Profile Save uses only a short SQLite transaction and can complete while an existing conversation holds its selected revision.
+126: 
+127: | Event | Preconditions | Transition and observable |
+128: |---|---|---|
+129: | New conversation | Host-issued non-empty ID; lease acquired | Transaction binds the current validated revision and generation 1; `opened` event; no inference on failure |
+130: | Legacy desktop conversation | Real saved chat exists and no instruction binding exists | Bind revision 0; never silently adopt current text |
+131: | Continue existing conversation | Lease acquired; binding and revision decode successfully | Read pinned selection; current global revision is irrelevant |
+132: | Save B while A is active | expected current revision matches | Current pointer becomes B; A's selection and outgoing carrier remain A |
+133: | Reload | Conversation lease acquired; expected generation and current revision match | One transaction updates selection, increments generation and records `reloaded`; next request reads the new carrier and its explicit revision notice |
+134: | Reload while running/compacting | Lease unavailable | `conversation_busy`; old selection and transcript unchanged |
+135: | Model/tools change | Existing selection valid | Rebuild only the existing model/skill/tool base; reuse pinned profile and re-evaluate capacity for the actual new request |
+136: | Compaction | Same conversation selection and lease | Reattach carrier from selection, not from summarised text; do not store duplicate system messages |
+137: | Terminal `/new` | Idle; new selection can be created | Generate UUID and bind before clearing old terminal state; failure leaves old state usable |
+138: | Restart | Store readable | New terminal invocation creates a new conversation using current profile; existing desktop ID reads its old selection |
+139: 
+140: A binding reserved before an initial transcript write may survive a failed first turn. This is intentional: it is an instruction-selection record, not a claim that a conversation message was saved. A retry under the same issued ID uses that reserved revision; starting a genuinely new ID selects the then-current profile. No cross-database atomicity is claimed. Missing or corrupt data after a binding exists blocks the affected request; it does not recreate the chat or select another colleague.
+141: 
+142: The existing terminal does not provide a normal disk-backed transcript-resume path in the inspected entry. G1 does not invent one or claim terminal transcript restoration. OI-07/OI-08 own that later continuity boundary. Distinct IDs, saved defaults and in-session selection survive the transitions G1 actually supports; reopening desktop transcripts is tested through their existing persistent owner.
+143: 
+144: ## 5. Actual request composition
+145: 
+146: DESIGNATED `internal/instructions/compose.go::Compose(base string, selection Selection) (string,error)` is a pure function. Disabled selection returns the supplied base byte-for-byte. Enabled selection returns base plus a two-newline separator when base is non-empty, then the literal header `User-configured instructions; revision <revision>; selection <generation>:\n`, then the exact profile text. Profile hash/binding validity is checked before composition. This user-authored text does not alter executor approvals, tool availability or filesystem authority. Recalled prose and arbitrary repository files are not promoted into this carrier by G1.
+147: 
+148: Terminal: `GenerateAgentTUI` creates/loads the selection through the shared owner and passes it to `chat.Options`; `chatModel.systemPrompt` composes after its existing built-in/extra construction; `startRunWithMessages` and manual compaction use that one effective result; `agent.buildChatRequest` receives the already-composed string. `/system on|off` keeps its existing built-in-prompt meaning; it is not silently redefined as the custom-instructions toggle.
+149: 
+150: Desktop: the real `Server.chat` derives new-versus-existing from its existing Store lookup, acquires the lease, resolves the selection before saving or invoking inference, then passes the selection and the actual model-system text from `Client.Show` to its existing request builder. When enabled, model-system text and existing MCP instructions form the base in that order, omitting only empty blocks; the shared composer appends the configured text. The builder adds one effective system message before the conversation. Existing role/tool/attachment conversion remains in that builder. When disabled, its old path remains exactly as before, including the current MCP instruction ordering. Adding a system message without preserving the model's system text fails G1-R-06.
+151: 
+152: Preview returns the exact effective carrier for a selected model and scope through the same construction helpers. It is labelled a preview, not proof of dispatch, model compliance, memory recovery or available context. Actual-request diagnostics separately record revision, generation, source digest, carrier byte count, model and request outcome without storing private instruction text in public logs or repository evidence.
+153: 
+154: ## 6. Context capacity — explicit unresolved boundary
+155: 
+156: Observed source is not an exact budget oracle. `agent.checkPreflightPromptBudget` uses an estimate and `sanitizeMessagesForEstimate` omits images; `server.chatPrompt` has an image heuristic and, when truncate is false, skips that truncation loop. The native path similarly returns messages unchanged when truncation is disabled. The remote branch forwards the request to another server. Therefore neither a count of the user text nor successful JSON encoding proves the model can consume the mandatory carrier.
+157: 
+158: The resolved implementation contract has to cover the effective carrier, model template, current task, selected history, tool schemas/pairs, format/thinking overhead, attachments and output allowance, with source-attributable supported context and an explicit unavailable/overflow result. Reusing `ChatRequest.Truncate=false` and `Shift=false` prevents requested history dropping at interfaces that honour them, but is only one part of that contract. The production default is not allowed to claim exactness for the existing estimate. OQ-1 is OPEN; no placeholder capacity constant, assumed cloud tokenizer or no-op budget gate is specified or licensed by this draft.
+159: 
+160: ## 7. Editor and terminal interaction
+161: 
+162: DESIGNATED `app/ui/instructions.go` exposes authenticated `GET /api/v1/instructions`, `PUT /api/v1/instructions`, `GET /api/v1/instructions/revisions`, `GET /api/v1/instructions/revisions/{revision}`, `POST /api/v1/instructions/preview`, and `POST /api/v1/chat/{id}/instructions/reload`. Revision listing returns at most 20 metadata-only entries before an optional decimal `before_revision` cursor; one revision GET returns its full accepted Profile. Restoring from a historical revision sends its content through the same new-revision CAS Save, never mutates history. GET returns current configuration and revision. PUT requires expected_revision plus Edit; it returns the committed profile only after durable success. Preview takes model and selected scope/revision and returns the shared composer's output plus truthful capacity status. Reload requires expected_generation and expected_revision. Unknown JSON members, invalid UTF-8/NUL, wrong JSON types, more than one top-level JSON value and oversized bodies are refused; the request limit is 524288 bytes. Worst-case JSON escaping costs at most six ASCII bytes per input UTF-8 byte for these bounded strings: text 65536 plus binding 2432 gives 407808 bytes, with more than 100000 bytes left for the fixed envelope. Exact one-object parsing and all decoded field caps still apply; the body cap is not the decoded-text limit. Authentication precedes parsing and state access. Typed errors carry machine codes and human-readable text; no false Saved toast follows a non-2xx reply.
+163: 
+164: DESIGNATED `InstructionSettings.tsx` is mounted in the real Settings component adjacent to SpeechSettings. It displays scope `Desktop and terminal — new conversations`, current revision, enabled state, editable text, byte limit, explicit Save, preview, Disable and Reset. Save is not an every-keystroke write. Dirty edits are kept on a stale-revision conflict; no automatic last-writer-wins retry. Reset makes a new disabled empty revision with a route to select a previous retained value. The existing general Settings reset does not destroy instruction history. The draft editor never activates an unresolved identity.
+165: 
+166: Existing conversations display their selected revision and a button `Apply saved instructions` at the conversation header. The button is disabled while the UI knows the conversation is active, and the backend lease remains authoritative. A successful reload displays the new generation/revision; an error leaves the existing selection visible. The editor does not pretend that saving automatically updates open conversations.
+167: 
+168: Terminal DESIGNATED `/instructions` displays current selection and scope; `/instructions reload` applies the saved revision only at idle; `/instructions off` records and selects a disabled revision through the same store rather than silently changing only a prompt string. Saved editing is provided by the desktop surface and DESIGNATED `ollama instructions set --file <path> --expected-revision <revision>` for terminal-only use. Input is read as data, never executed as a shell/editor command. Exact CLI registration and validation anchors are part of OQ-4, not assumed present.
+169: 
+170: ## 8. Failure representation, guards and cannot-represent scope
+171: 
+172: Closed error codes: `invalid_input`, `revision_conflict`, `conversation_busy`, `store_unavailable`, `corrupt_record`, `unsupported_schema`, `binding_unresolved`, `capacity_exceeded`, `context_unavailable`, `context_exceeded`. HTTP mapping: invalid_input 400; conflict/busy 409; binding_unresolved 422; capacity_exceeded 507; context unavailable/exceeded 422; store/corruption/schema 503. Errors stop the affected change/dispatch and preserve the old record. They do not require another operator approval and do not terminate independent conversations.
+173: 
+174: | Guard | Workload/bound | Rejection / observable | Forecloses / test |
+175: |---|---|---|---|
+176: | Authentication | Existing Server.Handler authentication, not Dev mode | Existing auth rejection | Unauthorised profile read/write; real token/no-token test |
+177: | Text size | Operator-controlled UTF-8, 0..65536 bytes | invalid_input before commit | Larger instruction values; exact/max+1 fixture |
+178: | Active empty text | Enabled with whitespace-only text | invalid_input | Misleading empty enabled profile; disabled empty remains valid |
+179: | Revision CAS | Real concurrent editor snapshots | revision_conflict | Silent overwritten edits; two-process same-expected race |
+180: | Capacity | 1024 revisions; 20000 bindings; 256 reloads | capacity_exceeded | Unbounded retained metadata; small-cap organic boundary fixture |
+181: | Lease | Active turn/compaction including tools | conversation_busy | Mid-turn configuration change; competing process fixture |
+182: | Schema/digest | Stored actual bytes and declared schema | unsupported_schema/corrupt_record | Fabricated success from unreadable state; raw corruption/restart |
+183: | Binding | G1 permits enabled only when binding is null | binding_unresolved | Activating a persona before G2; both plausible and placeholder-like non-null bindings fail while an unbound enabled profile succeeds |
+184: | Model budget | Exact full carrier, supported context and allowance | context_unavailable/context_exceeded | Silent mandatory-input loss; OQ-1 needs exact algorithm and real backend proof |
+185: 
+186: This table is a design guard list, not yet the complete independently re-derived R-8 closure census. The latter is an explicit promotion obligation. The new vocabulary cannot represent a recovered LETHE memory, a verified founding identity solely from a name, a transcript page, a completed autonomous goal, or a tool-authorisation grant. These five author examples do not substitute for Method16's five independent judge-supplied statements. Any proposed foreclosure intersecting a G1 requirement remains blocking, not cured by disclosure.
+187: 
+188: ## 9. Acceptance design, organic producers and deliberate faults
+189: 
+190: Test storage is isolated; actual production entry/assembly is exercised. External inference may be simulated for transport/store tests, clearly declared. Selected real-model qualification is a separate bounded run; recorded model name/digest, actual served identity, request/response evidence and limits remain attributable. No real user conversation, Keychain or credential is used as a fixture.
+191: 
+192: | Test ID | Organic path and source-derived assertion | Facade/twin caught |
+193: |---|---|---|
+194: | I-01 | Real editor/API saves contrasting A and B; fresh process reads the exact last committed bytes | Fixed string, in-memory-only store |
+195: | I-02 | Start X at A, save B in another process, send twice in X and once in new Y; capture actual requests | Current-settings-on-every-turn, same default conversation ID |
+196: | I-03 | Start a held turn/compaction, attempt real reload, then finish and reload at idle | UI-only gate, always-allow, never-allow |
+197: | I-04 | Restart desktop host and reopen X; request uses X's pinned A until explicit reload | NewChat replacement, regenerate from current profile |
+198: | I-05 | Normal terminal entry, `/new`, model/tool switches and real compaction events | Unused new ID, selection lost on reset, append-only duplicate systems |
+199: | I-06 | Disabled/unconfigured requests compared with frozen pre-feature request goldens including tools/model options | Always-enabled, never-enabled, constant receipt |
+200: | I-07 | Invalid text, unknown schema, corrupt digest, wrong binding, write denial and stale CAS | Always-success, swallowed read errors, schema-valid wrong identity |
+201: | I-08 | Limits exercised at zero, exact maximum and maximum+1, with live persisted counts | Prefix truncation, cap after write, unsigned wrap |
+202: | I-09 | Real Settings route and real top-level chat route in Playwright; save/restart/reload and visible errors | Story-only component, local echo, inaccessible input |
+203: | I-10 | Qualified model receives complete expected carrier with preserved model-system text/tools; oversized mandatory input fails visibly | Editor-only wiring, lower-layer truncation, model-template replacement |
+204: | I-11 | Snapshot/reload event roundtrip through actual store and next request diagnostics | Hash-only record with no consumer |
+205: | I-12 | All required tests are discovered, finish, and reconcile; a child exit 7, empty selection and missing case fail the gate | Vacuous pass and shell-exit proxy |
+206: 
+207: The eight standard degenerate twins are constant output, identity/no-op, always-success, always-reject, never-write, never-read, all-zero/empty selection and dropped configured input. I-01/I-02 detect constant/empty/dropped input; I-06 detects no-op/always-enabled; I-07 detects always-success; I-01/I-03 detect always-reject; I-04 detects never-write/never-read. A disconnected final composer, stale-binding loader and failed CAS are additional specific mutants. Mutations occur only in isolated copies after candidate/tests are committed. Each mutant compiles first and then fails its intended assertion; clean before and after runs pass. A compile failure or missing browser binary is an infrastructure failure, not detection credit.
+208: 
+209: Existing baseline, executed this continuation: `go test -count=1 -json -timeout=120s -run '^(TestSessionAddsSystemPromptOnlyToRequest|TestChatSystemCommandControlsBuiltInSystemPrompt)$' ./agent ./cmd/tui/chat` passed two named tests; `go test -count=1 -json -timeout=120s -run '^TestChatPrompt$/^no_truncate_with_limit_exceeded$' ./server` passed its parent and named subtest. They prove existing request construction and retained over-limit prompt behaviour, not G1 persistence, context admission or a passing new-feature failure number.
+210: 
+211: DESIGNATED default Go test files are `internal/instructions/store_test.go`, `lease_test.go`, `compose_test.go`, `app/ui/instructions_test.go`, `cmd/tui/chat/instructions_test.go`, and `cmd/instructions_test.go`; named test functions and requirement assignments are completed before promotion. Default frontend tests cover API/state transitions without a browser dependency; real Playwright acceptance uses the existing installed Playwright package, actual frontend routes and isolated real backend. The browser suite is mandatory G1 acceptance, never substituted with SSR.
+212: 
+213: ## 10. Component packs, full-system proof and closure
+214: 
+215: One feature, one blueprint. Component packs are not independently accepted OI items. The ordering is:
+216: 0A resolve this draft and source/guard populations → 0B independent Tier-2 panel → A verified build handoff → B1 shared owner/representation/lease → C1 independent proof → B2 both host request/lifecycle adapters → C2 proof → B3 actual editor/CLI/reload UI → C3 proof → D/E documentation verification → F combined G1 reality gate. B1's public store acceptance is not advertised as a delivered instructions feature. No external memory engine, autonomous scheduler or estate-wide cleanup is included.
+217: 
+218: | Pack | DESIGNATED changed/new production files | Current → projected LOC / added estimate |
+219: |---|---|---|
+220: | B1 | internal/instructions/types.go; store.go; compose.go; lease_unix.go; lease_windows.go | 0→140; 0→310; 0→70; 0→55; 0→60; subtotal 635 |
+221: | B2 | app/ui/instructions.go; app/ui/ui.go; cmd/agent_tui.go; cmd/tui/chat/chat.go; cmd/tui/chat/input.go; cmd/tui/chat/compaction.go; agent/session.go | 0→200; 2004→2054; 852→892; 1246→1286; 1728→1778; 101→111; 1087→1107; subtotal 410 |
+222: | B3 | app/ui/app/src/components/InstructionSettings.tsx; InstructionStatus.tsx; app/ui/app/src/api.ts; Settings.tsx; Chat.tsx; cmd/instructions.go; cmd/cmd.go | 0→210; 0→70; 879→924; 650→654; 345→355; 0→100; 2623→2628; subtotal 444 |
+223: 
+224: Total estimated new production LOC 1489; byte ceiling 59560. Tests, generated output, this document and evidence do not inflate that estimate. Context-admission work is NOT hidden in the estimate: OQ-1 has to choose its exact existing or newly owned surfaces, revise this pre-adjudication estimate honestly, and obtain review before freezing the first panel. No code is allocated to an unselected mechanism.
+225: 
+226: Declared combined proof set, before G1 closure: all tests in `./internal/instructions`, `./agent`, `./cmd/tui/chat`, `./cmd`, `./app/store`, `./app/ui`, `./server`, `./llm`; full frontend Vitest; generator reproducibility/check tests; TypeScript project check; full ESLint with exact baseline comparison; frontend production build; root Go build; the actual browser save/restart/dispatch journey; the real chosen-model carrier/capacity qualification; and all deliberate-break controls above. This is not a waiver of previously recorded root/app/Keychain/package release obligations. Keychain-sensitive suites require proven isolation or a supervised OS-authorised run, not another blind invocation. A known-red baseline remains a blocker to the affected combined gate, while unrelated design work may proceed.
+227: 
+228: Only G1's real joint save→restart→request and reload/disabled/failure results can close OI-03/OI-04. No installed-app claim follows from HTTP tests or a pushed branch. Main integration and installation retain their separately recorded release gates.
+229: 
+230: ## 11. Requirement mapping and handoff
+231: 
+232: | Requirements | Representation / owning contract | Acceptance | Build / review |
+233: |---|---|---|---|
+234: | G1-R-01,02,12 | Profile, Edit, revisions/current CAS; §3 | I-01,I-07,I-08 | B1/C1/F |
+235: | G1-R-03,04,10,11 | ConversationKey, Selection, Lease, ReloadEvent; §4 | I-02,I-03,I-04,I-05,I-11 | B1+B2/C1+C2/F |
+236: | G1-R-05,06,15 | Compose and real request adapters; §§2,5 | I-05,I-06,I-10 | B2/C2/F |
+237: | G1-R-07 | Full-capacity admission, unresolved §6 | I-10 | OQ-1 blocks pack allocation and promotion |
+238: | G1-R-08 | Actual editor/preview/CLI/reload controls; §7 | I-01,I-03,I-09 | B3/C3/F |
+239: | G1-R-09 | Null/unbound enabled or non-null inactive binding admission; §3 | I-07 | B1/C1/F; activating bound colleagues remains G2 |
+240: | G1-R-13 | Separate instruction/transcript ownership; §2 | I-04,I-06,I-11 | B1+B2/C1+C2/F |
+241: | G1-R-14 | Typed errors; §8 | I-03,I-07,I-08 | B1+B2+B3/C1+C2+C3/F |
+242: | G1-R-16,17,18 | Frozen candidate, complete proof records and joint acceptance; §§9,10 | I-01..I-12 | C1+C2+C3+E/F |
+243: 
+244: Next work is bounded: resolve OQ-1's real capacity/transport contract; execute the G1 failure baseline; complete exact declared sites/guard closure and independent source tracing; then the ordinary two-substrate panel. The chosen store and lifecycle design is a concrete proposal, not permission to fill those gaps silently during code. All 31 programme requirements remain in the canonical inventory; no feature is removed or accepted here.
+245: 
+246: BLUEPRINT_CREATED=PARTIAL
+247: PACKS_ALLOWED_FOR_0A_0B_ONLY
+
+SOURCE cmd/agent_tui.go file_sha256=c934b7b803875a6a334e86cdf289831395fb5356445519c60bcd07f728190ed9 lines=73-179
+73: func GenerateAgentTUI(cmd *cobra.Command, client *api.Client, opts agentTUIOptions) error {
+74: 	cwd := agentWorkingDir()
+75: 	contextWindowForModel := func(ctx context.Context, model string, fallback int) int {
+76: 		return agentContextWindowForModel(ctx, client, model, fallback)
+77: 	}
+78: 
+79: 	var skillCatalog *coreagent.SkillCatalog
+80: 	reloadSkills := func() (*coreagent.SkillCatalog, error) {
+81: 		catalog, err := coreagent.LoadDefaultSkills(cwd)
+82: 		if err != nil {
+83: 			return nil, err
+84: 		}
+85: 		if ignored := catalog.ExcludeNames(agentchat.BuiltinSlashCommandNames()); len(ignored) > 0 {
+86: 			fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m ignoring agent skill(s): %s\n", strings.Join(ignored, ", "))
+87: 		}
+88: 		for _, diagnostic := range catalog.Diagnostics() {
+89: 			fmt.Fprintf(os.Stderr, "\033[1mwarning:\033[0m ignored invalid agent skill: %v\n", diagnostic)
+90: 		}
+91: 		skillCatalog = catalog
+92: 		return catalog, nil
+93: 	}
+94: 	if _, err := reloadSkills(); err != nil {
+95: 		return fmt.Errorf("load agent skills: %w", err)
+96: 	}
+97: 	// One manager for the session, not one per registry: the registry is
+98: 	// rebuilt whenever the model changes, and reconnecting every MCP server on
+99: 	// a model switch would restart their processes for no reason.
+100: 	mcpManager := agentMCPManager(cmd.Context())
+101: 	if mcpManager != nil {
+102: 		defer mcpManager.Close()
+103: 	}
+104: 
+105: 	var registry *coreagent.Registry
+106: 	registryForModel := func(ctx context.Context, model string) *coreagent.Registry {
+107: 		return agentToolsRegistry(ctx, client, model, skillCatalog, mcpManager)
+108: 	}
+109: 	if opts.Model != "" {
+110: 		registry = agentToolsRegistry(cmd.Context(), client, opts.Model, skillCatalog, mcpManager)
+111: 	}
+112: 	systemPrompt := agentSystemPromptWithWorkingDir(opts.Model, opts.System, agentSkillSystemContext(skillCatalog, registry, opts.ToolsDisabled), cwd)
+113: 
+114: 	_, err := agentchat.Run(cmd.Context(), agentchat.Options{
+115: 		Model:                opts.Model,
+116: 		Client:               client,
+117: 		Tools:                registry,
+118: 		ToolRegistryForModel: registryForModel,
+119: 		MCPServers: func() []mcp.ServerState {
+120: 			if mcpManager == nil {
+121: 				return nil
+122: 			}
+123: 			return mcpManager.States()
+124: 		},
+125: 		SetMCPEnabled: func(ctx context.Context, name string, enabled bool) error {
+126: 			return setAgentMCPEnabled(ctx, mcpManager, name, enabled)
+127: 		},
+128: 		ToolsDisabled: opts.ToolsDisabled,
+129: 		MultiModalForModel: func(ctx context.Context, model string) bool {
+130: 			return agentModelSupportsMultimodal(ctx, client, model)
+131: 		},
+132: 		ModelOptions: func(ctx context.Context) ([]agentchat.ModelOption, error) {
+133: 			return agentModelOptions(ctx, client)
+134: 		},
+135: 		OnModelSelected: func(_ context.Context, model string) error {
+136: 			return config.SetLastModel(model)
+137: 		},
+138: 		SystemPromptForModel: func(ctx context.Context, model string, registry *coreagent.Registry, toolsDisabled bool) string {
+139: 			return agentSystemPromptWithWorkingDir(model, agentSystemFromShow(ctx, client, model), agentSkillSystemContext(skillCatalog, registry, toolsDisabled), cwd)
+140: 		},
+141: 		Skills:              skillCatalog,
+142: 		ImportSkills:        coreagent.ImportSkills,
+143: 		ReloadSkills:        reloadSkills,
+144: 		SystemPrompt:        systemPrompt,
+145: 		WorkingDir:          cwd,
+146: 		Format:              opts.Format,
+147: 		Options:             opts.Options,
+148: 		Think:               opts.Think,
+149: 		KeepAlive:           opts.KeepAlive,
+150: 		MultiModal:          opts.MultiModal,
+151: 		AllowAllTools:       opts.AllowAllTools,
+152: 		ContextWindowTokens: opts.ContextWindowTokens,
+153: 		Compactor: &coreagent.SimpleCompactor{
+154: 			Client:  client,
+155: 			Options: coreagent.CompactionOptions{ContextWindowTokens: opts.ContextWindowTokens},
+156: 		},
+157: 		ContextWindowTokensForModel: func(ctx context.Context, model string, fallback int) int {
+158: 			return contextWindowForModel(ctx, model, fallback)
+159: 		},
+160: 		PreloadModel: func(ctx context.Context, model string, think *api.ThinkValue) (int, error) {
+161: 			return preloadAgentModelIfLocal(ctx, client, opts, model, think)
+162: 		},
+163: 		CheckCloudModel: func(ctx context.Context, model, requiredPlan string) error {
+164: 			return ensureCloudModelAccess(ctx, client, model, requiredPlan)
+165: 		},
+166: 		OpenBrowser: launch.OpenBrowser,
+167: 		PollCloudAuth: func(ctx context.Context) (string, bool, error) {
+168: 			user, err := client.Whoami(ctx)
+169: 			if err != nil {
+170: 				return "", false, err
+171: 			}
+172: 			if user == nil || user.Name == "" {
+173: 				return "", false, nil
+174: 			}
+175: 			return user.Name, true, nil
+176: 		},
+177: 	})
+178: 	return err
+179: }
+
+SOURCE cmd/agent_tui.go file_sha256=c934b7b803875a6a334e86cdf289831395fb5356445519c60bcd07f728190ed9 lines=214-260
+214: func agentSystemPromptWithWorkingDir(modelName string, modelSystem string, extra string, workingDir string) string {
+215: 	return agentSystemPromptAtWithWorkingDir(time.Now(), modelName, modelSystem, extra, workingDir)
+216: }
+217: 
+218: func agentSystemPromptAtWithWorkingDir(now time.Time, modelName string, modelSystem string, extra string, workingDir string) string {
+219: 	var parts []string
+220: 	parts = append(parts, agentDefaultSystemPromptWithWorkingDir(now, modelName, workingDir))
+221: 	if strings.TrimSpace(modelSystem) != "" {
+222: 		parts = append(parts, strings.TrimSpace(modelSystem))
+223: 	}
+224: 	if strings.TrimSpace(extra) != "" {
+225: 		parts = append(parts, strings.TrimSpace(extra))
+226: 	}
+227: 	return strings.Join(parts, "\n\n")
+228: }
+229: 
+230: func agentDefaultSystemPromptWithWorkingDir(now time.Time, modelName string, workingDir string) string {
+231: 	date := now.Format("Monday, January 2, 2006")
+232: 	shellName := "bash"
+233: 	if runtime.GOOS == "windows" {
+234: 		shellName = "PowerShell"
+235: 	}
+236: 	parts := []string{
+237: 		"You are running in Ollama, in a harness to help the user accomplish tasks, and the model is " + modelName + ".",
+238: 		"",
+239: 		"Current date: " + date + ".",
+240: 		"",
+241: 	}
+242: 	parts = append(parts,
+243: 		"Be concise, practical, and action-oriented. Use tools when they materially help. Verify current or fast-changing facts with web tools when available; otherwise state uncertainty.",
+244: 		"",
+245: 		"Use "+shellName+" carefully. Prefer read-only inspection first. Stay within the current working directory unless explicitly asked. Surface intent before risky actions such as writes, deletes, moves, installs, git state changes, service changes, sudo, secrets access, network scripts, or commands outside the working directory. Request approval when required and do not work around denied approvals.",
+246: 		"",
+247: 		"Tell the user about meaningful changes, verification, failures, blockers, assumptions, and risks. Summarize routine tool output instead of dumping it.",
+248: 	)
+249: 	if workingDir != "" {
+250: 		parts = append(parts, "Current working directory: "+strconv.Quote(workingDir)+".")
+251: 	}
+252: 	return strings.Join(parts, "\n")
+253: }
+254: 
+255: func agentSystemFromShow(ctx context.Context, client *api.Client, modelName string) string {
+256: 	if client == nil || strings.TrimSpace(modelName) == "" {
+257: 		return ""
+258: 	}
+259: 	resp, err := client.Show(ctx, &api.ShowRequest{Model: modelName})
+260: 	if err != nil {
+
+SOURCE cmd/agent_tui.go file_sha256=c934b7b803875a6a334e86cdf289831395fb5356445519c60bcd07f728190ed9 lines=465-556
+465: func agentContextWindowForModel(ctx context.Context, client *api.Client, modelName string, fallback int) int {
+466: 	if client == nil || strings.TrimSpace(modelName) == "" {
+467: 		return fallback
+468: 	}
+469: 	if tokens := loadedContextWindowForModel(ctx, client, modelName); tokens > 0 {
+470: 		return tokens
+471: 	}
+472: 	if modelref.HasExplicitCloudSource(modelName) {
+473: 		if tokens := agentRecommendationContextWindowForModel(ctx, client, modelName); tokens > 0 {
+474: 			return tokens
+475: 		}
+476: 	}
+477: 	resp, err := client.Show(ctx, &api.ShowRequest{Model: modelName})
+478: 	if err != nil {
+479: 		return fallback
+480: 	}
+481: 	if tokens := showResponseContextWindow(resp); tokens > 0 {
+482: 		return tokens
+483: 	}
+484: 	return fallback
+485: }
+486: 
+487: func agentRecommendationContextWindowForModel(ctx context.Context, client *api.Client, modelName string) int {
+488: 	if client == nil {
+489: 		return 0
+490: 	}
+491: 	recs, err := client.ModelRecommendationsExperimental(ctx)
+492: 	if err != nil || recs == nil {
+493: 		return 0
+494: 	}
+495: 	return contextWindowFromRecommendations(modelName, recs.Recommendations)
+496: }
+497: 
+498: func contextWindowFromRecommendations(modelName string, recommendations []api.ModelRecommendation) int {
+499: 	for _, rec := range recommendations {
+500: 		if rec.ContextLength <= 0 {
+501: 			continue
+502: 		}
+503: 		if sameModelRef(modelName, rec.Model) {
+504: 			return rec.ContextLength
+505: 		}
+506: 	}
+507: 	return 0
+508: }
+509: 
+510: func sameModelRef(a, b string) bool {
+511: 	a = comparableModelRef(a)
+512: 	b = comparableModelRef(b)
+513: 	if strings.EqualFold(a, b) {
+514: 		return true
+515: 	}
+516: 	pa, errA := modelref.ParseRef(a)
+517: 	pb, errB := modelref.ParseRef(b)
+518: 	if errA != nil || errB != nil {
+519: 		return false
+520: 	}
+521: 	if !strings.EqualFold(pa.Base, pb.Base) {
+522: 		return false
+523: 	}
+524: 	return pa.Source == pb.Source ||
+525: 		pa.Source == modelref.ModelSourceUnspecified ||
+526: 		pb.Source == modelref.ModelSourceUnspecified
+527: }
+528: 
+529: func comparableModelRef(value string) string {
+530: 	value = strings.TrimSpace(value)
+531: 	if strings.HasSuffix(strings.ToLower(value), ":latest") {
+532: 		return strings.TrimSpace(value[:len(value)-len(":latest")])
+533: 	}
+534: 	return value
+535: }
+536: 
+537: func showResponseContextWindow(resp *api.ShowResponse) int {
+538: 	if resp == nil {
+539: 		return 0
+540: 	}
+541: 	if resp.Details.ContextLength > 0 {
+542: 		return resp.Details.ContextLength
+543: 	}
+544: 	if n, ok := numericModelInfo(resp.ModelInfo["general.context_length"]); ok {
+545: 		return n
+546: 	}
+547: 	best := 0
+548: 	for key, value := range resp.ModelInfo {
+549: 		if key != "context_length" && !strings.HasSuffix(key, ".context_length") {
+550: 			continue
+551: 		}
+552: 		if n, ok := numericModelInfo(value); ok && n > best {
+553: 			best = n
+554: 		}
+555: 	}
+556: 	return best
+
+SOURCE cmd/agent_tui.go file_sha256=c934b7b803875a6a334e86cdf289831395fb5356445519c60bcd07f728190ed9 lines=590-634
+590: 	}
+591: 	info, err := client.Show(ctx, &api.ShowRequest{Model: modelName})
+592: 	if err != nil {
+593: 		return 0, err
+594: 	}
+595: 	if info.RemoteHost != "" {
+596: 		return 0, nil
+597: 	}
+598: 	if err := client.Generate(ctx, &api.GenerateRequest{
+599: 		Model:     modelName,
+600: 		KeepAlive: opts.KeepAlive,
+601: 		Options:   opts.Options,
+602: 		Think:     think,
+603: 	}, func(api.GenerateResponse) error {
+604: 		return nil
+605: 	}); err != nil {
+606: 		return 0, err
+607: 	}
+608: 	return loadedContextWindowForModel(ctx, client, modelName), nil
+609: }
+610: 
+611: func loadedContextWindowForModel(ctx context.Context, client *api.Client, modelName string) int {
+612: 	if client == nil || strings.TrimSpace(modelName) == "" {
+613: 		return 0
+614: 	}
+615: 	resp, err := client.ListRunning(ctx)
+616: 	if err != nil {
+617: 		return 0
+618: 	}
+619: 	return processContextWindowForModel(modelName, resp)
+620: }
+621: 
+622: func processContextWindowForModel(modelName string, resp *api.ProcessResponse) int {
+623: 	if resp == nil {
+624: 		return 0
+625: 	}
+626: 	for _, running := range resp.Models {
+627: 		if running.ContextLength <= 0 {
+628: 			continue
+629: 		}
+630: 		if sameModelRef(modelName, running.Name) || sameModelRef(modelName, running.Model) {
+631: 			return running.ContextLength
+632: 		}
+633: 	}
+634: 	return 0
+
+SOURCE cmd/tui/chat/chat.go file_sha256=361d7650d71f162870f6a06e863d0f032d6d3b421fb341c1f628625a6ebfe96f lines=60-100
+60: 	ReloadSkills         func() (*coreagent.SkillCatalog, error)
+61: 	ToolRegistryForModel func(context.Context, string) *coreagent.Registry
+62: 	// MCPServers reports the current state of every configured MCP server.
+63: 	// It is a closure rather than the manager itself so this package cannot
+64: 	// close a manager it does not own.
+65: 	MCPServers func() []mcp.ServerState
+66: 	// SetMCPEnabled switches a server on or off and applies the change, which
+67: 	// includes stopping a server that was switched off.
+68: 	SetMCPEnabled               func(context.Context, string, bool) error
+69: 	ToolsDisabled               bool
+70: 	MultiModalForModel          func(context.Context, string) bool
+71: 	ModelOptions                func(context.Context) ([]ModelOption, error)
+72: 	OnModelSelected             func(context.Context, string) error
+73: 	SystemPromptForModel        func(context.Context, string, *coreagent.Registry, bool) string
+74: 	ApprovalPrompter            coreagent.ApprovalPrompter
+75: 	EventSinks                  []coreagent.EventSink
+76: 	AllowAllTools               bool
+77: 	WorkingDir                  string
+78: 	RootDir                     string
+79: 	Format                      string
+80: 	Options                     map[string]any
+81: 	Think                       *api.ThinkValue
+82: 	KeepAlive                   *api.Duration
+83: 	Images                      []api.ImageData
+84: 	MultiModal                  bool
+85: 	Compactor                   coreagent.Compactor
+86: 	ContextWindowTokens         int
+87: 	ContextWindowTokensForModel func(context.Context, string, int) int
+88: 	PreloadModel                func(context.Context, string, *api.ThinkValue) (int, error)
+89: 	CheckCloudModel             func(context.Context, string, string) error
+90: 	OpenBrowser                 func(string)
+91: 	PollCloudAuth               func(context.Context) (string, bool, error)
+92: 	CompactionThreshold         float64
+93: 	SystemPrompt                string
+94: }
+95: 
+96: type Result struct {
+97: 	ChatID   string
+98: 	Messages []api.Message
+99: }
+100: 
+
+SOURCE cmd/tui/chat/chat.go file_sha256=361d7650d71f162870f6a06e863d0f032d6d3b421fb341c1f628625a6ebfe96f lines=210-250
+210: type chatInputAttachment struct {
+211: 	placeholder string
+212: 	kind        string
+213: 	data        api.ImageData
+214: }
+215: 
+216: func Run(ctx context.Context, opts Options) (*Result, error) {
+217: 	if opts.RootDir == "" {
+218: 		opts.RootDir = opts.WorkingDir
+219: 	}
+220: 
+221: 	approvalState := &coreagent.ApprovalState{}
+222: 	approvalState.Set(opts.AllowAllTools, nil)
+223: 
+224: 	m := chatModel{
+225: 		ctx:             ctx,
+226: 		opts:            opts,
+227: 		chatID:          opts.ChatID,
+228: 		messages:        slices.Clone(opts.Messages),
+229: 		workingDir:      opts.WorkingDir,
+230: 		approvalState:   approvalState,
+231: 		defaultAllowAll: opts.AllowAllTools,
+232: 		promptHistory:   initialPromptHistory(ctx, opts),
+233: 		status:          "ready",
+234: 		openModelOnInit: opts.OpenModelPicker || (strings.TrimSpace(opts.Model) == "" && opts.ModelOptions != nil),
+235: 	}
+236: 	m.nextImageID, m.nextAudioID = nextInputAttachmentIDsFromMessages(m.messages)
+237: 	m.nextPastedTextID = nextInputPastedTextIDFromMessages(m.messages)
+238: 	m.entries = entriesFromMessages(m.messages)
+239: 	// Context window is resolved post-load (chatModelPreloadDoneMsg) rather than
+240: 	// here: for local models /api/ps only reports the running num_ctx after the
+241: 	// model loads, and opts.ContextWindowTokens already holds Show's max as a
+242: 	// pre-load fallback. Refreshing now would just re-derive that same value
+243: 	// (and block construction on a network call).
+244: 	m.contextTokens = m.estimatePromptTokens(m.messages, "")
+245: 	m.contextEstimate = true
+246: 	if m.openModelOnInit {
+247: 		updated, cmd := m.openModelPicker("")
+248: 		if cmd != nil {
+249: 			return nil, errors.New("initial model picker returned an unexpected command")
+250: 		}
+
+SOURCE cmd/tui/chat/chat.go file_sha256=361d7650d71f162870f6a06e863d0f032d6d3b421fb341c1f628625a6ebfe96f lines=997-1023
+997: func (m *chatModel) resetChat(status string) (tea.Model, tea.Cmd) {
+998: 	m.messages = nil
+999: 	m.liveMessages = nil
+1000: 	m.entries = nil
+1001: 	m.inputAttachments = nil
+1002: 	m.inputPastedTexts = nil
+1003: 	m.modelPicker = nil
+1004: 	m.modelPickerModels = nil
+1005: 	m.approvalController = nil
+1006: 	m.resetApprovalState()
+1007: 	m.nextImageID = 0
+1008: 	m.nextAudioID = 0
+1009: 	m.nextPastedTextID = 1
+1010: 	m.resetPromptHistoryCursor()
+1011: 	m.resetWorkingDir()
+1012: 	m.opts.AllowAllTools = m.defaultAllowAll
+1013: 	m.permissionNotice = ""
+1014: 	m.thinking = false
+1015: 	m.thinkingTokens = 0
+1016: 	m.contextTokens = 0
+1017: 	m.contextEstimate = true
+1018: 	m.scroll = 0
+1019: 	m.flowPrintedLines = 0
+1020: 	m.status = status
+1021: 	return *m, tea.ClearScreen
+1022: }
+1023: 
+
+SOURCE cmd/tui/chat/chat.go file_sha256=361d7650d71f162870f6a06e863d0f032d6d3b421fb341c1f628625a6ebfe96f lines=1116-1186
+1116: func (m *chatModel) startRunWithMessages(displayInput, historyInput string, newMessages []api.Message, extraSystemPrompt, skillName string) (tea.Model, tea.Cmd) {
+1117: 	m.addPromptHistory(historyInput)
+1118: 	m.entries = append(m.entries, newChatEntry(chatEntry{role: "user", content: displayInput}))
+1119: 	if len(newMessages) > 1 {
+1120: 		m.entries = append(m.entries, entriesFromMessages(newMessages[1:])...)
+1121: 	}
+1122: 	m.running = true
+1123: 	m.awaitingModel = true
+1124: 	m.status = "running"
+1125: 	m.spinner = 0
+1126: 	m.scroll = 0
+1127: 	m.detectedToolCalls = nil
+1128: 	m.thinking = false
+1129: 	m.thinkingTokens = 0
+1130: 	m.eventErrorRendered = false
+1131: 	systemPrompt := m.systemPrompt(extraSystemPrompt)
+1132: 	m.liveMessages = append(slices.Clone(m.messages), newMessages...)
+1133: 	m.contextTokens = m.estimatePromptTokens(m.liveMessages, systemPrompt)
+1134: 	m.contextEstimate = true
+1135: 
+1136: 	runCtx, cancel := context.WithCancel(m.ctx)
+1137: 	m.cancel = cancel
+1138: 	events := make(chan tea.Msg, 128)
+1139: 	m.events = events
+1140: 	m.approvalController = newChatApprovalController(events, m.ensureApprovalState())
+1141: 
+1142: 	var newMessagesPersisted bool
+1143: 	eventSinks := []coreagent.EventSink{chatEventSink{ctx: runCtx, ch: events, newMessagesPersisted: &newMessagesPersisted}}
+1144: 	eventSinks = append(eventSinks, m.opts.EventSinks...)
+1145: 
+1146: 	session := &coreagent.Session{
+1147: 		Client:           m.opts.Client,
+1148: 		EventSinks:       eventSinks,
+1149: 		Tools:            m.opts.Tools,
+1150: 		Skills:           m.opts.Skills,
+1151: 		DisableTools:     m.opts.ToolsDisabled,
+1152: 		ApprovalPrompter: m.approvalPrompterForRun(m.approvalController),
+1153: 		ApprovalState:    m.ensureApprovalState(),
+1154: 		WorkingDir:       m.currentWorkingDir(),
+1155: 		Compactor:        m.opts.Compactor,
+1156: 	}
+1157: 	opts := coreagent.RunOptions{
+1158: 		ChatID:       m.chatID,
+1159: 		Model:        m.opts.Model,
+1160: 		SystemPrompt: systemPrompt,
+1161: 		Messages:     slices.Clone(m.messages),
+1162: 		NewMessages:  slices.Clone(newMessages),
+1163: 		Format:       m.opts.Format,
+1164: 		Options:      m.opts.Options,
+1165: 		Think:        m.opts.Think,
+1166: 		KeepAlive:    m.opts.KeepAlive,
+1167: 		SkillName:    skillName,
+1168: 	}
+1169: 
+1170: 	persistedMessages := make([]api.Message, 0, len(m.messages)+len(newMessages))
+1171: 	persistedMessages = append(persistedMessages, slices.Clone(m.messages)...)
+1172: 	persistedMessages = append(persistedMessages, slices.Clone(newMessages)...)
+1173: 	go func() {
+1174: 		defer close(events)
+1175: 		result, err := session.Run(runCtx, opts)
+1176: 		select {
+1177: 		case events <- chatRunDoneMsg{result: result, err: err, newMessagesPersisted: newMessagesPersisted, persistedMessages: persistedMessages}:
+1178: 		case <-runCtx.Done():
+1179: 		}
+1180: 	}()
+1181: 
+1182: 	tickCmd := m.scheduleTick()
+1183: 	flushModel, flushCmd := m.flowTranscriptFlushCmd()
+1184: 	*m = flushModel
+1185: 	return *m, tea.Batch(flushCmd, waitForChatMsg(events), tickCmd)
+1186: }
+
+SOURCE cmd/tui/chat/input.go file_sha256=308fae49f0144cab8f4d2fafbd81795ee31f5bb3a28c39e9201fa918a1baa930 lines=400-480
+400: }
+401: 
+402: func (m *chatModel) handleToolsCommand(args string) (tea.Model, tea.Cmd) {
+403: 	if strings.TrimSpace(args) != "" {
+404: 		m.status = "error"
+405: 		m.entries = append(m.entries, newChatEntry(chatEntry{role: "error", content: "usage: /tools"}))
+406: 		return *m, nil
+407: 	}
+408: 	if m.opts.ToolsDisabled {
+409: 		m.opts.ToolsDisabled = false
+410: 		if m.opts.ToolRegistryForModel != nil {
+411: 			m.opts.Tools = m.opts.ToolRegistryForModel(m.ctx, m.opts.Model)
+412: 		}
+413: 		m.status = "tools on"
+414: 	} else {
+415: 		m.opts.ToolsDisabled = true
+416: 		m.status = "tools off"
+417: 	}
+418: 	if m.opts.SystemPromptForModel != nil {
+419: 		m.opts.SystemPrompt = m.opts.SystemPromptForModel(m.ctx, m.opts.Model, m.opts.Tools, m.opts.ToolsDisabled)
+420: 	}
+421: 	return *m, nil
+422: }
+423: 
+424: func (m *chatModel) handleSystemCommand(args string) (tea.Model, tea.Cmd) {
+425: 	switch strings.ToLower(strings.TrimSpace(args)) {
+426: 	case "":
+427: 		m.entries = append(m.entries, newSlashEntry(m.systemCommandOutput()))
+428: 	case "on":
+429: 		m.systemPromptDisabled = false
+430: 		m.status = "system prompt on"
+431: 		m.entries = append(m.entries, newSlashEntry(m.systemCommandOutput()))
+432: 	case "off":
+433: 		m.systemPromptDisabled = true
+434: 		m.status = "system prompt off"
+435: 		m.entries = append(m.entries, newSlashEntry(m.systemCommandOutput()))
+436: 	default:
+437: 		m.status = "error"
+438: 		m.entries = append(m.entries, newChatEntry(chatEntry{role: "error", content: "usage: /system [on|off]"}))
+439: 	}
+440: 	return *m, nil
+441: }
+442: 
+443: func (m chatModel) systemPromptState() string {
+444: 	if m.systemPromptDisabled {
+445: 		return "off"
+446: 	}
+447: 	return "on"
+448: }
+449: 
+450: func (m chatModel) systemCommandOutput() string {
+451: 	prompt := strings.TrimSpace(m.opts.SystemPrompt)
+452: 	if prompt == "" {
+453: 		prompt = "(empty)"
+454: 	}
+455: 	return "Built-in system prompt is " + m.systemPromptState() + ".\n\n" + prompt + "\n\nWarning: Changing the system prompt during a session breaks the prompt cache."
+456: }
+457: 
+458: func (m chatModel) slashInputIsMultimodalFile(input string) bool {
+459: 	if !m.opts.MultiModal {
+460: 		return false
+461: 	}
+462: 	fields := strings.Fields(input)
+463: 	if len(fields) == 0 {
+464: 		return false
+465: 	}
+466: 	for _, file := range filedata.ExtractNames(input) {
+467: 		if strings.HasPrefix(file, fields[0]) {
+468: 			return true
+469: 		}
+470: 	}
+471: 	return false
+472: }
+473: 
+474: func initialPromptHistory(ctx context.Context, opts Options) []string {
+475: 	var prompts []string
+476: 	for _, msg := range opts.Messages {
+477: 		if msg.Role == "user" {
+478: 			prompts = append(prompts, msg.Content)
+479: 		}
+480: 	}
+
+SOURCE cmd/tui/chat/input.go file_sha256=308fae49f0144cab8f4d2fafbd81795ee31f5bb3a28c39e9201fa918a1baa930 lines=1719-1728
+1719: func (m chatModel) systemPrompt(extra string) string {
+1720: 	var parts []string
+1721: 	if !m.systemPromptDisabled && strings.TrimSpace(m.opts.SystemPrompt) != "" {
+1722: 		parts = append(parts, strings.TrimSpace(m.opts.SystemPrompt))
+1723: 	}
+1724: 	if strings.TrimSpace(extra) != "" {
+1725: 		parts = append(parts, strings.TrimSpace(extra))
+1726: 	}
+1727: 	return strings.Join(parts, "\n\n")
+1728: }
+
+SOURCE cmd/tui/chat/compaction.go file_sha256=d31cabf34e80f4ae23c772be65bd019aef644a3fa6b1d53428c68c0ebff8b693 lines=1-101
+1: package chat
+2: 
+3: import (
+4: 	"context"
+5: 	"slices"
+6: 
+7: 	tea "github.com/charmbracelet/bubbletea"
+8: 
+9: 	coreagent "github.com/ollama/ollama/agent"
+10: 	"github.com/ollama/ollama/api"
+11: )
+12: 
+13: func (m *chatModel) startManualCompaction() (tea.Model, tea.Cmd) {
+14: 	if m.running || m.compacting {
+15: 		m.entries = append(m.entries, newChatEntry(chatEntry{role: "system", content: "Wait for the current response to finish before compacting."}))
+16: 		return *m, nil
+17: 	}
+18: 	m.refreshContextWindowTokens(m.opts.Model)
+19: 	if m.opts.Compactor == nil {
+20: 		m.entries = append(m.entries, newChatEntry(chatEntry{role: "system", content: coreagent.CompactionSkippedMessage("compaction is unavailable")}))
+21: 		m.status = "compact skipped"
+22: 		return *m, nil
+23: 	}
+24: 
+25: 	ctx := m.ctx
+26: 	if ctx == nil {
+27: 		ctx = context.Background()
+28: 	}
+29: 	runCtx, cancel := context.WithCancel(ctx)
+30: 	compactor := m.opts.Compactor
+31: 	events := make(chan tea.Msg, 128)
+32: 	m.compacting = true
+33: 	m.compactingTokens = 0
+34: 	m.cancel = cancel
+35: 	m.compactEvents = events
+36: 	m.status = "compacting"
+37: 	messages := slices.Clone(m.messages)
+38: 	var tools api.Tools
+39: 	if m.opts.Tools != nil {
+40: 		tools = m.opts.Tools.Tools()
+41: 	}
+42: 	req := coreagent.CompactionRequest{
+43: 		ChatID:       m.chatID,
+44: 		Model:        m.opts.Model,
+45: 		SystemPrompt: m.systemPrompt(""),
+46: 		Messages:     messages,
+47: 		Tools:        tools,
+48: 		Format:       m.opts.Format,
+49: 		Options:      m.opts.Options,
+50: 		KeepAlive:    m.opts.KeepAlive,
+51: 		Force:        true,
+52: 		Progress: func(progress coreagent.CompactionProgress) {
+53: 			select {
+54: 			case events <- chatCompactProgressMsg{tokens: progress.Tokens}:
+55: 			case <-runCtx.Done():
+56: 			}
+57: 		},
+58: 	}
+59: 	go func() {
+60: 		defer close(events)
+61: 		result, err := compactor.MaybeCompact(runCtx, req)
+62: 		select {
+63: 		case events <- chatCompactDoneMsg{result: result, err: err}:
+64: 		case <-runCtx.Done():
+65: 		}
+66: 	}()
+67: 	tickCmd := m.scheduleTick()
+68: 	return *m, tea.Batch(waitForChatMsg(events), tickCmd)
+69: }
+70: 
+71: func (m chatModel) finishManualCompaction(msg chatCompactDoneMsg) (tea.Model, tea.Cmd) {
+72: 	wasCanceling := m.status == "canceling"
+73: 	m.compacting = false
+74: 	m.compactEvents = nil
+75: 	m.cancel = nil
+76: 	m.compactingTokens = 0
+77: 	if wasCanceling || isChatContextCanceledError(msg.err) {
+78: 		m.status = "compact canceled"
+79: 		return m.withFlowTranscriptFlush(nil)
+80: 	}
+81: 	if msg.err != nil {
+82: 		m.entries = append(m.entries, newChatEntry(chatEntry{role: "system", content: coreagent.CompactionSkippedMessage(msg.err.Error())}))
+83: 		m.status = "compact skipped"
+84: 		return m.withFlowTranscriptFlush(nil)
+85: 	}
+86: 	if !msg.result.Compacted {
+87: 		m.entries = append(m.entries, newChatEntry(chatEntry{role: "system", content: coreagent.CompactionSkippedMessage(msg.result.Reason)}))
+88: 		m.status = "compact skipped"
+89: 		return m.withFlowTranscriptFlush(nil)
+90: 	}
+91: 
+92: 	m.messages = msg.result.Messages
+93: 	m.liveMessages = nil
+94: 	m.entries = entriesFromMessages(m.messages)
+95: 	m.contextTokens = m.estimatePromptTokens(m.messages, "")
+96: 	m.contextEstimate = true
+97: 	m.scroll = 0
+98: 	m.flowPrintedLines = 0
+99: 	m.status = "compacted"
+100: 	return m.withFlowTranscriptFlush(nil)
+101: }
+
+SOURCE agent/session.go file_sha256=0a2521b18c99b043c8f91af37605a827bdc4d50b380e904013a5959d859d3cec lines=17-65
+17: type ChatClient interface {
+18: 	Chat(context.Context, *api.ChatRequest, api.ChatResponseFunc) error
+19: }
+20: 
+21: type Session struct {
+22: 	Client           ChatClient
+23: 	EventSinks       []EventSink
+24: 	Tools            *Registry
+25: 	Skills           *SkillCatalog
+26: 	DisableTools     bool
+27: 	ApprovalPrompter ApprovalPrompter
+28: 	ApprovalState    *ApprovalState
+29: 	WorkingDir       string
+30: 	Compactor        Compactor
+31: }
+32: 
+33: type RunOptions struct {
+34: 	ChatID       string
+35: 	Model        string
+36: 	SystemPrompt string
+37: 	Messages     []api.Message
+38: 	NewMessages  []api.Message
+39: 	Format       string
+40: 	Options      map[string]any
+41: 	Think        *api.ThinkValue
+42: 	KeepAlive    *api.Duration
+43: 	// SkillName loads a catalog skill as an ordered synthetic tool call/result
+44: 	// before the first model request for this run.
+45: 	SkillName string
+46: 	// MaxToolRounds limits consecutive model/tool cycles. A positive value is
+47: 	// an explicit limit. Zero selects the default guard. A negative value disables
+48: 	// the guard for tests or special callers.
+49: 	MaxToolRounds int
+50: }
+51: 
+52: type RunResult struct {
+53: 	Messages   []api.Message
+54: 	Latest     api.ChatResponse
+55: 	WorkingDir string
+56: }
+57: 
+58: const (
+59: 	defaultMaxToolRounds              = 100
+60: 	maxToolResultRunes                = 60000
+61: 	smallContextToolResultRunes       = 6000
+62: 	tinyContextToolResultRunes        = 3200
+63: 	smallContextToolResultTokenWindow = 8192
+64: 	tinyContextToolResultTokenWindow  = 4096
+65: 	toolTruncationMarkerReserveTokens = 64
+
+SOURCE agent/session.go file_sha256=0a2521b18c99b043c8f91af37605a827bdc4d50b380e904013a5959d859d3cec lines=369-400
+369: func (s *Session) finishRun(ctx context.Context, st *runState) (*RunResult, error) {
+370: 	if st.finish.status != "" {
+371: 		event := newRunFinished(newEventMetadata(st.runID, st.opts), st.finish.status)
+372: 		var err error
+373: 		if st.finish.ignoreCanceled {
+374: 			err = s.emitIgnoringCanceled(ctx, event)
+375: 		} else {
+376: 			err = s.emit(event)
+377: 		}
+378: 		if err != nil {
+379: 			return nil, err
+380: 		}
+381: 	}
+382: 	return &RunResult{Messages: st.messages, Latest: st.latest, WorkingDir: s.WorkingDir}, st.finish.err
+383: }
+384: 
+385: func (s *Session) chatRound(ctx context.Context, runID string, opts RunOptions, messages []api.Message, latest *api.ChatResponse) (api.Message, []api.ToolCall, bool, error) {
+386: 	meta := newEventMetadata(runID, opts)
+387: 	var tools api.Tools
+388: 	if !s.DisableTools {
+389: 		tools = s.availableTools()
+390: 	}
+391: 	req := buildChatRequest(opts, messages, tools)
+392: 
+393: 	assistant := api.Message{Role: "assistant"}
+394: 	var pendingToolCalls []api.ToolCall
+395: 
+396: 	err := s.Client.Chat(ctx, &req, func(response api.ChatResponse) error {
+397: 		if response.Message.Role != "" {
+398: 			assistant.Role = response.Message.Role
+399: 		}
+400: 
+
+SOURCE agent/session.go file_sha256=0a2521b18c99b043c8f91af37605a827bdc4d50b380e904013a5959d859d3cec lines=441-468
+441: func buildChatRequest(opts RunOptions, messages []api.Message, tools api.Tools) api.ChatRequest {
+442: 	requestMessages := sanitizeMessagesForRequest(messages)
+443: 	if strings.TrimSpace(opts.SystemPrompt) != "" {
+444: 		withSystem := make([]api.Message, 0, len(requestMessages)+1)
+445: 		withSystem = append(withSystem, api.Message{Role: "system", Content: opts.SystemPrompt})
+446: 		requestMessages = append(withSystem, requestMessages...)
+447: 	}
+448: 
+449: 	format := opts.Format
+450: 	if format == "json" {
+451: 		format = `"` + format + `"`
+452: 	}
+453: 
+454: 	req := api.ChatRequest{
+455: 		Model:    opts.Model,
+456: 		Messages: requestMessages,
+457: 		Format:   json.RawMessage(format),
+458: 		Options:  opts.Options,
+459: 		Think:    opts.Think,
+460: 	}
+461: 	if opts.KeepAlive != nil {
+462: 		req.KeepAlive = opts.KeepAlive
+463: 	}
+464: 	if len(tools) > 0 {
+465: 		req.Tools = tools
+466: 	}
+467: 	return req
+468: }
+
+SOURCE agent/compactor.go file_sha256=9852a78dd0df4744c7a67a46b7798a2ccf536aece27aa94b2ce9813db2cdf989 lines=383-473
+383: func estimateCompactionRequestTokens(req CompactionRequest) int {
+384: 	requestMessages := sanitizeMessagesForEstimate(req.Messages)
+385: 	if strings.TrimSpace(req.SystemPrompt) != "" {
+386: 		requestMessages = make([]api.Message, 0, len(req.Messages)+1)
+387: 		requestMessages = append(requestMessages, api.Message{Role: "system", Content: strings.TrimSpace(req.SystemPrompt)})
+388: 		requestMessages = append(requestMessages, sanitizeMessagesForEstimate(req.Messages)...)
+389: 	}
+390: 
+391: 	payload := struct {
+392: 		Messages []api.Message   `json:"messages,omitempty"`
+393: 		Tools    api.Tools       `json:"tools,omitempty"`
+394: 		Format   json.RawMessage `json:"format,omitempty"`
+395: 	}{
+396: 		Messages: requestMessages,
+397: 		Tools:    req.Tools,
+398: 	}
+399: 	if rawFormat, ok := compactionFormatForEstimate(req.Format); ok {
+400: 		payload.Format = rawFormat
+401: 	}
+402: 	if data, err := json.Marshal(payload); err == nil {
+403: 		return estimateCompactionTokens(string(data))
+404: 	}
+405: 
+406: 	total := estimateMessagesTokens(requestMessages)
+407: 	total += estimateCompactionTokens(req.Tools.String())
+408: 	total += estimateCompactionTokens(req.Format)
+409: 	return total
+410: }
+411: 
+412: func (s *Session) estimateRunPromptTokens(opts RunOptions, messages []api.Message) int {
+413: 	return estimateCompactionRequestTokens(CompactionRequest{
+414: 		SystemPrompt: opts.SystemPrompt,
+415: 		Messages:     messages,
+416: 		Tools:        s.availableTools(),
+417: 		Format:       opts.Format,
+418: 		Options:      opts.Options,
+419: 	})
+420: }
+421: 
+422: func (s *Session) checkPreflightPromptBudget(opts RunOptions, messages []api.Message) error {
+423: 	contextWindow := s.contextWindowTokens(opts)
+424: 	if contextWindow <= 0 {
+425: 		return nil
+426: 	}
+427: 	estimated := s.estimateRunPromptTokens(opts, messages)
+428: 	if estimated < contextWindow {
+429: 		return nil
+430: 	}
+431: 	return fmt.Errorf("prompt is too large for the current context (~%d/%d tokens). Reduce the system prompt or message history, compact the conversation, or use a model with a larger context", estimated, contextWindow)
+432: }
+433: 
+434: func (s *Session) checkPostCompactionPromptBudget(opts RunOptions, messages []api.Message) error {
+435: 	contextWindow := s.contextWindowTokens(opts)
+436: 	if contextWindow <= 0 {
+437: 		return nil
+438: 	}
+439: 	estimated := s.estimateRunPromptTokens(opts, messages)
+440: 	if estimated < contextWindow {
+441: 		return nil
+442: 	}
+443: 	return fmt.Errorf("history is still too large after compaction (~%d/%d tokens). Start a fresh request, reduce the system prompt or history, or use a model with a larger context", estimated, contextWindow)
+444: }
+445: 
+446: func sanitizeMessagesForEstimate(messages []api.Message) []api.Message {
+447: 	requestMessages := sanitizeMessagesForRequest(messages)
+448: 	for i := range requestMessages {
+449: 		// Image token accounting is model-specific. Without the active model's
+450: 		// tokenizer and vision accounting, raw image bytes/base64 make the
+451: 		// estimate look much larger than the prompt the model actually sees.
+452: 		requestMessages[i].Images = nil
+453: 	}
+454: 	return requestMessages
+455: }
+456: 
+457: func compactionFormatForEstimate(format string) (json.RawMessage, bool) {
+458: 	format = strings.TrimSpace(format)
+459: 	if format == "" {
+460: 		return nil, false
+461: 	}
+462: 	if format == "json" {
+463: 		return json.RawMessage(`"json"`), true
+464: 	}
+465: 	if !json.Valid([]byte(format)) {
+466: 		return nil, false
+467: 	}
+468: 	return json.RawMessage(format), true
+469: }
+470: 
+471: func compactionPrompt(previousSummary string, archive []api.Message, maxTokens int) (string, error) {
+472: 	messages := make([]api.Message, 0, len(archive))
+473: 	for _, msg := range archive {
+
+SOURCE app/ui/ui.go file_sha256=8d6ebf9482c618cd09243d1fde9dc765d8c7934a7de8644bce59b8d9dbd0d68c lines=480-493
+480: 
+481: func (s *Server) createChat(w http.ResponseWriter, r *http.Request) error {
+482: 	if err := WaitForServer(r.Context(), 10*time.Second); err != nil {
+483: 		return err
+484: 	}
+485: 
+486: 	id, err := uuid.NewV7()
+487: 	if err != nil {
+488: 		return fmt.Errorf("failed to generate chat ID: %w", err)
+489: 	}
+490: 
+491: 	json.NewEncoder(w).Encode(map[string]string{"id": id.String()})
+492: 	return nil
+493: }
+
+SOURCE app/ui/ui.go file_sha256=8d6ebf9482c618cd09243d1fde9dc765d8c7934a7de8644bce59b8d9dbd0d68c lines=668-807
+668: func (s *Server) chat(w http.ResponseWriter, r *http.Request) error {
+669: 	w.Header().Set("Content-Type", "text/jsonl")
+670: 	w.Header().Set("Cache-Control", "no-cache")
+671: 	w.Header().Set("Connection", "keep-alive")
+672: 	w.Header().Set("Transfer-Encoding", "chunked")
+673: 
+674: 	flusher, ok := w.(http.Flusher)
+675: 	if !ok {
+676: 		return errors.New("streaming not supported")
+677: 	}
+678: 
+679: 	if r.Method != "POST" {
+680: 		return not.Found
+681: 	}
+682: 
+683: 	cid := r.PathValue("id")
+684: 	createdChat := false
+685: 
+686: 	// if cid is the literal string "new", then we create a new chat before
+687: 	// performing our normal actions
+688: 	if cid == "new" {
+689: 		u, err := uuid.NewV7()
+690: 		if err != nil {
+691: 			return fmt.Errorf("failed to generate new chat id: %w", err)
+692: 		}
+693: 		cid = u.String()
+694: 		createdChat = true
+695: 	}
+696: 
+697: 	var req responses.ChatRequest
+698: 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+699: 		fmt.Fprintf(os.Stderr, "error unmarshalling body: %v\n", err)
+700: 		return fmt.Errorf("invalid request body: %w", err)
+701: 	}
+702: 
+703: 	if req.Model == "" {
+704: 		return fmt.Errorf("empty model")
+705: 	}
+706: 
+707: 	// Don't allow empty messages unless forceUpdate is true
+708: 	if req.Prompt == "" && !req.ForceUpdate {
+709: 		return fmt.Errorf("empty message")
+710: 	}
+711: 
+712: 	if createdChat {
+713: 		// send message to the client that the chat has been created
+714: 		json.NewEncoder(w).Encode(responses.ChatEvent{
+715: 			EventName: "chat_created",
+716: 			ChatID:    &cid,
+717: 		})
+718: 		flusher.Flush()
+719: 	}
+720: 
+721: 	// Check if this is from a specific message index (e.g. for editing)
+722: 	idx := -1
+723: 	if req.Index != nil {
+724: 		idx = *req.Index
+725: 	}
+726: 
+727: 	// Load chat with attachments since we need them for processing
+728: 	chat, err := s.Store.ChatWithOptions(cid, true)
+729: 	if err != nil {
+730: 		if !errors.Is(err, not.Found) {
+731: 			return err
+732: 		}
+733: 		chat = store.NewChat(cid)
+734: 	}
+735: 
+736: 	// Only add user message if not forceUpdate
+737: 	if !req.ForceUpdate {
+738: 		var messageOptions *store.MessageOptions
+739: 		if len(req.Attachments) > 0 {
+740: 			storeAttachments := make([]store.File, 0, len(req.Attachments))
+741: 
+742: 			for _, att := range req.Attachments {
+743: 				if att.Data == "" {
+744: 					// This is an existing file reference - keep it from the original message
+745: 					if idx >= 0 && idx < len(chat.Messages) {
+746: 						originalMessage := chat.Messages[idx]
+747: 						// Find the file by filename in the original message
+748: 						for _, originalFile := range originalMessage.Attachments {
+749: 							if originalFile.Filename == att.Filename {
+750: 								storeAttachments = append(storeAttachments, originalFile)
+751: 								break
+752: 							}
+753: 						}
+754: 					}
+755: 				} else {
+756: 					// This is a new file - decode base64 data
+757: 					data, err := base64.StdEncoding.DecodeString(att.Data)
+758: 					if err != nil {
+759: 						s.log().Error("failed to decode attachment data", "error", err, "filename", att.Filename)
+760: 						continue
+761: 					}
+762: 
+763: 					storeAttachments = append(storeAttachments, store.File{
+764: 						Filename: att.Filename,
+765: 						Data:     data,
+766: 					})
+767: 				}
+768: 			}
+769: 
+770: 			messageOptions = &store.MessageOptions{
+771: 				Attachments: storeAttachments,
+772: 			}
+773: 		}
+774: 		userMsg := store.NewMessage("user", req.Prompt, messageOptions)
+775: 
+776: 		if idx >= 0 && idx < len(chat.Messages) {
+777: 			// Generate from specified message: truncate and replace
+778: 			chat.Messages = chat.Messages[:idx]
+779: 			chat.Messages = append(chat.Messages, userMsg)
+780: 		} else {
+781: 			// Normal mode: append new message
+782: 			chat.Messages = append(chat.Messages, userMsg)
+783: 		}
+784: 
+785: 		if err := s.Store.SetChat(*chat); err != nil {
+786: 			return err
+787: 		}
+788: 	}
+789: 
+790: 	ctx, cancel := context.WithCancel(r.Context())
+791: 	defer cancel()
+792: 
+793: 	_, cancelLoading := context.WithCancel(ctx)
+794: 	loading := false
+795: 
+796: 	c := s.inferenceClient()
+797: 
+798: 	// Check if the model exists locally by trying to show it
+799: 	// TODO (jmorganca): skip this round trip and instead just act
+800: 	// on a 404 error on chat
+801: 	_, err = c.Show(ctx, &api.ShowRequest{Model: req.Model})
+802: 	if err != nil || req.ForceUpdate {
+803: 		// Create an empty assistant message to store the model information
+804: 		// This will be overwritten when the model responds
+805: 		chat.Messages = append(chat.Messages, store.NewMessage("assistant", "", &store.MessageOptions{Model: req.Model}))
+806: 		if err := s.Store.SetChat(*chat); err != nil {
+807: 			cancelLoading()
+
+SOURCE app/ui/ui.go file_sha256=8d6ebf9482c618cd09243d1fde9dc765d8c7934a7de8644bce59b8d9dbd0d68c lines=950-980
+950: 		// request-only assistant with tool_calls inserted BEFORE tool messages
+951: 		reqChat := chat
+952: 		if len(pendingAssistantToolCalls) > 0 {
+953: 			if len(chat.Messages) == 0 || chat.Messages[len(chat.Messages)-1].Role != "assistant" {
+954: 				temp := *chat
+955: 				synth := store.NewMessage("assistant", "", &store.MessageOptions{Model: req.Model, ToolCalls: pendingAssistantToolCalls})
+956: 				insertIdx := len(temp.Messages) - 1
+957: 				for insertIdx >= 0 && temp.Messages[insertIdx].Role == "tool" {
+958: 					insertIdx--
+959: 				}
+960: 				if insertIdx < 0 {
+961: 					temp.Messages = append([]store.Message{synth}, temp.Messages...)
+962: 				} else {
+963: 					tmp := make([]store.Message, 0, len(temp.Messages)+1)
+964: 					tmp = append(tmp, temp.Messages[:insertIdx+1]...)
+965: 					tmp = append(tmp, synth)
+966: 					tmp = append(tmp, temp.Messages[insertIdx+1:]...)
+967: 					temp.Messages = tmp
+968: 				}
+969: 
+970: 				reqChat = &temp
+971: 			}
+972: 		}
+973: 		chatReq, err := s.buildChatRequest(reqChat, req.Model, thinkValue, availableTools, mcpInstructions)
+974: 		if err != nil {
+975: 			return err
+976: 		}
+977: 
+978: 		err = c.Chat(ctx, chatReq, func(res api.ChatResponse) error {
+979: 			if loading {
+980: 				// Remove the loading indicator on first token
+
+SOURCE app/ui/ui.go file_sha256=8d6ebf9482c618cd09243d1fde9dc765d8c7934a7de8644bce59b8d9dbd0d68c lines=1689-1754
+1689: func (s *Server) getSettings(w http.ResponseWriter, r *http.Request) error {
+1690: 	settings, err := s.Store.Settings()
+1691: 	if err != nil {
+1692: 		return fmt.Errorf("failed to load settings: %w", err)
+1693: 	}
+1694: 
+1695: 	// set default models directory if not set
+1696: 	if settings.Models == "" {
+1697: 		settings.Models = envconfig.Models()
+1698: 	}
+1699: 
+1700: 	// Include current runtime settings
+1701: 	settings.Agent = s.Agent
+1702: 	settings.Tools = s.Tools
+1703: 	settings.WorkingDir = s.WorkingDir
+1704: 
+1705: 	w.Header().Set("Content-Type", "application/json")
+1706: 	return json.NewEncoder(w).Encode(responses.SettingsResponse{
+1707: 		Settings: settings,
+1708: 	})
+1709: }
+1710: 
+1711: func (s *Server) settings(w http.ResponseWriter, r *http.Request) error {
+1712: 	old, err := s.Store.Settings()
+1713: 	if err != nil {
+1714: 		return fmt.Errorf("failed to load settings: %w", err)
+1715: 	}
+1716: 
+1717: 	var settings store.Settings
+1718: 	if err := json.NewDecoder(r.Body).Decode(&settings); err != nil {
+1719: 		return fmt.Errorf("invalid request body: %w", err)
+1720: 	}
+1721: 
+1722: 	if err := s.Store.SetSettings(settings); err != nil {
+1723: 		return fmt.Errorf("failed to save settings: %w", err)
+1724: 	}
+1725: 
+1726: 	// Handle auto-update toggle changes
+1727: 	if old.AutoUpdateEnabled != settings.AutoUpdateEnabled {
+1728: 		if !settings.AutoUpdateEnabled {
+1729: 			// Auto-update disabled: cancel any ongoing download
+1730: 			if s.Updater != nil {
+1731: 				s.Updater.CancelOngoingDownload()
+1732: 			}
+1733: 		} else {
+1734: 			// Auto-update re-enabled: show notification if update is already staged, or trigger immediate check
+1735: 			if (updater.IsUpdatePending() || updater.UpdateDownloaded) && s.UpdateAvailableFunc != nil {
+1736: 				s.UpdateAvailableFunc()
+1737: 			} else if s.Updater != nil {
+1738: 				// Trigger the background checker to run immediately
+1739: 				s.Updater.TriggerImmediateCheck()
+1740: 			}
+1741: 		}
+1742: 	}
+1743: 
+1744: 	if old.ContextLength != settings.ContextLength ||
+1745: 		old.Models != settings.Models ||
+1746: 		old.Expose != settings.Expose {
+1747: 		s.Restart()
+1748: 	}
+1749: 
+1750: 	w.Header().Set("Content-Type", "application/json")
+1751: 	return json.NewEncoder(w).Encode(responses.SettingsResponse{
+1752: 		Settings: settings,
+1753: 	})
+1754: }
+
+SOURCE app/ui/ui.go file_sha256=8d6ebf9482c618cd09243d1fde9dc765d8c7934a7de8644bce59b8d9dbd0d68c lines=1909-2004
+1909: func (s *Server) buildChatRequest(chat *store.Chat, model string, think any, availableTools api.Tools, mcpInstructions string) (*api.ChatRequest, error) {
+1910: 	var msgs []api.Message
+1911: 	// The servers' own words, ahead of the conversation. A tool definition says
+1912: 	// what one call does; this is the only place a server can say what it is
+1913: 	// for, which is what decides whether a model reaches for it unprompted.
+1914: 	if strings.TrimSpace(mcpInstructions) != "" {
+1915: 		msgs = append(msgs, api.Message{Role: "system", Content: mcpInstructions})
+1916: 	}
+1917: 	for _, m := range chat.Messages {
+1918: 		// Skip empty messages if present
+1919: 		if m.Content == "" && m.Thinking == "" && len(m.ToolCalls) == 0 && len(m.Attachments) == 0 {
+1920: 			continue
+1921: 		}
+1922: 
+1923: 		apiMsg := api.Message{Role: m.Role, Thinking: m.Thinking}
+1924: 
+1925: 		sb := strings.Builder{}
+1926: 		sb.WriteString(m.Content)
+1927: 
+1928: 		var images []api.ImageData
+1929: 		if m.Role == "user" && len(m.Attachments) > 0 {
+1930: 			for _, a := range m.Attachments {
+1931: 				if isImageAttachment(a.Filename) {
+1932: 					images = append(images, api.ImageData(a.Data))
+1933: 				} else {
+1934: 					content := convertBytesToText(a.Data, a.Filename)
+1935: 					sb.WriteString(fmt.Sprintf("\n--- File: %s ---\n%s\n--- End of %s ---",
+1936: 						a.Filename, content, a.Filename))
+1937: 				}
+1938: 			}
+1939: 		}
+1940: 
+1941: 		apiMsg.Content = sb.String()
+1942: 		apiMsg.Images = images
+1943: 
+1944: 		switch m.Role {
+1945: 		case "assistant":
+1946: 			if len(m.ToolCalls) > 0 {
+1947: 				var toolCalls []api.ToolCall
+1948: 				for _, tc := range m.ToolCalls {
+1949: 					var args api.ToolCallFunctionArguments
+1950: 					if err := json.Unmarshal([]byte(tc.Function.Arguments), &args); err != nil {
+1951: 						s.log().Error("failed to parse tool call arguments", "error", err, "function_name", tc.Function.Name, "arguments", tc.Function.Arguments)
+1952: 						continue
+1953: 					}
+1954: 
+1955: 					toolCalls = append(toolCalls, api.ToolCall{
+1956: 						Function: api.ToolCallFunction{
+1957: 							Name:      tc.Function.Name,
+1958: 							Arguments: args,
+1959: 						},
+1960: 					})
+1961: 				}
+1962: 				apiMsg.ToolCalls = toolCalls
+1963: 			}
+1964: 		case "tool":
+1965: 			apiMsg.Role = "tool"
+1966: 			apiMsg.Content = m.Content
+1967: 			apiMsg.ToolName = m.ToolName
+1968: 		case "user", "system":
+1969: 			// User and system messages are handled normally
+1970: 		default:
+1971: 			// Log unknown roles but still include them
+1972: 			s.log().Debug("unknown message role", "role", m.Role)
+1973: 		}
+1974: 
+1975: 		msgs = append(msgs, apiMsg)
+1976: 	}
+1977: 
+1978: 	var thinkValue *api.ThinkValue
+1979: 	if think != nil {
+1980: 		// Only set Think if it's actually requesting thinking
+1981: 		if boolValue, ok := think.(bool); ok {
+1982: 			if boolValue {
+1983: 				thinkValue = &api.ThinkValue{Value: boolValue}
+1984: 			}
+1985: 		} else if stringValue, ok := think.(string); ok {
+1986: 			if stringValue != "" && stringValue != "none" {
+1987: 				thinkValue = &api.ThinkValue{Value: stringValue}
+1988: 			}
+1989: 		}
+1990: 	}
+1991: 
+1992: 	req := &api.ChatRequest{
+1993: 		Model:    model,
+1994: 		Messages: msgs,
+1995: 		Stream:   ptr(true),
+1996: 		Think:    thinkValue,
+1997: 	}
+1998: 
+1999: 	if len(availableTools) > 0 {
+2000: 		req.Tools = availableTools
+2001: 	}
+2002: 
+2003: 	return req, nil
+2004: }
+
+SOURCE app/store/store.go file_sha256=80c4bf13dd8b811809a389b3a5fc61386770b5963ce10012fe55dc29fab82601 lines=123-201
+123: type Settings struct {
+124: 	// Expose is a boolean that indicates if the ollama server should
+125: 	// be exposed to the network
+126: 	Expose bool
+127: 
+128: 	// Browser is a boolean that indicates if the ollama server should
+129: 	// be exposed to browser windows (e.g. CORS set to allow all origins)
+130: 	Browser bool
+131: 
+132: 	// Survey is a boolean that indicates if the user allows anonymous
+133: 	// inference information to be shared with Ollama
+134: 	Survey bool
+135: 
+136: 	// Models is a string that contains the models to load on startup
+137: 	Models string
+138: 
+139: 	// TODO(parthsareen): temporary for experimentation
+140: 	// Agent indicates if the app should use multi-turn tools to fulfill user requests
+141: 	Agent bool
+142: 
+143: 	// Tools indicates if the app should use single-turn tools to fulfill user requests
+144: 	Tools bool
+145: 
+146: 	// WorkingDir specifies the working directory for all agent operations
+147: 	WorkingDir string
+148: 
+149: 	// ContextLength specifies the context length for the ollama server (using OLLAMA_CONTEXT_LENGTH)
+150: 	ContextLength int
+151: 
+152: 	// TurboEnabled indicates if Ollama Turbo features are enabled
+153: 	TurboEnabled bool
+154: 
+155: 	// Maps gpt-oss specific frontend name' BrowserToolEnabled' to db field 'websearch_enabled'
+156: 	WebSearchEnabled bool
+157: 
+158: 	// ThinkEnabled indicates if thinking is enabled
+159: 	ThinkEnabled bool
+160: 
+161: 	// ThinkLevel indicates the level of thinking to use for models that support multiple levels
+162: 	ThinkLevel string
+163: 
+164: 	// SelectedModel stores the last model that the user selected
+165: 	SelectedModel string
+166: 
+167: 	// SidebarOpen indicates if the chat sidebar is open
+168: 	SidebarOpen bool
+169: 
+170: 	// LastHomeView stores the preferred home route target ("chat" or integration name)
+171: 	LastHomeView string
+172: 
+173: 	// AutoUpdateEnabled indicates if automatic updates should be downloaded
+174: 	AutoUpdateEnabled bool
+175: 
+176: 	// AutoApproveTools lets every tool call that would otherwise wait for the
+177: 	// user's approval run at once, without asking. It is one global switch,
+178: 	// off by default. The gate that honours it re-reads it on every call, so
+179: 	// switching it off takes effect on the very next tool call.
+180: 	AutoApproveTools bool
+181: }
+182: 
+183: type Store struct {
+184: 	// DBPath allows overriding the default database path (mainly for testing)
+185: 	DBPath string
+186: 
+187: 	// dbMu protects database initialization only
+188: 	dbMu sync.Mutex
+189: 	db   *database
+190: }
+191: 
+192: var defaultDBPath = func() string {
+193: 	switch runtime.GOOS {
+194: 	case "windows":
+195: 		return filepath.Join(os.Getenv("LOCALAPPDATA"), "Ollama", "db.sqlite")
+196: 	case "darwin":
+197: 		return filepath.Join(os.Getenv("HOME"), "Library", "Application Support", "Ollama", "db.sqlite")
+198: 	default:
+199: 		return filepath.Join(os.Getenv("HOME"), ".ollama", "db.sqlite")
+200: 	}
+201: }()
+
+SOURCE app/store/store.go file_sha256=80c4bf13dd8b811809a389b3a5fc61386770b5963ce10012fe55dc29fab82601 lines=378-443
+378: func (s *Store) Settings() (Settings, error) {
+379: 	if err := s.ensureDB(); err != nil {
+380: 		return Settings{}, fmt.Errorf("load settings: %w", err)
+381: 	}
+382: 
+383: 	settings, err := s.db.getSettings()
+384: 	if err != nil {
+385: 		return Settings{}, err
+386: 	}
+387: 
+388: 	// Set default models directory if not set
+389: 	if settings.Models == "" {
+390: 		dir := os.Getenv("OLLAMA_MODELS")
+391: 		if dir != "" {
+392: 			settings.Models = dir
+393: 		} else {
+394: 			home, err := os.UserHomeDir()
+395: 			if err == nil {
+396: 				settings.Models = filepath.Join(home, ".ollama", "models")
+397: 			}
+398: 		}
+399: 	}
+400: 
+401: 	if settings.LastHomeView == "" {
+402: 		settings.LastHomeView = "launch"
+403: 	}
+404: 
+405: 	return settings, nil
+406: }
+407: 
+408: func (s *Store) SetSettings(settings Settings) error {
+409: 	if err := s.ensureDB(); err != nil {
+410: 		return err
+411: 	}
+412: 
+413: 	return s.db.setSettings(settings)
+414: }
+415: 
+416: func (s *Store) Chats() ([]Chat, error) {
+417: 	if err := s.ensureDB(); err != nil {
+418: 		return nil, err
+419: 	}
+420: 
+421: 	return s.db.getAllChats()
+422: }
+423: 
+424: func (s *Store) Chat(id string) (*Chat, error) {
+425: 	return s.ChatWithOptions(id, true)
+426: }
+427: 
+428: func (s *Store) ChatWithOptions(id string, loadAttachmentData bool) (*Chat, error) {
+429: 	if err := s.ensureDB(); err != nil {
+430: 		return nil, err
+431: 	}
+432: 
+433: 	return s.db.getChatWithOptions(id, loadAttachmentData)
+434: }
+435: 
+436: func (s *Store) SetChat(chat Chat) error {
+437: 	if err := s.ensureDB(); err != nil {
+438: 		return err
+439: 	}
+440: 
+441: 	return s.db.saveChat(chat)
+442: }
+443: 
+
+SOURCE app/store/database.go file_sha256=6905b4e6146f76e0aed66f97e17a39245d27a0182f0051d06642389de042b551 lines=677-716
+677: func (db *database) getChatWithOptions(id string, loadAttachmentData bool) (*Chat, error) {
+678: 	query := `
+679: 		SELECT id, title, created_at, browser_state
+680: 		FROM chats
+681: 		WHERE id = ?
+682: 	`
+683: 
+684: 	var chat Chat
+685: 	var createdAt time.Time
+686: 	var browserState sql.NullString
+687: 
+688: 	err := db.conn.QueryRow(query, id).Scan(
+689: 		&chat.ID,
+690: 		&chat.Title,
+691: 		&createdAt,
+692: 		&browserState,
+693: 	)
+694: 	if err != nil {
+695: 		if err == sql.ErrNoRows {
+696: 			return nil, fmt.Errorf("%w: chat %s", not.Found, id)
+697: 		}
+698: 		return nil, fmt.Errorf("query chat: %w", err)
+699: 	}
+700: 
+701: 	chat.CreatedAt = createdAt
+702: 	if browserState.Valid && browserState.String != "" {
+703: 		var raw json.RawMessage
+704: 		if err := json.Unmarshal([]byte(browserState.String), &raw); err == nil {
+705: 			chat.BrowserState = raw
+706: 		}
+707: 	}
+708: 
+709: 	messages, err := db.getMessages(id, loadAttachmentData)
+710: 	if err != nil {
+711: 		return nil, fmt.Errorf("get messages: %w", err)
+712: 	}
+713: 	chat.Messages = messages
+714: 
+715: 	return &chat, nil
+716: }
+
+SOURCE app/store/database.go file_sha256=6905b4e6146f76e0aed66f97e17a39245d27a0182f0051d06642389de042b551 lines=718-776
+718: func (db *database) saveChat(chat Chat) error {
+719: 	tx, err := db.conn.Begin()
+720: 	if err != nil {
+721: 		return fmt.Errorf("begin transaction: %w", err)
+722: 	}
+723: 	defer tx.Rollback()
+724: 
+725: 	// Use COALESCE for browser_state to avoid wiping an existing
+726: 	// chat-level browser_state when saving a chat that doesn't include a new state payload.
+727: 	// Many code paths call SetChat to update metadata/messages only; without COALESCE the
+728: 	// UPSERT would overwrite browser_state with NULL, breaking revisit rendering that relies
+729: 	// on the last persisted full tool state.
+730: 	query := `
+731: 		INSERT INTO chats (id, title, created_at, browser_state)
+732: 		VALUES (?, ?, ?, ?)
+733: 		ON CONFLICT(id) DO UPDATE SET
+734: 			title = excluded.title,
+735: 			browser_state = COALESCE(excluded.browser_state, chats.browser_state)
+736: 	`
+737: 
+738: 	var browserState sql.NullString
+739: 	if chat.BrowserState != nil {
+740: 		browserState = sql.NullString{String: string(chat.BrowserState), Valid: true}
+741: 	}
+742: 
+743: 	_, err = tx.Exec(query,
+744: 		chat.ID,
+745: 		chat.Title,
+746: 		chat.CreatedAt,
+747: 		browserState,
+748: 	)
+749: 	if err != nil {
+750: 		return fmt.Errorf("save chat: %w", err)
+751: 	}
+752: 
+753: 	// Delete existing messages (we'll re-insert all)
+754: 	_, err = tx.Exec("DELETE FROM messages WHERE chat_id = ?", chat.ID)
+755: 	if err != nil {
+756: 		return fmt.Errorf("delete messages: %w", err)
+757: 	}
+758: 
+759: 	// Insert messages
+760: 	for _, msg := range chat.Messages {
+761: 		messageID, err := db.insertMessage(tx, chat.ID, msg)
+762: 		if err != nil {
+763: 			return fmt.Errorf("insert message: %w", err)
+764: 		}
+765: 
+766: 		// Insert tool calls if any
+767: 		for _, toolCall := range msg.ToolCalls {
+768: 			err := db.insertToolCall(tx, messageID, toolCall)
+769: 			if err != nil {
+770: 				return fmt.Errorf("insert tool call: %w", err)
+771: 			}
+772: 		}
+773: 	}
+774: 
+775: 	return tx.Commit()
+776: }
+
+SOURCE cmd/config/config.go file_sha256=52a9905ce9eb38ca8cf73f89f0529b1065755469e485ebdf1d9a3ee0fd398078 lines=1-95
+1: // Package config provides integration configuration for external coding tools
+2: // (Claude Code, Codex, Droid, OpenCode) to use Ollama models.
+3: package config
+4: 
+5: import (
+6: 	"encoding/json"
+7: 	"errors"
+8: 	"fmt"
+9: 	"os"
+10: 	"path/filepath"
+11: 	"strings"
+12: 
+13: 	"github.com/ollama/ollama/cmd/internal/fileutil"
+14: )
+15: 
+16: type integration struct {
+17: 	Models    []string          `json:"models"`
+18: 	Aliases   map[string]string `json:"aliases,omitempty"`
+19: 	Onboarded bool              `json:"onboarded,omitempty"`
+20: }
+21: 
+22: // IntegrationConfig is the persisted config for one integration.
+23: type IntegrationConfig = integration
+24: 
+25: type config struct {
+26: 	Integrations  map[string]*integration `json:"integrations"`
+27: 	LastModel     string                  `json:"last_model,omitempty"`
+28: 	LastSelection string                  `json:"last_selection,omitempty"` // "run" or integration name
+29: }
+30: 
+31: func configPath() (string, error) {
+32: 	home, err := os.UserHomeDir()
+33: 	if err != nil {
+34: 		return "", err
+35: 	}
+36: 	return filepath.Join(home, ".ollama", "config.json"), nil
+37: }
+38: 
+39: func legacyConfigPath() (string, error) {
+40: 	home, err := os.UserHomeDir()
+41: 	if err != nil {
+42: 		return "", err
+43: 	}
+44: 	return filepath.Join(home, ".ollama", "config", "config.json"), nil
+45: }
+46: 
+47: // migrateConfig moves the config from the legacy path to ~/.ollama/config.json
+48: func migrateConfig() (bool, error) {
+49: 	oldPath, err := legacyConfigPath()
+50: 	if err != nil {
+51: 		return false, err
+52: 	}
+53: 
+54: 	oldData, err := os.ReadFile(oldPath)
+55: 	if err != nil {
+56: 		if os.IsNotExist(err) {
+57: 			return false, nil
+58: 		}
+59: 		return false, err
+60: 	}
+61: 
+62: 	// Ignore legacy files with invalid JSON and continue startup.
+63: 	if !json.Valid(oldData) {
+64: 		return false, nil
+65: 	}
+66: 
+67: 	newPath, err := configPath()
+68: 	if err != nil {
+69: 		return false, err
+70: 	}
+71: 
+72: 	if err := os.MkdirAll(filepath.Dir(newPath), 0o755); err != nil {
+73: 		return false, err
+74: 	}
+75: 	if err := os.WriteFile(newPath, oldData, 0o644); err != nil {
+76: 		return false, fmt.Errorf("write new config: %w", err)
+77: 	}
+78: 
+79: 	_ = os.Remove(oldPath)
+80: 	_ = os.Remove(filepath.Dir(oldPath)) // clean up empty directory
+81: 
+82: 	return true, nil
+83: }
+84: 
+85: func load() (*config, error) {
+86: 	path, err := configPath()
+87: 	if err != nil {
+88: 		return nil, err
+89: 	}
+90: 
+91: 	data, err := os.ReadFile(path)
+92: 	if err != nil && os.IsNotExist(err) {
+93: 		if migrated, merr := migrateConfig(); merr == nil && migrated {
+94: 			data, err = os.ReadFile(path)
+95: 		}
+
+SOURCE api/types.go file_sha256=2155658af3cdb27fc0f44d772ce94a7b52f8da1b51d7b26aa0d158d08ee5791d lines=133-180
+133: type ChatRequest struct {
+134: 	// Model is the model name, as in [GenerateRequest].
+135: 	Model string `json:"model"`
+136: 
+137: 	// Messages is the messages of the chat - can be used to keep a chat memory.
+138: 	Messages []Message `json:"messages"`
+139: 
+140: 	// Stream enables streaming of returned responses; true by default.
+141: 	Stream *bool `json:"stream,omitempty"`
+142: 
+143: 	// Format is the format to return the response in (e.g. "json").
+144: 	Format json.RawMessage `json:"format,omitempty"`
+145: 
+146: 	// KeepAlive controls how long the model will stay loaded into memory
+147: 	// following the request.
+148: 	KeepAlive *Duration `json:"keep_alive,omitempty"`
+149: 
+150: 	// Tools is an optional list of tools the model has access to.
+151: 	Tools `json:"tools,omitempty"`
+152: 
+153: 	// Options lists model-specific options.
+154: 	Options map[string]any `json:"options"`
+155: 
+156: 	// Think controls whether thinking/reasoning models will think before
+157: 	// responding. Can be a boolean (true/false) or a string ("high", "medium", "low")
+158: 	// for supported models.
+159: 	Think *ThinkValue `json:"think,omitempty"`
+160: 
+161: 	// Truncate is a boolean that, when set to true, truncates the chat history messages
+162: 	// if the rendered prompt exceeds the context length limit.
+163: 	Truncate *bool `json:"truncate,omitempty"`
+164: 
+165: 	// Shift is a boolean that, when set to true, shifts the chat history
+166: 	// when hitting the context length limit instead of erroring.
+167: 	Shift *bool `json:"shift,omitempty"`
+168: 
+169: 	// DebugRenderOnly is a debug option that, when set to true, returns the rendered
+170: 	// template instead of calling the model.
+171: 	DebugRenderOnly bool `json:"_debug_render_only,omitempty"`
+172: 
+173: 	// Logprobs specifies whether to return log probabilities of the output tokens.
+174: 	Logprobs bool `json:"logprobs,omitempty"`
+175: 
+176: 	// TopLogprobs is the number of most likely tokens to return at each token position,
+177: 	// each with an associated log probability. Only applies when Logprobs is true.
+178: 	// Valid values are 0-20. Default is 0 (only return the selected token's logprob).
+179: 	TopLogprobs int `json:"top_logprobs,omitempty"`
+180: }
+
+SOURCE api/types.go file_sha256=2155658af3cdb27fc0f44d772ce94a7b52f8da1b51d7b26aa0d158d08ee5791d lines=801-843
+801: // ModelRecommendationsResponse is the response from [Client.ModelRecommendationsExperimental].
+802: type ModelRecommendationsResponse struct {
+803: 	Recommendations []ModelRecommendation `json:"recommendations"`
+804: }
+805: 
+806: // ModelRecommendation is a single recommendation entry in [ModelRecommendationsResponse].
+807: type ModelRecommendation struct {
+808: 	Model           string `json:"model"`
+809: 	Description     string `json:"description"`
+810: 	ContextLength   int    `json:"context_length,omitempty"`
+811: 	MaxOutputTokens int    `json:"max_output_tokens,omitempty"`
+812: 	VRAMBytes       int64  `json:"vram_bytes,omitempty"`
+813: 	RequiredPlan    string `json:"required_plan,omitempty"`
+814: }
+815: 
+816: // ProcessResponse is the response from [Client.Process].
+817: type ProcessResponse struct {
+818: 	Models []ProcessModelResponse `json:"models"`
+819: }
+820: 
+821: // ListModelResponse is a single model description in [ListResponse].
+822: type ListModelResponse struct {
+823: 	Name         string             `json:"name"`
+824: 	Model        string             `json:"model"`
+825: 	RemoteModel  string             `json:"remote_model,omitempty"`
+826: 	RemoteHost   string             `json:"remote_host,omitempty"`
+827: 	ModifiedAt   time.Time          `json:"modified_at"`
+828: 	Size         int64              `json:"size"`
+829: 	Digest       string             `json:"digest"`
+830: 	Details      ModelDetails       `json:"details,omitempty"`
+831: 	Capabilities []model.Capability `json:"capabilities,omitempty"`
+832: }
+833: 
+834: // ProcessModelResponse is a single model description in [ProcessResponse].
+835: type ProcessModelResponse struct {
+836: 	Name          string       `json:"name"`
+837: 	Model         string       `json:"model"`
+838: 	Size          int64        `json:"size"`
+839: 	Digest        string       `json:"digest"`
+840: 	Details       ModelDetails `json:"details,omitempty"`
+841: 	ExpiresAt     time.Time    `json:"expires_at"`
+842: 	SizeVRAM      int64        `json:"size_vram"`
+843: 	ContextLength int          `json:"context_length"`
+
+SOURCE server/prompt.go file_sha256=79411c4e15ff27fb8bac4dcd96076407e035ec407c0ab1a1840035f9668b4654 lines=18-92
+18: type tokenizeFunc func(context.Context, string) ([]int, error)
+19: 
+20: // chatPrompt accepts a list of messages and returns the prompt and media that should be used for the next chat turn.
+21: // chatPrompt truncates any messages that exceed the context window of the model, making sure to always include 1) the
+22: // latest message and 2) system messages
+23: func chatPrompt(ctx context.Context, m *Model, tokenize tokenizeFunc, opts *api.Options, msgs []api.Message, tools []api.Tool, think *api.ThinkValue, truncate bool) (prompt string, media []llm.MediaData, _ error) {
+24: 	var system []api.Message
+25: 
+26: 	// TODO: This is only a truncation heuristic; llama-server handles the
+27: 	// actual image/media inputs. Replace this with projector/model-aware media
+28: 	// token accounting so image history is neither over-packed nor over-trimmed.
+29: 	// Clip images are represented as 768 tokens, each an embedding.
+30: 	imageNumTokens := 768
+31: 
+32: 	lastMsgIdx := len(msgs) - 1
+33: 	currMsgIdx := 0
+34: 
+35: 	if truncate {
+36: 		// Start with all messages and remove from the front until it fits in context
+37: 		for i := 0; i <= lastMsgIdx; i++ {
+38: 			// Collect system messages from the portion we're about to skip
+39: 			system = make([]api.Message, 0)
+40: 			for j := range i {
+41: 				if msgs[j].Role == "system" {
+42: 					system = append(system, msgs[j])
+43: 				}
+44: 			}
+45: 
+46: 			p, err := renderPrompt(m, append(system, msgs[i:]...), tools, think)
+47: 			if err != nil {
+48: 				return "", nil, err
+49: 			}
+50: 
+51: 			s, err := tokenize(ctx, p)
+52: 			if err != nil {
+53: 				return "", nil, err
+54: 			}
+55: 
+56: 			ctxLen := len(s)
+57: 			if m.ProjectorPaths != nil {
+58: 				for _, msg := range msgs[i:] {
+59: 					ctxLen += imageNumTokens * len(msg.Images)
+60: 				}
+61: 			}
+62: 
+63: 			if ctxLen <= opts.NumCtx {
+64: 				currMsgIdx = i
+65: 				break
+66: 			}
+67: 
+68: 			// Must always include at least the last message
+69: 			if i == lastMsgIdx {
+70: 				currMsgIdx = lastMsgIdx
+71: 				break
+72: 			}
+73: 		}
+74: 	}
+75: 
+76: 	if currMsgIdx > 0 {
+77: 		slog.Debug("truncating input messages which exceed context length", "truncated", len(msgs[currMsgIdx:]))
+78: 	}
+79: 
+80: 	renderMsgs, media, err := imageTaggedMessages(m, msgs, currMsgIdx, false)
+81: 	if err != nil {
+82: 		return "", nil, err
+83: 	}
+84: 
+85: 	// truncate any messages that do not fit into the context window
+86: 	p, err := renderPrompt(m, append(system, renderMsgs[currMsgIdx:]...), tools, think)
+87: 	if err != nil {
+88: 		return "", nil, err
+89: 	}
+90: 
+91: 	return p, media, nil
+92: }
+
+SOURCE server/routes.go file_sha256=47b8e89a73ef76d118c89c101dbd9f74b0a63777ba3cbac153b46002b5397ec2 lines=2495-2535
+2495: 	if m.Config.RemoteHost != "" && m.Config.RemoteModel != "" {
+2496: 		if disabled, _ := internalcloud.Status(); disabled {
+2497: 			c.JSON(http.StatusForbidden, gin.H{"error": internalcloud.DisabledError(cloudErrRemoteInferenceUnavailable)})
+2498: 			return
+2499: 		}
+2500: 
+2501: 		origModel := req.Model
+2502: 
+2503: 		remoteURL, err := url.Parse(m.Config.RemoteHost)
+2504: 		if err != nil {
+2505: 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+2506: 			return
+2507: 		}
+2508: 
+2509: 		if !slices.Contains(envconfig.Remotes(), remoteURL.Hostname()) {
+2510: 			slog.Info("remote model", "remotes", envconfig.Remotes(), "remoteURL", m.Config.RemoteHost, "hostname", remoteURL.Hostname())
+2511: 			c.JSON(http.StatusBadRequest, gin.H{"error": "this server cannot run this remote model"})
+2512: 			return
+2513: 		}
+2514: 
+2515: 		req.Model = m.Config.RemoteModel
+2516: 		if req.Options == nil {
+2517: 			req.Options = map[string]any{}
+2518: 		}
+2519: 
+2520: 		var msgs []api.Message
+2521: 		if len(req.Messages) > 0 {
+2522: 			msgs = append(m.Messages, req.Messages...)
+2523: 			if req.Messages[0].Role != "system" && m.System != "" {
+2524: 				msgs = append([]api.Message{{Role: "system", Content: m.System}}, msgs...)
+2525: 			}
+2526: 		}
+2527: 
+2528: 		msgs = filterThinkTags(msgs, m)
+2529: 		req.Messages = msgs
+2530: 
+2531: 		for k, v := range m.Options {
+2532: 			if _, ok := req.Options[k]; !ok {
+2533: 				req.Options[k] = v
+2534: 			}
+2535: 		}
+
+SOURCE server/routes.go file_sha256=47b8e89a73ef76d118c89c101dbd9f74b0a63777ba3cbac153b46002b5397ec2 lines=2611-2655
+2611: 	r, m, opts, err := s.scheduleRunner(c.Request.Context(), name.String(), caps, req.Options, req.KeepAlive, req.Shift)
+2612: 	if errors.Is(err, errCapabilityCompletion) {
+2613: 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%q does not support chat", req.Model)})
+2614: 		return
+2615: 	} else if err != nil {
+2616: 		handleScheduleError(c, req.Model, err)
+2617: 		return
+2618: 	}
+2619: 
+2620: 	checkpointLoaded := time.Now()
+2621: 
+2622: 	if len(req.Messages) == 0 {
+2623: 		c.JSON(http.StatusOK, api.ChatResponse{
+2624: 			Model:      req.Model,
+2625: 			CreatedAt:  time.Now().UTC(),
+2626: 			Message:    api.Message{Role: "assistant"},
+2627: 			Done:       true,
+2628: 			DoneReason: "load",
+2629: 		})
+2630: 		return
+2631: 	}
+2632: 
+2633: 	msgs := append(m.Messages, req.Messages...)
+2634: 	if req.Messages[0].Role != "system" && m.System != "" {
+2635: 		msgs = append([]api.Message{{Role: "system", Content: m.System}}, msgs...)
+2636: 	}
+2637: 	msgs = filterThinkTags(msgs, m)
+2638: 
+2639: 	if shouldUseHarmony(m) {
+2640: 		// harmony's Reasoning field only understands low/medium/high; map "max" to "high"
+2641: 		if req.Think != nil {
+2642: 			if s, ok := req.Think.Value.(string); ok && s == "max" {
+2643: 				req.Think.Value = "high"
+2644: 			}
+2645: 		}
+2646: 		if m.Config.Parser == "" {
+2647: 			m.Config.Parser = "harmony"
+2648: 		}
+2649: 	}
+2650: 
+2651: 	if chatModeForModel(m) == chatExecutionModeNative {
+2652: 		s.handleNativeChat(c, req, m, r, opts, msgs, checkpointStart, checkpointLoaded)
+2653: 		return
+2654: 	}
+2655: 
+
+SOURCE server/routes.go file_sha256=47b8e89a73ef76d118c89c101dbd9f74b0a63777ba3cbac153b46002b5397ec2 lines=2672-2695
+2672: 	truncate := req.Truncate == nil || *req.Truncate
+2673: 	if m.IsMLX() {
+2674: 		truncate = false
+2675: 	}
+2676: 	promptOpts := optionsForPrompt(opts, r)
+2677: 	prompt, media, err := chatPrompt(c.Request.Context(), m, r.Tokenize, promptOpts, msgs, processedTools, req.Think, truncate)
+2678: 	if err != nil {
+2679: 		slog.Error("chat prompt error", "error", err)
+2680: 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+2681: 		return
+2682: 	}
+2683: 
+2684: 	// If debug mode is enabled, return the rendered template instead of calling the model
+2685: 	if req.DebugRenderOnly {
+2686: 		c.JSON(http.StatusOK, api.ChatResponse{
+2687: 			Model:     req.Model,
+2688: 			CreatedAt: time.Now().UTC(),
+2689: 			DebugInfo: &api.DebugInfo{
+2690: 				RenderedTemplate: prompt,
+2691: 				ImageCount:       len(media),
+2692: 			},
+2693: 		})
+2694: 		return
+2695: 	}
+
+SOURCE server/routes.go file_sha256=47b8e89a73ef76d118c89c101dbd9f74b0a63777ba3cbac153b46002b5397ec2 lines=2913-2939
+2913: func prepareNativeChatRequest(ctx context.Context, m *Model, r llm.LlamaServer, opts *api.Options, nativeReq llm.ChatRequest, truncate bool) (llm.ChatRequest, error) {
+2914: 	var err error
+2915: 	nativeReq.Messages, err = truncateNativeChatMessages(ctx, m, r, optionsForPrompt(opts, r), nativeReq, truncate)
+2916: 	return nativeReq, err
+2917: }
+2918: 
+2919: func (s *Server) handleNativeChat(c *gin.Context, req api.ChatRequest, m *Model, r llm.LlamaServer, opts *api.Options, msgs []api.Message, checkpointStart, checkpointLoaded time.Time) {
+2920: 	truncate := req.Truncate == nil || *req.Truncate
+2921: 	nativeReq, err := prepareNativeChatRequest(c.Request.Context(), m, r, opts, llm.ChatRequest{
+2922: 		Messages:    msgs,
+2923: 		Tools:       req.Tools,
+2924: 		Format:      req.Format,
+2925: 		Options:     opts,
+2926: 		Think:       req.Think,
+2927: 		Shift:       req.Shift == nil || *req.Shift,
+2928: 		Logprobs:    req.Logprobs,
+2929: 		TopLogprobs: req.TopLogprobs,
+2930: 	}, truncate)
+2931: 	if err != nil {
+2932: 		slog.Error("chat template prompt error", "error", err)
+2933: 		var serr api.StatusError
+2934: 		if errors.As(err, &serr) {
+2935: 			c.JSON(serr.StatusCode, gin.H{"error": serr.ErrorMessage})
+2936: 		} else {
+2937: 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+2938: 		}
+2939: 		return
+
+SOURCE server/routes.go file_sha256=47b8e89a73ef76d118c89c101dbd9f74b0a63777ba3cbac153b46002b5397ec2 lines=3010-3066
+3010: func truncateNativeChatMessages(ctx context.Context, m *Model, r llm.LlamaServer, opts *api.Options, req llm.ChatRequest, truncate bool) ([]api.Message, error) {
+3011: 	if !truncate || opts == nil || opts.NumCtx <= 0 || len(req.Messages) <= 1 {
+3012: 		return req.Messages, nil
+3013: 	}
+3014: 
+3015: 	lastMsgIdx := len(req.Messages) - 1
+3016: 	currMsgIdx := 0
+3017: 	var system []api.Message
+3018: 
+3019: 	for i := 0; i <= lastMsgIdx; i++ {
+3020: 		system = system[:0]
+3021: 		for j := range i {
+3022: 			if req.Messages[j].Role == "system" {
+3023: 				system = append(system, req.Messages[j])
+3024: 			}
+3025: 		}
+3026: 
+3027: 		renderReq := req
+3028: 		renderReq.Messages = append(slices.Clone(system), req.Messages[i:]...)
+3029: 		prompt, err := r.ApplyChatTemplate(ctx, renderReq)
+3030: 		if err != nil {
+3031: 			return nil, err
+3032: 		}
+3033: 
+3034: 		tokens, err := r.Tokenize(ctx, prompt)
+3035: 		if err != nil {
+3036: 			return nil, err
+3037: 		}
+3038: 
+3039: 		ctxLen := len(tokens)
+3040: 		if m != nil && m.ProjectorPaths != nil {
+3041: 			for _, msg := range renderReq.Messages {
+3042: 				ctxLen += 768 * len(msg.Images)
+3043: 			}
+3044: 		}
+3045: 
+3046: 		if ctxLen <= opts.NumCtx {
+3047: 			currMsgIdx = i
+3048: 			break
+3049: 		}
+3050: 		if i == lastMsgIdx {
+3051: 			currMsgIdx = lastMsgIdx
+3052: 			break
+3053: 		}
+3054: 	}
+3055: 
+3056: 	if currMsgIdx > 0 {
+3057: 		slog.Debug("truncating native chat messages which exceed context length", "truncated", currMsgIdx)
+3058: 	}
+3059: 
+3060: 	system = system[:0]
+3061: 	for j := range currMsgIdx {
+3062: 		if req.Messages[j].Role == "system" {
+3063: 			system = append(system, req.Messages[j])
+3064: 		}
+3065: 	}
+3066: 	return append(slices.Clone(system), req.Messages[currMsgIdx:]...), nil
+
+SOURCE llm/llama_server.go file_sha256=eb6b90eab5122a509a841b54c57fb08ce91a000591d6abd18bd51cda625db46e lines=276-315
+276: func (s *llamaServerRunner) completionPromptForRequest(ctx context.Context, req CompletionRequest) (any, error) {
+277: 	prompt := s.completionPrompt(req.Prompt, req.LeadingBOS)
+278: 	if !req.Truncate || len(req.Media) > 0 || s.options.NumCtx <= 1 || len(prompt) < s.options.NumCtx {
+279: 		return prompt, nil
+280: 	}
+281: 
+282: 	tokens, err := s.tokenize(ctx, prompt, true, nil)
+283: 	if err != nil {
+284: 		return nil, err
+285: 	}
+286: 
+287: 	fullPromptLimit := s.options.NumCtx - 1
+288: 	if len(tokens) <= fullPromptLimit {
+289: 		return prompt, nil
+290: 	}
+291: 
+292: 	if !s.launch.config.ContextShift {
+293: 		return nil, api.StatusError{
+294: 			StatusCode:   http.StatusBadRequest,
+295: 			ErrorMessage: "the prompt is longer than the context length currently available to the model; shorten the prompt, adjust the context length in settings, or use a model with a longer context length",
+296: 		}
+297: 	}
+298: 
+299: 	nKeep := req.Options.NumKeep
+300: 	if nKeep < 0 {
+301: 		nKeep = len(tokens)
+302: 	}
+303: 	if s.tokenizerAddsBOS() {
+304: 		nKeep++
+305: 	}
+306: 	nKeep = min(nKeep, fullPromptLimit)
+307: 
+308: 	limit := contextShiftPromptLimit(s.options.NumCtx, nKeep)
+309: 	discard := len(tokens) - limit
+310: 	truncated := make([]int, 0, limit)
+311: 	truncated = append(truncated, tokens[:nKeep]...)
+312: 	truncated = append(truncated, tokens[nKeep+discard:]...)
+313: 
+314: 	slog.Warn("truncating input prompt", "limit", limit, "prompt", len(tokens), "keep", nKeep, "new", len(truncated))
+315: 	return truncated, nil
+
+SOURCE llm/llama_server.go file_sha256=eb6b90eab5122a509a841b54c57fb08ce91a000591d6abd18bd51cda625db46e lines=1465-1475
+1465: type llamaServerTimings struct {
+1466: 	CacheN    int     `json:"cache_n"`
+1467: 	PromptN   int     `json:"prompt_n"`
+1468: 	PromptMS  float64 `json:"prompt_ms"`
+1469: 	PredictN  int     `json:"predicted_n"`
+1470: 	PredictMS float64 `json:"predicted_ms"`
+1471: }
+1472: 
+1473: func (t llamaServerTimings) promptEvalCount() int {
+1474: 	return t.CacheN + t.PromptN
+1475: }
+
+SOURCE app/ui/app/src/components/Settings.tsx file_sha256=88cc55ca3a1e2f7a5ecd773c0b570b47670e664dcf5eab254668d733acfec22a lines=49-100
+49: export default function Settings() {
+50:   const queryClient = useQueryClient();
+51:   const [showSaved, setShowSaved] = useState(false);
+52:   const [restartMessage, setRestartMessage] = useState(false);
+53:   const {
+54:     user,
+55:     isAuthenticated,
+56:     refreshUser,
+57:     isRefreshing,
+58:     refetchUser,
+59:     fetchConnectUrl,
+60:     isLoading,
+61:     disconnectUser,
+62:   } = useUser();
+63:   const [isAwaitingConnection, setIsAwaitingConnection] = useState(false);
+64:   const [connectionError, setConnectionError] = useState<string | null>(null);
+65:   const [pollingInterval, setPollingInterval] = useState<number | null>(null);
+66:   const navigate = useNavigate();
+67:   const {
+68:     cloudDisabled,
+69:     cloudStatus,
+70:     isLoading: cloudStatusLoading,
+71:   } = useCloudStatus();
+72: 
+73:   const {
+74:     data: settingsData,
+75:     isLoading: loading,
+76:     error,
+77:   } = useQuery({
+78:     queryKey: ["settings"],
+79:     queryFn: getSettings,
+80:   });
+81: 
+82:   const settings = settingsData?.settings || null;
+83: 
+84:   const { data: inferenceComputeResponse } = useQuery({
+85:     queryKey: ["inferenceCompute"],
+86:     queryFn: getInferenceCompute,
+87:   });
+88: 
+89:   const defaultContextLength = inferenceComputeResponse?.defaultContextLength;
+90: 
+91:   const updateSettingsMutation = useMutation({
+92:     mutationFn: updateSettings,
+93:     onSuccess: () => {
+94:       queryClient.invalidateQueries({ queryKey: ["settings"] });
+95:       setShowSaved(true);
+96:       setTimeout(() => setShowSaved(false), 1500);
+97:     },
+98:   });
+99: 
+100:   const updateCloudMutation = useMutation({
+
+SOURCE app/ui/app/src/components/Settings.tsx file_sha256=88cc55ca3a1e2f7a5ecd773c0b570b47670e664dcf5eab254668d733acfec22a lines=189-224
+189:   const handleChange = useCallback(
+190:     (field: keyof SettingsType, value: boolean | string | number) => {
+191:       if (settings) {
+192:         const updatedSettings = new SettingsType({
+193:           ...settings,
+194:           [field]: value,
+195:         });
+196: 
+197:         // If context length is being changed, show restart message
+198:         if (field === "ContextLength" && value !== settings.ContextLength) {
+199:           setRestartMessage(true);
+200:           // Hide restart message after 3 seconds
+201:           setTimeout(() => setRestartMessage(false), 3000);
+202:         }
+203: 
+204:         updateSettingsMutation.mutate(updatedSettings);
+205:       }
+206:     },
+207:     [settings, updateSettingsMutation],
+208:   );
+209: 
+210:   const handleResetToDefaults = () => {
+211:     if (settings) {
+212:       const defaultSettings = new SettingsType({
+213:         Expose: false,
+214:         Browser: false,
+215:         Models: "",
+216:         Agent: false,
+217:         Tools: false,
+218:         ContextLength: 0,
+219:         AutoUpdateEnabled: true,
+220:         AutoApproveTools: false,
+221:       });
+222:       updateSettingsMutation.mutate(defaultSettings);
+223:     }
+224:   };
+
+SOURCE app/ui/app/src/api.ts file_sha256=19e7d77c7b8e69cf689172f22a67ed7e28707916c199aefea501f43ef5cd16ff lines=513-544
+513: export async function getSettings(): Promise<{
+514:   settings: Settings;
+515: }> {
+516:   const response = await fetch(`${API_BASE}/api/v1/settings`);
+517:   if (!response.ok) {
+518:     throw new Error("Failed to fetch settings");
+519:   }
+520:   const data = await response.json();
+521:   return {
+522:     settings: new Settings(data.settings),
+523:   };
+524: }
+525: 
+526: export async function updateSettings(settings: Settings): Promise<{
+527:   settings: Settings;
+528: }> {
+529:   const response = await fetch(`${API_BASE}/api/v1/settings`, {
+530:     method: "POST",
+531:     headers: {
+532:       "Content-Type": "application/json",
+533:     },
+534:     body: JSON.stringify(settings),
+535:   });
+536:   if (!response.ok) {
+537:     const error = await response.text();
+538:     throw new Error(error || "Failed to update settings");
+539:   }
+540:   const data = await response.json();
+541:   return {
+542:     settings: new Settings(data.settings),
+543:   };
+544: }
+
+MEASURED SYNTHETIC TRANSPORT RECORD results.json
+[
+  {
+    "case": "ordinary-headroom",
+    "requested_model": "deepseek-v4.1-flash:cloud",
+    "served_model": "deepseek-v4.1-flash",
+    "requested_num_ctx": 4096,
+    "http_status": 200,
+    "prompt_eval_count": 25,
+    "eval_count": 2,
+    "done": true,
+    "done_reason": "stop",
+    "error": null,
+    "response_sha256": "7cb5a532b0f30a328bad07cdb40bd24a99486fe9158a67be4e0436f8d129bf33",
+    "request_sha256": "6f5f497f7f87579073596adb408fcd46c8838ccb1952f2cc5aabb2d66a8e2c52",
+    "elapsed_seconds": 2.4758746250299737,
+    "limit": "A small synthetic transport observation; not a general proof of provider truncation or true maximum context."
+  },
+  {
+    "case": "deliberately-small-requested-context",
+    "requested_model": "deepseek-v4.1-flash:cloud",
+    "served_model": "deepseek-v4.1-flash",
+    "requested_num_ctx": 8,
+    "http_status": 200,
+    "prompt_eval_count": 25,
+    "eval_count": 2,
+    "done": true,
+    "done_reason": "stop",
+    "error": null,
+    "response_sha256": "cce5f3aaf16cb6a79780e46726cded843f68ade08e80dd94ee73eebc8a2aa58b",
+    "request_sha256": "540d02c65b45254c184635643d68e34133f5651312b6a13ca15f582b2a4f7a0b",
+    "elapsed_seconds": 1.4855383329559118,
+    "limit": "A small synthetic transport observation; not a general proof of provider truncation or true maximum context."
+  }
+]
+
+
+MEASURED SYNTHETIC TRANSPORT RECORD prefill-results.json
+[
+  {
+    "case": "zero-output-short",
+    "requested_model": "deepseek-v4.1-flash:cloud",
+    "served_model": null,
+    "requested_num_predict": 0,
+    "http_status": 400,
+    "prompt_eval_count": null,
+    "eval_count": null,
+    "done": null,
+    "done_reason": null,
+    "content_bytes": 0,
+    "thinking_bytes": 0,
+    "tool_calls": 0,
+    "error": "max_tokens must be positive, got: 0 (ref: ff401e42-957e-4168-a487-c6a78d6c0d39)",
+    "response_sha256": "ae27784f52d2b96c4a41ecf8b2bd246e5d1231355ae138e5cc1494b4655b5fcf",
+    "request_sha256": "3196477bf9af67adbdb4519ea3be5bab1d5190aa57a83d655b0e5b49f062078e",
+    "elapsed_seconds": 0.5953077919548377,
+    "scope": "Synthetic qualification probe, not a general tokenizer or provider guarantee"
+  },
+  {
+    "case": "zero-output-longer",
+    "requested_model": "deepseek-v4.1-flash:cloud",
+    "served_model": null,
+    "requested_num_predict": 0,
+    "http_status": 400,
+    "prompt_eval_count": null,
+    "eval_count": null,
+    "done": null,
+    "done_reason": null,
+    "content_bytes": 0,
+    "thinking_bytes": 0,
+    "tool_calls": 0,
+    "error": "max_tokens must be positive, got: 0 (ref: 3c7bb4f8-438e-413c-a697-a78e33e80915)",
+    "response_sha256": "1f0d4464ee8f866f3f2137863e722ff88b9ba71e3c0adb6eb12e65894a051b27",
+    "request_sha256": "5388b9d7e870056ebacd18de8f7723cc8da9bbcd4597508d1e26ee6424ee0167",
+    "elapsed_seconds": 0.3943639579229057,
+    "scope": "Synthetic qualification probe, not a general tokenizer or provider guarantee"
+  }
+]
+
+
+MEASURED SYNTHETIC TRANSPORT RECORD one-token-results.json
+[
+  {
+    "case": "one-token-short",
+    "requested_model": "deepseek-v4.1-flash:cloud",
+    "served_model": "deepseek-v4.1-flash",
+    "requested_num_predict": 1,
+    "http_status": 200,
+    "prompt_eval_count": 25,
+    "eval_count": 1,
+    "done": true,
+    "done_reason": "length",
+    "content_bytes": 2,
+    "thinking_bytes": 0,
+    "tool_calls": 0,
+    "error": null,
+    "response_sha256": "3e6052b0bbe24d51298cdea7edc61de06a80d590d13686422a9ce39fcffcb39c",
+    "request_sha256": "2c207ca577ea2b01503822be3523cc367de30e3b3d17afe0cc39006f69e284b1",
+    "elapsed_seconds": 1.203132166992873,
+    "scope": "Actual one-token inference probe; its output is discarded, not a tokenizer-only or zero-output operation."
+  },
+  {
+    "case": "one-token-longer",
+    "requested_model": "deepseek-v4.1-flash:cloud",
+    "served_model": "deepseek-v4.1-flash",
+    "requested_num_predict": 1,
+    "http_status": 200,
+    "prompt_eval_count": 502,
+    "eval_count": 1,
+    "done": true,
+    "done_reason": "length",
+    "content_bytes": 2,
+    "thinking_bytes": 0,
+    "tool_calls": 0,
+    "error": null,
+    "response_sha256": "ae36791c8f6196e698321c5a6fcc0cb2be727a804ac00f73a09420425fee5d2d",
+    "request_sha256": "193d994735aae8347e63733032f22ce3d489f85df296471bff3362c24b848838",
+    "elapsed_seconds": 3.084795874892734,
+    "scope": "Actual one-token inference probe; its output is discarded, not a tokenizer-only or zero-output operation."
+  },
+  {
+    "case": "one-token-longer-repeat",
+    "requested_model": "deepseek-v4.1-flash:cloud",
+    "served_model": "deepseek-v4.1-flash",
+    "requested_num_predict": 1,
+    "http_status": 200,
+    "prompt_eval_count": 502,
+    "eval_count": 1,
+    "done": true,
+    "done_reason": "length",
+    "content_bytes": 2,
+    "thinking_bytes": 0,
+    "tool_calls": 0,
+    "error": null,
+    "response_sha256": "c356c65f49bfa6f47c997fc623e8e0f4eaef5c976c49da0d271c75843369a7d6",
+    "request_sha256": "193d994735aae8347e63733032f22ce3d489f85df296471bff3362c24b848838",
+    "elapsed_seconds": 0.8828627920011058,
+    "scope": "Actual one-token inference probe; its output is discarded, not a tokenizer-only or zero-output operation."
+  }
+]

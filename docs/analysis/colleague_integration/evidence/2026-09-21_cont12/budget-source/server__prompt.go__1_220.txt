@@ -1,0 +1,156 @@
+1: package server
+2: 
+3: import (
+4: 	"bytes"
+5: 	"context"
+6: 	"errors"
+7: 	"fmt"
+8: 	"log/slog"
+9: 	"slices"
+10: 	"strings"
+11: 
+12: 	"github.com/ollama/ollama/api"
+13: 	"github.com/ollama/ollama/llm"
+14: 	"github.com/ollama/ollama/model/renderers"
+15: 	"github.com/ollama/ollama/template"
+16: )
+17: 
+18: type tokenizeFunc func(context.Context, string) ([]int, error)
+19: 
+20: // chatPrompt accepts a list of messages and returns the prompt and media that should be used for the next chat turn.
+21: // chatPrompt truncates any messages that exceed the context window of the model, making sure to always include 1) the
+22: // latest message and 2) system messages
+23: func chatPrompt(ctx context.Context, m *Model, tokenize tokenizeFunc, opts *api.Options, msgs []api.Message, tools []api.Tool, think *api.ThinkValue, truncate bool) (prompt string, media []llm.MediaData, _ error) {
+24: 	var system []api.Message
+25: 
+26: 	// TODO: This is only a truncation heuristic; llama-server handles the
+27: 	// actual image/media inputs. Replace this with projector/model-aware media
+28: 	// token accounting so image history is neither over-packed nor over-trimmed.
+29: 	// Clip images are represented as 768 tokens, each an embedding.
+30: 	imageNumTokens := 768
+31: 
+32: 	lastMsgIdx := len(msgs) - 1
+33: 	currMsgIdx := 0
+34: 
+35: 	if truncate {
+36: 		// Start with all messages and remove from the front until it fits in context
+37: 		for i := 0; i <= lastMsgIdx; i++ {
+38: 			// Collect system messages from the portion we're about to skip
+39: 			system = make([]api.Message, 0)
+40: 			for j := range i {
+41: 				if msgs[j].Role == "system" {
+42: 					system = append(system, msgs[j])
+43: 				}
+44: 			}
+45: 
+46: 			p, err := renderPrompt(m, append(system, msgs[i:]...), tools, think)
+47: 			if err != nil {
+48: 				return "", nil, err
+49: 			}
+50: 
+51: 			s, err := tokenize(ctx, p)
+52: 			if err != nil {
+53: 				return "", nil, err
+54: 			}
+55: 
+56: 			ctxLen := len(s)
+57: 			if m.ProjectorPaths != nil {
+58: 				for _, msg := range msgs[i:] {
+59: 					ctxLen += imageNumTokens * len(msg.Images)
+60: 				}
+61: 			}
+62: 
+63: 			if ctxLen <= opts.NumCtx {
+64: 				currMsgIdx = i
+65: 				break
+66: 			}
+67: 
+68: 			// Must always include at least the last message
+69: 			if i == lastMsgIdx {
+70: 				currMsgIdx = lastMsgIdx
+71: 				break
+72: 			}
+73: 		}
+74: 	}
+75: 
+76: 	if currMsgIdx > 0 {
+77: 		slog.Debug("truncating input messages which exceed context length", "truncated", len(msgs[currMsgIdx:]))
+78: 	}
+79: 
+80: 	renderMsgs, media, err := imageTaggedMessages(m, msgs, currMsgIdx, false)
+81: 	if err != nil {
+82: 		return "", nil, err
+83: 	}
+84: 
+85: 	// truncate any messages that do not fit into the context window
+86: 	p, err := renderPrompt(m, append(system, renderMsgs[currMsgIdx:]...), tools, think)
+87: 	if err != nil {
+88: 		return "", nil, err
+89: 	}
+90: 
+91: 	return p, media, nil
+92: }
+93: 
+94: func imageTaggedMessages(m *Model, msgs []api.Message, start int, clearImages bool) ([]api.Message, []llm.MediaData, error) {
+95: 	renderMsgs := slices.Clone(msgs)
+96: 	var media []llm.MediaData
+97: 
+98: 	for cnt, msg := range renderMsgs[start:] {
+99: 		if slices.Contains(m.Config.ModelFamilies, "mllama") && len(msg.Images) > 1 {
+100: 			return nil, nil, errors.New("this model only supports one image while more than one image requested")
+101: 		}
+102: 
+103: 		var prefix string
+104: 		prompt := msg.Content
+105: 
+106: 		for _, i := range msg.Images {
+107: 			mediaData := llm.NewMediaData(len(media), i)
+108: 			media = append(media, mediaData)
+109: 
+110: 			if m.Config.Renderer != "" {
+111: 				continue
+112: 			}
+113: 
+114: 			// The prompt marker is still image-named for compatibility with
+115: 			// existing templates and llama-server media marker replacement.
+116: 			imgTag := fmt.Sprintf("[img-%d]", mediaData.ID)
+117: 			if !strings.Contains(prompt, "[img]") {
+118: 				prefix += imgTag
+119: 			} else {
+120: 				prompt = strings.Replace(prompt, "[img]", imgTag, 1)
+121: 			}
+122: 		}
+123: 
+124: 		if m.Config.Renderer == "" {
+125: 			renderMsgs[start+cnt].Content = prefix + prompt
+126: 		}
+127: 		if clearImages {
+128: 			renderMsgs[start+cnt].Images = nil
+129: 		}
+130: 	}
+131: 
+132: 	return renderMsgs, media, nil
+133: }
+134: 
+135: func renderPrompt(m *Model, msgs []api.Message, tools []api.Tool, think *api.ThinkValue) (string, error) {
+136: 	if m.Config.Renderer != "" {
+137: 		rendererName := resolveRendererName(m)
+138: 		rendered, err := renderers.RenderWithRenderer(rendererName, msgs, tools, think)
+139: 		if err != nil {
+140: 			return "", err
+141: 		}
+142: 		return rendered, nil
+143: 	}
+144: 
+145: 	var b bytes.Buffer
+146: 	thinkVal := false
+147: 	thinkLevel := ""
+148: 	if think != nil {
+149: 		thinkVal = think.Bool()
+150: 		thinkLevel = think.String()
+151: 	}
+152: 	if err := m.Template.Execute(&b, template.Values{Messages: msgs, Tools: tools, Think: thinkVal, ThinkLevel: thinkLevel, IsThinkSet: think != nil}); err != nil {
+153: 		return "", err
+154: 	}
+155: 	return b.String(), nil
+156: }

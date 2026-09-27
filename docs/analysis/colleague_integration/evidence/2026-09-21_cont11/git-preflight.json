@@ -1,0 +1,77 @@
+[
+  {
+    "argv": [
+      "git",
+      "status",
+      "--porcelain=v1",
+      "--untracked-files=all"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "exit_code": 0,
+    "stdout": "17197224933cbdd9875c2277f18767c5f6f134a2\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "branch",
+      "--show-current"
+    ],
+    "exit_code": 0,
+    "stdout": "eko/chat-read-integrity-20260920\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "worktree",
+      "list",
+      "--porcelain"
+    ],
+    "exit_code": 0,
+    "stdout": "worktree /Users/krypto/GitHub/ollama\nHEAD 953de98d408a9697fa20a48c23973b9dc8eee921\nbranch refs/heads/main\n\nworktree /Users/krypto/GitHub/ollama-eko-chat-read-integrity\nHEAD 17197224933cbdd9875c2277f18767c5f6f134a2\nbranch refs/heads/eko/chat-read-integrity-20260920\n\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "diff",
+      "--stat"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "diff",
+      "--cached",
+      "--stat"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "ls-remote",
+      "origin",
+      "refs/heads/main",
+      "refs/heads/eko/chat-read-integrity-20260920"
+    ],
+    "exit_code": 0,
+    "stdout": "17197224933cbdd9875c2277f18767c5f6f134a2\trefs/heads/eko/chat-read-integrity-20260920\n953de98d408a9697fa20a48c23973b9dc8eee921\trefs/heads/main\n",
+    "stderr": ""
+  }
+]

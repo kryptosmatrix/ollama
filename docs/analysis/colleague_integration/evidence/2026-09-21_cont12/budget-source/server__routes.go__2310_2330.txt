@@ -1,0 +1,21 @@
+2310: 	return renderers.LeadingBOSForRenderer(resolveRendererName(m))
+2311: }
+2312: 
+2313: func optionsForPrompt(opts *api.Options, runner llm.LlamaServer) *api.Options {
+2314: 	if opts == nil || runner == nil {
+2315: 		return opts
+2316: 	}
+2317: 
+2318: 	if ctxLen := runner.ContextLength(); ctxLen > 0 && opts.NumCtx > ctxLen {
+2319: 		copied := *opts
+2320: 		copied.NumCtx = ctxLen
+2321: 		return &copied
+2322: 	}
+2323: 
+2324: 	return opts
+2325: }
+2326: 
+2327: type chatExecutionMode int
+2328: 
+2329: const (
+2330: 	chatExecutionModeNative chatExecutionMode = iota

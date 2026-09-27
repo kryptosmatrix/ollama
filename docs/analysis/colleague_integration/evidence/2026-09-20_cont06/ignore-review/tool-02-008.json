@@ -1,0 +1,16 @@
+{
+  "name": "read_evidence",
+  "arguments": {
+    "name": "baseline_rules",
+    "start": 1,
+    "count": 200
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama/app/.gitignore",
+    "file_sha256": "4be2ca0def51da2377feb62d6246b47194d8c437a285f6d506c543beddb7d6d1",
+    "start": 1,
+    "end": 11,
+    "total_lines": 11,
+    "text": "1: ollama.syso\n2: *.crt\n3: *.exe\n4: /app/app\n5: /app/squirrel\n6: ollama\n7: *cover*\n8: .vscode\n9: .env\n10: .DS_Store\n11: .claude"
+  }
+}

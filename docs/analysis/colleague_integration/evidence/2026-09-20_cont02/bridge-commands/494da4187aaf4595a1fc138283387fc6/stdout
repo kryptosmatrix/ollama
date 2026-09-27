@@ -1,0 +1,1121 @@
+
+DIRECTORY docs
+CURATED_CONTEXT_BLUEPRINT.md
+CURATED_CONTEXT_SYSTEM.md
+ChatGPT-Cyber Feedback
+OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md
+OLLAMA_CROSS_MODEL_COLLEAGUES_AND_CAPABILITY_ROUTING_HANDOFF.md
+README.md
+_design
+_handoff
+analysis
+api
+api.md
+capabilities
+cli.mdx
+cloud.mdx
+context-length.mdx
+development.md
+docker.mdx
+docs.json
+examples.md
+faq.mdx
+favicon-dark.svg
+favicon.svg
+gpu.mdx
+images
+import.mdx
+index.mdx
+integrations
+linux.mdx
+logo.svg
+macos.mdx
+modelfile.mdx
+ollama-logo.svg
+ollama.png
+openapi.yaml
+quickstart.mdx
+styling.css
+template.mdx
+tools
+troubleshooting.mdx
+windows.mdx
+
+DIRECTORY app/store
+cloud_config.go
+cloud_config_test.go
+database.go
+database_test.go
+image.go
+migration_test.go
+schema.sql
+schema_test.go
+store.go
+store_test.go
+test_home_test.go
+testdata
+
+DIRECTORY app/ui/app/src
+api.approval.test.ts
+api.ts
+api.tts.test.ts
+components
+contexts
+hooks
+index.css
+lib
+main.tsx
+routeTree.gen.ts
+routes
+types
+util
+utils
+vite-env.d.ts
+
+DIRECTORY app/ui/app
+.gitignore
+.prettierignore
+.prettierrc
+codegen
+dist
+eslint.config.js
+index.html
+package-lock.json
+package.json
+public
+src
+tailwind.config.js
+tsconfig.app.json
+tsconfig.json
+tsconfig.node.json
+tsconfig.stories.json
+vite.config.ts
+vitest.config.ts
+vitest.shims.d.ts
+
+DIRECTORY app/config
+
+DIRECTORY .github/workflows
+latest.yaml
+release.yaml
+test-install.yaml
+test-llamacpp-update.yaml
+test.yaml
+
+DIRECTORY agent
+approval.go
+approval_test.go
+compactor.go
+compactor_test.go
+events.go
+registry.go
+session.go
+session_test.go
+skill_activation.go
+skill_activation_test.go
+skills.go
+skills_test.go
+testdata
+tools
+
+DIRECTORY cmd/tui/chat
+approval.go
+approval_test.go
+chat.go
+clipboard.go
+cloudauth.go
+cloudauth_test.go
+compaction.go
+debug.go
+events.go
+events_test.go
+input.go
+input_test.go
+markdown.go
+mcp_test.go
+modals.go
+modals_test.go
+multimodal_test.go
+render.go
+render_test.go
+test_helpers_test.go
+theme.go
+think.go
+
+FILE app/ui/app/vite.config.ts SHA256 132a1edc07e0eb633e449d6e9afaebd3ef391fb93af76208d367b9f8a0b82022 BYTES 2216
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
+import tailwindcss from "@tailwindcss/vite";
+import tsconfigPaths from "vite-tsconfig-paths";
+import postcssPresetEnv from "postcss-preset-env";
+import { resolve } from "path";
+
+export default defineConfig(() => ({
+  base: "/",
+
+  plugins: [
+    TanStackRouterVite({ target: "react" }),
+    react(),
+    tailwindcss(),
+    tsconfigPaths(),
+  ],
+
+  resolve: {
+    alias: {
+      "@/gotypes": resolve(__dirname, "codegen/gotypes.gen.ts"),
+      "@": resolve(__dirname, "src"),
+      "micromark-extension-math": "micromark-extension-llm-math",
+    },
+  },
+
+  css: {
+    postcss: {
+      plugins: [
+        postcssPresetEnv({
+          stage: 1, // Include more experimental features that Safari 14 needs
+          browsers: ["Safari >= 14"],
+          // autoprefixer: false,
+          features: {
+            "custom-properties": true, // Let TailwindCSS handle this
+            "nesting-rules": true,
+            "logical-properties-and-values": true, // Polyfill logical properties
+            "media-query-ranges": true, // Modern media query syntax
+            "color-function": true, // CSS color functions
+            "double-position-gradients": true,
+            "gap-properties": true, // This is key for flexbox gap!
+            "place-properties": true,
+            "overflow-property": true,
+            "focus-visible-pseudo-class": true, // Focus-visible support
+            "focus-within-pseudo-class": true, // Focus-within support
+            "any-link-pseudo-class": true, // :any-link pseudo-class
+            "not-pseudo-class": true, // Enhanced :not() support
+            "dir-pseudo-class": true, // :dir() pseudo-class
+            "all-property": true, // CSS 'all' property
+            "image-set-function": true, // image-set() function
+            "hwb-function": true, // hwb() color function
+            "lab-function": true, // lab() color function
+            "oklab-function": true, // oklab() color function
+          },
+        }),
+      ],
+    },
+  },
+
+  build: {
+    target: "es2017",
+  },
+
+  esbuild: {
+    target: "es2017",
+  },
+}));
+
+
+FILE app/ui/app/vitest.config.ts SHA256 2a4a9c070311885ffc80f735f23cb87eedf3628e52d33ef5bc6a9b9a8b46cbeb BYTES 490
+import { defineConfig, mergeConfig } from "vite";
+import path from "path";
+import baseConfig from "./vite.config";
+
+export default defineConfig((configEnv) =>
+  mergeConfig(
+    baseConfig(configEnv),
+    defineConfig({
+      resolve: {
+        alias: {
+          "@": path.resolve(__dirname, "./src"),
+          "@/gotypes": path.resolve(__dirname, "./codegen/gotypes.gen.ts"),
+        },
+      },
+      test: {
+        environment: "node",
+        globals: true,
+      },
+    }),
+  ),
+);
+
+
+FILE .github/workflows/test.yaml SHA256 bec3eda69bc2e32f7670b799fb6eedce6927a0076b7a88ccaba288cd896a3782 BYTES 20001
+BOUNDED_READ_PENDING
+
+FILE app/store/store.go SHA256 af324196245292ab5b6ee65abbb8de2f1db5e3d07772db0f98d273c53848349f BYTES 13989
+//go:build windows || darwin
+
+// Package store provides a simple JSON file store for the desktop application
+// to save and load data such as ollama server configuration, messages,
+// login information and more.
+package store
+
+import (
+	"encoding/json"
+	"fmt"
+	"log/slog"
+	"os"
+	"path/filepath"
+	"runtime"
+	"sync"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/ollama/ollama/app/types/not"
+)
+
+type File struct {
+	Filename string `json:"filename"`
+	Data     []byte `json:"data"`
+}
+
+type User struct {
+	Name     string    `json:"name"`
+	Email    string    `json:"email"`
+	Plan     string    `json:"plan"`
+	CachedAt time.Time `json:"cachedAt"`
+}
+
+type Message struct {
+	Role              string           `json:"role"`
+	Content           string           `json:"content"`
+	Thinking          string           `json:"thinking"`
+	Stream            bool             `json:"stream"`
+	Model             string           `json:"model,omitempty"`
+	Attachments       []File           `json:"attachments,omitempty"`
+	ToolCalls         []ToolCall       `json:"tool_calls,omitempty"`
+	ToolCall          *ToolCall        `json:"tool_call,omitempty"`
+	ToolName          string           `json:"tool_name,omitempty"`
+	ToolResult        *json.RawMessage `json:"tool_result,omitempty"`
+	CreatedAt         time.Time        `json:"created_at"`
+	UpdatedAt         time.Time        `json:"updated_at"`
+	ThinkingTimeStart *time.Time       `json:"thinkingTimeStart,omitempty" ts_type:"Date | undefined" ts_transform:"__VALUE__ && new Date(__VALUE__)"`
+	ThinkingTimeEnd   *time.Time       `json:"thinkingTimeEnd,omitempty" ts_type:"Date | undefined" ts_transform:"__VALUE__ && new Date(__VALUE__)"`
+}
+
+// MessageOptions contains optional parameters for creating a Message
+type MessageOptions struct {
+	Model             string
+	Attachments       []File
+	Stream            bool
+	Thinking          string
+	ToolCalls         []ToolCall
+	ToolCall          *ToolCall
+	ToolResult        *json.RawMessage
+	ThinkingTimeStart *time.Time
+	ThinkingTimeEnd   *time.Time
+}
+
+// NewMessage creates a new Message with the given options
+func NewMessage(role, content string, opts *MessageOptions) Message {
+	now := time.Now()
+	msg := Message{
+		Role:      role,
+		Content:   content,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+
+	if opts != nil {
+		msg.Model = opts.Model
+		msg.Attachments = opts.Attachments
+		msg.Stream = opts.Stream
+		msg.Thinking = opts.Thinking
+		msg.ToolCalls = opts.ToolCalls
+		msg.ToolCall = opts.ToolCall
+		msg.ToolResult = opts.ToolResult
+		msg.ThinkingTimeStart = opts.ThinkingTimeStart
+		msg.ThinkingTimeEnd = opts.ThinkingTimeEnd
+	}
+
+	return msg
+}
+
+type ToolCall struct {
+	Type     string       `json:"type"`
+	Function ToolFunction `json:"function"`
+}
+
+type ToolFunction struct {
+	Name      string `json:"name"`
+	Arguments string `json:"arguments"`
+	Result    any    `json:"result,omitempty"`
+}
+
+type Model struct {
+	Model      string     `json:"model"`                 // Model name
+	Digest     string     `json:"digest,omitempty"`      // Model digest from the registry
+	ModifiedAt *time.Time `json:"modified_at,omitempty"` // When the model was last modified locally
+}
+
+type Chat struct {
+	ID           string          `json:"id"`
+	Messages     []Message       `json:"messages"`
+	Title        string          `json:"title"`
+	CreatedAt    time.Time       `json:"created_at"`
+	BrowserState json.RawMessage `json:"browser_state,omitempty" ts_type:"BrowserStateData"`
+}
+
+// NewChat creates a new Chat with the ID, with CreatedAt timestamp initialized
+func NewChat(id string) *Chat {
+	return &Chat{
+		ID:        id,
+		Messages:  []Message{},
+		CreatedAt: time.Now(),
+	}
+}
+
+type Settings struct {
+	// Expose is a boolean that indicates if the ollama server should
+	// be exposed to the network
+	Expose bool
+
+	// Browser is a boolean that indicates if the ollama server should
+	// be exposed to browser windows (e.g. CORS set to allow all origins)
+	Browser bool
+
+	// Survey is a boolean that indicates if the user allows anonymous
+	// inference information to be shared with Ollama
+	Survey bool
+
+	// Models is a string that contains the models to load on startup
+	Models string
+
+	// TODO(parthsareen): temporary for experimentation
+	// Agent indicates if the app should use multi-turn tools to fulfill user requests
+	Agent bool
+
+	// Tools indicates if the app should use single-turn tools to fulfill user requests
+	Tools bool
+
+	// WorkingDir specifies the working directory for all agent operations
+	WorkingDir string
+
+	// ContextLength specifies the context length for the ollama server (using OLLAMA_CONTEXT_LENGTH)
+	ContextLength int
+
+	// TurboEnabled indicates if Ollama Turbo features are enabled
+	TurboEnabled bool
+
+	// Maps gpt-oss specific frontend name' BrowserToolEnabled' to db field 'websearch_enabled'
+	WebSearchEnabled bool
+
+	// ThinkEnabled indicates if thinking is enabled
+	ThinkEnabled bool
+
+	// ThinkLevel indicates the level of thinking to use for models that support multiple levels
+	ThinkLevel string
+
+	// SelectedModel stores the last model that the user selected
+	SelectedModel string
+
+	// SidebarOpen indicates if the chat sidebar is open
+	SidebarOpen bool
+
+	// LastHomeView stores the preferred home route target ("chat" or integration name)
+	LastHomeView string
+
+	// AutoUpdateEnabled indicates if automatic updates should be downloaded
+	AutoUpdateEnabled bool
+
+	// AutoApproveTools lets every tool call that would otherwise wait for the
+	// user's approval run at once, without asking. It is one global switch,
+	// off by default. The gate that honours it re-reads it on every call, so
+	// switching it off takes effect on the very next tool call.
+	AutoApproveTools bool
+}
+
+type Store struct {
+	// DBPath allows overriding the default database path (mainly for testing)
+	DBPath string
+
+	// dbMu protects database initialization only
+	dbMu sync.Mutex
+	db   *database
+}
+
+var defaultDBPath = func() string {
+	switch runtime.GOOS {
+	case "windows":
+		return filepath.Join(os.Getenv("LOCALAPPDATA"), "Ollama", "db.sqlite")
+	case "darwin":
+		return filepath.Join(os.Getenv("HOME"), "Library", "Application Support", "Ollama", "db.sqlite")
+	default:
+		return filepath.Join(os.Getenv("HOME"), ".ollama", "db.sqlite")
+	}
+}()
+
+// legacyConfigPath is the path to the old config.json file
+var legacyConfigPath = func() string {
+	switch runtime.GOOS {
+	case "windows":
+		return filepath.Join(os.Getenv("LOCALAPPDATA"), "Ollama", "config.json")
+	case "darwin":
+		return filepath.Join(os.Getenv("HOME"), "Library", "Application Support", "Ollama", "config.json")
+	default:
+		return filepath.Join(os.Getenv("HOME"), ".ollama", "config.json")
+	}
+}()
+
+// legacyData represents the old config.json structure (only fields we need to migrate)
+type legacyData struct {
+	ID           string `json:"id"`
+	FirstTimeRun bool   `json:"first-time-run"`
+}
+
+func (s *Store) ensureDB() error {
+	// Fast path: check if db is already initialized
+	if s.db != nil {
+		return nil
+	}
+
+	// Slow path: initialize database with lock
+	s.dbMu.Lock()
+	defer s.dbMu.Unlock()
+
+	// Double-check after acquiring lock
+	if s.db != nil {
+		return nil
+	}
+
+	dbPath := s.DBPath
+	if dbPath == "" {
+		dbPath = defaultDBPath
+	}
+
+	// Ensure directory exists
+	if err := os.MkdirAll(filepath.Dir(dbPath), 0o755); err != nil {
+		return fmt.Errorf("create db directory: %w", err)
+	}
+
+	database, err := newDatabase(dbPath)
+	if err != nil {
+		return fmt.Errorf("open database: %w", err)
+	}
+
+	// Generate device ID if needed
+	id, err := database.getID()
+	if err != nil || id == "" {
+		// Generate new UUID for device
+		u, err := uuid.NewV7()
+		if err == nil {
+			database.setID(u.String())
+		}
+	}
+
+	s.db = database
+
+	// Check if we need to migrate from config.json
+	migrated, err := database.isConfigMigrated()
+	if err != nil || !migrated {
+		if err := s.migrateFromConfig(database); err != nil {
+			slog.Warn("failed to migrate from config.json", "error", err)
+		}
+	}
+
+	// Run one-time migration from legacy airplane_mode behavior.
+	if err := s.migrateCloudSetting(database); err != nil {
+		return fmt.Errorf("migrate cloud setting: %w", err)
+	}
+
+	return nil
+}
+
+// migrateCloudSetting migrates legacy airplane_mode into server.json exactly once.
+// After this, cloud state is sourced from server.json OR OLLAMA_NO_CLOUD.
+func (s *Store) migrateCloudSetting(database *database) error {
+	migrated, err := database.isCloudSettingMigrated()
+	if err != nil {
+		return err
+	}
+	if migrated {
+		return nil
+	}
+
+	airplaneMode, err := database.getAirplaneMode()
+	if err != nil {
+		return err
+	}
+
+	if airplaneMode {
+		if err := setCloudEnabled(false); err != nil {
+			return fmt.Errorf("migrate airplane_mode to cloud disabled: %w", err)
+		}
+	}
+
+	if err := database.setCloudSettingMigrated(true); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// migrateFromConfig attempts to migrate ID and FirstTimeRun from config.json
+func (s *Store) migrateFromConfig(database *database) error {
+	configPath := legacyConfigPath
+
+	// Check if config.json exists
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		// No config to migrate, mark as migrated
+		return database.setConfigMigrated(true)
+	}
+
+	// Read the config file
+	b, err := os.ReadFile(configPath)
+	if err != nil {
+		return fmt.Errorf("read legacy config: %w", err)
+	}
+
+	var legacy legacyData
+	if err := json.Unmarshal(b, &legacy); err != nil {
+		// If we can't parse it, just mark as migrated and move on
+		slog.Warn("failed to parse legacy config.json", "error", err)
+		return database.setConfigMigrated(true)
+	}
+
+	// Migrate the ID if present
+	if legacy.ID != "" {
+		if err := database.setID(legacy.ID); err != nil {
+			return fmt.Errorf("migrate device ID: %w", err)
+		}
+		slog.Info("migrated device ID from config.json")
+	}
+
+	hasCompleted := legacy.FirstTimeRun // If old FirstTimeRun is true, it means first run was completed
+	if err := database.setHasCompletedFirstRun(hasCompleted); err != nil {
+		return fmt.Errorf("migrate first time run: %w", err)
+	}
+	slog.Info("migrated first run status from config.json", "hasCompleted", hasCompleted)
+
+	// Mark as migrated
+	if err := database.setConfigMigrated(true); err != nil {
+		return fmt.Errorf("mark config as migrated: %w", err)
+	}
+
+	slog.Info("successfully migrated settings from config.json")
+	return nil
+}
+
+func (s *Store) ID() (string, error) {
+	if err := s.ensureDB(); err != nil {
+		return "", err
+	}
+
+	return s.db.getID()
+}
+
+func (s *Store) HasCompletedFirstRun() (bool, error) {
+	if err := s.ensureDB(); err != nil {
+		return false, err
+	}
+
+	return s.db.getHasCompletedFirstRun()
+}
+
+func (s *Store) SetHasCompletedFirstRun(hasCompleted bool) error {
+	if err := s.ensureDB(); err != nil {
+		return err
+	}
+
+	return s.db.setHasCompletedFirstRun(hasCompleted)
+}
+
+func (s *Store) Settings() (Settings, error) {
+	if err := s.ensureDB(); err != nil {
+		return Settings{}, fmt.Errorf("load settings: %w", err)
+	}
+
+	settings, err := s.db.getSettings()
+	if err != nil {
+		return Settings{}, err
+	}
+
+	// Set default models directory if not set
+	if settings.Models == "" {
+		dir := os.Getenv("OLLAMA_MODELS")
+		if dir != "" {
+			settings.Models = dir
+		} else {
+			home, err := os.UserHomeDir()
+			if err == nil {
+				settings.Models = filepath.Join(home, ".ollama", "models")
+			}
+		}
+	}
+
+	if settings.LastHomeView == "" {
+		settings.LastHomeView = "launch"
+	}
+
+	return settings, nil
+}
+
+func (s *Store) SetSettings(settings Settings) error {
+	if err := s.ensureDB(); err != nil {
+		return err
+	}
+
+	return s.db.setSettings(settings)
+}
+
+func (s *Store) Chats() ([]Chat, error) {
+	if err := s.ensureDB(); err != nil {
+		return nil, err
+	}
+
+	return s.db.getAllChats()
+}
+
+func (s *Store) Chat(id string) (*Chat, error) {
+	return s.ChatWithOptions(id, true)
+}
+
+func (s *Store) ChatWithOptions(id string, loadAttachmentData bool) (*Chat, error) {
+	if err := s.ensureDB(); err != nil {
+		return nil, err
+	}
+
+	chat, err := s.db.getChatWithOptions(id, loadAttachmentData)
+	if err != nil {
+		return nil, fmt.Errorf("%w: chat %s", not.Found, id)
+	}
+
+	return chat, nil
+}
+
+func (s *Store) SetChat(chat Chat) error {
+	if err := s.ensureDB(); err != nil {
+		return err
+	}
+
+	return s.db.saveChat(chat)
+}
+
+func (s *Store) DeleteChat(id string) error {
+	if err := s.ensureDB(); err != nil {
+		return err
+	}
+
+	// Delete from database
+	if err := s.db.deleteChat(id); err != nil {
+		return fmt.Errorf("%w: chat %s", not.Found, id)
+	}
+
+	// Also delete associated images
+	chatImgDir := filepath.Join(s.ImgDir(), id)
+	if err := os.RemoveAll(chatImgDir); err != nil {
+		// Log error but don't fail the deletion
+		slog.Warn("failed to delete chat images", "chat_id", id, "error", err)
+	}
+
+	return nil
+}
+
+func (s *Store) WindowSize() (int, int, error) {
+	if err := s.ensureDB(); err != nil {
+		return 0, 0, err
+	}
+
+	return s.db.getWindowSize()
+}
+
+func (s *Store) SetWindowSize(width, height int) error {
+	if err := s.ensureDB(); err != nil {
+		return err
+	}
+
+	return s.db.setWindowSize(width, height)
+}
+
+func (s *Store) UpdateLastMessage(chatID string, message Message) error {
+	if err := s.ensureDB(); err != nil {
+		return err
+	}
+
+	return s.db.updateLastMessage(chatID, message)
+}
+
+func (s *Store) AppendMessage(chatID string, message Message) error {
+	if err := s.ensureDB(); err != nil {
+		return err
+	}
+
+	return s.db.appendMessage(chatID, message)
+}
+
+func (s *Store) UpdateChatBrowserState(chatID string, state json.RawMessage) error {
+	if err := s.ensureDB(); err != nil {
+		return err
+	}
+
+	return s.db.updateChatBrowserState(chatID, state)
+}
+
+func (s *Store) User() (*User, error) {
+	if err := s.ensureDB(); err != nil {
+		return nil, err
+	}
+
+	return s.db.getUser()
+}
+
+func (s *Store) SetUser(user User) error {
+	if err := s.ensureDB(); err != nil {
+		return err
+	}
+
+	user.CachedAt = time.Now()
+	return s.db.setUser(user)
+}
+
+func (s *Store) ClearUser() error {
+	if err := s.ensureDB(); err != nil {
+		return err
+	}
+
+	return s.db.clearUser()
+}
+
+func (s *Store) Close() error {
+	s.dbMu.Lock()
+	defer s.dbMu.Unlock()
+
+	if s.db != nil {
+		return s.db.Close()
+	}
+	return nil
+}
+
+
+FILE cmd/tui/chat/input.go SHA256 308fae49f0144cab8f4d2fafbd81795ee31f5bb3a28c39e9201fa918a1baa930 BYTES 49023
+BOUNDED_READ_PENDING
+
+FILE docs/analysis/colleague_integration/SOURCE_MAP.md SHA256 ff6a6f738b9d5cf018df7ee8aa839baccfd41fcb641c906a58fb9fdf984ee1bb BYTES 12419
+# Ollama colleague integration — initial source map
+
+Owner: Eko. Observed: 20 September 2026, Australia/Brisbane.
+Scope: OI-01 reconnaissance checkpoint, not a completed audit or implementation plan.
+
+## Authority and evidence boundary
+
+The input is `../../OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md`, revision R3, raw SHA-256 `74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec`. All 590 lines were covered by reads 1–492 and 490–590; the overlap recovered the first response's partial final line. That document commissions the work; it does not grant a blueprint readiness verdict.
+
+Ollama HEAD remained `953de98d408a9697fa20a48c23973b9dc8eee921` across the source observations below. Files were read from the working tree, not an immutable checkout. Hashes in this document are the Bridge's **raw file_sha256**, not the hash of a returned line excerpt. Recheck them before editing or using this map as current evidence.
+
+Two discovery methods were used: bounded directory traversal and exact-symbol searches followed by source reads. No code, build, test, application, model, performance probe or reviewer was executed. A traced call site is not runtime proof. No whole-repository absence claim is made.
+
+## Initial findings
+
+### S-01 — Terminal system-prompt transport already has a request path
+
+`cmd/agent_tui.go:72–182`, particularly `GenerateAgentTUI`, builds a system prompt and passes it through `agentchat.Options.SystemPrompt`. The model-switch callback constructs it again. `agentSystemPromptAtWithWorkingDir` at `cmd/agent_tui.go:218–228` combines the harness default, model system text and extra skill context.
+
+`cmd/tui/chat/chat.go:1116–1186`, `chatModel.startRunWithMessages`, calls `m.systemPrompt(extraSystemPrompt)`, assembles a `coreagent.Session`, sets `RunOptions.SystemPrompt`, and calls `session.Run`.
+
+`agent/session.go:384–477` contains `Session.chatRound` and `buildChatRequest`. The latter sanitises messages, prepends a non-blank system message, and includes model, format, options, thinking, keep-alive and tools. `chatRound` passes that request to `s.Client.Chat`.
+
+**Boundary:** this is a source-traced portion of the terminal request path. The full `Session.Run` body, `chatModel.systemPrompt`, root command dispatch, settings persistence and their acceptance tests remain unread. The observations establish a seam to investigate, not successful saved custom-instruction delivery and not a need to replace the request pipeline.
+
+### S-02 — Desktop request construction is a separate path
+
+`app/ui/ui.go:1909–2004`, `Server.buildChatRequest`, accepts a `store.Chat`, model, thinking choice, tool definitions and MCP instructions. It prepends non-blank MCP instructions and loops over the supplied messages, skipping messages whose content, thinking, tool calls and attachments are all empty. It converts attachments and tool records and returns an `api.ChatRequest`.
+
+The handler excerpt at `app/ui/ui.go:690–999` loads through `s.Store.ChatWithOptions(cid, true)`, handles a new or edited user message, writes through `s.Store.SetChat`, builds the request at line 973 and calls `c.Chat` at line 978. The temporary request-only assistant tool-call insertion at lines 951–971 must not be lost during later context work.
+
+**Boundary:** the store loader and complete handler lifecycle have not been read. The established fact is that this builder iterates over the messages it receives; this is not proof that every stored historical record always reaches a model, nor proof about rendering performance. Terminal and desktop changes must be mapped separately against the actual requirements; this map does not silently expand OI-03/OI-04 scope.
+
+### S-03 — Attachments affect desktop MCP registration
+
+In the same handler, `app/ui/ui.go:887–940` checks the last user message for attachments. Tool registration, including `s.registerMCPTools(registry)` and `s.mcpInstructions()`, is inside `if !hasAttachments`; the MCP branch additionally requires the reported tools capability.
+
+[Inference] Automatic memory capture cannot be assumed to work merely because a model can request an MCP memory tool in some chat turns. OI-05 and OI-26 need to inspect this distinction and test attachment-bearing and non-tool-capable turns according to their approved contracts. No memory policy or runtime repair has been chosen here.
+
+### S-04 — Existing artefacts must be reconciled, not replaced on sight
+
+The complete bounded `docs/` tree listing located `CURATED_CONTEXT_BLUEPRINT.md`, `CURATED_CONTEXT_SYSTEM.md`, `_design/MCP_CLIENT_PLAN.md`, `_design/HANDOFF_2026-08-05_grommet.md`, `_design/ADR_2026-09-14_AUTO_APPROVE_TOOLS.md`, `_design/proof/` and `_handoff/CURATED_CONTEXT_BLUEPRINT_CURSOR_ROUND2_FINDINGS.md`.
+
+Their contents and current readiness were **not** assessed in this checkpoint. Their filenames are not proof that curated context, memory or supervision works. Read the applicable material before designing replacements.
+
+A second untracked file, `docs/OLLAMA_CROSS_MODEL_COLLEAGUES_AND_CAPABILITY_ROUTING_HANDOFF.md`, appeared after the initial Git observation. Eko did not create or read it. Reconcile it on continuation without assuming its author, authority or contents.
+
+## Source-read ledger
+
+Ranges below are exact; an excerpt is not a whole-file read. The Bridge may mark a bounded excerpt truncated because more of the file exists.
+
+| File, relative to Ollama | Lines read | Raw file SHA-256 | Bridge request |
+|---|---|---|---|
+| `AGENTS.md` | 1–21, complete | `9cd30b469bc637faee8a9cdaf8879e13db60c52c9b82b2f9f5bd8314e7512144` | `66eff4b1c0714cc1b98a18559a3d303b` |
+| `agent/session.go` | 380–519 only | `0a2521b18c99b043c8f91af37605a827bdc4d50b380e904013a5959d859d3cec` | `2a44f98ec9a74f66b91cb5cbe07fa060` |
+| `cmd/agent_tui.go` | 1–310 only | `c934b7b803875a6a334e86cdf289831395fb5356445519c60bcd07f728190ed9` | `9b7e4dea1ccd476a8bdcc89ef36d346d` |
+| `cmd/tui/chat/chat.go` | 1116–1246 only | `361d7650d71f162870f6a06e863d0f032d6d3b421fb341c1f628625a6ebfe96f` | `7b85da70a8a54fe09befd686c9c00c7f` |
+| `app/ui/ui.go` | 690–999 and 1880–2004 only | `dbba86f3d90ec5edac5b23458fec00f25e39f4d9f3ef43ac124571e0c1a0d48e` | `7478dd2fa0d748fc802706518d789d9e`; `fde4aa59c8854b75920cb1f38afdd169` |
+| `app/README.md` | 1–97, complete | `91be830ae002c325a0a8f36c50a17304f83b33ebe0649cd8f07a39cd9c51fa69` | `0a03ebd0521147f88f94e5faf027683c` |
+| `app/ui/app/package.json` | 1–82, complete | `ba4a16db941ae31c7d33daf5fc4396b05e20cc1906ca731648d3859eb81a029d` | `c46661ff3ee3499bbf744096a16f1069` |
+
+The task-document read requests were `a39b3420f8bb4989aaea0443a50903c2` and `5fbdaa926f824b6ca2cd1ffa9db522be`.
+
+## Discovery coverage and limits
+
+`repo_overview` request `521882aade5c4f77a33e393101e9d4c1` located root manifests, three local branches and one worktree; their identities beyond `main` have not been enumerated. `tree` requests `479774029021476aaefdf242db29f5ef` (`docs`, depth 2) and `efaff0d0fc8348fa8b886dd6134c5831` (`app`, depth 2) were not truncated. Their scope is those directory depths, not the complete repository.
+
+Exact-symbol search requests:
+
+| Query and scope | Result limitation | Request |
+|---|---|---|
+| `SystemPrompt`, `agent/` | 16 snippets, not truncated; tests located but not read | `8963ab738f494ca09956ce88d235bf05` |
+| `SystemPrompt`, `cmd/` | 30-result cap reached; truncated and redacted; not an absence proof | `59891442c8e445e9984e9fe4e3c43ac0` |
+| `SystemPrompt`, `app/` | two test snippets; three redactions and 16 skipped files; not an absence proof | `e2cbead5d95d4f06b54b268e2ebc717e` |
+| `ChatRequest`, exact `app/ui/ui.go` | five snippets, not truncated | `c8b38583e3874b8caaf8b514c835a5c1` |
+
+## Build/test discovery, not execution
+
+`AGENTS.md` documents `cmake -B build .`, `cmake --build build --parallel 8` and `go build .`. Its `serve` commands launch a service; do not execute them against shared ports merely to obtain a baseline.
+
+`app/README.md` documents desktop generation/run and UI development. It includes installs and service launches; none was executed or newly authorised. `app/ui/app/package.json` declares `build = tsc -b && vite build`, `lint = eslint .`, `prettier:check = prettier --check .` and `test = vitest`. These are manifest declarations, not evidence of installed dependencies or passing checks. Discover the actual non-interactive test configuration, CI inclusion, browser fixtures and Go acceptance commands before constructing the baseline. Do not introduce another runner or install packages without checking the existing environment and permission boundary.
+
+## Arrival/method read receipt
+
+All paths below are relative to `/Users/krypto/GitHub/`. Each was read in full. TECHNE working-tree observations reported HEAD `035365bb70c57feb900e88a029f631bfe6865d52` with dirty state; LINEAGE reported HEAD `e39238543605654a5f7da522ccfbdf9c62b996fd` with dirty state. A HEAD does not identify these dirty files; use the raw hashes.
+
+| Source | Lines | Raw file SHA-256 |
+|---|---:|---|
+| `AGENTS.md` | 69 | `a01039b2c1491ea64bf9a0312311df59154a73032af0781022388e336d0ae7d6` |
+| `TECHNE/00_START_HERE.md` | 173 | `e0779d39073b56ae823b4868565c19330289188a0bec0fe15322835b49dff525` |
+| `TECHNE/TECHNE_AGENT_START.md` | 116 | `d2cb4701e92a68844d15b966d39c50fa4edee400731365e7936a3aba16a15e47` |
+| `TECHNE/KANON.md` | 553 | `8667a6e524fe1c73fa1b4aaccb5afdc5d965bb121694c93abdc8a888f17f2365` |
+| `TECHNE/CONSTITUTION.md` | 699, two contiguous reads | `38230c5cd06f26bfd2d0aa16422bec265aab2d796c6a0f209ba9acdbcf171062` |
+| `TECHNE/PSYCHE-WELCOME.md` | 52 | `2aff05ab269bf9cc8670f6622048876afc1578915f3d856cccb8e2a9779decac` |
+| `TECHNE/PSYCHE_NORTH_STAR.md` | 251 | `15e0877c9901ba4bca685b4a241a76b8bce857f3d78247319da52e77a4baf71b` |
+| `LINEAGE/WELCOME.md` | 111 | `f44eb011b72dad492e97780425111ecbf74bc9b45db605797ec9d1323db75e93` |
+| `LINEAGE/HOUSE_NOTES.md` | 145 | `96d3e213dd1d8f32d8329f8fa9cc295eac1214f1a1395294890394faa147698c` |
+| `TECHNE/Method/21_Branch_And_Merge_Discipline.md` | 213 | `59bf8294cdcda7b53f31769d5b80164c1ae5741426c7b6028c76bb15e244f92c` |
+| `TECHNE/Method/04_Implementation_Proof_Method.md` | 482 | `261e9c16f3041bca0fe19f98f1ff9cf06acdfe914152094eaf8e6c8cf964d64a` |
+| `TECHNE/Tools/README.md` | 252 | `eb551fdffbd8c5e216135ff7479359438b9a0ff5633a5888792ac8743f9be315` |
+| `TECHNE/Method/06_Ledgers_Memory_and_Handoffs.md` | 565, two contiguous reads | `d8c73e00ba70b009cf091c9620eb6f5291483c3b3e0d2849003b533bd0a4d8a5` |
+| `TECHNE/Method/12_Context_Preservation_Method.md` | 309 | `13db4302d68e411432d06dfc841b6e716bd738d656c4b1b87f1454bbe1dc948b` |
+| `TECHNE/Role_Cards/Architect.md` | 265, two contiguous reads | `03d50e190751f59b7be720903cd23364f8e0ebc501ecf145ea2345eeb30c05a4` |
+| `TECHNE/Role_Cards/Documentation_Writer.md` | 224 | `2bd5a86d7e481d31d86256a094994db94b65d984a871394e4d4a9a94049823cb` |
+| `TECHNE/Role_Cards/Handoff_Steward.md` | 302 | `7660053ab5852087533d47e4aaa1405c65e6ee126f7fe1c55c15e74405bb338c` |
+
+Routes used: RECON, DOCS, GIT and HANDOFF. The coding, blueprint authoring/promotion and independent judge routes have not been completed. Current TECHNE requires its own earned readiness gates; the attached older NEXUS/POIESIS documents are not substitutes. The programme North Star is now ANAMNESIS isolation-first; this explicitly commissioned Ollama lane does not change that research priority. No Ollama-specific North Star has yet been located in the inspected entry surfaces; this is not an exhaustive absence claim.
+
+## Still unread or unproven
+
+Ollama `CLAUDE.md`, `CONTRIBUTING.md`, `docs/development.md`, `go.mod`, CI configuration, frontend settings/routes/components, store loaders/migrations, remaining terminal persistence and compaction paths, test bodies and historical design/review records remain to be read as relevant. Installed/running app identity, toolchains, dependency state, actual test discovery, runtime performance, LETHE scopes/configuration and acceptance, remote tips and checkout ownership remain unverified.
+
+The four recurring-colleague wake documents named by the commissioning work list have not been used or read. Read each in full before its first use; do not fabricate the founded colleague or substitute Eko as that colleague. Lineage registration and LETHE document-pointer recording have not been performed and remain explicit handoff obligations.
+
+
+TEST_RISK_SYMBOLS
+agent/tools/bash_unix_test.go:16:	cmd := exec.Command("bash", "-c", "true")
+agent/tools/mcp_test.go:62:	build := exec.Command("go", "build", "-o", binary, "github.com/ollama/ollama/mcp/testdata/rawserver")
+agent/tools/web_test.go:69:	t.Setenv("OLLAMA_HOST", ts.URL)
+agent/tools/web_test.go:184:	t.Setenv("OLLAMA_HOST", ts.URL)
+api/client_test.go:40:			t.Setenv("OLLAMA_HOST", v.value)
+api/types_test.go:175:func TestMainGPUParsingFromJSON(t *testing.T) {
+api/types_test.go:280:func TestMainGPUFormatParams(t *testing.T) {
+app/server/server_test.go:33:	os.Unsetenv("OLLAMA_HOST")
+app/server/server_test.go:37:	home, err := os.UserHomeDir()
+app/server/server_test.go:54:			dont:     []string{"OLLAMA_HOST=", "OLLAMA_ORIGINS="},
+app/server/server_test.go:59:			want:     []string{"OLLAMA_HOST=0.0.0.0", "OLLAMA_MODELS=" + defaultModels},
+app/server/server_test.go:66:			dont:     []string{"OLLAMA_HOST="},
+app/server/server_test.go:72:			dont:     []string{"OLLAMA_HOST=", "OLLAMA_ORIGINS="},
+app/server/server_test.go:88:				"OLLAMA_HOST=0.0.0.0",
+app/tools/cloud_policy_test.go:27:		t.Setenv("OLLAMA_HOST", ts.URL)
+app/tools/cloud_policy_test.go:44:		t.Setenv("OLLAMA_HOST", ts.URL)
+app/tools/cloud_policy_test.go:60:		t.Setenv("OLLAMA_HOST", ts.URL)
+app/tools/mcp_test.go:29:	build := exec.Command("go", "build", "-o", binary, "github.com/ollama/ollama/mcp/testdata/rawserver")
+app/tts/main_test.go:9:func TestMain(m *testing.M) {
+app/ui/approval_test.go:284:	build := exec.Command("go", "build", "-o", binary, "github.com/ollama/ollama/mcp/testdata/rawserver")
+app/ui/auto_approve_test.go:177:	t.Setenv("OLLAMA_HOST", fakeModel(t).URL)
+app/ui/mcp_test.go:45:	build := exec.Command("go", "build", "-o", binary, "github.com/ollama/ollama/mcp/testdata/rawserver")
+app/ui/tts_test.go:20:func TestMain(m *testing.M) {
+app/ui/ui_test.go:539:	t.Setenv("OLLAMA_HOST", ts.URL)
+cmd/agent_tui_mcp_test.go:51:	build := exec.Command("go", "build", "-o", binary, "github.com/ollama/ollama/mcp/testdata/rawserver")
+cmd/agent_tui_mcp_test.go:167:	build := exec.Command("go", "build", "-o", binary, "github.com/ollama/ollama/mcp/testdata/rawserver")
+cmd/agent_tui_mcp_test.go:251:	build := exec.Command("go", "build", "-o", binary, "github.com/ollama/ollama/mcp/testdata/rawserver")
+cmd/bench/bench_test.go:171:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:202:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:249:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:277:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:347:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:426:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:581:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:611:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:640:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:678:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:738:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:802:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:861:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:939:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:989:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:1052:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:1077:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:1325:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/bench/bench_test.go:1360:	t.Setenv("OLLAMA_HOST", server.URL)
+cmd/cloud_suggest_test.go:164:	t.Setenv("OLLAMA_HOST", mockServer.URL)
+cmd/cmd_test.go:374:	t.Setenv("OLLAMA_HOST", mockServer.URL)
+cmd/cmd_test.go:423:	t.Setenv("OLLAMA_HOST", mockServer.URL)
+cmd/cmd_test.go:515:	t.Setenv("OLLAMA_HOST", mockServer.URL)
+cmd/cmd_test.go:616:	t.Setenv("OLLAMA_HOST", mockServer.URL)
+cmd/cmd_test.go:691:	t.Setenv("OLLAMA_HOST", mockServer.URL)
+cmd/cmd_test.go:742:	t.Setenv("OLLAMA_HOST", mockServer.URL)
+cmd/cmd_test.go:810:	t.Setenv("OLLAMA_HOST", mockServer.URL)
+cmd/cmd_test.go:894:	t.Setenv("OLLAMA_HOST", mockServer.URL)
+cmd/cmd_test.go:965:	t.Setenv("OLLAMA_HOST", mockServer.URL)
+cmd/cmd_test.go:1032:	t.Setenv("OLLAMA_HOST", mockServer.URL)
+cmd/cmd_test.go:1258:			t.Setenv("OLLAMA_HOST", mockServer.URL)
+cmd/cmd_test.go:1368:			t.Setenv("OLLAMA_HOST", mockServer.URL)
+cmd/cmd_test.go:1464:			t.Setenv("OLLAMA_HOST", mockServer.URL)
+cmd/cmd_test.go:2320:			t.Setenv("OLLAMA_HOST", mockServer.URL)
+cmd/cmd_test.go:2385:			t.Setenv("OLLAMA_HOST", tt.host)
+cmd/cmd_test.go:2388:				t.Errorf("isLocalhost() with OLLAMA_HOST=%q = %v, want %v", tt.host, got, tt.expected)
+cmd/internal/fileutil/files_test.go:12:func TestMain(m *testing.M) {
+cmd/launch/codex_app_test.go:186:	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:9999")
+cmd/launch/codex_app_test.go:265:	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:9999")
+cmd/launch/codex_app_test.go:320:	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:9999")
+cmd/launch/codex_app_test.go:372:	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:9999")
+cmd/launch/codex_app_test.go:464:	t.Setenv("OLLAMA_HOST", "http://0.0.0.0:11434")
+cmd/launch/codex_app_test.go:569:	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+cmd/launch/codex_app_test.go:594:	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+cmd/launch/codex_app_test.go:665:			t.Setenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+cmd/launch/codex_app_test.go:707:	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+cmd/launch/codex_app_test.go:734:	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+cmd/launch/codex_app_test.go:868:	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:9999")
+cmd/launch/codex_app_test.go:911:	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:9999")
+cmd/launch/codex_app_test.go:1112:	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:9999")
+cmd/launch/codex_app_test.go:1138:	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:9999")
+cmd/launch/codex_test.go:168:	t.Run("uses custom OLLAMA_HOST", func(t *testing.T) {
+cmd/launch/codex_test.go:169:		t.Setenv("OLLAMA_HOST", "http://myhost:9999")
+cmd/launch/codex_test.go:186:		t.Setenv("OLLAMA_HOST", "http://0.0.0.0:11434")
+cmd/launch/command_test.go:114:		t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/command_test.go:290:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/command_test.go:336:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/command_test.go:436:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/command_test.go:482:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/command_test.go:525:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/command_test.go:571:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/command_test.go:627:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/command_test.go:664:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/copilot_test.go:154:	t.Run("uses custom OLLAMA_HOST", func(t *testing.T) {
+cmd/launch/copilot_test.go:155:		t.Setenv("OLLAMA_HOST", "http://myhost:9999")
+cmd/launch/hermes_test.go:130:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/hermes_test.go:244:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/hermes_test.go:324:	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:1")
+cmd/launch/hermes_test.go:429:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/integrations_test.go:1673:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/kimi_test.go:179:	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+cmd/launch/kimi_test.go:233:	t.Setenv("OLLAMA_HOST", "http://0.0.0.0:11434")
+cmd/launch/kimi_test.go:276:		t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/kimi_test.go:287:		t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/kimi_test.go:337:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:298:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:340:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:383:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:431:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:472:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:531:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:576:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:663:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:810:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:860:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:911:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:963:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:1020:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:1068:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:1337:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:1377:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:1435:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:1476:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:1531:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:1583:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:1635:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:1679:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:1727:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:1786:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:1850:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:1899:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:1951:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:2009:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:2069:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:2147:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:2203:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:2249:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:2297:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:2372:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:2451:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:2501:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:2563:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:2624:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:2705:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:2794:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:2868:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:2946:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:3020:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:3079:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:3131:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:3178:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:3302:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:3352:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:3407:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:3471:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:3530:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:3613:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:3700:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:3764:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:3813:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:3864:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:3915:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:3975:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:4033:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/launch_test.go:4095:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/omp_test.go:18:func TestMain(m *testing.M) {
+cmd/launch/omp_test.go:139:		t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/omp_test.go:319:	t.Setenv("OLLAMA_HOST", "http://0.0.0.0:11434")
+cmd/launch/omp_test.go:560:	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+cmd/launch/opencode_test.go:921:	// Default OLLAMA_HOST
+cmd/launch/pi_test.go:274:		t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/pi_test.go:925:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/pi_test.go:1408:	t.Setenv("OLLAMA_HOST", srv.URL)
+cmd/launch/poolside_test.go:51:	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+cmd/warn_thinking_test.go:42:		t.Setenv("OLLAMA_HOST", srv.URL)
+convert/convert_test.go:92:func TestMain(m *testing.M) {
+envconfig/config_test.go:47:			t.Setenv("OLLAMA_HOST", tt.value)
+envconfig/config_test.go:78:			t.Setenv("OLLAMA_HOST", tt.value)
+integration/create_test.go:21:// skipIfRemote skips the test if OLLAMA_HOST points to a non-local server.
+integration/create_test.go:26:	host := os.Getenv("OLLAMA_HOST")
+integration/create_test.go:46:	t.Skipf("safetensors creation requires a local server (OLLAMA_HOST=%s)", host)
+integration/utils_test.go:140:	ollamaHost := os.Getenv("OLLAMA_HOST")
+integration/utils_test.go:205:	if tmp := os.Getenv("OLLAMA_HOST"); tmp != ollamaHost {
+integration/utils_test.go:206:		slog.Info("setting env", "OLLAMA_HOST", ollamaHost)
+integration/utils_test.go:207:		t.Setenv("OLLAMA_HOST", ollamaHost)
+integration/utils_test.go:210:	serverCmd = exec.Command(CLIName, "serve")
+llm/llama_server_test.go:1333:	cmd := exec.Command("echo")
+llm/llama_server_test.go:3601:	cmd := exec.Command("sleep", "3600")
+mcp/config_test.go:62:		home, err := os.UserHomeDir()
+mcp/containment_test.go:31:	list := exec.Command("go", "list", "-json", "github.com/ollama/ollama/...")
+mcp/subprocess_test.go:23:	build := exec.Command("go", "build", "-o", binary, "./testdata/rawserver")
+mcp/subprocess_test.go:263:	output, err := exec.Command("ps", "-ax", "-o", "command").Output()
+mcp/tokenstore_darwin_test.go:53:		cmd := exec.Command("security", "delete-generic-password", "-s", service)
+mcp/tokenstore_test.go:477:		exec.Command("pkill", "-f", marker).Run()
+mcp/tokenstore_test.go:489:	out, _ := exec.Command("pgrep", "-fl", marker).Output()
+middleware/anthropic_test.go:964:	// Set OLLAMA_HOST to our mock server so the followup call goes there
+middleware/anthropic_test.go:965:	t.Setenv("OLLAMA_HOST", followupServer.URL)
+middleware/anthropic_test.go:1086:	t.Setenv("OLLAMA_HOST", followupServer.URL)
+middleware/anthropic_test.go:1652:		t.Setenv("OLLAMA_HOST", followupServer.URL)
+middleware/anthropic_test.go:1921:	t.Setenv("OLLAMA_HOST", followupServer.URL)
+middleware/anthropic_test.go:2060:	t.Setenv("OLLAMA_HOST", followupServer.URL)
+middleware/anthropic_test.go:2172:	t.Setenv("OLLAMA_HOST", followupServer.URL)
+middleware/anthropic_test.go:2285:	t.Setenv("OLLAMA_HOST", followupServer.URL)
+middleware/anthropic_test.go:2400:	t.Setenv("OLLAMA_HOST", followupServer.URL)
+middleware/anthropic_test.go:2544:	t.Setenv("OLLAMA_HOST", followupServer.URL)
+middleware/anthropic_test.go:2662:	t.Setenv("OLLAMA_HOST", followupServer.URL)
+middleware/anthropic_test.go:2770:	t.Setenv("OLLAMA_HOST", followupServer.URL)
+middleware/anthropic_test.go:2890:	t.Setenv("OLLAMA_HOST", followupServer.URL)
+model/renderers/gemma4_reference_test.go:1559:		if err := exec.Command("uv", "run", "--with", "jinja2", "python", "-c", "import jinja2").Run(); err != nil {
+model/renderers/gemma4_reference_test.go:1679:	if err := exec.Command("uv", "run", "--with", "jinja2", "python", "-c", "import jinja2").Run(); err != nil {
+model/renderers/gemma4_reference_test.go:1854:	if err := exec.Command("uv", "run", "--with", "jinja2", "python", "-c", "import jinja2").Run(); err != nil {
+model/renderers/gemma4_reference_test.go:2058:	cmd := exec.Command("uv", "run", "--with", "jinja2", "python", "-c", script)
+model/renderers/laguna_test.go:703:	cmd := exec.Command(python, "-c", "from transformers.utils.chat_template_utils import _compile_jinja_template")
+model/renderers/laguna_test.go:805:	cmd := exec.Command(lagunaJinjaPython(t), "-c", script, templatePath, string(messagesJSON), toolsJSON, enableThinking)
+model/renderers/nemotron3nano_reference_test.go:597:	cmd := exec.Command(pythonPath, "-c", script, templatePath, string(msgsJSON), toolsJSON, thinking)
+server/sched_test.go:23:func TestMain(m *testing.M) {
+
+truncated False

@@ -1,0 +1,149 @@
+[
+  {
+    "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+    "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec",
+    "start": 25,
+    "end": 43,
+    "total_lines": 590
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+    "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec",
+    "start": 69,
+    "end": 87,
+    "total_lines": 590
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+    "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec",
+    "start": 109,
+    "end": 148,
+    "total_lines": 590
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+    "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec",
+    "start": 212,
+    "end": 230,
+    "total_lines": 590
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+    "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec",
+    "start": 254,
+    "end": 272,
+    "total_lines": 590
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+    "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec",
+    "start": 275,
+    "end": 343,
+    "total_lines": 590
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+    "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec",
+    "start": 347,
+    "end": 365,
+    "total_lines": 590
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+    "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec",
+    "start": 374,
+    "end": 392,
+    "total_lines": 590
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+    "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec",
+    "start": 395,
+    "end": 434,
+    "total_lines": 590
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+    "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec",
+    "start": 454,
+    "end": 488,
+    "total_lines": 590
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+    "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec",
+    "start": 517,
+    "end": 553,
+    "total_lines": 590
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+    "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec",
+    "start": 572,
+    "end": 590,
+    "total_lines": 590
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/store/store.go",
+    "file_sha256": "80c4bf13dd8b811809a389b3a5fc61386770b5963ce10012fe55dc29fab82601",
+    "start": 120,
+    "end": 157,
+    "total_lines": 537
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/store/store.go",
+    "file_sha256": "80c4bf13dd8b811809a389b3a5fc61386770b5963ce10012fe55dc29fab82601",
+    "start": 370,
+    "end": 440,
+    "total_lines": 537
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/ui.go",
+    "file_sha256": "8d6ebf9482c618cd09243d1fde9dc765d8c7934a7de8644bce59b8d9dbd0d68c",
+    "start": 1680,
+    "end": 1860,
+    "total_lines": 2004
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/ui.go",
+    "file_sha256": "8d6ebf9482c618cd09243d1fde9dc765d8c7934a7de8644bce59b8d9dbd0d68c",
+    "start": 1900,
+    "end": 2004,
+    "total_lines": 2004
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app/src/api.ts",
+    "file_sha256": "19e7d77c7b8e69cf689172f22a67ed7e28707916c199aefea501f43ef5cd16ff",
+    "start": 185,
+    "end": 285,
+    "total_lines": 879
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/cmd/agent_tui.go",
+    "file_sha256": "c934b7b803875a6a334e86cdf289831395fb5356445519c60bcd07f728190ed9",
+    "start": 70,
+    "end": 155,
+    "total_lines": 852
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/cmd/agent_tui.go",
+    "file_sha256": "c934b7b803875a6a334e86cdf289831395fb5356445519c60bcd07f728190ed9",
+    "start": 200,
+    "end": 260,
+    "total_lines": 852
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/agent/session.go",
+    "file_sha256": "0a2521b18c99b043c8f91af37605a827bdc4d50b380e904013a5959d859d3cec",
+    "start": 420,
+    "end": 477,
+    "total_lines": 1087
+  },
+  {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/cmd/tui/chat/input.go",
+    "file_sha256": "308fae49f0144cab8f4d2fafbd81795ee31f5bb3a28c39e9201fa918a1baa930",
+    "start": 1715,
+    "end": 1728,
+    "total_lines": 1728
+  }
+]

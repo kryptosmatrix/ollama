@@ -1,0 +1,26 @@
+{
+  "purpose": "Byte-identical copies taken before Thole edited any control record (continuation 13).",
+  "taken_at": "2026-09-26T19:42:14+10:00",
+  "files": {
+    "STATE.json": {
+      "bytes": 31544,
+      "sha256": "73fcb2147a8a750cb717c3deb7a73a01c183915c3d73280e0cdf2e9efb48c04e"
+    },
+    "DECISIONS.md": {
+      "bytes": 16659,
+      "sha256": "449ec981077a5d5dce858c65026c2af70a11dba25a1d40a7b9e3572428c2a5e3"
+    },
+    "HANDOFF.md": {
+      "bytes": 2949,
+      "sha256": "ce2f1af02220c963656aa49362d93f11da283b892f87ff398de060d89f8df1a5"
+    },
+    "REQUIREMENTS.md": {
+      "bytes": 6958,
+      "sha256": "56b00b70c38d2ea595563ee7b63c1489f549fc8cfdccf780701b16d0bb0ab850"
+    },
+    "BLOCKERS.md": {
+      "bytes": 1554,
+      "sha256": "9ff43c1c6168d5fc4314f57d8d2408ca1b741fc78b0c08c0c1e3fae882fe26be"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "path": "mutant_empty-success",
+    "start": 424,
+    "count": 20
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont05/mutants/empty-success/store.go",
+    "file_sha256": "f745a211db44c88729c867e0b48b341a08f37af714b24dceba7ccaac85599804",
+    "start": 424,
+    "end": 443,
+    "total_lines": 537,
+    "text": "424: func (s *Store) Chat(id string) (*Chat, error) {\n425: \treturn s.ChatWithOptions(id, true)\n426: }\n427: \n428: func (s *Store) ChatWithOptions(id string, loadAttachmentData bool) (*Chat, error) {\n429: \tif err := s.ensureDB(); err != nil {\n430: \t\treturn nil, err\n431: \t}\n432: \n433: \treturn NewChat(id), nil\n434: }\n435: \n436: func (s *Store) SetChat(chat Chat) error {\n437: \tif err := s.ensureDB(); err != nil {\n438: \t\treturn err\n439: \t}\n440: \n441: \treturn s.db.saveChat(chat)\n442: }\n443: "
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "read_source",
+  "arguments": {
+    "path": "app/store/database.go",
+    "start": 640,
+    "count": 62
+  },
+  "result": {
+    "path": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/store/database.go",
+    "file_sha256": "6905b4e6146f76e0aed66f97e17a39245d27a0182f0051d06642389de042b551",
+    "start": 640,
+    "end": 701,
+    "total_lines": 1373,
+    "text": "640: \t\terr := rows.Scan(\n641: \t\t\t&chat.ID,\n642: \t\t\t&chat.Title,\n643: \t\t\t&createdAt,\n644: \t\t\t&firstUserContent,\n645: \t\t\t&lastUpdatedStr,\n646: \t\t)\n647: \n648: \t\t// Parse the last updated time\n649: \t\tlastUpdated, _ := time.Parse(\"2006-01-02 15:04:05\", lastUpdatedStr)\n650: \t\tif err != nil {\n651: \t\t\treturn nil, fmt.Errorf(\"scan chat: %w\", err)\n652: \t\t}\n653: \n654: \t\tchat.CreatedAt = createdAt\n655: \n656: \t\t// Add a dummy first user message for the UI to display\n657: \t\t// This is just for the excerpt, full messages are loaded when needed\n658: \t\tchat.Messages = []Message{}\n659: \t\tif firstUserContent != \"\" {\n660: \t\t\tchat.Messages = append(chat.Messages, Message{\n661: \t\t\t\tRole:      \"user\",\n662: \t\t\t\tContent:   firstUserContent,\n663: \t\t\t\tUpdatedAt: lastUpdated,\n664: \t\t\t})\n665: \t\t}\n666: \n667: \t\tchats = append(chats, chat)\n668: \t}\n669: \n670: \tif err := rows.Err(); err != nil {\n671: \t\treturn nil, fmt.Errorf(\"iterate chats: %w\", err)\n672: \t}\n673: \n674: \treturn chats, nil\n675: }\n676: \n677: func (db *database) getChatWithOptions(id string, loadAttachmentData bool) (*Chat, error) {\n678: \tquery := `\n679: \t\tSELECT id, title, created_at, browser_state\n680: \t\tFROM chats\n681: \t\tWHERE id = ?\n682: \t`\n683: \n684: \tvar chat Chat\n685: \tvar createdAt time.Time\n686: \tvar browserState sql.NullString\n687: \n688: \terr := db.conn.QueryRow(query, id).Scan(\n689: \t\t&chat.ID,\n690: \t\t&chat.Title,\n691: \t\t&createdAt,\n692: \t\t&browserState,\n693: \t)\n694: \tif err != nil {\n695: \t\tif err == sql.ErrNoRows {\n696: \t\t\treturn nil, fmt.Errorf(\"%w: chat %s\", not.Found, id)\n697: \t\t}\n698: \t\treturn nil, fmt.Errorf(\"query chat: %w\", err)\n699: \t}\n700: \n701: \tchat.CreatedAt = createdAt"
+  }
+}

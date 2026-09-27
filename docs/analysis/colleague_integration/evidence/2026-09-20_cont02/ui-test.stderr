@@ -1,0 +1,16 @@
+Browserslist: browsers data (caniuse-lite) is 16 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[90mstderr[2m | src/utils/clipboard.test.ts[2m > [22m[2mcopyTextToClipboard[2m > [22m[2mfalls back to execCommand when Clipboard API fails
+[22m[39mClipboard API failed, falling back to execCommand Error: not allowed
+    at [90m/Users/krypto/GitHub/ollama/app/ui/app/[39msrc/utils/clipboard.test.ts:24:49
+    at [90mfile:///Users/krypto/GitHub/ollama/app/ui/app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:155:11
+    at [90mfile:///Users/krypto/GitHub/ollama/app/ui/app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:26
+    at [90mfile:///Users/krypto/GitHub/ollama/app/ui/app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/krypto/GitHub/ollama/app/ui/app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Users/krypto/GitHub/ollama/app/ui/app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at runSuite [90m(file:///Users/krypto/GitHub/ollama/app/ui/app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Users/krypto/GitHub/ollama/app/ui/app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1729:8[90m)[39m
+

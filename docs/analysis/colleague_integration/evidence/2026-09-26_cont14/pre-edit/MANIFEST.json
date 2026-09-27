@@ -1,0 +1,30 @@
+{
+  "written_at": "2026-09-26T22:14:53+10:00",
+  "purpose": "pre-edit copies before the continuation-14 custody transfer",
+  "files": {
+    "STATE.json": {
+      "sha256": "f2234381adfe415b15cba5e18f54098a3922af4361796cecf7f8d7e48561b32b",
+      "bytes": 39406
+    },
+    "DECISIONS.md": {
+      "sha256": "61cf8262ad611948d28fa35448d8292bfa5b2eb70c7e652b3064810fe72877ec",
+      "bytes": 26752
+    },
+    "HANDOFF.md": {
+      "sha256": "6a6667f9c5a0e05b2d4da1387410ec858d382d896d4d7e9d0c04d8ecd162f7a5",
+      "bytes": 4026
+    },
+    "REQUIREMENTS.md": {
+      "sha256": "56b00b70c38d2ea595563ee7b63c1489f549fc8cfdccf780701b16d0bb0ab850",
+      "bytes": 6958
+    },
+    "BLOCKERS.md": {
+      "sha256": "9ff43c1c6168d5fc4314f57d8d2408ca1b741fc78b0c08c0c1e3fae882fe26be",
+      "bytes": 1554
+    },
+    "SOURCE_MAP.md": {
+      "sha256": "05f9647c14109e7c2e2824ca4741a27029c9087e6cd6668ea6ba1d460618166e",
+      "bytes": 18245
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "http_status": 200,
+  "requested_model": "deepseek-v4.1-flash:cloud",
+  "served_model": "deepseek-v4.1-flash",
+  "done": true,
+  "done_reason": "stop",
+  "elapsed_seconds": 13.27422237501014,
+  "prompt_eval_count": 45700,
+  "eval_count": 2230,
+  "same_prior_messages_preserved": true,
+  "prior_report_unchanged": true,
+  "design_sha256": "8bfea5fc2804b40bcd23d6f99f4d970e2507dab28d084e8203ced7534725ecab",
+  "report_sha256": "9ec6ee021b794fc141bc95d34bc0588b8e04c7d35c8af5663e722a636212a0a7",
+  "scope": "source/log consultation only; not blueprint promotion or independent execution"
+}

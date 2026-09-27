@@ -1,0 +1,181 @@
+{"Time":"2026-09-21T16:29:11.183258+10:00","Action":"start","Package":"github.com/ollama/ollama/app/store"}
+{"Time":"2026-09-21T16:29:11.1843+10:00","Action":"start","Package":"github.com/ollama/ollama/app/ui/responses"}
+{"Time":"2026-09-21T16:29:11.184416+10:00","Action":"output","Package":"github.com/ollama/ollama/app/ui/responses","Output":"?   \tgithub.com/ollama/ollama/app/ui/responses\t[no test files]\n"}
+{"Time":"2026-09-21T16:29:11.184471+10:00","Action":"skip","Package":"github.com/ollama/ollama/app/ui/responses","Elapsed":0}
+{"Time":"2026-09-21T16:29:12.121035+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadMissingHeaderIsNotFound"}
+{"Time":"2026-09-21T16:29:12.121268+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadMissingHeaderIsNotFound","Output":"=== RUN   TestChatReadMissingHeaderIsNotFound\n"}
+{"Time":"2026-09-21T16:29:12.136922+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadMissingHeaderIsNotFound","Output":"--- PASS: TestChatReadMissingHeaderIsNotFound (0.02s)\n"}
+{"Time":"2026-09-21T16:29:12.137028+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadMissingHeaderIsNotFound","Elapsed":0.02}
+{"Time":"2026-09-21T16:29:12.137098+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadValidEmptyAndPopulated"}
+{"Time":"2026-09-21T16:29:12.137133+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadValidEmptyAndPopulated","Output":"=== RUN   TestChatReadValidEmptyAndPopulated\n"}
+{"Time":"2026-09-21T16:29:12.162792+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadValidEmptyAndPopulated","Output":"--- PASS: TestChatReadValidEmptyAndPopulated (0.03s)\n"}
+{"Time":"2026-09-21T16:29:12.162861+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadValidEmptyAndPopulated","Elapsed":0.03}
+{"Time":"2026-09-21T16:29:12.162896+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadRejectsMalformedMessage"}
+{"Time":"2026-09-21T16:29:12.162932+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadRejectsMalformedMessage","Output":"=== RUN   TestChatReadRejectsMalformedMessage\n"}
+{"Time":"2026-09-21T16:29:12.175549+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadRejectsMalformedMessage","Output":"--- PASS: TestChatReadRejectsMalformedMessage (0.01s)\n"}
+{"Time":"2026-09-21T16:29:12.17563+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadRejectsMalformedMessage","Elapsed":0.01}
+{"Time":"2026-09-21T16:29:12.175656+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadInitialisationFailureIsNotAbsence"}
+{"Time":"2026-09-21T16:29:12.175885+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadInitialisationFailureIsNotAbsence","Output":"=== RUN   TestChatReadInitialisationFailureIsNotAbsence\n"}
+{"Time":"2026-09-21T16:29:12.178007+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadInitialisationFailureIsNotAbsence","Output":"--- PASS: TestChatReadInitialisationFailureIsNotAbsence (0.00s)\n"}
+{"Time":"2026-09-21T16:29:12.178071+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadInitialisationFailureIsNotAbsence","Elapsed":0}
+{"Time":"2026-09-21T16:29:12.178093+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause"}
+{"Time":"2026-09-21T16:29:12.178112+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause","Output":"=== RUN   TestChatReadPreservesDatabaseErrorCause\n"}
+{"Time":"2026-09-21T16:29:12.186144+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause","Output":"--- PASS: TestChatReadPreservesDatabaseErrorCause (0.01s)\n"}
+{"Time":"2026-09-21T16:29:12.186248+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatReadPreservesDatabaseErrorCause","Elapsed":0.01}
+{"Time":"2026-09-21T16:29:12.186276+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled"}
+{"Time":"2026-09-21T16:29:12.186291+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled","Output":"=== RUN   TestCloudDisabled\n"}
+{"Time":"2026-09-21T16:29:12.186317+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/default_enabled"}
+{"Time":"2026-09-21T16:29:12.186329+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/default_enabled","Output":"=== RUN   TestCloudDisabled/default_enabled\n"}
+{"Time":"2026-09-21T16:29:12.196672+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/default_enabled","Output":"--- PASS: TestCloudDisabled/default_enabled (0.01s)\n"}
+{"Time":"2026-09-21T16:29:12.196751+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/default_enabled","Elapsed":0.01}
+{"Time":"2026-09-21T16:29:12.196787+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/env_disables_cloud"}
+{"Time":"2026-09-21T16:29:12.196817+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/env_disables_cloud","Output":"=== RUN   TestCloudDisabled/env_disables_cloud\n"}
+{"Time":"2026-09-21T16:29:12.210692+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/env_disables_cloud","Output":"--- PASS: TestCloudDisabled/env_disables_cloud (0.01s)\n"}
+{"Time":"2026-09-21T16:29:12.210779+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/env_disables_cloud","Elapsed":0.01}
+{"Time":"2026-09-21T16:29:12.210819+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/config_disables_cloud"}
+{"Time":"2026-09-21T16:29:12.21085+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/config_disables_cloud","Output":"=== RUN   TestCloudDisabled/config_disables_cloud\n"}
+{"Time":"2026-09-21T16:29:12.227828+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/config_disables_cloud","Output":"--- PASS: TestCloudDisabled/config_disables_cloud (0.02s)\n"}
+{"Time":"2026-09-21T16:29:12.227955+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/config_disables_cloud","Elapsed":0.02}
+{"Time":"2026-09-21T16:29:12.228403+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/env_and_config"}
+{"Time":"2026-09-21T16:29:12.228455+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/env_and_config","Output":"=== RUN   TestCloudDisabled/env_and_config\n"}
+{"Time":"2026-09-21T16:29:12.243317+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/env_and_config","Output":"--- PASS: TestCloudDisabled/env_and_config (0.02s)\n"}
+{"Time":"2026-09-21T16:29:12.2434+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/env_and_config","Elapsed":0.02}
+{"Time":"2026-09-21T16:29:12.243479+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/invalid_config_is_ignored"}
+{"Time":"2026-09-21T16:29:12.243515+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/invalid_config_is_ignored","Output":"=== RUN   TestCloudDisabled/invalid_config_is_ignored\n"}
+{"Time":"2026-09-21T16:29:12.253644+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/invalid_config_is_ignored","Output":"--- PASS: TestCloudDisabled/invalid_config_is_ignored (0.01s)\n"}
+{"Time":"2026-09-21T16:29:12.253701+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled/invalid_config_is_ignored","Elapsed":0.01}
+{"Time":"2026-09-21T16:29:12.253731+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled","Output":"--- PASS: TestCloudDisabled (0.07s)\n"}
+{"Time":"2026-09-21T16:29:12.253754+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudDisabled","Elapsed":0.07}
+{"Time":"2026-09-21T16:29:12.253769+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestSetCloudEnabled"}
+{"Time":"2026-09-21T16:29:12.253835+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestSetCloudEnabled","Output":"=== RUN   TestSetCloudEnabled\n"}
+{"Time":"2026-09-21T16:29:12.264353+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestSetCloudEnabled","Output":"--- PASS: TestSetCloudEnabled (0.01s)\n"}
+{"Time":"2026-09-21T16:29:12.26444+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestSetCloudEnabled","Elapsed":0.01}
+{"Time":"2026-09-21T16:29:12.264477+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaMigrations"}
+{"Time":"2026-09-21T16:29:12.264507+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaMigrations","Output":"=== RUN   TestSchemaMigrations\n"}
+{"Time":"2026-09-21T16:29:12.264539+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaMigrations/schema_comparison_after_migration"}
+{"Time":"2026-09-21T16:29:12.265375+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaMigrations/schema_comparison_after_migration","Output":"=== RUN   TestSchemaMigrations/schema_comparison_after_migration\n"}
+{"Time":"2026-09-21T16:29:12.296226+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaMigrations/schema_comparison_after_migration","Output":"--- PASS: TestSchemaMigrations/schema_comparison_after_migration (0.03s)\n"}
+{"Time":"2026-09-21T16:29:12.296305+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaMigrations/schema_comparison_after_migration","Elapsed":0.03}
+{"Time":"2026-09-21T16:29:12.29633+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaMigrations/idempotent_migrations"}
+{"Time":"2026-09-21T16:29:12.296351+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaMigrations/idempotent_migrations","Output":"=== RUN   TestSchemaMigrations/idempotent_migrations\n"}
+{"Time":"2026-09-21T16:29:12.315862+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaMigrations/idempotent_migrations","Output":"--- PASS: TestSchemaMigrations/idempotent_migrations (0.02s)\n"}
+{"Time":"2026-09-21T16:29:12.315949+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaMigrations/idempotent_migrations","Elapsed":0.02}
+{"Time":"2026-09-21T16:29:12.315991+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaMigrations/init_database_has_correct_schema_version"}
+{"Time":"2026-09-21T16:29:12.316021+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaMigrations/init_database_has_correct_schema_version","Output":"=== RUN   TestSchemaMigrations/init_database_has_correct_schema_version\n"}
+{"Time":"2026-09-21T16:29:12.326743+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaMigrations/init_database_has_correct_schema_version","Output":"--- PASS: TestSchemaMigrations/init_database_has_correct_schema_version (0.01s)\n"}
+{"Time":"2026-09-21T16:29:12.326797+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaMigrations/init_database_has_correct_schema_version","Elapsed":0.01}
+{"Time":"2026-09-21T16:29:12.326838+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaMigrations","Output":"--- PASS: TestSchemaMigrations (0.06s)\n"}
+{"Time":"2026-09-21T16:29:12.326853+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaMigrations","Elapsed":0.06}
+{"Time":"2026-09-21T16:29:12.326868+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestMigrationV13ToV14ContextLength"}
+{"Time":"2026-09-21T16:29:12.326881+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestMigrationV13ToV14ContextLength","Output":"=== RUN   TestMigrationV13ToV14ContextLength\n"}
+{"Time":"2026-09-21T16:29:12.34386+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestMigrationV13ToV14ContextLength","Output":"--- PASS: TestMigrationV13ToV14ContextLength (0.02s)\n"}
+{"Time":"2026-09-21T16:29:12.343935+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestMigrationV13ToV14ContextLength","Elapsed":0.02}
+{"Time":"2026-09-21T16:29:12.344135+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestMigrationV15ToV16LastHomeViewDefaultsToLaunch"}
+{"Time":"2026-09-21T16:29:12.344184+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestMigrationV15ToV16LastHomeViewDefaultsToLaunch","Output":"=== RUN   TestMigrationV15ToV16LastHomeViewDefaultsToLaunch\n"}
+{"Time":"2026-09-21T16:29:12.358197+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestMigrationV15ToV16LastHomeViewDefaultsToLaunch","Output":"--- PASS: TestMigrationV15ToV16LastHomeViewDefaultsToLaunch (0.01s)\n"}
+{"Time":"2026-09-21T16:29:12.358286+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestMigrationV15ToV16LastHomeViewDefaultsToLaunch","Elapsed":0.01}
+{"Time":"2026-09-21T16:29:12.358326+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatDeletionWithCascade"}
+{"Time":"2026-09-21T16:29:12.35839+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatDeletionWithCascade","Output":"=== RUN   TestChatDeletionWithCascade\n"}
+{"Time":"2026-09-21T16:29:12.358423+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatDeletionWithCascade/chat_deletion_cascades_to_related_messages"}
+{"Time":"2026-09-21T16:29:12.35845+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatDeletionWithCascade/chat_deletion_cascades_to_related_messages","Output":"=== RUN   TestChatDeletionWithCascade/chat_deletion_cascades_to_related_messages\n"}
+{"Time":"2026-09-21T16:29:12.372092+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatDeletionWithCascade/chat_deletion_cascades_to_related_messages","Output":"--- PASS: TestChatDeletionWithCascade/chat_deletion_cascades_to_related_messages (0.01s)\n"}
+{"Time":"2026-09-21T16:29:12.372133+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatDeletionWithCascade/chat_deletion_cascades_to_related_messages","Elapsed":0.01}
+{"Time":"2026-09-21T16:29:12.372151+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatDeletionWithCascade/foreign_keys_are_enabled"}
+{"Time":"2026-09-21T16:29:12.372164+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatDeletionWithCascade/foreign_keys_are_enabled","Output":"=== RUN   TestChatDeletionWithCascade/foreign_keys_are_enabled\n"}
+{"Time":"2026-09-21T16:29:12.380097+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatDeletionWithCascade/foreign_keys_are_enabled","Output":"--- PASS: TestChatDeletionWithCascade/foreign_keys_are_enabled (0.01s)\n"}
+{"Time":"2026-09-21T16:29:12.380177+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatDeletionWithCascade/foreign_keys_are_enabled","Elapsed":0.01}
+{"Time":"2026-09-21T16:29:12.38022+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestChatDeletionWithCascade/cleanup_orphaned_data"}
+{"Time":"2026-09-21T16:29:12.380235+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatDeletionWithCascade/cleanup_orphaned_data","Output":"=== RUN   TestChatDeletionWithCascade/cleanup_orphaned_data\n"}
+{"Time":"2026-09-21T16:29:12.388481+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatDeletionWithCascade/cleanup_orphaned_data","Output":"--- PASS: TestChatDeletionWithCascade/cleanup_orphaned_data (0.01s)\n"}
+{"Time":"2026-09-21T16:29:12.388527+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatDeletionWithCascade/cleanup_orphaned_data","Elapsed":0.01}
+{"Time":"2026-09-21T16:29:12.388546+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestChatDeletionWithCascade","Output":"--- PASS: TestChatDeletionWithCascade (0.03s)\n"}
+{"Time":"2026-09-21T16:29:12.388561+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestChatDeletionWithCascade","Elapsed":0.03}
+{"Time":"2026-09-21T16:29:12.388584+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestConfigMigration"}
+{"Time":"2026-09-21T16:29:12.388598+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestConfigMigration","Output":"=== RUN   TestConfigMigration\n"}
+{"Time":"2026-09-21T16:29:12.403179+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestConfigMigration","Output":"2026/09/21 16:29:12 INFO migrated device ID from config.json\n"}
+{"Time":"2026-09-21T16:29:12.403251+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestConfigMigration","Output":"2026/09/21 16:29:12 INFO migrated first run status from config.json hasCompleted=true\n"}
+{"Time":"2026-09-21T16:29:12.40335+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestConfigMigration","Output":"2026/09/21 16:29:12 INFO successfully migrated settings from config.json\n"}
+{"Time":"2026-09-21T16:29:12.408469+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestConfigMigration","Output":"--- PASS: TestConfigMigration (0.02s)\n"}
+{"Time":"2026-09-21T16:29:12.408523+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestConfigMigration","Elapsed":0.02}
+{"Time":"2026-09-21T16:29:12.408559+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestNoConfigToMigrate"}
+{"Time":"2026-09-21T16:29:12.408577+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestNoConfigToMigrate","Output":"=== RUN   TestNoConfigToMigrate\n"}
+{"Time":"2026-09-21T16:29:12.417942+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestNoConfigToMigrate","Output":"--- PASS: TestNoConfigToMigrate (0.01s)\n"}
+{"Time":"2026-09-21T16:29:12.418028+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestNoConfigToMigrate","Elapsed":0.01}
+{"Time":"2026-09-21T16:29:12.418064+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudMigrationFromAirplaneMode"}
+{"Time":"2026-09-21T16:29:12.418093+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudMigrationFromAirplaneMode","Output":"=== RUN   TestCloudMigrationFromAirplaneMode\n"}
+{"Time":"2026-09-21T16:29:12.438435+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudMigrationFromAirplaneMode","Output":"--- PASS: TestCloudMigrationFromAirplaneMode (0.02s)\n"}
+{"Time":"2026-09-21T16:29:12.438515+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestCloudMigrationFromAirplaneMode","Elapsed":0.02}
+{"Time":"2026-09-21T16:29:12.438554+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestMigrationFromEpoc"}
+{"Time":"2026-09-21T16:29:12.438603+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestMigrationFromEpoc","Output":"=== RUN   TestMigrationFromEpoc\n"}
+{"Time":"2026-09-21T16:29:12.441205+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestMigrationFromEpoc","Output":"    migration_test.go:265: DB created: /var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/TestMigrationFromEpoc3346866184/001/db.sqlite\n"}
+{"Time":"2026-09-21T16:29:12.444467+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestMigrationFromEpoc","Output":"    migration_test.go:278: v1 schema created\n"}
+{"Time":"2026-09-21T16:29:12.453525+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestMigrationFromEpoc","Output":"    migration_test.go:282: migrations completed\n"}
+{"Time":"2026-09-21T16:29:12.463996+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestMigrationFromEpoc","Output":"--- PASS: TestMigrationFromEpoc (0.03s)\n"}
+{"Time":"2026-09-21T16:29:12.464078+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestMigrationFromEpoc","Elapsed":0.03}
+{"Time":"2026-09-21T16:29:12.464115+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaVersioning"}
+{"Time":"2026-09-21T16:29:12.464139+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaVersioning","Output":"=== RUN   TestSchemaVersioning\n"}
+{"Time":"2026-09-21T16:29:12.464432+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaVersioning/new_database_has_correct_schema_version"}
+{"Time":"2026-09-21T16:29:12.464477+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaVersioning/new_database_has_correct_schema_version","Output":"=== RUN   TestSchemaVersioning/new_database_has_correct_schema_version\n"}
+{"Time":"2026-09-21T16:29:12.472612+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaVersioning/new_database_has_correct_schema_version","Output":"--- PASS: TestSchemaVersioning/new_database_has_correct_schema_version (0.01s)\n"}
+{"Time":"2026-09-21T16:29:12.472665+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaVersioning/new_database_has_correct_schema_version","Elapsed":0.01}
+{"Time":"2026-09-21T16:29:12.47269+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaVersioning/can_update_schema_version"}
+{"Time":"2026-09-21T16:29:12.47271+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaVersioning/can_update_schema_version","Output":"=== RUN   TestSchemaVersioning/can_update_schema_version\n"}
+{"Time":"2026-09-21T16:29:12.480224+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaVersioning/can_update_schema_version","Output":"--- PASS: TestSchemaVersioning/can_update_schema_version (0.01s)\n"}
+{"Time":"2026-09-21T16:29:12.480342+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaVersioning/can_update_schema_version","Elapsed":0.01}
+{"Time":"2026-09-21T16:29:12.482318+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaVersioning","Output":"--- PASS: TestSchemaVersioning (0.02s)\n"}
+{"Time":"2026-09-21T16:29:12.482384+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestSchemaVersioning","Elapsed":0.02}
+{"Time":"2026-09-21T16:29:12.482422+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestStore"}
+{"Time":"2026-09-21T16:29:12.48245+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore","Output":"=== RUN   TestStore\n"}
+{"Time":"2026-09-21T16:29:12.48301+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/default_id"}
+{"Time":"2026-09-21T16:29:12.483083+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/default_id","Output":"=== RUN   TestStore/default_id\n"}
+{"Time":"2026-09-21T16:29:12.490405+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/default_id","Output":"--- PASS: TestStore/default_id (0.01s)\n"}
+{"Time":"2026-09-21T16:29:12.490464+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/default_id","Elapsed":0.01}
+{"Time":"2026-09-21T16:29:12.490502+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/has_completed_first_run"}
+{"Time":"2026-09-21T16:29:12.490532+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/has_completed_first_run","Output":"=== RUN   TestStore/has_completed_first_run\n"}
+{"Time":"2026-09-21T16:29:12.491231+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/has_completed_first_run","Output":"--- PASS: TestStore/has_completed_first_run (0.00s)\n"}
+{"Time":"2026-09-21T16:29:12.491299+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/has_completed_first_run","Elapsed":0}
+{"Time":"2026-09-21T16:29:12.491335+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings"}
+{"Time":"2026-09-21T16:29:12.491371+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings","Output":"=== RUN   TestStore/settings\n"}
+{"Time":"2026-09-21T16:29:12.491573+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings","Output":"--- PASS: TestStore/settings (0.00s)\n"}
+{"Time":"2026-09-21T16:29:12.49167+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings","Elapsed":0}
+{"Time":"2026-09-21T16:29:12.491713+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/auto-approve_tools_is_off_until_switched_on,_and_off_again_when_switched_off"}
+{"Time":"2026-09-21T16:29:12.491744+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/auto-approve_tools_is_off_until_switched_on,_and_off_again_when_switched_off","Output":"=== RUN   TestStore/auto-approve_tools_is_off_until_switched_on,_and_off_again_when_switched_off\n"}
+{"Time":"2026-09-21T16:29:12.504698+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/auto-approve_tools_is_off_until_switched_on,_and_off_again_when_switched_off","Output":"--- PASS: TestStore/auto-approve_tools_is_off_until_switched_on,_and_off_again_when_switched_off (0.01s)\n"}
+{"Time":"2026-09-21T16:29:12.50477+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/auto-approve_tools_is_off_until_switched_on,_and_off_again_when_switched_off","Elapsed":0.01}
+{"Time":"2026-09-21T16:29:12.504809+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings_default_home_view_is_launch"}
+{"Time":"2026-09-21T16:29:12.504837+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings_default_home_view_is_launch","Output":"=== RUN   TestStore/settings_default_home_view_is_launch\n"}
+{"Time":"2026-09-21T16:29:12.504871+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings_default_home_view_is_launch","Output":"--- PASS: TestStore/settings_default_home_view_is_launch (0.00s)\n"}
+{"Time":"2026-09-21T16:29:12.504903+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings_default_home_view_is_launch","Elapsed":0}
+{"Time":"2026-09-21T16:29:12.504976+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings_empty_home_view_falls_back_to_launch"}
+{"Time":"2026-09-21T16:29:12.505021+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings_empty_home_view_falls_back_to_launch","Output":"=== RUN   TestStore/settings_empty_home_view_falls_back_to_launch\n"}
+{"Time":"2026-09-21T16:29:12.505236+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings_empty_home_view_falls_back_to_launch","Output":"--- PASS: TestStore/settings_empty_home_view_falls_back_to_launch (0.00s)\n"}
+{"Time":"2026-09-21T16:29:12.505287+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings_empty_home_view_falls_back_to_launch","Elapsed":0}
+{"Time":"2026-09-21T16:29:12.505332+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings_disabled_home_view_falls_back_to_launch"}
+{"Time":"2026-09-21T16:29:12.505363+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings_disabled_home_view_falls_back_to_launch","Output":"=== RUN   TestStore/settings_disabled_home_view_falls_back_to_launch\n"}
+{"Time":"2026-09-21T16:29:12.505408+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings_disabled_home_view_falls_back_to_launch","Output":"--- PASS: TestStore/settings_disabled_home_view_falls_back_to_launch (0.00s)\n"}
+{"Time":"2026-09-21T16:29:12.505449+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings_disabled_home_view_falls_back_to_launch","Elapsed":0}
+{"Time":"2026-09-21T16:29:12.50548+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings_codex_app_home_view_is_accepted"}
+{"Time":"2026-09-21T16:29:12.505514+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings_codex_app_home_view_is_accepted","Output":"=== RUN   TestStore/settings_codex_app_home_view_is_accepted\n"}
+{"Time":"2026-09-21T16:29:12.505784+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings_codex_app_home_view_is_accepted","Output":"--- PASS: TestStore/settings_codex_app_home_view_is_accepted (0.00s)\n"}
+{"Time":"2026-09-21T16:29:12.505832+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/settings_codex_app_home_view_is_accepted","Elapsed":0}
+{"Time":"2026-09-21T16:29:12.505869+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/window_size"}
+{"Time":"2026-09-21T16:29:12.505899+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/window_size","Output":"=== RUN   TestStore/window_size\n"}
+{"Time":"2026-09-21T16:29:12.506002+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/window_size","Output":"--- PASS: TestStore/window_size (0.00s)\n"}
+{"Time":"2026-09-21T16:29:12.506039+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/window_size","Elapsed":0}
+{"Time":"2026-09-21T16:29:12.506069+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/create_and_retrieve_chat"}
+{"Time":"2026-09-21T16:29:12.506096+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/create_and_retrieve_chat","Output":"=== RUN   TestStore/create_and_retrieve_chat\n"}
+{"Time":"2026-09-21T16:29:12.508301+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/create_and_retrieve_chat","Output":"--- PASS: TestStore/create_and_retrieve_chat (0.00s)\n"}
+{"Time":"2026-09-21T16:29:12.508358+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/create_and_retrieve_chat","Elapsed":0}
+{"Time":"2026-09-21T16:29:12.508391+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/list_chats"}
+{"Time":"2026-09-21T16:29:12.508419+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/list_chats","Output":"=== RUN   TestStore/list_chats\n"}
+{"Time":"2026-09-21T16:29:12.509138+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/list_chats","Output":"--- PASS: TestStore/list_chats (0.00s)\n"}
+{"Time":"2026-09-21T16:29:12.509208+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/list_chats","Elapsed":0}
+{"Time":"2026-09-21T16:29:12.509242+10:00","Action":"run","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/delete_chat"}
+{"Time":"2026-09-21T16:29:12.509271+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/delete_chat","Output":"=== RUN   TestStore/delete_chat\n"}
+{"Time":"2026-09-21T16:29:12.511115+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/delete_chat","Output":"--- PASS: TestStore/delete_chat (0.00s)\n"}
+{"Time":"2026-09-21T16:29:12.511162+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestStore/delete_chat","Elapsed":0}
+{"Time":"2026-09-21T16:29:12.514924+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Test":"TestStore","Output":"--- PASS: TestStore (0.03s)\n"}
+{"Time":"2026-09-21T16:29:12.515029+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Test":"TestStore","Elapsed":0.03}
+{"Time":"2026-09-21T16:29:12.515101+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Output":"PASS\n"}
+{"Time":"2026-09-21T16:29:12.520383+10:00","Action":"output","Package":"github.com/ollama/ollama/app/store","Output":"ok  \tgithub.com/ollama/ollama/app/store\t1.336s\n"}
+{"Time":"2026-09-21T16:29:12.520457+10:00","Action":"pass","Package":"github.com/ollama/ollama/app/store","Elapsed":1.337}

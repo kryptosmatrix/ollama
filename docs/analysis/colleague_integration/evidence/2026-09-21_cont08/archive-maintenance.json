@@ -1,0 +1,8 @@
+{
+  "retired_job": "e6dacbb4d6ab483cb536d212e16fea95",
+  "preserved_record": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/retained-cont03-review-packet-command.json",
+  "record_sha256": "73c79533a5c6fcd5a711b94e37544e060d8566d4806ac8abc5d4b5f29bf45af0",
+  "streams_verified": true,
+  "admission_failure": "COMMAND_ARCHIVE_FULL",
+  "service_configuration_changed": false
+}

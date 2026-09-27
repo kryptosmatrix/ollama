@@ -1,0 +1,83 @@
+{
+  "record_type": "tool_failure_and_local_git_observations",
+  "date_brisbane": "2026-09-20",
+  "owner": "Eko",
+  "scope": "OI-01 initial reconnaissance; no runtime implementation",
+  "capture_limit": "The run_command error below is the complete returned error object. Other entries are explicitly selected observations, not complete copies of their tool responses. No build or test stdout exists for this attempt.",
+  "command_attempt": {
+    "tool": "Eko_Write_Bridge.run_command",
+    "request_id": "eko-ollama-20260920-arrival-01",
+    "cwd": "/Users/krypto/GitHub/ollama",
+    "timeout_seconds": 30,
+    "purpose": "Read explicitly named arrival documents with Python; no writes requested.",
+    "returned_job_id": null,
+    "child_exit_code": null,
+    "execution_observed": false,
+    "response": {
+      "ok": false,
+      "error": {
+        "code": "COMMAND_ARCHIVE_FULL",
+        "message": "Command archive is full; explicitly forget completed jobs or archive the service state"
+      },
+      "is_error": true
+    }
+  },
+  "declared_bridge_observations": {
+    "profile": "Eko Write Bridge",
+    "bridge_version": "0.3.0",
+    "execution_state_id": "dfbd69b42df2453aae7bfa1c5a7af704",
+    "saved_job_limit": 256,
+    "actual_saved_job_count": null,
+    "archive_bytes_used": null,
+    "archive_root_cause_beyond_error": null,
+    "forget_operation_performed": false,
+    "service_configuration_changed": false,
+    "old_output_deleted": false,
+    "job_inventory_read_limit": 5,
+    "job_inventory_scope": "Newest five records only; includes forgotten tombstones; not a full archive census."
+  },
+  "initial_repo_observation": {
+    "tool": "Eko_Write_Bridge.repo_overview",
+    "request_id": "521882aade5c4f77a33e393101e9d4c1",
+    "head_commit": "953de98d408a9697fa20a48c23973b9dc8eee921",
+    "branch": "main",
+    "upstream": "origin/main",
+    "local_tracking_ahead": 0,
+    "local_tracking_behind": 0,
+    "remote_fetched": false,
+    "staged_count": 0,
+    "unstaged_count": 0,
+    "untracked": ["docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md"],
+    "conflicted_count": 0,
+    "local_branch_count": 3,
+    "worktree_count": 1,
+    "truncated": false
+  },
+  "pre_write_repo_observation": {
+    "tool": "Eko_Write_Bridge.git_status",
+    "request_id": "5def805ea944442898493576d7f00dfa",
+    "head_commit": "953de98d408a9697fa20a48c23973b9dc8eee921",
+    "branch": "main",
+    "upstream": "origin/main",
+    "local_tracking_ahead": 0,
+    "local_tracking_behind": 0,
+    "remote_fetched": false,
+    "staged_count": 0,
+    "unstaged_count": 0,
+    "untracked": [
+      "docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+      "docs/OLLAMA_CROSS_MODEL_COLLEAGUES_AND_CAPABILITY_ROUTING_HANDOFF.md"
+    ],
+    "conflicted_count": 0,
+    "truncated": false,
+    "concurrent_change": "The second untracked document appeared between observations. Eko did not create, read, edit, stage or remove it. Its owner and contents remain unverified."
+  },
+  "interpretation_limits": [
+    "No command job was accepted for this task; the error is not a failed build or a failed test result.",
+    "Tool read access and subsequent create-only documentation writes do not establish build/test access.",
+    "Local remote-tracking equality does not establish the current remote branch tip.",
+    "Repository cleanliness does not establish exclusive checkout ownership.",
+    "No independent reviewer was launched; role changes within Eko are not independent review.",
+    "Existing packaged application files do not establish which application or server is running."
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "name": "run_validation",
+  "arguments": {
+    "case": "gate-self-checks"
+  },
+  "result": {
+    "case": "gate-self-checks",
+    "head": "6a3778184d43b23c5cba14e0379922377f615f52",
+    "expectation_met": true,
+    "result_path": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-9-gate-self-checks/result.json",
+    "tests": {
+      "argv": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-c",
+        "raise SystemExit(7)"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+      "exit_code": 7,
+      "timed_out": false,
+      "seconds": 0.18064266699366271,
+      "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-9-gate-self-checks/failing-child.stdout",
+      "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-9-gate-self-checks/failing-child.stderr",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "controls": {
+      "clean_positive": true,
+      "failing_child_blocks": true,
+      "missing_case_blocks": true,
+      "empty_selection_blocks": true
+    },
+    "source_and_dependencies_unchanged": true
+  }
+}

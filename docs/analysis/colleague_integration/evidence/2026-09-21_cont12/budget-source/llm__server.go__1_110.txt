@@ -1,0 +1,110 @@
+1: package llm
+2: 
+3: import (
+4: 	"context"
+5: 	"encoding/json"
+6: 	"errors"
+7: 	"log/slog"
+8: 	"os"
+9: 	"slices"
+10: 	"strings"
+11: 	"time"
+12: 
+13: 	"github.com/ollama/ollama/api"
+14: 	"github.com/ollama/ollama/envconfig"
+15: 	"github.com/ollama/ollama/format"
+16: 	"github.com/ollama/ollama/fs/ggml"
+17: 	"github.com/ollama/ollama/ml"
+18: )
+19: 
+20: var ErrLoadRequiredFull = errors.New("unable to load full model on GPU")
+21: 
+22: type filteredEnv []string
+23: 
+24: func (e filteredEnv) LogValue() slog.Value {
+25: 	var attrs []slog.Attr
+26: 	for _, env := range e {
+27: 		if key, value, ok := strings.Cut(env, "="); ok {
+28: 			if filteredEnvLogKey(key) {
+29: 				attrs = append(attrs, slog.String(key, filteredEnvLogValue(key, value)))
+30: 			}
+31: 		}
+32: 	}
+33: 	return slog.GroupValue(attrs...)
+34: }
+35: 
+36: func filteredEnvLogKey(key string) bool {
+37: 	return strings.HasPrefix(key, "CUDA_") ||
+38: 		strings.HasPrefix(key, "ROCR_") ||
+39: 		strings.HasPrefix(key, "ROCM_") ||
+40: 		strings.HasPrefix(key, "HIP_") ||
+41: 		strings.HasPrefix(key, "HSA_") ||
+42: 		strings.HasPrefix(key, "GGML_") ||
+43: 		slices.Contains([]string{
+44: 			"PATH",
+45: 			"LD_LIBRARY_PATH",
+46: 			"DYLD_LIBRARY_PATH",
+47: 		}, key)
+48: }
+49: 
+50: func filteredEnvLogValue(key, value string) string {
+51: 	for _, token := range []string{"API", "KEY", "TOKEN", "SECRET", "PASSWORD", "PASS", "CREDENTIAL", "AUTH"} {
+52: 		if strings.Contains(strings.ToUpper(key), token) {
+53: 			return "[redacted]"
+54: 		}
+55: 	}
+56: 	return value
+57: }
+58: 
+59: type LlamaServer interface {
+60: 	ModelPath() string
+61: 	Load(ctx context.Context, systemInfo ml.SystemInfo, gpus []ml.DeviceInfo, requireFull bool) ([]ml.DeviceID, error)
+62: 	Ping(ctx context.Context) error
+63: 	WaitUntilRunning(ctx context.Context) error
+64: 	Completion(ctx context.Context, req CompletionRequest, fn func(CompletionResponse)) error
+65: 	Chat(ctx context.Context, req ChatRequest, fn func(ChatResponse)) error
+66: 	ApplyChatTemplate(ctx context.Context, req ChatRequest) (string, error)
+67: 	Embedding(ctx context.Context, input string) ([]float32, int, error)
+68: 	Tokenize(ctx context.Context, content string) ([]int, error)
+69: 	Detokenize(ctx context.Context, tokens []int) (string, error)
+70: 	Close() error
+71: 	MemorySize() (total, vram uint64)
+72: 	VRAMByGPU(id ml.DeviceID) uint64
+73: 	Pid() int
+74: 	GetPort() int
+75: 	GetDeviceInfos(ctx context.Context) []ml.DeviceInfo
+76: 	HasExited() bool
+77: 	ContextLength() int
+78: }
+79: 
+80: type LlamaServerConfig struct {
+81: 	DisableJinja   bool
+82: 	ContextShift   bool
+83: 	EnableMTP      bool
+84: 	DraftModelPath string
+85: }
+86: 
+87: // LoadModel will load a model from disk. The model must be in the GGML format.
+88: //
+89: // It collects array values for arrays with a size less than or equal to
+90: // maxArraySize. If maxArraySize is 0, the default value of 1024 is used. If
+91: // the maxArraySize is negative, all arrays are collected.
+92: func LoadModel(model string, maxArraySize int) (*ggml.GGML, error) {
+93: 	if _, err := os.Stat(model); err != nil {
+94: 		return nil, err
+95: 	}
+96: 
+97: 	f, err := os.Open(model)
+98: 	if err != nil {
+99: 		return nil, err
+100: 	}
+101: 	defer f.Close()
+102: 
+103: 	return ggml.Decode(f, maxArraySize)
+104: }
+105: 
+106: // NewLlamaServer creates a new llama-server runner for the given model.
+107: // All GGML models are served via the upstream llama-server subprocess.
+108: func NewLlamaServer(systemInfo ml.SystemInfo, gpus []ml.DeviceInfo, modelPath string, f *ggml.GGML, adapters, projectors []string, opts api.Options, numParallel int, config LlamaServerConfig) (LlamaServer, error) {
+109: 	slog.Info("using llama-server for model", "model", modelPath)
+110: 

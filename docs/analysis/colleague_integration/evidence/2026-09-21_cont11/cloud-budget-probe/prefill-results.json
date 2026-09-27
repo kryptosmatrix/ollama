@@ -1,0 +1,40 @@
+[
+  {
+    "case": "zero-output-short",
+    "requested_model": "deepseek-v4.1-flash:cloud",
+    "served_model": null,
+    "requested_num_predict": 0,
+    "http_status": 400,
+    "prompt_eval_count": null,
+    "eval_count": null,
+    "done": null,
+    "done_reason": null,
+    "content_bytes": 0,
+    "thinking_bytes": 0,
+    "tool_calls": 0,
+    "error": "max_tokens must be positive, got: 0 (ref: ff401e42-957e-4168-a487-c6a78d6c0d39)",
+    "response_sha256": "ae27784f52d2b96c4a41ecf8b2bd246e5d1231355ae138e5cc1494b4655b5fcf",
+    "request_sha256": "3196477bf9af67adbdb4519ea3be5bab1d5190aa57a83d655b0e5b49f062078e",
+    "elapsed_seconds": 0.5953077919548377,
+    "scope": "Synthetic qualification probe, not a general tokenizer or provider guarantee"
+  },
+  {
+    "case": "zero-output-longer",
+    "requested_model": "deepseek-v4.1-flash:cloud",
+    "served_model": null,
+    "requested_num_predict": 0,
+    "http_status": 400,
+    "prompt_eval_count": null,
+    "eval_count": null,
+    "done": null,
+    "done_reason": null,
+    "content_bytes": 0,
+    "thinking_bytes": 0,
+    "tool_calls": 0,
+    "error": "max_tokens must be positive, got: 0 (ref: 3c7bb4f8-438e-413c-a697-a78e33e80915)",
+    "response_sha256": "1f0d4464ee8f866f3f2137863e722ff88b9ba71e3c0adb6eb12e65894a051b27",
+    "request_sha256": "5388b9d7e870056ebacd18de8f7723cc8da9bbcd4597508d1e26ee6424ee0167",
+    "elapsed_seconds": 0.3943639579229057,
+    "scope": "Synthetic qualification probe, not a general tokenizer or provider guarantee"
+  }
+]

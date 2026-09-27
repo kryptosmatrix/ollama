@@ -1,0 +1,30 @@
+{
+  "source_commit": "85c69f45e7c0fa731dcb18058c24c2b0a6d03d12",
+  "documentation_commit": "281dcaa06c7cd8b299c6045a248dd6b6ac85f954",
+  "documentation_only_delta": [
+    "docs/analysis/colleague_integration/CONTINUATION_06_REPORT.md",
+    "docs/analysis/colleague_integration/proof_cont06/app-suite-result.json",
+    "docs/analysis/colleague_integration/proof_cont06/ignore-commit.json",
+    "docs/analysis/colleague_integration/proof_cont06/ignore-negative-controls.json",
+    "docs/analysis/colleague_integration/proof_cont06/ignore-rules-proof.json",
+    "docs/analysis/colleague_integration/proof_cont06/independent-executed-verification.json",
+    "docs/analysis/colleague_integration/proof_cont06/independent-review-result.json",
+    "docs/analysis/colleague_integration/proof_cont06/independent-review.md",
+    "docs/analysis/colleague_integration/proof_cont06/lint-comparison.json",
+    "docs/analysis/colleague_integration/proof_cont06/manifest.json",
+    "docs/analysis/colleague_integration/proof_cont06/native-warnings.json"
+  ],
+  "branch": "eko/chat-read-integrity-20260920",
+  "worktree": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+  "remote": "https://github.com/kryptosmatrix/ollama.git",
+  "push_exit": 0,
+  "remote_query_exit": 0,
+  "remote_output": "281dcaa06c7cd8b299c6045a248dd6b6ac85f954\trefs/heads/eko/chat-read-integrity-20260920\n",
+  "verified_remote_tip": "281dcaa06c7cd8b299c6045a248dd6b6ac85f954",
+  "source_and_curated_proof_backed_up": true,
+  "worktree_clean": true,
+  "main_merged": false,
+  "installed": false,
+  "disposition": "PARKED",
+  "timestamp_brisbane": "2026-09-20T22:36:48.835600+10:00"
+}

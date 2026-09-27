@@ -1,0 +1,51 @@
+{
+  "args": [
+    "/opt/homebrew/bin/go",
+    "test",
+    "-overlay",
+    "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont03/store-test-overlay.json",
+    "-count=1",
+    "-json",
+    "-timeout=90s",
+    "-run=^TestChatRead(MissingHeaderIsNotFound|PreservesDatabaseErrorCause)$",
+    "./app/store"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama",
+  "exit_code": 1,
+  "elapsed_seconds": 3.8328005829825997,
+  "environment_overrides": {
+    "HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/ollama-chat-read-store-v2-gnajmhxr",
+    "USERPROFILE": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/ollama-chat-read-store-v2-gnajmhxr",
+    "LOCALAPPDATA": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/ollama-chat-read-store-v2-gnajmhxr",
+    "OLLAMA_HOST": "http://127.0.0.1:1",
+    "GOTOOLCHAIN": "local",
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "CI": "true"
+  },
+  "cache_locations": {
+    "GOCACHE": "/Users/krypto/Library/Caches/go-build",
+    "GOMODCACHE": "/Users/krypto/go/pkg/mod",
+    "GOPATH": "/Users/krypto/go"
+  },
+  "source_head": "953de98d408a9697fa20a48c23973b9dc8eee921",
+  "test_sha256": "cb497b9f4d2751dff6acc3de003e6453a1f7d13d33059e789752a3b1d62df5c4",
+  "overlay": {
+    "Replace": {
+      "/Users/krypto/GitHub/ollama/app/store/chat_read_errors_test.go": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont03/testdata/store_chat_read_errors_test.go"
+    }
+  },
+  "stdout_sha256": "5e08ac84e91692adc2906cc4eaec66d2892def854f55c6b63986ffa2fe876395",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "production_source_overlay": false,
+  "named_test_results": [
+    {
+      "test": "TestChatReadMissingHeaderIsNotFound",
+      "action": "pass"
+    },
+    {
+      "test": "TestChatReadPreservesDatabaseErrorCause",
+      "action": "fail"
+    }
+  ]
+}

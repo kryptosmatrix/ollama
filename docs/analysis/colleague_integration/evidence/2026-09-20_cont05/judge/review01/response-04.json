@@ -1,0 +1,40 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "created_at": "2026-09-20T11:57:59.404371636Z",
+  "message": {
+    "role": "assistant",
+    "content": "Now let me find the UI consumer of `ChatWithOptions` — the load/continuation path.",
+    "tool_calls": [
+      {
+        "id": "call_b6jpecuv",
+        "function": {
+          "index": 0,
+          "name": "read_source",
+          "arguments": {
+            "path": "app/ui/ui.go",
+            "start": 60,
+            "count": 200
+          }
+        }
+      },
+      {
+        "id": "call_4q5n2kai",
+        "function": {
+          "index": 1,
+          "name": "read_source",
+          "arguments": {
+            "path": "app/store/database.go",
+            "start": 1,
+            "count": 60
+          }
+        }
+      }
+    ]
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 1483949603,
+  "prompt_eval_count": 12027,
+  "prompt_eval_cached_count": 1408,
+  "eval_count": 157
+}

@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/npm",
+    "test",
+    "--",
+    "--run",
+    "--reporter=json"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity/app/ui/app",
+  "exit_code": 0,
+  "seconds": 32.10526858305093,
+  "stdout_sha256": "aa123126962d540f0972f7256c784d72c42fc1b9f735d68b5dd98d9c465867c8",
+  "stderr_sha256": "e92fea1dba81c37c823f3b2bf228dc4acea887496c3018efa08410636ff4cd99",
+  "counts": {
+    "numTotalTests": 164,
+    "numPassedTests": 164,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "success": true
+  },
+  "failures": []
+}

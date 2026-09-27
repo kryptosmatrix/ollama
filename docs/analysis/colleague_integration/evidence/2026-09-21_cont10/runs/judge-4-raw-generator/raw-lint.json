@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/npm",
+    "exec",
+    "--no",
+    "--",
+    "eslint",
+    "codegen/gotypes.gen.ts",
+    "--format=json"
+  ],
+  "cwd": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-4-raw-generator/frontend",
+  "exit_code": 1,
+  "timed_out": false,
+  "seconds": 6.047058625030331,
+  "stdout": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-4-raw-generator/raw-lint.stdout",
+  "stderr": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont10/runs/judge-4-raw-generator/raw-lint.stderr",
+  "stdout_sha256": "2d3d6bd452ee28c83e18f7a7ff41072548e7937f64ae838245c7d92084ed2d7a",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

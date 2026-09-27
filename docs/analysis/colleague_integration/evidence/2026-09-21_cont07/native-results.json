@@ -1,0 +1,119 @@
+{
+  "records": [
+    {
+      "name": "native-candidate-syntax",
+      "argv": [
+        "/usr/bin/clang++",
+        "-std=c++11",
+        "-DWEBVIEW_STATIC",
+        "-DWEBVIEW_COCOA",
+        "-Werror=deprecated-literal-operator",
+        "-fsyntax-only",
+        "app/webview/webview.cc"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "exit_code": 0,
+      "seconds": 2.1664874999551103,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "native-candidate-object",
+      "argv": [
+        "/usr/bin/clang++",
+        "-std=c++11",
+        "-DWEBVIEW_STATIC",
+        "-DWEBVIEW_COCOA",
+        "-O2",
+        "-c",
+        "app/webview/webview.cc",
+        "-o",
+        "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/webview-candidate.o"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "exit_code": 0,
+      "seconds": 2.4498695420334116,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "native-original-control",
+      "argv": [
+        "/usr/bin/clang++",
+        "-std=c++11",
+        "-DWEBVIEW_STATIC",
+        "-DWEBVIEW_COCOA",
+        "-Werror=deprecated-literal-operator",
+        "-fsyntax-only",
+        "webview.cc"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-21_cont07/native-control",
+      "exit_code": 1,
+      "seconds": 2.0886632920010015,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "28f87e2ff680fb0d5627d258f39ce29adfd91bbe62ca8ca983543bea0d578107"
+    },
+    {
+      "name": "native-final-syntax",
+      "argv": [
+        "/usr/bin/clang++",
+        "-std=c++11",
+        "-DWEBVIEW_STATIC",
+        "-DWEBVIEW_COCOA",
+        "-Werror=deprecated-literal-operator",
+        "-fsyntax-only",
+        "app/webview/webview.cc"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "exit_code": 0,
+      "seconds": 1.6134556249598972,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "native-app-tests",
+      "argv": [
+        "/opt/homebrew/bin/go",
+        "test",
+        "-count=1",
+        "-json",
+        "-timeout=90s",
+        "./app/cmd/app"
+      ],
+      "cwd": "/Users/krypto/GitHub/ollama-eko-chat-read-integrity",
+      "exit_code": 0,
+      "seconds": 30.05050366697833,
+      "stdout_sha256": "94e9214092f98044b611acd1182cbb9ba3ad9678e7a76a0dda42d2d8196cd764",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "object_byte_identical": true,
+  "object_sha256": "b6551cda945646f3d49b6dba0336de43d2d385fa3c7b9692978b89896122b09f",
+  "header_sha256": "60b93d50eefa841c61a37e2c9425107dc720fbb2b112455129776547c2e8eef0",
+  "tests": {
+    "github.com/ollama/ollama/app/cmd/app::TestManagerExistsWithAnEmptyConfiguration": "pass",
+    "github.com/ollama/ollama/app/cmd/app::TestAServerAddedAfterLaunchCanBeConnected": "pass",
+    "github.com/ollama/ollama/app/cmd/app::TestManagerIsRefusedWhenMCPIsSwitchedOff": "pass",
+    "github.com/ollama/ollama/app/cmd/app::TestManagerConnectsWhatIsAlreadyConfigured": "pass"
+  },
+  "unfinished": [],
+  "warnings": [
+    "# github.com/ollama/ollama/app/cmd/app.test\nld: warning: ignoring duplicate libraries: '-lobjc'\n"
+  ],
+  "environment_overrides": {
+    "HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-native-cont07-14jd0l98",
+    "USERPROFILE": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-native-cont07-14jd0l98",
+    "LOCALAPPDATA": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-native-cont07-14jd0l98",
+    "XDG_CONFIG_HOME": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-native-cont07-14jd0l98/.config",
+    "OLLAMA_HOST": "http://127.0.0.1:1",
+    "OLLAMA_MCP_CONFIG": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-native-cont07-14jd0l98/mcp.json",
+    "OLLAMA_MCP_APPROVALS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-native-cont07-14jd0l98/approvals.json",
+    "OLLAMA_MCP_TOKENS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-native-cont07-14jd0l98/tokens.json",
+    "OLLAMA_TTS_SECRETS": "/var/folders/z_/ywv267d55_s9yq799rstj3fm0000gn/T/eko-native-cont07-14jd0l98/tts.json",
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "GOTOOLCHAIN": "local",
+    "CI": "true"
+  },
+  "scope": "Actual webview translation unit plus app assembly tests; no GUI launch or Keychain tests"
+}

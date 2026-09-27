@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "/bin/bash",
+    "/Users/krypto/GitHub/TECHNE/Tools/ollama/ask.sh",
+    "--model",
+    "deepseek-v4.1-flash:cloud",
+    "--prompt-file",
+    "/Users/krypto/GitHub/ollama/docs/analysis/colleague_integration/evidence/2026-09-20_cont03/routing-review-prompt.txt",
+    "--approve-local-content",
+    "--expect-digest",
+    "e04da138d31e0c9468e982e1ae9503d06cb7e170caa16a90c17d931c4aa140f8",
+    "--expect-served-model",
+    "deepseek-v4.1-flash",
+    "--run-id",
+    "eko-chat-read-route-cont03",
+    "--num-ctx",
+    "262144",
+    "--num-predict",
+    "8192",
+    "--think",
+    "off",
+    "--num-gpu",
+    "auto",
+    "--timeout-seconds",
+    "420"
+  ],
+  "prompt_sha256": "13dea2a5bc6aca10d83b56b2b23024f80cf78ae0fdab58e178c6b58c10ba1fe9",
+  "purpose": "routing and diagnostic review; no promotion authority"
+}

@@ -1,0 +1,218 @@
+{
+  "record_type": "ollama_colleague_integration_control_state",
+  "checkpoint_date_brisbane": "2026-09-20",
+  "task_id": "eko-ollama-20260920-initial-recon",
+  "controller": {
+    "name": "Eko",
+    "model": "GPT-6 Astra Pro",
+    "host": "ChatGPT",
+    "is_founded_ollama_colleague": false,
+    "background_execution": false
+  },
+  "commission": {
+    "path": "/Users/krypto/GitHub/ollama/docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+    "revision": "R3",
+    "file_sha256": "74c6bb39fbcd62ebe6aa1c9807349a0faad9472b4b485999244872ca182a71ec",
+    "read_complete": true,
+    "read_ranges": [
+      [
+        1,
+        492
+      ],
+      [
+        490,
+        590
+      ]
+    ],
+    "partial_final_line_recovered_by_overlap": true,
+    "required_item_count": 31,
+    "accepted_item_count": 0,
+    "index": "REQUIREMENTS.md"
+  },
+  "progress": {
+    "active_item": "OI-01",
+    "phase": "OI-01: command recovery complete; broader reconnaissance and baseline pending",
+    "status": "in-progress",
+    "disposition": "PARKED",
+    "stop_token": "PACK_PREREQUISITE_MISSING",
+    "blocker_id": null,
+    "recon_complete": false,
+    "design_readiness": null,
+    "active_blueprint": null,
+    "active_implementation_pack": null,
+    "runtime_features_delivered": [],
+    "runtime_files_changed": [],
+    "test_files_changed": [],
+    "disposition_reason": "Programme checkpoint remains uncommitted and unreviewed; OI-01/design prerequisites are still incomplete. Command admission is no longer blocked."
+  },
+  "repository": {
+    "root": "/Users/krypto/GitHub/ollama",
+    "observed_head": "953de98d408a9697fa20a48c23973b9dc8eee921",
+    "observed_branch": "main",
+    "local_tracking_upstream": "origin/main",
+    "remote_fetched": false,
+    "verified_remote_tip": null,
+    "exclusive_checkout_ownership_verified": false,
+    "task_branch_created": null,
+    "task_worktree_created": null,
+    "commits_created": [],
+    "pushes_performed": 0,
+    "checkpoint_custody": "Local untracked files; not committed, pushed, integrated or remotely backed up by this task.",
+    "preserved_external_untracked_files": [
+      "docs/OLLAMA_COLLEAGUE_INTEGRATION_WORK_LIST.md",
+      "docs/OLLAMA_CROSS_MODEL_COLLEAGUES_AND_CAPABILITY_ROUTING_HANDOFF.md"
+    ],
+    "concurrent_handoff_read": true,
+    "installed_or_running_app_identity": null,
+    "companion_handoff_sha256": "24da38b49da7c628a874d96e1d100e7f269315ba591d9bea745c10ba0d07ddcf"
+  },
+  "execution": {
+    "bridge_profile": "Eko Write Bridge",
+    "bridge_version": "0.3.0",
+    "execution_state_id": "dfbd69b42df2453aae7bfa1c5a7af704",
+    "command_admission": "restored-and-measured",
+    "attempted_request_ids": [
+      "eko-ollama-20260920-arrival-01",
+      "eko-ollama-20260920-execution-recheck-01"
+    ],
+    "accepted_job_ids": [
+      "81838f447a5e4575924e70d1560951a4",
+      "f066bb69db834fa280d8d8497ecce8e4",
+      "23b09e55888343ae868cfd1a56adb23d",
+      "f69a3539cb4f42309e57240231e29de4",
+      "86ab9302ee424746b2d8b23f202ee575",
+      "025cbb5a846246bb91c80f4d6a8619b2",
+      "a62675c9ea914b769db928933edf6629",
+      "af8112db875c4c438b3cce0457299f5e"
+    ],
+    "task_commands_in_flight": [],
+    "checkpoint_writer_completion": {
+      "job_id": "af8112db875c4c438b3cce0457299f5e",
+      "state": "exited",
+      "exit_code": 0,
+      "output_complete": 1,
+      "stdout_chunk_sha256": "446bebaec823c671c089088784d962569d0756a33db037b18c2f47262f086f10",
+      "evidence_hashes_verified": true
+    },
+    "retired_request_replay_check": {
+      "job_id": "f68fa53d7c8c4fbaa57ba6fef20f86b2",
+      "state": "forgotten",
+      "replayed": true,
+      "original_timestamps_unchanged": true,
+      "new_execution": false
+    },
+    "retained_job_count_last_observed": 231,
+    "retained_job_limit": 256,
+    "builds_run": 0,
+    "test_runs": 1,
+    "discovered_test_count": 2,
+    "passed_test_count": 2,
+    "failed_test_count": 0,
+    "skipped_test_count": 0,
+    "warning_baseline": "No stderr in two-test baseline; full-build/frontend warning baseline not measured",
+    "git_diff_check_run": true,
+    "archive_maintenance_authorised_in_this_task": true,
+    "jobs_forgotten": 33,
+    "service_configuration_changed": false,
+    "build_scope_note": "go test compiled the selected package/test binary; no standalone application build ran.",
+    "maintenance_report": "BRIDGE_MAINTENANCE_2026-09-20.md",
+    "test_scope": "Two existing Session request tests using fakeClient; no system acceptance or independent review.",
+    "archive_maintenance_authorisation": "Ash: Please do, in response to the explicit preservation-first maintenance request, 20 September 2026.",
+    "historical_admission_failures": [
+      "eko-ollama-20260920-arrival-01",
+      "eko-ollama-20260920-execution-recheck-01",
+      "eko-archive-maintenance-20260920-preflight-01"
+    ]
+  },
+  "review": {
+    "independent_colleagues_invoked": 0,
+    "reviewed_candidate": null,
+    "blueprint_judge_verdict": null,
+    "code_judge_verdict": null,
+    "reality_gate_verdict": null,
+    "notes": "Source reading and role changes within Eko do not constitute independent review."
+  },
+  "routing_receipt": {
+    "routes_used": [
+      "RECON",
+      "DOCS",
+      "GIT",
+      "HANDOFF"
+    ],
+    "read_ledger": "SOURCE_MAP.md",
+    "full_arrival_reads_recorded": true,
+    "source_read_scope": "Bounded excerpts only; exact file ranges and hashes in SOURCE_MAP.md.",
+    "not_completed": [
+      "Installed/running application reconciliation and broader build/test baseline; host toolchain versions captured",
+      "Full relevant source and acceptance-test reconnaissance",
+      "Applicable blueprint-authoring, readiness and pack gates",
+      "Independent review",
+      "Lineage registration and predecessor observation",
+      "LETHE document-pointer recording",
+      "Git checkpoint and remote closeout"
+    ]
+  },
+  "records": {
+    "handoff": "HANDOFF.md",
+    "requirements": "REQUIREMENTS.md",
+    "decisions": "DECISIONS.md",
+    "source_map": "SOURCE_MAP.md",
+    "blockers": "BLOCKERS.md",
+    "evidence": [
+      "evidence/2026-09-20_eko_execution_blocker.json",
+      "evidence/2026-09-20_eko_execution_recheck.json",
+      "evidence/2026-09-20_baseline_environment.json",
+      "evidence/2026-09-20_bridge_batch_backup.json",
+      "evidence/2026-09-20_bridge_bootstrap_archive.json",
+      "evidence/2026-09-20_bridge_maintenance_result.json",
+      "evidence/2026-09-20_bridge_retirement_receipts.jsonl",
+      "evidence/2026-09-20_bridge_verified_execution.json",
+      "evidence/2026-09-20_request_baseline.jsonl",
+      "evidence/2026-09-20_request_baseline.stderr.txt",
+      "evidence/2026-09-20_request_baseline_result.json"
+    ],
+    "maintenance": "BRIDGE_MAINTENANCE_2026-09-20.md"
+  },
+  "record_file_sha256": {
+    "HANDOFF.md": "c4a0a0aab487e12942519e970a261de4281b6e6afe30db7577248f8b0c63a165",
+    "REQUIREMENTS.md": "a8e35a5b772fde807700d53d1c7b78ddd32fb9b49c3f36a7f89ef039707d7719",
+    "DECISIONS.md": "14156bcf5e935baf66dd55222b78e323f88f88684e2f126a3e0d2e1c9b16782b",
+    "SOURCE_MAP.md": "ff6a6f738b9d5cf018df7ee8aa839baccfd41fcb641c906a58fb9fdf984ee1bb",
+    "BLOCKERS.md": "2a2520f176951d900bbfcd2f6690d42ef6971de8ae382cfcbf8a0b99e73f145c",
+    "evidence/2026-09-20_eko_execution_blocker.json": "4b01ac2aac752589e0cbc0599d0ae941b9a6cd46969ff20bcef3ab1044806e8d",
+    "evidence/2026-09-20_eko_execution_recheck.json": "0129cdcb20852a8e2890b8a15621590336a6938b341f26443ddf6c469d085e0e",
+    "BRIDGE_MAINTENANCE_2026-09-20.md": "841c00264acd820f3a6c8d029868ede08ad27c5ea46ff441037a64c17672f07e",
+    "evidence/2026-09-20_baseline_environment.json": "ab0b121c822e94a1ac56f29249812fd902cff541b01dd9e5c8f651b9209fe18b",
+    "evidence/2026-09-20_bridge_batch_backup.json": "ae92b5166ecb62b93f7af7c5d94a4e04dc8411a31283a2d0dad6370271839282",
+    "evidence/2026-09-20_bridge_bootstrap_archive.json": "d56215ee4a138c6d4e52f9770e24e9020bb52eb598fbde1dda5bfb36697f2e07",
+    "evidence/2026-09-20_bridge_maintenance_result.json": "ec54a4c048938eea980a03682cba19705e28e740502f88793d082f1c4b1f8f31",
+    "evidence/2026-09-20_bridge_retirement_receipts.jsonl": "6c8371aa6a9ed705229114505cc5880ba58e8908d19c7fc5bf277bd318ce896c",
+    "evidence/2026-09-20_bridge_verified_execution.json": "b2d26b1ff80d0aa9272ff8121e2cecb08bc59988c5ce643453d1426b2c4cab6c",
+    "evidence/2026-09-20_request_baseline.jsonl": "ddff080c1638fb3d134f1be8893f8bf00fd9d7a69bdbae7f17f702e080fc85a2",
+    "evidence/2026-09-20_request_baseline.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "evidence/2026-09-20_request_baseline_result.json": "908dc9f5c74f3cd3c631a17017933f24824c66e86d5114b0c1d775ba46bce766"
+  },
+  "post_write_containment": {
+    "tool": "Eko_Write_Bridge.git_status",
+    "request_id": "007bcd26e41b4f5db682380d4a5eb49b",
+    "head_commit": "953de98d408a9697fa20a48c23973b9dc8eee921",
+    "branch": "main",
+    "staged": 0,
+    "unstaged": 0,
+    "conflicted": 0,
+    "untracked_total": 10,
+    "pre_existing_or_concurrent_untracked": 2,
+    "new_task_report_files": 8,
+    "truncated": false,
+    "original_work_list_hash_recheck_request": "80bd2a8eee22430b88b472b6a176ccb3",
+    "original_work_list_hash_unchanged": true,
+    "scope_note": "Historical initial checkpoint snapshot, superseded by evidence/2026-09-20_baseline_environment.json and final post-maintenance containment. Not current file counts."
+  },
+  "next_action": {
+    "title": "Continue OI-01 from the restored execution checkpoint",
+    "first_dependency": "Confirm checkpoint recorder terminal exit; recheck current candidate and checkout ownership. Command capacity is restored.",
+    "then": "Finish store/UI/installed-app reconnaissance and broader baseline; complete bookkeeping and source-bound design gates before runtime changes.",
+    "revisit_trigger": "Next user invocation resumes the existing commissioned programme, not the completed maintenance request."
+  },
+  "checkpoint_updated_brisbane": "2026-09-20T17:45:45.796049+10:00"
+}

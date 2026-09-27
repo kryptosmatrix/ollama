@@ -1,0 +1,12 @@
+{
+  "status": "INVALID_DIAGNOSTIC_BUILD",
+  "reason": "Eko omitted the cleanup return value from existing setupTestStore. The Go build failed; no test executed and this result does not evidence the persistence defect.",
+  "source": "testdata/store_chat_read_errors_v1.go.txt",
+  "source_sha256": "d74c328b74ccc6ef6dbad44c21863a61b8aae4b056209b6f85591fc7da39f177",
+  "logs": [
+    "store-baseline.stdout",
+    "store-baseline.stderr",
+    "store-baseline.json"
+  ],
+  "capture_note": "Full JSONL retained build-output events. Console renderer initially selected only output events; subsequent raw read exposed the compiler diagnostics."
+}

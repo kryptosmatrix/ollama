@@ -1,0 +1,14 @@
+{
+  "before_sha256": "8bfea5fc2804b40bcd23d6f99f4d970e2507dab28d084e8203ced7534725ecab",
+  "after_sha256": "3d2f2db8ff514119f63f302b939455f6ed81b9257c5082e29f1cd9534e2b9241",
+  "bytes": 59128,
+  "byte_ceiling": 59560,
+  "frozen_18_outcomes_unchanged": true,
+  "source_target": "native b10091 server-context.cpp slot-start branch, lines 3068\u20133150; existing task token count and actual capped slot context",
+  "previous_author_error": "The candidate required admission before task queueing. That is unnecessarily early: the existing definitive guard binds the selected slot before prefill. A preview or Go requested context is not that state.",
+  "correction": "Extend the existing actual-token/slot admission guard for the future output budget; leave ingress/output-policy/backend-matrix decisions explicitly open.",
+  "previous_review_limitation": "Source adviser recommended a pre-task hook and had not yet inspected the selected slot guard. No formal promotion was performed.",
+  "native_probe_limit": "Version-only command timed out; no model-specific probe was launched. Internal binary activity during that timeout was not observed.",
+  "status": "SPEC-DRAFT; no implementation permission stamp; no runtime or default test changes",
+  "timestamp_brisbane": "2026-09-21T20:26:35.265011+10:00"
+}

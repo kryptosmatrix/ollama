@@ -1,0 +1,2 @@
+REVIEW_PROMPT_BYTES 241390
+{"exit_code": 5, "elapsed_seconds": 49.815662833, "stdout": "", "stderr": "error: generation stopped at the token limit; artefact=/Users/krypto/GitHub/TECHNE/Tools/ollama/_runs/2026-09-20T08-52-49Z_eko-ollama-chat-read-20260920__b0iiatc [TRUNCATED_RESPONSE]\n"}
