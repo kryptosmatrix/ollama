@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Decided by Abuttal under KANON 25 (tier 2, options checked before deciding), except D-11, which is routed to Ash as product scope. D-1's two refinements and D-10's narrowing were not in the options packets and go to a separate falsification pass before the blueprint text lands. Governs G1 blueprint §5, §7, §8, §9 and §10 once written there |
+| Status | Decided by Abuttal under KANON 25 (tier 2, options checked before deciding), except D-11, product scope, which Ash ruled at 11:23:00 AEST on 27 September 2026 (DECISIONS.md `ash-classic-run-scope-2026-09-27`): the classic `ollama run` chat and one-shot paths are in G1. D-1's two refinements and D-10's narrowing were not in the options packets and go to a separate falsification pass before the blueprint text lands. Governs G1 blueprint §5, §7, §8, §9 and §10 once written there |
 | Decider | Abuttal (Claude Opus 5.5), G1 delivery owner from 27 September 2026 |
 | Feature | OLLAMA-G1-INSTRUCTIONS (OI-03 + OI-04), open obligation OQ-4 |
 | Candidate | Ollama fork `5899971690b08cecc0e48ed5ab66209b5a5b8286` (production and test sources identical to `04009c432e313eef65172293e75feb038ebe476b`) |
@@ -34,7 +34,7 @@ OQ-4 must close the gaps G1's failure-number instrument exposed (`proof_cont14/o
 
 **D-10 — `/prompt` and `/save` stay faithful to what G1 adds.** Both show and write the composed carrier (they read the effective system prompt) and, when the selection is enabled, the admission member the dispatch would carry, attached by the same helper that attaches it to the real request; the view is labelled a preview. `/save` of a request carrying an enabled carrier writes mode 0600 and warns in one line, outside the file, that it contains saved instructions. Disabled and unconfigured `/prompt` and `/save` are unchanged (G1-R-15). Delegated default for Ash to veto: a faithful export, warned and private, rather than a redacted one.
 
-**D-11 — the classic `ollama run` paths: routed to Ash.** Recommendation: exclude them from G1 and have the classic interactive chat show a one-line notice when saved instructions are enabled, so the boundary is visible; inclusion of the classic chat stays open as a separately scoped extension.
+**D-11 — the classic `ollama run` paths are in G1 (Ash's ruling).** Routed to Ash as product scope with the recommendation to exclude them and show a one-line notice in the classic chat. Ash chose "Include chat and one-shot (most thorough)" at 11:23:00 AEST: saved instructions apply in the classic interactive chat (`cmd/interactive.go:34`, turns through `cmd/cmd.go:1840-1852`) and in one-shot `ollama run <model> <prompt>` and piped runs (`cmd/cmd.go:1972-1984`), and the admission contract extends to `/api/generate`. How those paths carry the selection, the carrier, the contract and the refusal is decided separately, after its own options check, as an amendment to this record.
 
 ## Alternatives considered
 
@@ -75,4 +75,4 @@ D-1 keeps an operator in a chat that refuses every turn until they act; a start-
 
 ## Reconsider when
 
-An operator ruling makes a refused session close before it opens; a real need to correlate requests with terminal conversations outside the process appears; the instrument's port shows default discovery impractical; or Ash rules D-11 towards inclusion, which extends G1's terminal adapters and this record.
+An operator ruling makes a refused session close before it opens; a real need to correlate requests with terminal conversations outside the process appears; or the instrument's port shows default discovery impractical.
